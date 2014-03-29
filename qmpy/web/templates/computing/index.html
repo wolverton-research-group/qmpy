@@ -1,0 +1,65 @@
+{% extends "base_site.html" %}
+{% load admin_static %}
+{% load i18n %}
+
+{% block content_title %}
+<h1> Computing </h1>
+{% endblock %}
+
+{% block content %}
+<div>
+  From this website you can monitor progress on various <a href="/computing/projects">projects</a>, manage your computing <a href="/computing/hosts">resources</a>.
+  <h2> ICSD progress </h2>
+  <img src="{{ icsd }}" width="500px"/>
+</div>
+{% endblock %}
+
+
+{% block sidebar %}
+<div class="box" id="sidebar">
+  <h1> Computing dashboard </h1>
+
+  <h2 style="margin:0px"> Projects </h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Project</th>
+        <th># of tasks</th>
+        <th># completed</th>
+        <th># failed</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for project in projects %}
+      <tr class=clickableRow href="/computing/project/{{project.name}}">
+        <td>{{project.name}}</td>
+        <td>{{project.task_set.count}}</td>
+        <td>{{project.completed.count}}</td>
+        <td>{{project.failed.count}}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h2> Hosts </h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Host</th>
+        <th># of cores available</th>
+        <th>% utilization</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for host in hosts %}
+      <tr class=clickableRow href="/computing/host/{{host.name}}">
+        <td>{{host.name}}</td>
+        <td>{{host.ncpus}}</td>
+        <td>{{host.percent_utilization | floatformat:-2}}%<td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+{% endblock %}

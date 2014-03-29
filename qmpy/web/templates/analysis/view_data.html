@@ -1,0 +1,90 @@
+{% extends "base_site.html" %}
+{% load admin_static %}
+{% load i18n %}
+
+{% block extrastyle %}
+<script type="text/javascript" src={% static "js/jsmol/JSmol.min.js" %}></script>
+{% endblock %}
+
+{% block content_title %}
+<h1> JSMol visualizer </h1>
+{% endblock %}
+
+{% block content %}
+Copy and paste your own structure data, in any format readable by JSMol into the text box below for quick visualization.
+
+<script>
+	jQuery(document).ready(function($) {
+		$(".clickableRow").click(function() {
+			window.document.location = $(this).attr("href")
+		});
+	});
+</script>
+
+<div>
+	<h1> Structure data </h1>
+</div>
+
+<div>
+	<form action="" method="post">{% csrf_token %}
+		<textarea cols="40" rows="30" name="crystal_data">
+{{ crystal_data }}
+		</textarea><br>
+		<input type="submit" value="submit">
+	</form>
+</div>
+
+<!--- RESULTS -->
+
+
+{% if structure %}
+<ul>
+	<li>Spacegroup Number: <a href="/analysis/symmetry/spacegroup/{{structure.spacegroup_id}}">
+		{{structure.spacegroup_id}}</a></li>
+	<li>Spacegroup Symbol (Hall): <a href="/analysis/symmetry/spacegroup/{{structure.spacegroup.hall}}">
+		{{structure.spacegroup_id}}</a></li>
+
+<h2> Atomic coordinates </h2>
+<table>
+        <thead>
+                <tr>
+                        <th>Element</th>
+                        <th>x</th>
+                        <th>y</th>
+                        <th>z</th>
+                        <th>magnetic moment</th>
+                        <th>oxidation state</th>
+                </tr>
+        </thead>
+        <tbody>
+                {% for atom in structure.sites %}
+                <tr>
+                        <td>{{atom}}</td>
+                        <td>{{atom.x |floatformat:-8 }}</td>
+                        <td>{{atom.y |floatformat:-8 }}</td>
+                        <td>{{atom.z |floatformat:-8 }}</td>
+                        <td>{{atom.magmom | floatformat:-2}}</td>
+                        <td>{{atom.ox | floatformat:-2}}</td>
+                </tr>
+                {% endfor %}
+        </tbody>
+</table>
+
+{% endif %}
+
+{% endblock %}
+
+{% block sidebar %}
+<div id="sidebar" class="box">
+	<script>
+		var Info = {
+			j2sPath: "{% static 'js/jsmol/j2s' %}",
+			src: "/analysis/visualize/custom",
+			use: "HTML5",
+			width: 400,
+			height: 400
+		};
+		Jmol.getApplet("myJmol", Info);
+	</script>
+</div>
+{% endblock %}

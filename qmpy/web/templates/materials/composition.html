@@ -1,0 +1,141 @@
+{% extends "base_site.html" %}
+{% load admin_static %}
+{% load i18n %}
+
+{% block title %}{{ s.name }}{% endblock %}
+
+{% block extrastyle %}
+<link rel="stylesheet" type="text/css" href="{% static "css/flot.css" %}"/>
+{% endblock %}
+
+{% block extrascript %}
+<script language="javascript" type="text/javascript" src={% static "js/flot/jquery.flot.pie.js" %}></script>
+
+<script language="javascript" type="text/javascript">
+  function labelFormatter(label, series) {
+        return "<div style='font-size:12pt; text-align:center; padding:2px; color:black;'>" + label + "<br/>" + Math.round(series.percent) + "%</div>";
+          }
+  $(function() {
+    $.plot("#phasecomp", {{ phase_comp | safe }}, {
+      legend: {show: false,
+      labelFormatter: function(label, series) {
+      return '<a href="/materials/composition/'+label+'">'+label+'</a>';}
+      },
+      series: {
+        pie: {
+          show: true,
+          label: {
+            background: { opacity: 0},
+            formatter: labelFormatter}
+          }
+        }
+      });
+    });
+  </script>
+
+<script language="javascript" type="text/javascript">
+$(function() {
+    {{ plot | safe }}
+    });
+</script>
+
+<script language="javascript" type="text/javascript">
+$(function() {
+    {{ pd | safe }}
+    });
+</script>
+
+<script type='text/javascript'>//<![CDATA[ 
+window.onload=function(){
+var theForm = document.getElementById('theForm');
+var theInput = document.getElementById('subj');
+
+theForm.onsubmit = function(e) {
+    location = "/materials/composition/" + encodeURIComponent(theInput.value);
+    return false;
+}
+}//]]>  
+
+</script>
+{% endblock %}
+
+{% block content_title %}
+{% if gs %}
+  <h1> Composition: {{ composition.name }}</h1>
+  <h1>&Delta;H = {{gs.energy | floatformat:-3}} eV/atom </h1>
+{% endif %}
+{% if composition.experiment %}
+<h1> Expt &Delta;H = {{ composition.experiment | floatformat:-3 }} eV/atom</h1>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+{% if gs %}
+<div class="box">
+  This composition appears in the {{ space }} region of phase space. It's relative stability is shown in the {{ space }} phase diagram (left). The relative stability of all other phases at this composition (and the combination of other stable phases, if no compound at this composition is stable) is shown in the relative stability plot (right).
+  <div>
+    <div style="width:500px;height:400px;margin:40px;float:left">
+      <div id="phasediagram" class="flot-placeholder"></div>
+    </div>
+
+    <div style="width:200px;height:400px;margin:40px;float:left">
+      <div id="placeholder" class="flot-placeholder"></div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% if results %}
+<div style="padding-top:20px;float:left">
+<h1> Compounds at this composition </h1>
+<table>
+<thead>
+  <tr>
+    <th>ID</th>
+    <th>Composition</th>
+    <th>Spacegroup</th>
+    <th>Formation Energy [eV/atom]</th>
+    <th>Prototype</th>
+    <th># of atoms</th>
+    <th>Reference</th>
+  </tr>
+</thead>
+
+<tbody>
+  {% for entry in results %}
+  <tr class=clickableRow href="/materials/entry/{{ entry.id }}">
+    <td>{{ entry.id }}</td>
+    <td>{{ entry.html | safe }}</td>
+    <td>{{ entry.structure.spacegroup.symbol }}</td>
+    <td>{{ entry.energy |floatformat:-3 }}</td>
+    <td>{{ entry.prototype.name }}</td>
+    <td>{{ entry.natoms }}</td>
+    <td>{{ entry.reference.citation }}</td>
+  </tr>
+  {% endfor %}
+</tbody>
+</table>
+</div>
+
+{% endif %}
+
+{% endblock %}
+
+{% block sidebar %}
+<div id="sidebar" class="box">
+  <h2 class="subhead"> Search for a composition or region </h2>
+  <form id="theForm">
+    <input id='subj' value="{{ search }}"/>
+    <input type='submit'/>
+  </form>
+  Examples:<br>
+  <ul>
+    <li>Al2O3
+    <li>LiFeO2
+    <li>Cu2MnAl
+    <li>Fe-O
+    <li>Ni-Ti-Al
+  </ul>
+
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+ running on    8 total cores
+ distrk:  each k-point on    8 cores,    1 groups
+ distr:  one band on    4 cores,    2 groups
+ using from now: INCAR     
+ vasp.5.3.2 13Sep12 (build Mar 19 2013 12:21:59) complex                        
+  
+ POSCAR found type information on POSCAR  Cr In O 
+ POSCAR found :  3 types and      12 ions
+ LDA part: xc-table for Pade appr. of Perdew
+ POSCAR, INCAR and KPOINTS ok, starting setup
+ WARNING: small aliasing (wrap around) errors must be expected
+ FFT: planning ...
+ WAVECAR not read
+ charge-density read from file: unknown                                 
+ magnetization density read from file 1
+ WARNING: random wavefunctions but no delay for mixing, default for NELMDL
+ entering main loop
+       N       E                     dE             d eps       ncg     rms          rms(c)
+DAV:   1     0.984010880010E+03    0.98401E+03   -0.34523E+04 43960   0.170E+03
+DAV:   2     0.121105877595E+03   -0.86291E+03   -0.78769E+03 47296   0.466E+02
+DAV:   3    -0.629123442777E+02   -0.18402E+03   -0.16537E+03 48984   0.214E+02
+DAV:   4    -0.792136479254E+02   -0.16301E+02   -0.15999E+02 52352   0.683E+01
+DAV:   5    -0.798459985458E+02   -0.63235E+00   -0.63150E+00 57152   0.133E+01    0.226E+00
+RMM:   6    -0.809628556693E+02   -0.11169E+01   -0.56700E-01 50347   0.521E+00    0.246E+00
+RMM:   7    -0.810528546931E+02   -0.89999E-01   -0.15129E-01 58420   0.265E+00    0.125E+00
+RMM:   8    -0.810667941455E+02   -0.13939E-01   -0.44496E-02 60497   0.127E+00    0.973E-01
+RMM:   9    -0.810706001730E+02   -0.38060E-02   -0.31879E-02 57677   0.910E-01    0.351E-01
+RMM:  10    -0.810723188908E+02   -0.17187E-02   -0.43411E-03 64406   0.401E-01    0.186E-01
+RMM:  11    -0.810726945375E+02   -0.37565E-03   -0.14390E-03 51202   0.220E-01    0.626E-02
+RMM:  12    -0.810727416804E+02   -0.47143E-04   -0.32543E-04 41482   0.121E-01
+   1 F= -.81072742E+02 E0= -.81072742E+02  d E =0.000000E+00  mag=     5.0000

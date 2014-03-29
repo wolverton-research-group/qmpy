@@ -1,0 +1,55 @@
+{% extends "documentation/doc_base.html" %}
+
+{% block title %}
+OQMD | Documentation - qmpy
+{% endblock %}
+
+
+{% block extrahead %}
+{% endblock %}
+
+{% block content %}
+
+<h1> Documentation: qmpy </h1>
+
+<h2> Download and installation</h2>
+
+<h3> Recommended </h3>
+
+Install qmpy using: <br>
+
+<blockquote> 
+  pip install --upgrade numpy<br>
+  pip install matplotlib<br>
+  pip install qmpy 
+</blockquote>
+
+Download the database <a href="/download">here</a>.
+
+<h3> From source </h3>
+
+Download qmpy <a href="https://pypi.python.org/pypi/qmpy">here</a><br>
+
+You will need to make sure several dependency packages are properly installed:
+<ul>
+  <li>Django</li>
+  <li>Django-extensions</li>
+  <li>Python-mysqldb - for connecting to the database</li>
+  <li>PyYaml - for reading datafiles</li>
+  <li>NumPy</li>
+  <li>argparse</li>
+  <li>SciPy - for phase diagrams</li>
+  <li>matplotlib</li>
+  <li>PyCifRW - utility for parsing CIF files</li>
+  <li>NetworkX - for some high-D phase diagram analysis methods</li>
+  <li>(Optional) PuLP - for GCLP and reaction analysis</li>
+  <li>(Optional) ASE - Atomic Simulation Environment</li>
+</ul>
+
+<h3> Integrating the database </h3>
+
+To use the downloaded database, you must place the entire database directory into into your mysql data directory, (most likely /var/lib/mysql/). Make sure that the database directory, and all files within it are owned by the user 'mysql'. Finally, once this is done you need to give any users that will be accessing the database permissions. Do this from the mysql command line, <blockquote> GRANT ALL PRIVILEGES ON *.* to '[username]'@'localhost';</blockquote>. 
+
+Once this is done, you need to edit qmpy/db/settings.py. Set the DATABASES variable such that 'USER' is the user with permissions to access the newly installed database.
+
+{% endblock %} 

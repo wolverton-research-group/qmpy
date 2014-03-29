@@ -1,0 +1,50 @@
+JSME_2013-03-19 :
+    - antialias is on by default for SVG and off for VML
+    - new help page
+
+JSME_2013-03-18 :
+    - spiro button
+    - triple bond in menu is improved - looks better with browser with poor antialias
+
+
+JSME_2013-03-16 :
+    - rename JavaScriptApplet to JSApplet to avoid trademark problems with JavaScript
+    - disable molecule scaling for IOS
+    - removes blue marking about atoms and bonds after click enabled unless touch device
+
+
+JSME_2013-03-14 :
+    - increased touch radius for atoms and bonds - much better usability on iPad
+
+JSME_2013-03-13 : not for redistribution
+    - first DIV shield - still bugs
+    - rubber banding box was not saved in the undo stack - fixed
+
+JSME_2013-03-12 : not for redistribution
+    - Rollback of all the Smiles changes, no more example of NotifyStructuralChangeJSfunction provided
+    - improved rotation&scaling on iPad. Scaling is still buggy
+JSME_2013-03-11 : not for redistribution
+    - Smiles generation changes the atom ordering of the atoms in the editor, which is a problem for the NotifyStructuralChangeJSfunction. Fixed.
+JSME_2013-03-10 : not for redistribution
+    - Scaling of the molecule implemented for touch devices - still buggy. Problem with rotation, does not work on Android
+    - NotifyStructuralChangeJSfunction - problem with smiles generation
+JSME_2013-03-07
+    - Marked atoms are not displayed anymore with a blue square after touch/mouse up
+    - Touch device: rotation bug fixed (random jump move at the end of the rotation)
+    - bug fix for CSS distribution
+JSME_2013-03-04
+    - Touch device: rotation works on iPad
+
+
+JSME_2013-03-03
+    - Touch device: touch and hold will show the copy&paste popup menu
+    - Touch device: mouse events of drawing area were replaced by touch events in order to have a faster response on the iPad
+    - Touch device: structure can be moved. It is smooth on a iPad 4, slow on a Samsung Note
+    - Touch device: bond angle can be changed, multichain works
+    - CSS pollution: all global CSS definitions were removed from all the included CSS files from GWT and gwt-mosaic
+    - CSS global protection: better protection against global CSS definitions from the host page
+    
+    
+    
+Known bug: scaling and bond length rubber banding
+    

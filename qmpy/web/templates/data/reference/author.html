@@ -1,0 +1,57 @@
+{% extends "base_site.html" %}
+{% load admin_static %}
+
+{% block content %}
+<h1> {{ author.name }}</h1>
+
+<h1> Materials discovered:</h1>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Composition</th>
+      <th>Prototype</th>
+      <th>Paper<th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for entry in materials %}
+    <tr class="clickableRow" href="/materials/entry/{{entry.id}}">
+      <td> {{entry.id}}</td>
+      <td> {{entry.name}}</td>
+      <td> {{entry.label}}</td>
+      <td> {{entry.reference.citation}}</td>
+    </tr>
+    {% endfor %}
+  </body>
+</table>
+
+{% endblock %}
+
+{% block sidebar %}
+<div id="sidebar" class="sidebar">
+  <h1> Co-authored papers with </h1>
+  <center>
+  <table>
+    <thead>
+      <tr>
+        <th>Last</th>
+        <th>First</th>
+        <th># of papers together</th>
+        <th># of materials together</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for co, data in coauthors.items %}
+      <tr class="clickableRow" href="/reference/author/{{co.id}}">
+        <td> {{co.last}}</td>
+        <td> {{co.first}}</td>
+        <td> {{data.papers}}</td>
+        <td> {{data.materials}}</td>
+      </tr>
+      {% endfor %}
+    </body>
+  </table>
+</center>
+</div>
+{% endblock %}

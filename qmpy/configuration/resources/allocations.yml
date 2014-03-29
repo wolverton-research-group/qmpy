@@ -1,0 +1,54 @@
+#name:
+# host: hostname
+# key: key needed for identifying allocation
+# users: [list, of, permitted, users]
+
+b1004:
+  host: quest
+  key: b1004
+  users: [jes786, jwd686, sjk648]
+
+byrd:
+  host: byrd
+  users: [jwd686, oqmd, sjk648]
+
+e20438:
+  host: quest
+  key: e20438
+  users: [jwd686]
+
+hopper:
+  host: hopper
+  users: [jwd686, sjk648]
+
+josquin:
+  host: josquin
+  users: [jwd686, oqmd, sjk648]
+
+p20254:
+  host: quest
+  key: p20254
+  users: [jwd686]
+
+p20268:
+  host: quest
+  key: p20268
+  users: [sjk648]
+
+p20273:
+  host: quest
+  key: p20273
+  users: [sjk648]
+
+p20274:
+  host: quest
+  key: p20274
+  users: [jes786]
+
+palestrina:
+  host: palestrina
+  users: [jwd686, oqmd, sjk648]
+
+victoria:
+  host: victoria
+  users: [oqmd, sjk648]

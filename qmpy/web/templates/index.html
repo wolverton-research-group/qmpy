@@ -1,0 +1,41 @@
+{% extends "base_site.html" %}
+
+{% block title %}
+OQMD
+{% endblock %}
+
+{% block content_title %}
+<h1> Welcome to the Open Quantum Materials Database </h1>
+{% endblock %}
+
+{% block extrahead %}
+{% endblock %}
+
+{% block notice %}
+{% endblock %}
+
+{% block content %}
+
+<p> The OQMD is a database DFT calculated thermodynamic and structural properties. We are providing this online interface for convenient, small scale access; however for more powerful utilization we recommend downloading the entire database and the API for interfacing with it, detailed in the link below.</p>
+
+<h2> You can...</h2>
+
+<ul>
+	<li><b><a href="/materials/">Search</a></b> for materials by composition, </li>
+	<li><b><a href="/analysis/phase_diagram">Create</a></b> phase diagrams using database thermochemical data,</li>
+	<li><b><a href="/analysis/gclp">Determine</a></b> ground state compositions, </li>
+	<li><b><a href="/analysis/visualize">Visualize</a></b> crystal structures, or </li>
+	<li><b> <a href="/download">Download</a></b> the entire database for your own use! </li>
+</ul>
+
+<p> The OQMD was created in <a href="http://wolverton.northwestern.edu">Chris Wolverton's</a> group at Northwestern University.</p>
+{% endblock %} 
+
+{% block sidebar %} 
+<div id="sidebar" class="box">
+  <h1> Current status </h1>
+  Database contains <b>{{ entries.count }}</b> entries, of which <b>{{ done.count }}</b> have been calculated. In addition, calculations are constantly on-going, there are {{ running.count }} new structures currently being run!
+  <br>
+  Recently completed compounds include: {% for calc in recent %} <a href="/materials/entry/{{calc.entry_id}}">{{calc.input.name}}</a> {% endfor %}
+</div>
+{% endblock %}

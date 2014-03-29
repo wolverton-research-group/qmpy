@@ -1,0 +1,80 @@
+{% extends "base_site.html" %}
+{% load admin_static %}
+
+{% block extrastyle %}
+<script type="text/javascript" src={% static "js/jsmol/JSmol.min.js" %}></script>
+{% endblock %}
+
+{% block title %}Spacegroup: {{ spacegroup.symbol }}{% endblock %}
+
+{% block content %}
+<h1> Spacegroup: {{spacegroup.symbol}}</h1>
+
+<div style="width:400px">
+  <center>
+    <h2> Centering Vectors </h2>
+    <table class=matrix>
+        {% for cv in spacegroup.centering_vectors.all %}
+        <tr>
+          <td>{{ cv }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <br>
+
+    <h2> Symmetry operations </h2>
+    <table class=matrix>
+      {% for op in spacegroup.sym_ops %}
+      <tr>
+        <td> {{ op }} </td>
+      </tr>
+      {% endfor %}
+    </table>
+    <br>
+
+    <h2> Wyckoff positions </h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Multiplicity</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for site in spacegroup.wyckoff_sites %}
+        <tr>
+          <td>{{site.symbol}}</td>
+          <td>{{site.multiplicity}}</td>
+          <td>{{site.position}}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </center>
+</div>
+
+{% endblock %}
+
+{% block sidebar %}
+<div id="sidebar" class="sidebar">
+  <h2> Examples of structures with this spacegroup </h2>
+  <center>
+    <table>
+      <thead>
+        <tr>
+          <th>Composition</th>
+          <th># of atoms</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for structure in structures %}
+        <tr class=clickableRow href="/materials/entry/{{structure.entry_id}}">
+          <td>{{ structure.name }}</td>
+          <td>{{ structure.natoms }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </center>
+</div>
+{% endblock %}

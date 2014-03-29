@@ -1,0 +1,30 @@
+{% extends "base_site.html" %}
+{% load admin_static %}
+{% load i18n %}
+
+{% block extrastyle %}
+<link rel="stylesheet" type="text/css" href="{% static "css/flot.css" %}"/>
+{% endblock %}
+
+{% block extrascript %}
+<script language="javascript" type="text/javascript" src={% static "js/flot/jquery.flot.pie.js" %}></script>
+{% endblock %}
+
+{% block content %}
+<h1> {{ sname }} Tasks for {{ project.name }} </h1>
+
+<table>
+  <thead>
+    <th>ID</th>
+    <th>Composition</th>
+  </thead>
+  <tbody>
+    {% for task in tasks %}
+    <tr class=clickableRow href="/computing/task/{{task.id}}">
+      <td>{{task.id}}</td>
+      <td>{{task.entry.name}}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

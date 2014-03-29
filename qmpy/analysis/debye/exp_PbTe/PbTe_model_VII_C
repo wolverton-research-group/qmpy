@@ -1,0 +1,7 @@
+#Elastic constants of PbTe (GPa) from Cochran, et al Proc. Roy. Soc. 1966
+107.4 7.8 7.8 0 0 0
+7.8 107.4 7.8 0 0 0
+7.8 7.8 107.4 0 0 0
+0 0 0 12.9 0 0
+0 0 0 0 12.9 0
+0 0 0 0 0 12.9

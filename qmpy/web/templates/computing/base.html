@@ -1,0 +1,14 @@
+{% extends "base_site.html" %}
+{% load admin_static %}
+{% load i18n %}
+
+{% block sub-header %}
+<div style="margin:3px 20px">
+  <ul id='nav-global'>
+    <li><a href="/computing/hosts">Hosts</a></li>
+    <li><a href="/computing/projects">Projects</a> </li>
+    <li><a href="/computing/queue">Queue</a> </li>
+  </ul>
+</div>
+
+{% endblock %}

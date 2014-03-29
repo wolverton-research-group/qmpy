@@ -1,0 +1,52 @@
+{% extends "base_site.html" %}
+{% load admin_static %}
+
+{% block content %}
+<h1> {{ reference.title }} </h1>
+
+<h2> Materials discovered in this paper </h2>
+<table>
+	<thead>
+		<tr>
+      <th>ID</th>
+      <th>Composition</th>
+      <th>Spacegroup</th>
+      <th>&Delta; H</th>
+		</tr>
+	</thead>
+	<tbody>
+    {% for entry in reference.entry_set.all %}
+    <tr class="clickableRow" href="/materials/entry/{{entry.id}}">
+      <td>{{entry.id}}</td>
+      <td>{{entry.composition.name}}</td>
+      <td>{{entry.spacegroup.symbol}}</td>
+      <td>{{entry.delta_e}}</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
+{% endblock %}
+
+{% block sidebar %}
+<div class="sidebar" id="sidebar">
+  <center>
+  <h2> Authors on this paper </h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Last</th>
+        <th>First</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for author in reference.authors %}
+      <tr class=clickableRow href="/reference/author/{{author.id}}">
+        <td>{{ author.last }}</td>
+        <td>{{ author.first }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</center>
+</div>
+{% endblock %}

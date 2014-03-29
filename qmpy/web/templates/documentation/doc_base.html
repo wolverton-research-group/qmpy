@@ -1,0 +1,18 @@
+{% extends "base_site.html" %}
+
+{% block title %}
+OQMD | Documentation
+{% endblock %}
+
+{% block sidebar %}
+<div id="sidebar" class="box">
+  <h2 style="margin:2px"> Sections </h2>
+  <ul style="margin:2px;padding:4px">
+    <li><a href="/documentation/overview">Overview</a> - General information</li>
+    <li><a href="/documentation/vasp">DFT Settings</a> - Settings employed in our DFT calculations</li>
+    <li><a href="/documentation/qmpy">API Documentation</a> - Documentation for qmpy</li>
+    <li><a href="/documentation/structures">Structures</a> - Sources of structures in the OQMD</li>
+    <li><a href="/documentation/publications">Publications</a> - Publications using the OQMD</li>
+  </ul>
+</div>
+{% endblock %} 

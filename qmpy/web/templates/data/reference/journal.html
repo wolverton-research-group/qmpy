@@ -1,0 +1,56 @@
+{% extends "base_site.html" %}
+{% load admin_static %}
+
+{% block content %}
+<h1> {{ journal.name }}</h1>
+
+<h2> Publications vs. Time</h2>
+<div>
+  <img src="{{ hist }}" width="500px"/>
+</div>
+
+{% if False %}
+<table>
+	<thead>
+		<tr>
+			<th>Multiplicity</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for site in spacegroup.wyckoff_sites %}
+		<tr>
+			<td>{{site.position}}</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
+{% endif %}
+
+</div>
+{% endblock %}
+
+{% block sidebar %}
+<div id="sidebar" class="sidebar">
+  <h2> Examples of structures from this journal </h2>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Composition</th>
+        <th>Spacegroup</th>
+        <th># of atoms</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for entry in entries %}
+      <tr class=clickableRow href="/materials/entry/{{entry.id}}">
+        <td> {{entry.id}} </td>
+        <td> {{entry.name}} </td>
+        <td> {{entry.spacegroup.symbol}}</td>
+        <td> {{entry.natoms}}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

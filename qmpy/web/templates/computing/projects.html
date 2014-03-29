@@ -1,0 +1,57 @@
+{% extends "base_site.html" %}
+{% load admin_static %}
+{% load i18n %}
+
+{% block extrastyle %}
+<link rel="stylesheet" type="text/css" href="{% static "css/flot.css" %}"/>
+{% endblock %}
+
+{% block extrascript %}
+<script language="javascript" type="text/javascript" src={% static "js/flot/jquery.flot.pie.js" %}></script>
+{% endblock %}
+
+{% block content %}
+<div>
+  <h1> Host Dashboard: </h1>
+  {% for project in projects %}
+  {% if project.active %} 
+  <div class="box" style='width:280px'>
+  {% else %} 
+  <div class="box" style='width:280px;background-color:#C0C0C0'>
+    {% endif %}
+    <h1><a href="/computing/project/{{ project.name }}">{{project.name}}</a></h1>
+    {% if project.active %}
+    <h2>RUNNING</h2>{% else %}
+    <h2>STOPPED</h2>{% endif %}
+
+    {% if project.task_set.count %}
+    <script language="javascript" type="text/javascript">
+    $(function() {
+        $.plot("#{{project.name}}", {{ project.flot | safe }}, { 
+          legend: {position: "ne", margin: 1,
+                   labelFormatter: function(label, series) {
+                   return '<a href="/computing/project/'+label+'/{{project.name}}">'+label+'</a>';
+                   }},
+          series: { 
+            pie: { 
+              show: true
+            } 
+          }
+        }
+      );
+    });
+  </script>
+
+    <div class="flot-container" style="width:280px; height:120px;">
+      <div id="{{project.name}}" class="flot-placeholder"></div>
+    </div>
+
+    {% else %} 
+    <h2> No tasks assigned. </h2>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}
+

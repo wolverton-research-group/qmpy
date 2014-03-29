@@ -1,0 +1,107 @@
+{% extends "documentation/doc_base.html" %}
+
+{% block title %}
+OQMD | Documentation
+{% endblock %}
+
+{% block content_title %}
+<h1> Structure Sources </h1>
+{% endblock %}
+
+{% block content %}
+The OQMD contains approximately 300,000 calculated structures. These structures come primarily from two sources: ~10% from the ICSD and ~90% from iterating over many chemistries for several simple prototypes.
+
+<h2> ICSD </h2>
+The <a href="http://icsd.fiz-karlsruhe.de/">Inorganic Crystal Structure Database</a> (ICSD), created by FIZ Karlsruhe, is a database of ~161,000 crystal structures. Ignoring entries which contain partial occupancy, contain incomplete data, or are duplicates of other sturctures, there are approximately 44,000 calculable entries in the ISCD. Of these, the OQMD contains calculations for every entry with a primitive cell of 35 or fewer atoms, ~30,000 structures. The remaining ~14,000 structures are currently being calculated and added to the OQMD as they are completed.
+
+<h2> Prototype Structures </h2>
+The OQMD contains calculations of several simple elemental, binary, and ternary prototypical structures for every possible chemistry, totaling ~250,000 calculations.
+
+<br>
+16 elemental prototypes are included. Their strukturbericht and common prototype names are: 
+<table border=1>
+  <tr>
+    <td>A1</td>
+    <td>A2</td>
+    <td>A3</td>
+    <td>A3'</td>
+    <td>A4</td>
+    <td>A5</td>
+    <td>A7</td>
+    <td>A9</td>
+    <td>A10</td>
+    <td>A11</td>
+    <td>A12</td>
+    <td>A13</td>
+    <td>A_a</td>
+    <td>A_b</td>
+    <td>A_h</td>
+    <td>C19</td>
+  <tr>
+    <td>FCC</td>
+    <td>BCC</td>
+    <td>HCP</td>
+    <td>alpha-La</td>
+    <td>diamond</td>
+    <td>beta-Sn</td>
+    <td>alpha-As</td>
+    <td>graphite</td>
+    <td>alpha-Hg</td>
+    <td>alpha-Ga</td>
+    <td>alpha-Mn</td>
+    <td>beta-Mn</td>
+    <td>BCT</td>
+    <td>beta-U</td>
+    <td>alpha-Po</td>
+    <td>alpha-Sm</td>
+  </tr>
+</table>
+
+<br>
+Binary prototypes and their compositions include: 
+<table border="1">
+  <tr>
+    <td>B2</td>
+    <td>D0_3</td>
+    <td>L1_0</td>
+    <td>L1_1</td>
+    <td>L1_2</td>
+    <td>B_h</td>
+    <td>B_19</td>
+    <td>D0_19</td>
+    <td>B1</td>
+    <td>B3</td>
+    <td>B4</td>
+    <td>D0_22</td>
+  <tr>
+    <td>XY</td>
+    <td>X3Y</td>
+    <td>XY</td>
+    <td>XY</td>
+    <td>X3Y</td>
+    <td>XY</td>
+    <td>XY</td>
+    <td>X3Y</td>
+    <td>XY</td>
+    <td>XY</td>
+    <td>XY</td>
+    <td>X3Y</td>
+  </tr>
+</table>
+
+<br>
+Ternary prototypes and their compositions include:
+<table border="1">
+  <tr>
+    <td>L2_1 Heusler</td>
+    <td>Perovskite</td>
+    <td>Brownmillerite</td>
+    <tr>
+      <td>X2Y2O5</td>
+      <td>X2YZ</td>
+      <td>XYO3</td>
+    </table>
+
+
+
+{% endblock %} 

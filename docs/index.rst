@@ -1,0 +1,47 @@
+.. qmpy documentation master file, created by
+   sphinx-quickstart on Wed Feb 26 17:36:09 2014.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+****
+qmpy
+****
+
+qmpy is the backend responsible for creating and running the Open Quantum 
+Materials Database (http://oqmd.org). The OQMD is a project created in Chris
+Wolverton's group at Northwestern University (http://wolverton.northwestern.edu). 
+
+.. toctree::
+   :maxdepth: 2
+
+   getting_started
+   tutorials
+   models
+   analysis
+   examples
+
+Contribute
+==========
+
+- Issue Tracker: http://code.google.com/p/qmpy/issues
+- Source: http://code.google.com/p/qmpy/source
+
+Support
+=======
+
+If you are having issues, please let us know.
+We can be reached at oqmd.contact@gmail.com.
+
+License
+=======
+
+The project is licensed under the MIT license.
+
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+

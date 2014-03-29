@@ -1,0 +1,75 @@
+1s: [H, He]
+2p: [B, C, F, N, Ne, O]
+2s: [Be, Li]
+3d: [Co, Cr, Cu, Fe, Mn, Ni, Sc, Ti, V, Zn]
+3p: [Al, Ar, Cl, P, S, Si]
+3s: [Na, Mg]
+4d: [Ag, Cd, Mo, Nb, Pd, Rh, Ru, Tc, Y, Zr]
+4f: [Ce, Dy, Er, Eu, Gd, Ho, La, Nd, Pm, Pr, Sm, Tb, Tm, Yb]
+4p: [As, Br, Ga, Ge, Kr, Se]
+4s: [Ca, K]
+5d: [Au, Hf, Hg, Ir, Lu, Os, Pt, Re, Ta, W]
+5f: [Ac, Np, Pa, Pu, Th, U]
+5p: [I, In, Sb, Sn, Te, Xe]
+5s: [Rb, Sr]
+6d: []
+6p: [Bi, Pb, Tl]
+6s: [Cs, Ba]
+7p: []
+7s: []
+DD: [Ag, Au, Cd, Co, Cr, Cu, Fe, Hf, Hg, Ir, Lu, Mn, Mo, Nb, Ni, Os, Pd, Pt, Re, Rh,
+  Ru, Sc, Ta, Tc, Ti, V, W, Y, Zn, Zr]
+FF: [Ac, Ce, Dy, Er, Eu, Gd, Ho, La, Nd, Np, Pa, Pm, Pr, Pu, Sm, Tb, Th, Tm, U, Yb]
+P1: [Cs, H, K, Li, Na, Rb]
+P10: [Ni, Pd, Pt]
+P11: [Ag, Au, Cu]
+P12: [Cd, Hg, Zn]
+P13: [Al, B, Ga, In, Tl]
+P14: [C, Ge, Pb, Si, Sn]
+P15: [As, Bi, N, P, Sb]
+P16: [O, S, Se, Te]
+P17: [Br, Cl, F, I]
+P18: [Ar, He, Kr, Ne, Xe]
+P2: [Ba, Be, Ca, Mg, Sr]
+P3: [Lu, Sc, Y]
+P4: [Hf, Ti, Zr]
+P5: [Nb, Ta, V]
+P6: [Cr, Mo, W]
+P7: [Mn, Re, Tc]
+P8: [Fe, Os, Ru]
+P9: [Co, Ir, Rh]
+PP: [Al, Ar, As, B, Bi, Br, C, Cl, F, Ga, Ge, I, In, Kr, N, Ne, O, P, Pb, S, Sb, Se,
+  Si, Sn, Te, Tl, Xe]
+R1: [H, He]
+R2: [B, Be, C, F, Li, N, Ne, O]
+R3: [Al, Ar, Cl, Mg, Na, P, S, Si]
+R4: [As, Br, Ca, Co, Cr, Cu, Fe, Ga, Ge, K, Kr, Mn, Ni, Sc, Se, Ti, V, Zn]
+R5: [Ag, Cd, I, In, Mo, Nb, Pd, Rb, Rh, Ru, Sb, Sn, Sr, Tc, Te, Xe, Y, Zr]
+R6: [Au, Ba, Bi, Ce, Cs, Dy, Er, Eu, Gd, Hf, Hg, Ho, Ir, La, Lu, Nd, Os, Pb, Pm, Pr,
+  Pt, Re, Sm, Ta, Tb, Tl, Tm, W, Yb]
+R7: [Ac, Np, Pa, Pu, Th, U]
+SS: [Ba, Be, Ca, Cs, H, He, K, Li, Mg, Na, Rb, Sr]
+all: [H, He, Li, Be, Na, Mg, K, Ca, Rb, Sr, Cs, Ba, B, C, N, O, F, Ne, Al, Si, P,
+  S, Cl, Ar, Ga, Ge, As, Se, Br, Kr, In, Sn, Sb, Te, I, Xe, Tl, Pb, Bi, Sc, Ti, V,
+  Cr, Mn, Fe, Co, Ni, Cu, Zn, Y, Zr, Nb, Mo, Tc, Ru, Rh, Pd, Ag, Cd, Lu, Hf, Ta, W,
+  Re, Os, Ir, Pt, Au, Hg, La, Ce, Pr, Nd, Pm, Sm, Eu, Gd, Tb, Dy, Ho, Er, Tm, Yb,
+  Ac, Th, Pa, U, Np, Pu]
+all-metals: [Ac, Ag, Al, As, Au, B, Ba, Be, Bi, Ca, Cd, Ce, Co, Cr, Cs, Cu, Dy, Er,
+  Eu, Fe, Ga, Gd, Ge, Hf, Hg, Ho, In, Ir, K, La, Li, Lu, Mg, Mn, Mo, Na, Nb, Nd, Ni,
+  Np, Os, Pa, Pb, Pd, Pm, Pr, Pt, Pu, Rb, Re, Rh, Ru, Sb, Sc, Si, Sm, Sn, Sr, Ta,
+  Tb, Tc, Te, Th, Ti, Tl, Tm, U, V, W, Y, Yb, Zn, Zr]
+all-solids: [Ac, Ag, Al, As, Au, B, Ba, Be, Bi, C, Ca, Cd, Ce, Co, Cr, Cs, Cu, Dy,
+  Er, Eu, Fe, Ga, Gd, Ge, Hf, Ho, In, Ir, K, La, Li, Lu, Mg, Mn, Mo, Na, Nb, Nd, Ni,
+  Np, Os, P, Pa, Pb, Pd, Pm, Pr, Pt, Pu, Rb, Re, Rh, Ru, S, Sb, Sc, Se, Si, Sm, Sn,
+  Sr, Ta, Tb, Tc, Te, Th, Ti, Tl, Tm, U, V, W, Y, Yb, Zn, Zr]
+all-sub: [Ac, Ag, Al, As, Au, B, Ba, Be, Bi, Br, C, Ca, Cd, Ce, Cl, Co, Cr, Cs, Cu,
+  Dy, Er, Eu, F, Fe, Ga, Gd, Ge, H, Hf, Hg, Ho, I, In, Ir, K, La, Li, Lu, Mg, Mn,
+  Mo, N, Na, Nb, Nd, Ni, Np, O, Os, P, Pa, Pb, Pd, Pm, Pr, Pt, Pu, Rb, Re, Rh, Ru,
+  S, Sb, Sc, Se, Si, Sm, Sn, Sr, Ta, Tb, Tc, Te, Th, Ti, Tl, Tm, U, V, W, Y, Yb, Zn,
+  Zr]
+dimers: [Br, Cl, F, H, I, N, O]
+ldau: [Co, Cr, Cu, Fe, Mn, Ni, Np, Pa, Pu, Th, U, V]
+rareearth: [Ce, Dy, Er, Eu, Gd, Ho, La, Lu, Nd, Pm, Pr, Sc, Sm, Tb, Tm, Y, Yb]
+simple-metals: [Ag, Al, Au, Ba, Be, Bi, Ca, Cd, Co, Cr, Cs, Cu, Fe, Ga, Hf, Hg, In,
+  Ir, K, La, Li, Mg, Mn, Mo, Na, Nb, Ni, Os, Pb, Pd, Pt, Rb, Re, Rh, Ru, Sc, Sn, Sr,
+  Ta, Tc, Ti, Tl, V, W, Y, Zn, Zr]

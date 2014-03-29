@@ -1,0 +1,179 @@
+{% extends "base_site.html" %}
+{% load admin_static %}
+
+{% block title %}{{ entry.name }}{% endblock %}
+
+{% block extrascript %}
+<script type="text/javascript" src={% static "js/jsmol/JSmol.min.js" %}></script>
+{% endblock %} 
+
+{% block extrastyle %}
+<link rel="stylesheet" type="text/css" href="{% static "css/flot.css" %}"/>
+{% endblock %}
+
+{% block content_title %}
+<h1> <a href="{{ ROOT_URL }}/materials/composition/{{entry.composition.name}}">{{ entry.composition.html|safe}}</a> 
+	{% if not entry.energy == None  %}: &Delta;H<sub>f</sub> = {{ entry.energy | floatformat:-3 }} eV/atom{% endif %}</h1>
+{% endblock %}
+
+{% if warning %}
+{% block notice %}
+{{ warning }}
+{% endblock %}
+{% endif %}
+
+{% block content %}
+
+<h2> Database Information </h2>
+<ul>
+	{% if entry.todo %}
+  <li>Queued tasks: {% for task in entry.todo %} 
+  <a href="/computing/task/{{task.id}}">{{task.id}}</a> {% endfor %}</li>
+	{% endif %}
+	{% if entry.running %}
+  <li>Currently running: {% for job in entry.running %} 
+  <a href="/computing/job/{{job.id}}">{{job.id}}</a> {% endfor %}</li>
+	{% endif %}
+	{% if entry.label %}
+	<li>Label: {{ entry.label }}
+	{% endif %}
+	{% if entry.composition.experiment %}
+	<li>Experimental Heat of Formation (298K): {{ entry.composition.experiment | floatformat:3 }}</li>
+	{% endif %}
+	{% if entry.duplicate_of %}
+	<li>Duplicate of:
+	<a href="/materials/entry/{{ entry.duplicate_of_id }}">Entry {{entry.duplicate_of_id}}</a>
+  </li>{% elif entry.duplicates.all %}
+  <li>See also:
+  {% for e in entry.duplicates.all %} 
+  <a href="/materials/entry/{{ e.id }}">Entry {{e.id}}</a>
+  {% endfor %}
+  {% endif %}
+
+	{% if entry.prototype %}
+	<li>Structure derived from: 
+	<a href="/materials/prototype/{{ entry.prototype_id }}">{{entry.prototype_id}}</a>
+	</li>{% endif %}
+
+  <li> Input structure: <a href="/materials/structure/{{entry.input.id}}">
+    {{entry.input.id}}</a></li>
+  <li> Spacegroup: <a href="/analysis/symmetry/spacegroup/{{entry.structure.spacegroup}}">
+    {{entry.structure.spacegroup.symbol}}</a></li>
+  <li> # of atoms: {{entry.input.natoms}}</li>
+
+  <li> Path: {{entry.path}} </li>
+
+	{% if entry.holds %}
+  <li> Holds: {% for hold in entry.holds %} <a href="/materials/hold/{{hold}}">{{hold}}</a>
+  {% endfor %}
+	</li> {% endif %}
+
+	{% if entry.keywords %}
+  <li> Associated keywords: {% for kw in entry.keywords %} <a href="/materials/keyword/{{kw}}">{{kw}}</a>
+  {% endfor %}
+  </li> {% endif %}
+
+	{% if entry.projects %}
+  <li> Associated projects: {% for project in entry.projects %} <a href="/computing/project/{{project.name}}">{{project.name}}</a>
+  {% endfor %}
+	</li> {% endif %}
+</ul>
+
+<div>
+  <h2> Calculation History </h2>
+<table>
+  <thead>
+    <tr>
+      <th>Configuration</th>
+      <th>Total energy [eV/atom]</th>
+      <th>Band gap [eV]</th>
+      <th>Volume [&#8491;<sup>3</sup>/atom]</th>
+      <th># of ionic steps</th>
+      <th>Converged</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for calc in entry.calculation_set.all %}
+    <tr class=clickableRow href="/analysis/calculation/{{calc.id}}">
+      <td>{{calc.label}}</td>
+      <td>{{calc.energy_pa | floatformat:-3}}</td>
+      <td>{{calc.band_gap | floatformat:-1}}</td>
+      <td>{{calc.output.volume_pa | floatformat:-3}}</td>
+      <td>{{calc.nsteps}}</td>
+      <td>{{calc.converged}}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+</div>
+    
+
+{% if entry.reference %}
+<div style=float:left>
+<h2>Original Reference</h2>
+<a href="/reference/{{entry.reference_id}}">{{ entry.reference.citation }}</a><br>
+(Authors: {% for auth in entry.reference.authors %}
+<a href="/reference/author/{{auth.id}}">{{auth.name}} </a>{% endfor %})<br>
+(Journal: <a href="/reference/journal/{{entry.reference.journal_id}}">
+  {{entry.reference.journal.name}} </a><br>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block sidebar %}
+<div id="sidebar" class="box">
+  {% if not entry.tasks %}
+  <h1> Control Panel</h1>
+  <form action="" method="post">{% csrf_token %}
+    <input type="submit" name="calculate" value="Request calculation">
+  </form>
+  {% endif %}
+  {% if entry.holds %}
+  <form action="" method="post">{% csrf_token %}
+    <input type="submit" name="clear_holds" value="Clear holds">
+  </form>
+  {% endif %}
+
+  <form action="" method="post">{% csrf_token %}
+    Add keyword: <input type="text" name="add_keyword"><br>
+    Add hold: <input type="text" name="add_hold"><br>
+    <input type="submit">
+  </form>
+
+  <h1> Visualization </h1>
+  {% if entry.natoms > 200 %}
+  Structure contains more than 200 atoms, so is not being displayed. <br>
+  {% else %}
+  <h2> Crystal structure </h2>
+    <script>
+      var Info = {
+        j2sPath: "{% static 'js/jsmol/j2s' %}",
+        {% if primitive %}
+        src: "/materials/export/primitive/cif/{{entry.structure.id}}",
+        {% else %}
+        src: "/materials/export/conventional/cif/{{entry.structure.id}}",
+        {% endif %}
+        use: "HTML5",
+        width: 400,
+        height: 300,
+      };
+      JMolApplet = Jmol.getApplet("myJmol", Info);
+    </script>
+    <form action="" method="POST">{% csrf_token %}
+      <input id="rPrim" type="radio" name="primitive" value="1" 
+      onclick="this.form.submit();" {% if primitive %}checked{% endif %}>
+      <label for="rPrim">Primitive Cell</label>
+      <input id="rConv" type="radio" name="primitive" value="0" 
+      onclick="this.form.submit();" {% if not primitive %}checked{% endif %}>
+      <label for="rConv">Conventional Cell</label>
+
+    </form>
+  {% endif %}
+
+  Download 
+  <a href="/materials/export/primitive/poscar/{{entry.input.id}}">primitive</a> or 
+  <a href="/materials/export/conventional/poscar/{{entry.input.id}}">conventional</a> cells (VASP format).<br>
+</div>
+{% endblock %}

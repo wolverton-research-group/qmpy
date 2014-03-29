@@ -1,0 +1,60 @@
+{% extends "base_site.html" %}
+{% load admin_static %}
+{% load i18n %}
+
+{% block extrascript %}
+<script language="javascript" type="text/javascript" src={% static "js/flot/jquery.flot.pie.js" %}></script>
+
+<script type='text/javascript'>//<![CDATA[ 
+window.onload=function(){
+var theForm = document.getElementById('theForm');
+var theInput = document.getElementById('subj');
+
+theForm.onsubmit = function(e) {
+    location = "/materials/generic_composition/" + encodeURIComponent(theInput.value);
+    return false;
+}
+}//]]>  
+
+</script>
+{% endblock %}
+
+{% block content %}
+{% if search %}
+Generic Composition: {{ gc.formula }}
+
+<table>
+  <thead>
+    <tr>
+      <th> Composition </th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for comp in gc.compositions %}
+    <tr class="clickableRow" href="/materials/composition/{{comp.name}}">
+      <td> {{comp.name }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+
+{% endblock %}
+
+{% block sidebar %}
+<div id="sidebar" class="box">
+  <h2 class="subhead"> Search for a composition or region </h2>
+  <form id="theForm">
+    <input id='subj' value="{{ search }}"/>
+    <input type='submit'/>
+  </form>
+  Examples:<br>
+  <ul>
+    <li>Al2O3
+    <li>LiFeO2
+    <li>Cu2MnAl
+  </ul>
+
+</div>
+{% endblock %}

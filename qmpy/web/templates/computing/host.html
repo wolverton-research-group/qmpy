@@ -1,0 +1,51 @@
+{% extends "base_site.html" %}
+{% load i18n %}
+
+{% block content_title %}
+<h1>Host: <a href="/computing/host/{{host.name}}">{{ host.name }}</a></h1>
+{% endblock %}
+
+{% block content %}
+
+<ul>
+	<li>Number of nodes: {{ host.nodes }}</li>
+	<li>Processors per node: {{ host.ppn }}</li>
+</ul>
+
+<h2> Currently running jobs </h2>
+<table>
+	<thead>
+		<tr>
+			<th>ID</th>
+			<th>Project</th>
+			<th>Account</th>
+			<th>Path</th>
+			<th>Remaining walltime</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for job in host.jobs %}
+    <tr class="clickableRow" href="/computing/job/{{job.id}}">
+			<td>{{job.id}}</td>
+			<td>{{job.project.name}}</td>
+			<td>{{job.account.name}}</td>
+			<td>{{job.run_path}}</td>
+			<td>{{job.walltime}}</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
+
+{% endblock %}
+
+{% block sidebar %}
+<div id="sidebar" class="box">
+    <h1> Control panel </h1>
+    <form action="" method="post">{% csrf_token %}
+      <ul style="margin-left:5px;padding:1px">
+        <li><label><input type="checkbox" {% if host.state == 1 %}checked{% endif %} name="active"> Active? </label><br>
+      <br>
+      <input type="submit">
+    </form>
+</div>
+{% endblock %}

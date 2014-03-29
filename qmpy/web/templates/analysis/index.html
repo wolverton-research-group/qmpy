@@ -1,0 +1,22 @@
+{% extends "base_site.html" %}
+{% load admin_static %}
+{% load i18n %}
+
+{% block content %}
+
+<h1> Analysis tools </h1>
+
+<h2> Available </h2>
+<ul>
+	<li><a href="/analysis/gclp">GCLP</a></li>
+	<li><a href="/analysis/phase_diagram">Phase Diagram</a></li>
+	<li><a href="/analysis/visualize">Visualize a crystal structure</a></li>
+</ul>
+
+<h2> Not yet available </h2>
+<ul>
+	<li>Reaction discovery</li>
+	<li>Precipitate design</li>
+</ul>
+
+{% endblock %}

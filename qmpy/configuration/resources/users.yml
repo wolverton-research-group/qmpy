@@ -1,0 +1,33 @@
+#name:
+# hostname: {run_path:/where/to/run/on/host, username: usernameonhost}
+# hostname1: {run_path:/where/to/run/on/host1, username: usernameonhost1}
+# hostname2: {run_path:/where/to/run/on/host2, username: usernameonhost2}
+# hostname3: {run_path:/where/to/run/on/host3, username: usernameonhost3}
+
+jes786:
+  byrd: {run_path: /home/jsaal531/auto_run, username: jsaal531}
+  josquin: {run_path: /home/jsaal531/auto_run, username: jsaal531}
+  palestrina: {run_path: /home/jsaal531/auto_run, username: jsaal531}
+  quest: {run_path: /projects/p20274/auto_run, username: jes786}
+  victoria: {run_path: /home/jsaal531/auto_run, username: jsaal531}
+
+jwd686:
+  byrd: {run_path: /home/jwd686/auto_run, username: jwd686}
+  hopper: {run_path: /global/homes/s/skirklin/auto_run, username: jwd686}
+  josquin: {run_path: /home/jwd686/auto_run, username: jwd686}
+  palestrina: {run_path: /home/jwd686/auto_run, username: jwd686}
+  quest: {run_path: /projects/p20254/auto_run, username: jwd686}
+
+oqmd:
+  byrd: {run_path: /home/oqmd/auto_run, username: oqmd}
+  josquin: {run_path: /home/oqmd/auto_run, username: oqmd}
+  palestrina: {run_path: /home/oqmd/auto_run, username: oqmd}
+  victoria: {run_path: /home/oqmd/auto_run, username: oqmd}
+
+sjk648:
+  byrd: {run_path: /home/sjk648/auto_run, username: sjk648}
+  hopper: {run_path: /global/homes/s/skirklin/auto_run, username: skirklin}
+  josquin: {run_path: /home/sjk648/auto_run, username: sjk648}
+  palestrina: {run_path: /home/sjk648/auto_run, username: sjk648}
+  quest: {run_path: /projects/b1004/sjk648/auto_run, username: sjk648}
+  victoria: {run_path: /home/sjk648/auto_run, username: sjk648}

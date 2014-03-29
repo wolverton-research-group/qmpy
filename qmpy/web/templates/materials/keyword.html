@@ -1,0 +1,34 @@
+{% extends "base_site.html" %}
+{% load admin_static %}
+
+{% block extrastyle %}
+<link rel="stylesheet" type="text/css" href="{% static "css/flot.css" %}"/>
+{% endblock %}
+
+{% block extrascript %}
+<script type="text/javascript" src={% static "js/jsmol/JSmol.min.js" %}></script>
+{% endblock %}
+
+{% block content_title %}
+{% endblock %}
+
+{% block content %}
+<h2> Entries with this structure </h2>
+
+<table>
+	<thead>
+		<tr>
+			<th>Composition</th>
+			<th>Stable?</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for entry in keyword.entry_set.all %}
+		<tr class=clickableRow href="/materials/entry/{{ entry.id }}">
+			<td>{{entry.name}}</th>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
+
+{% endblock %}

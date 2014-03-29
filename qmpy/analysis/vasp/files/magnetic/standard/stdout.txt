@@ -1,0 +1,35 @@
+ running on    8 total cores
+ distrk:  each k-point on    8 cores,    1 groups
+ distr:  one band on    4 cores,    2 groups
+ using from now: INCAR     
+ vasp.5.3.2 13Sep12 (build Mar 19 2013 12:21:59) complex                        
+  
+ POSCAR found type information on POSCAR  Rh Sn V 
+ POSCAR found :  3 types and      16 ions
+ LDA part: xc-table for Pade appr. of Perdew
+ POSCAR, INCAR and KPOINTS ok, starting setup
+ WARNING: small aliasing (wrap around) errors must be expected
+ FFT: planning ...
+ WAVECAR not read
+ WARNING: dimensions on CHGCAR file are different
+ WARNING: random wavefunctions but no delay for mixing, default for NELMDL
+ entering main loop
+       N       E                     dE             d eps       ncg     rms          rms(c)
+DAV:   1     0.184546779536E+04    0.18455E+04   -0.56065E+04 28928   0.179E+03
+DAV:   2     0.279440377689E+03   -0.15660E+04   -0.14300E+04 28320   0.493E+02
+DAV:   3    -0.624555120082E+02   -0.34190E+03   -0.29502E+03 28320   0.208E+02
+DAV:   4    -0.929067470176E+02   -0.30451E+02   -0.29442E+02 32454   0.706E+01
+DAV:   5    -0.939913403401E+02   -0.10846E+01   -0.10819E+01 35984   0.147E+01    0.554E+01
+RMM:   6    -0.125890039375E+03   -0.31899E+02   -0.76222E+01 33310   0.300E+01    0.479E+01
+RMM:   7    -0.127890239850E+03   -0.20002E+01   -0.27304E+01 33612   0.147E+01    0.322E+01
+RMM:   8    -0.117459494228E+03    0.10431E+02   -0.81772E+00 37532   0.106E+01    0.135E+01
+RMM:   9    -0.116493481337E+03    0.96601E+00   -0.40509E+00 35462   0.674E+00    0.359E+00
+RMM:  10    -0.116504125445E+03   -0.10644E-01   -0.43362E-01 42175   0.196E+00    0.123E+00
+RMM:  11    -0.116509474489E+03   -0.53490E-02   -0.71594E-02 38539   0.843E-01    0.870E-01
+RMM:  12    -0.116502215853E+03    0.72586E-02   -0.91603E-03 42835   0.395E-01    0.331E-01
+RMM:  13    -0.116502001566E+03    0.21429E-03   -0.18949E-03 41957   0.143E-01    0.898E-02
+RMM:  14    -0.116502237609E+03   -0.23604E-03   -0.28599E-04 30687   0.651E-02    0.406E-02
+RMM:  15    -0.116502472667E+03   -0.23506E-03   -0.75790E-05 19888   0.388E-02    0.376E-02
+WARNING in EDDRMM: call to ZHEGV failed, returncode =   8  4 53
+RMM:  16    -0.116502432300E+03    0.40368E-04   -0.31948E-05 18301   0.252E-02
+   1 F= -.11650243E+03 E0= -.11650243E+03  d E =0.000000E+00  mag=     4.7105

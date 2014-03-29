@@ -1,0 +1,16 @@
+{% extends "base_site.html" %}
+
+{% block content %}
+
+<form action="" method="post">
+  Name: <input type="text" name="name"><br>
+  ip_address: <input type="text" name="ip_address"><br>
+  hostname: <input type="text" name="hostname"><br>
+  Number of nodes: <input type="text" name="nodes" value={{nodes}}><br>
+  Number of cores/node: <input type="text" name="ppn" value={{ppn}}><br>
+  Maximum walltime (in seconds): <input type="text" name="walltime" value={{walltime}}><br>
+  Submit job command: <input type="text" name="sub_script" size="40" value={{sub_script}}><br>
+  Check queue command: <input type="text" name="check_queue" size="40" value={{check_queue}}><br>
+  Queue file contents: <textarea name="sub_script" cols="80" rows="20">{{sub_text}}</textarea><br>
+  <input type="submit">
+{% endblock %}

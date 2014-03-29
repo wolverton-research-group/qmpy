@@ -1,0 +1,2576 @@
+Ac:
+  atomic_radii: 195.0
+  boil: 3471.0
+  covalent_radii: -1.0
+  d_elec: 1.0
+  density: 10.0699996948
+  electronegativity: 1.10000002384
+  f_elec: 0.0
+  first_ionization_energy: 5.17000007629
+  group: 0.0
+  mass: 227.0
+  melt: 1323.15002441
+  name: Actinium
+  p_elec: 0.0
+  period: 7.0
+  production: 0.0010000000475
+  s_elec: 2.0
+  scattering_factors: {a1: 35.659698, a2: 23.103201, a3: 12.5977, a4: 4.08655, b1: 0.589092,
+    b2: 3.65155, b3: 18.599001, b4: 117.019997, c: 13.5266}
+  specific_heat: 0.119999997318
+  symbol: Ac
+  van_der_waals_radii: -1.0
+  volume: 44.8699989319
+  z: 89.0
+Ag:
+  HHI_P: 1200.0
+  HHI_R: 1400.0
+  atomic_radii: 160.0
+  boil: 2435.0
+  covalent_radii: 153.0
+  d_elec: 10.0
+  density: 10.5010004044
+  electronegativity: 1.92999994755
+  f_elec: 0.0
+  first_ionization_energy: 7.57620000839
+  group: 11.0
+  mass: 107.867996216
+  melt: 1234.15002441
+  name: Silver
+  p_elec: 0.0
+  period: 5.0
+  production: 0.0750000029802
+  s_elec: 1.0
+  scattering_factors: {a1: 19.2808, a2: 16.688499, a3: 4.8045, a4: 1.0463, b1: 0.6446,
+    b2: 7.4726, b3: 24.6605, b4: 99.815598, c: 5.179}
+  specific_heat: 0.234999999404
+  symbol: Ag
+  van_der_waals_radii: 172.0
+  volume: 17.4099998474
+  z: 47.0
+Al:
+  HHI_P: 1600.0
+  HHI_R: 1000.0
+  atomic_radii: 125.0
+  boil: 2792.0
+  covalent_radii: 118.0
+  d_elec: 0.0
+  density: 2.69799995422
+  electronegativity: 1.61000001431
+  f_elec: 0.0
+  first_ionization_energy: 5.98577022552
+  group: 13.0
+  mass: 26.9815006256
+  melt: 933.400024414
+  name: Aluminium
+  p_elec: 1.0
+  period: 3.0
+  production: 82300.0
+  s_elec: 2.0
+  scattering_factors: {a1: 6.4202, a2: 1.9002, a3: 1.5936, a4: 1.9646, b1: 3.0387,
+    b2: 0.7426, b3: 31.547199, b4: 85.0886, c: 1.1151}
+  specific_heat: 0.897000014782
+  symbol: Al
+  van_der_waals_radii: -1.0
+  volume: 16.4799995422
+  z: 13.0
+Am:
+  atomic_radii: 175.0
+  boil: 2880.0
+  covalent_radii: -1.0
+  d_elec: 0.0
+  density: 13.6899995804
+  electronegativity: 1.29999995232
+  f_elec: 7.0
+  first_ionization_energy: 5.97380018234
+  group: 0.0
+  mass: 243.0
+  melt: 1267.15002441
+  name: Americium
+  p_elec: 0.0
+  period: 7.0
+  production: 8.0
+  s_elec: 2.0
+  scattering_factors: {a1: 36.670601, a2: 24.099199, a3: 17.341499, a4: 3.49331, b1: 0.483629,
+    b2: 3.20647, b3: 14.3136, b4: 102.273003, c: 13.3592}
+  specific_heat: -1.0
+  symbol: Am
+  van_der_waals_radii: -1.0
+  volume: -1.0
+  z: 95.0
+Ar:
+  atomic_radii: 71.0
+  boil: 87.3000030518
+  covalent_radii: 97.0
+  d_elec: 0.0
+  density: 0.00178369996138
+  electronegativity: 0.0
+  f_elec: 0.0
+  first_ionization_energy: 15.7595996857
+  group: 18.0
+  mass: 39.9480018616
+  melt: 83.9599990845
+  name: Argon
+  p_elec: 6.0
+  period: 3.0
+  production: 3.5
+  s_elec: 2.0
+  scattering_factors: {a1: 7.4845, a2: 6.7723, a3: 0.6539, a4: 1.6442, b1: 0.9072,
+    b2: 14.8407, b3: 43.8983, b4: 33.392899, c: 1.4445}
+  specific_heat: 0.519999980927
+  symbol: Ar
+  van_der_waals_radii: 188.0
+  volume: 33.7999992371
+  z: 18.0
+As:
+  HHI_P: 3300.0
+  HHI_R: 4000.0
+  atomic_radii: 115.0
+  boil: 887.0
+  covalent_radii: 119.0
+  d_elec: 10.0
+  density: 5.77600002289
+  electronegativity: 2.18000006676
+  f_elec: 0.0
+  first_ionization_energy: 9.78859996796
+  group: 15.0
+  mass: 74.9216003418
+  melt: 1090.16003418
+  name: Arsenic
+  p_elec: 3.0
+  period: 4.0
+  production: 1.79999995232
+  s_elec: 2.0
+  scattering_factors: {a1: 10.6723, a2: 6.0701, a3: 3.4313, a4: 4.2779, b1: 2.6345,
+    b2: 0.2647, b3: 12.9479, b4: 47.797199, c: 2.531}
+  specific_heat: 0.328999996185
+  symbol: As
+  van_der_waals_radii: 185.0
+  volume: 23.8974990845
+  z: 33.0
+At:
+  atomic_radii: -1.0
+  boil: 610.0
+  covalent_radii: -1.0
+  d_elec: 0.0
+  density: 7.0
+  electronegativity: 2.20000004768
+  f_elec: 0.0
+  first_ionization_energy: -1.0
+  group: 17.0
+  mass: 210.0
+  melt: 575.150024414
+  name: Astatine
+  p_elec: 0.0
+  period: 6.0
+  production: 0.0010000000475
+  s_elec: 0.0
+  scattering_factors: {a1: 35.316299, a2: 19.021099, a3: 9.49887, a4: 7.42518, b1: 0.68587,
+    b2: 3.97458, b3: 11.3824, b4: 45.4715, c: 13.7108}
+  specific_heat: -1.0
+  symbol: At
+  van_der_waals_radii: -1.0
+  volume: -1.0
+  z: 85.0
+Au:
+  HHI_P: 1100.0
+  HHI_R: 1000.0
+  atomic_radii: 135.0
+  boil: 3129.0
+  covalent_radii: 144.0
+  d_elec: 10.0
+  density: 19.281999588
+  electronegativity: 2.53999996185
+  f_elec: 14.0
+  first_ionization_energy: 9.22550010681
+  group: 11.0
+  mass: 196.966995239
+  melt: 1337.72998047
+  name: Gold
+  p_elec: 0.0
+  period: 6.0
+  production: 0.00400000018999
+  s_elec: 1.0
+  scattering_factors: {a1: 16.881901, a2: 18.591299, a3: 25.558201, a4: 5.86, b1: 0.4611,
+    b2: 8.6216, b3: 1.4826, b4: 36.395599, c: 12.0658}
+  specific_heat: 0.128999993205
+  symbol: Au
+  van_der_waals_radii: 166.0
+  volume: 17.7099990845
+  z: 79.0
+B:
+  HHI_P: 2900.0
+  HHI_R: 2000.0
+  atomic_radii: 85.0
+  boil: 4200.0
+  covalent_radii: 82.0
+  d_elec: 0.0
+  density: 2.33999991417
+  electronegativity: 2.03999996185
+  f_elec: 0.0
+  first_ionization_energy: 8.2980298996
+  group: 13.0
+  mass: 10.8109998703
+  melt: 2573.14990234
+  name: Boron
+  p_elec: 1.0
+  period: 2.0
+  production: 10.0
+  s_elec: 4.0
+  scattering_factors: {a1: 2.0545, a2: 1.3326, a3: 1.0979, a4: 0.7068, b1: 23.2185,
+    b2: 1.021, b3: 60.3498, b4: 0.1403, c: -0.1932}
+  specific_heat: 1.02600002289
+  symbol: B
+  van_der_waals_radii: -1.0
+  volume: 7.18499994278
+  z: 5.0
+Ba:
+  HHI_P: 3000.0
+  HHI_R: 2300.0
+  atomic_radii: 215.0
+  boil: 2170.0
+  covalent_radii: 198.0
+  d_elec: 0.0
+  density: 3.59400010109
+  electronegativity: 0.889999985695
+  f_elec: 0.0
+  first_ionization_energy: 5.21169996262
+  group: 2.0
+  mass: 137.32699585
+  melt: 1002.15002441
+  name: Barium
+  p_elec: 0.0
+  period: 6.0
+  production: 425.0
+  s_elec: 2.0
+  scattering_factors: {a1: 20.3361, a2: 19.297001, a3: 10.888, a4: 2.6959, b1: 3.216,
+    b2: 0.2756, b3: 20.2073, b4: 167.201996, c: 2.7731}
+  specific_heat: 0.203999996185
+  symbol: Ba
+  van_der_waals_radii: -1.0
+  volume: 63.0099983215
+  z: 56.0
+Be:
+  HHI_P: 8000.0
+  HHI_R: 4000.0
+  atomic_radii: 105.0
+  boil: 2742.0
+  covalent_radii: 90.0
+  d_elec: 0.0
+  density: 1.85000002384
+  electronegativity: 1.57000005245
+  f_elec: 0.0
+  first_ionization_energy: 9.32269954681
+  group: 2.0
+  mass: 9.01218032837
+  melt: 1560.15002441
+  name: Beryllium
+  p_elec: 0.0
+  period: 2.0
+  production: 2.79999995232
+  s_elec: 4.0
+  scattering_factors: {a1: 1.5919, a2: 1.1278, a3: 0.5391, a4: 0.7029, b1: 43.6427,
+    b2: 1.8623, b3: 103.483002, b4: 0.542, c: 0.0385}
+  specific_heat: 1.82500004768
+  symbol: Be
+  van_der_waals_radii: -1.0
+  volume: 7.90999984741
+  z: 4.0
+Bh: {atomic_radii: -1.0, boil: -1.0, covalent_radii: -1.0, d_elec: 0.0, density: 37.0,
+  electronegativity: -1.0, f_elec: 0.0, first_ionization_energy: -1.0, group: 7.0,
+  mass: 264.0, melt: -1.0, name: Bohrium, p_elec: 0.0, period: 7.0, production: 0.0,
+  s_elec: 0.0, specific_heat: -1.0, symbol: Bh, van_der_waals_radii: -1.0, volume: -1.0,
+  z: 107.0}
+Bi:
+  HHI_P: 5300.0
+  HHI_R: 6000.0
+  atomic_radii: 160.0
+  boil: 1837.0
+  covalent_radii: 146.0
+  d_elec: 10.0
+  density: 9.80700016022
+  electronegativity: 2.01999998093
+  f_elec: 14.0
+  first_ionization_energy: 7.28560018539
+  group: 15.0
+  mass: 208.979995728
+  melt: 544.66998291
+  name: Bismuth
+  p_elec: 3.0
+  period: 6.0
+  production: 0.00899999961257
+  s_elec: 2.0
+  scattering_factors: {a1: 33.3689, a2: 12.951, a3: 16.5877, a4: 6.4692, b1: 0.704,
+    b2: 2.9238, b3: 8.7937, b4: 48.0093, c: 13.5782}
+  specific_heat: 0.122000001371
+  symbol: Bi
+  van_der_waals_radii: -1.0
+  volume: 36.0900001526
+  z: 83.0
+Bk:
+  atomic_radii: -1.0
+  boil: 983.0
+  covalent_radii: -1.0
+  d_elec: 0.0
+  density: 14.7899999619
+  electronegativity: 1.29999995232
+  f_elec: 0.0
+  first_ionization_energy: 6.19789981842
+  group: 0.0
+  mass: 247.0
+  melt: 1259.15002441
+  name: Berkelium
+  p_elec: 0.0
+  period: 7.0
+  production: 0.0
+  s_elec: 0.0
+  scattering_factors: {a1: 36.788101, a2: 24.7736, a3: 17.891899, a4: 4.23284, b1: 0.451018,
+    b2: 3.04619, b3: 12.8946, b4: 86.002998, c: 13.2754}
+  specific_heat: -1.0
+  symbol: Bk
+  van_der_waals_radii: -1.0
+  volume: -1.0
+  z: 97.0
+Br:
+  HHI_P: 3300.0
+  HHI_R: 6900.0
+  atomic_radii: 115.0
+  boil: 332.0
+  covalent_radii: 114.0
+  d_elec: 10.0
+  density: 3.12199997902
+  electronegativity: 2.96000003815
+  f_elec: 0.0
+  first_ionization_energy: 11.8137998581
+  group: 17.0
+  mass: 79.9039993286
+  melt: 266.049987793
+  name: Bromine
+  p_elec: 5.0
+  period: 4.0
+  production: 2.40000009537
+  s_elec: 2.0
+  scattering_factors: {a1: 17.1789, a2: 5.2358, a3: 5.6377, a4: 3.9851, b1: 2.1723,
+    b2: 16.579599, b3: 0.2609, b4: 41.4328, c: 2.9557}
+  specific_heat: 0.474000006914
+  symbol: Br
+  van_der_waals_radii: 185.0
+  volume: 31.5475006104
+  z: 35.0
+C:
+  HHI_P: 500.0
+  HHI_R: 500.0
+  atomic_radii: 70.0
+  boil: 4300.0
+  covalent_radii: 77.0
+  d_elec: 0.0
+  density: 2.26699995995
+  electronegativity: 2.54999995232
+  f_elec: 0.0
+  first_ionization_energy: 11.2602996826
+  group: 14.0
+  mass: 12.0107002258
+  melt: 3948.15991211
+  name: Carbon
+  p_elec: 2.0
+  period: 2.0
+  production: 200.0
+  s_elec: 4.0
+  scattering_factors: {a1: 2.31, a2: 1.02, a3: 1.5886, a4: 0.865, b1: 20.843901, b2: 10.2075,
+    b3: 0.5687, b4: 51.651199, c: 0.2156}
+  specific_heat: 0.708999991417
+  symbol: C
+  van_der_waals_radii: 170.0
+  volume: 11.7574996948
+  z: 6.0
+Ca:
+  HHI_P: 3900.0
+  HHI_R: 1500.0
+  atomic_radii: 180.0
+  boil: 1757.0
+  covalent_radii: 174.0
+  d_elec: 0.0
+  density: 1.53999996185
+  electronegativity: 1.0
+  f_elec: 0.0
+  first_ionization_energy: 6.11316013336
+  group: 2.0
+  mass: 40.077999115
+  melt: 1112.15002441
+  name: Calcium
+  p_elec: 0.0
+  period: 4.0
+  production: 41500.0
+  s_elec: 2.0
+  scattering_factors: {a1: 8.6266, a2: 7.3873, a3: 1.5899, a4: 1.0211, b1: 10.4421,
+    b2: 0.6599, b3: 85.748398, b4: 178.436996, c: 1.3751}
+  specific_heat: 0.647000014782
+  symbol: Ca
+  van_der_waals_radii: -1.0
+  volume: 39.7599983215
+  z: 20.0
+Cd:
+  HHI_P: 1700.0
+  HHI_R: 1300.0
+  atomic_radii: 155.0
+  boil: 1040.0
+  covalent_radii: 148.0
+  d_elec: 10.0
+  density: 8.68999958038
+  electronegativity: 1.69000005722
+  f_elec: 0.0
+  first_ionization_energy: 8.99380016327
+  group: 12.0
+  mass: 112.411003113
+  melt: 594.33001709
+  name: Cadmium
+  p_elec: 0.0
+  period: 5.0
+  production: 0.158999994397
+  s_elec: 2.0
+  scattering_factors: {a1: 19.221399, a2: 17.6444, a3: 4.461, a4: 1.6029, b1: 0.5946,
+    b2: 6.9089, b3: 24.7008, b4: 87.482498, c: 5.0694}
+  specific_heat: 0.231999993324
+  symbol: Cd
+  van_der_waals_radii: 158.0
+  volume: 21.9599990845
+  z: 48.0
+Ce:
+  HHI_P: 9500.0
+  HHI_R: 3100.0
+  atomic_radii: 185.0
+  boil: 3716.0
+  covalent_radii: -1.0
+  d_elec: 1.0
+  density: 6.76999998093
+  electronegativity: 1.12000000477
+  f_elec: 1.0
+  first_ionization_energy: 5.53870010376
+  group: 0.0
+  mass: 140.115997314
+  melt: 1071.15002441
+  name: Cerium
+  p_elec: 0.0
+  period: 6.0
+  production: 66.5
+  s_elec: 2.0
+  scattering_factors: {a1: 21.167101, a2: 19.769501, a3: 11.8513, a4: 3.33049, b1: 2.81219,
+    b2: 0.226836, b3: 17.608299, b4: 127.112999, c: 1.86264}
+  specific_heat: 0.192000001669
+  symbol: Ce
+  van_der_waals_radii: -1.0
+  volume: 37.2000007629
+  z: 58.0
+Cf:
+  atomic_radii: -1.0
+  boil: 1173.0
+  covalent_radii: -1.0
+  d_elec: 0.0
+  density: 15.1000003815
+  electronegativity: 1.29999995232
+  f_elec: 0.0
+  first_ionization_energy: 6.28170013428
+  group: 0.0
+  mass: 251.0
+  melt: 1925.15002441
+  name: Californium
+  p_elec: 0.0
+  period: 7.0
+  production: 0.0
+  s_elec: 0.0
+  scattering_factors: {a1: 36.918499, a2: 25.199499, a3: 18.331699, a4: 4.24391, b1: 0.437533,
+    b2: 3.00775, b3: 12.4044, b4: 83.788101, c: 13.2674}
+  specific_heat: -1.0
+  symbol: Cf
+  van_der_waals_radii: -1.0
+  volume: -1.0
+  z: 98.0
+Cl:
+  HHI_P: 1500.0
+  HHI_R: 1500.0
+  atomic_radii: 100.0
+  boil: 239.11000061
+  covalent_radii: 99.0
+  d_elec: 0.0
+  density: 0.00321400002576
+  electronegativity: 3.16000008583
+  f_elec: 0.0
+  first_ionization_energy: 12.9675998688
+  group: 17.0
+  mass: 35.452999115
+  melt: 172.309997559
+  name: Chlorine
+  p_elec: 5.0
+  period: 3.0
+  production: 145.0
+  s_elec: 2.0
+  scattering_factors: {a1: 11.4604, a2: 7.1964, a3: 6.2556, a4: 1.6455, b1: 0.0104,
+    b2: 1.1662, b3: 18.5194, b4: 47.7784, c: -9.5574}
+  specific_heat: 0.479000002146
+  symbol: Cl
+  van_der_waals_radii: 175.0
+  volume: 27.8899993896
+  z: 17.0
+Cm:
+  atomic_radii: -1.0
+  boil: 3383.0
+  covalent_radii: -1.0
+  d_elec: 0.0
+  density: 13.5100002289
+  electronegativity: 1.29999995232
+  f_elec: 0.0
+  first_ionization_energy: 5.99149990082
+  group: 0.0
+  mass: 247.0
+  melt: 1340.15002441
+  name: Curium
+  p_elec: 0.0
+  period: 7.0
+  production: 0.0
+  s_elec: 0.0
+  scattering_factors: {a1: 36.6488, a2: 24.409599, a3: 17.399, a4: 4.21665, b1: 0.465154,
+    b2: 3.08997, b3: 13.4346, b4: 88.483398, c: 13.2887}
+  specific_heat: -1.0
+  symbol: Cm
+  van_der_waals_radii: -1.0
+  volume: -1.0
+  z: 96.0
+Cn: {atomic_radii: -1.0, boil: -1.0, covalent_radii: -1.0, d_elec: 0.0, density: -1.0,
+  electronegativity: -1.0, f_elec: 0.0, first_ionization_energy: -1.0, group: 12.0,
+  mass: 285.0, melt: -1.0, name: Copernicium, p_elec: 0.0, period: 7.0, production: 0.0,
+  s_elec: 0.0, specific_heat: -1.0, symbol: Cn, van_der_waals_radii: -1.0, volume: -1.0,
+  z: 112.0}
+Co:
+  HHI_P: 3100.0
+  HHI_R: 2700.0
+  atomic_radii: 135.0
+  boil: 3200.0
+  covalent_radii: 121.0
+  d_elec: 7.0
+  density: 8.85999965668
+  electronegativity: 1.87999999523
+  f_elec: 0.0
+  first_ionization_energy: 7.63980007172
+  group: 9.0
+  mass: 58.9332008362
+  melt: 1768.15002441
+  name: Cobalt
+  p_elec: 0.0
+  period: 4.0
+  production: 25.0
+  s_elec: 2.0
+  scattering_factors: {a1: 12.2841, a2: 7.3409, a3: 4.0034, a4: 2.3488, b1: 4.2791,
+    b2: 0.2784, b3: 13.5359, b4: 71.169197, c: 1.0118}
+  specific_heat: 0.421000003815
+  symbol: Co
+  van_der_waals_radii: 163.0
+  volume: 10.6649999619
+  z: 27.0
+Cr:
+  HHI_P: 3100.0
+  HHI_R: 4100.0
+  atomic_radii: 140.0
+  boil: 2944.0
+  covalent_radii: 127.0
+  d_elec: 5.0
+  density: 7.15000009537
+  electronegativity: 1.65999996662
+  f_elec: 0.0
+  first_ionization_energy: 6.76649999619
+  group: 6.0
+  mass: 51.9961013794
+  melt: 2130.14990234
+  name: Chromium
+  p_elec: 0.0
+  period: 4.0
+  production: 102.0
+  s_elec: 1.0
+  scattering_factors: {a1: 10.6406, a2: 7.3537, a3: 3.324, a4: 1.4922, b1: 6.1038,
+    b2: 0.392, b3: 20.2626, b4: 98.739899, c: 1.1832}
+  specific_heat: 0.449000000954
+  symbol: Cr
+  van_der_waals_radii: -1.0
+  volume: 11.3000001907
+  z: 24.0
+Cs:
+  HHI_P: 6000.0
+  HHI_R: 6000.0
+  atomic_radii: 260.0
+  boil: 944.0
+  covalent_radii: 225.0
+  d_elec: 0.0
+  density: 1.87300002575
+  electronegativity: 0.790000021458
+  f_elec: 0.0
+  first_ionization_energy: 3.8938999176
+  group: 1.0
+  mass: 132.904998779
+  melt: 301.700012207
+  name: Caesium
+  p_elec: 0.0
+  period: 6.0
+  production: 3.0
+  s_elec: 1.0
+  scattering_factors: {a1: 20.3892, a2: 19.106199, a3: 10.662, a4: 1.4953, b1: 3.569,
+    b2: 0.3107, b3: 24.387899, b4: 213.904007, c: 3.3352}
+  specific_heat: 0.241999998689
+  symbol: Cs
+  van_der_waals_radii: -1.0
+  volume: 115.830001831
+  z: 55.0
+Cu:
+  HHI_P: 1600.0
+  HHI_R: 1500.0
+  atomic_radii: 135.0
+  boil: 2835.0
+  covalent_radii: 138.0
+  d_elec: 10.0
+  density: 8.96000003815
+  electronegativity: 1.89999997616
+  f_elec: 0.0
+  first_ionization_energy: 7.72637987137
+  group: 11.0
+  mass: 63.5460014343
+  melt: 1357.75
+  name: Copper
+  p_elec: 0.0
+  period: 4.0
+  production: 60.0
+  s_elec: 1.0
+  scattering_factors: {a1: 13.338, a2: 7.1676, a3: 5.6158, a4: 1.6735, b1: 3.5828,
+    b2: 0.247, b3: 11.3966, b4: 64.812599, c: 1.191}
+  specific_heat: 0.384999990463
+  symbol: Cu
+  van_der_waals_radii: 140.0
+  volume: 11.720000267
+  z: 29.0
+Db: {atomic_radii: -1.0, boil: -1.0, covalent_radii: -1.0, d_elec: 0.0, density: 39.0,
+  electronegativity: -1.0, f_elec: 0.0, first_ionization_energy: -1.0, group: 5.0,
+  mass: 262.0, melt: -1.0, name: Dubnium, p_elec: 0.0, period: 7.0, production: 0.0,
+  s_elec: 0.0, specific_heat: -1.0, symbol: Db, van_der_waals_radii: -1.0, volume: -1.0,
+  z: 105.0}
+Ds: {atomic_radii: -1.0, boil: -1.0, covalent_radii: -1.0, d_elec: 0.0, density: -1.0,
+  electronegativity: -1.0, f_elec: 0.0, first_ionization_energy: -1.0, group: 10.0,
+  mass: 271.0, melt: -1.0, name: Darmstadtium, p_elec: 0.0, period: 7.0, production: 0.0,
+  s_elec: 0.0, specific_heat: -1.0, symbol: Ds, van_der_waals_radii: -1.0, volume: -1.0,
+  z: 110.0}
+Dy:
+  HHI_P: 9500.0
+  HHI_R: 3100.0
+  atomic_radii: 175.0
+  boil: 2840.0
+  covalent_radii: -1.0
+  d_elec: 0.0
+  density: 8.55000019073
+  electronegativity: 1.22000002861
+  f_elec: 10.0
+  first_ionization_energy: 5.9388999939
+  group: 0.0
+  mass: 162.5
+  melt: 1680.15002441
+  name: Dysprosium
+  p_elec: 0.0
+  period: 6.0
+  production: 5.19999980927
+  s_elec: 2.0
+  scattering_factors: {a1: 26.507, a2: 17.6383, a3: 14.5596, a4: 2.96577, b1: 2.1802,
+    b2: 0.202172, b3: 12.1899, b4: 111.874001, c: 4.29728}
+  specific_heat: 0.170000001788
+  symbol: Dy
+  van_der_waals_radii: -1.0
+  volume: 31.486700058
+  z: 66.0
+Er:
+  HHI_P: 9500.0
+  HHI_R: 3100.0
+  atomic_radii: 175.0
+  boil: 3503.0
+  covalent_radii: -1.0
+  d_elec: 0.0
+  density: 9.06599998474
+  electronegativity: 1.24000000954
+  f_elec: 12.0
+  first_ionization_energy: 6.10769987106
+  group: 0.0
+  mass: 167.259002686
+  melt: 1795.15002441
+  name: Erbium
+  p_elec: 0.0
+  period: 6.0
+  production: 3.5
+  s_elec: 2.0
+  scattering_factors: {a1: 27.6563, a2: 16.428499, a3: 14.9779, a4: 2.98233, b1: 2.07356,
+    b2: 0.223545, b3: 11.3604, b4: 105.703003, c: 5.92046}
+  specific_heat: 0.167999997735
+  symbol: Er
+  van_der_waals_radii: -1.0
+  volume: 30.8250007629
+  z: 68.0
+Es: {atomic_radii: -1.0, boil: -1.0, covalent_radii: -1.0, d_elec: 0.0, density: 13.5,
+  electronegativity: 1.29999995232, f_elec: 0.0, first_ionization_energy: 6.42000007629,
+  group: 0.0, mass: 252.0, melt: 1133.15002441, name: Einsteinium, p_elec: 0.0, period: 7.0,
+  production: 0.0, s_elec: 0.0, specific_heat: -1.0, symbol: Es, van_der_waals_radii: -1.0,
+  volume: -1.0, z: 99.0}
+Eu:
+  HHI_P: 9500.0
+  HHI_R: 3100.0
+  atomic_radii: 185.0
+  boil: 1802.0
+  covalent_radii: -1.0
+  d_elec: 0.0
+  density: 5.24300003052
+  electronegativity: 1.20000004768
+  f_elec: 7.0
+  first_ionization_energy: 5.67040014267
+  group: 0.0
+  mass: 151.964004517
+  melt: 1095.15002441
+  name: Europium
+  p_elec: 0.0
+  period: 6.0
+  production: 2.0
+  s_elec: 2.0
+  scattering_factors: {a1: 24.627399, a2: 19.0886, a3: 13.7603, a4: 2.9227, b1: 2.3879,
+    b2: 0.1942, b3: 13.7546, b4: 123.174004, c: 2.5745}
+  specific_heat: 0.181999996305
+  symbol: Eu
+  van_der_waals_radii: -1.0
+  volume: 44.5200004578
+  z: 63.0
+F:
+  HHI_P: 1500.0
+  HHI_R: 1500.0
+  atomic_radii: 50.0
+  boil: 85.0299987793
+  covalent_radii: 71.0
+  d_elec: 0.0
+  density: 0.00169599999208
+  electronegativity: 3.98000001907
+  f_elec: 0.0
+  first_ionization_energy: 17.4228000641
+  group: 17.0
+  mass: 18.9983997345
+  melt: 53.6300010681
+  name: Fluorine
+  p_elec: 5.0
+  period: 2.0
+  production: 585.0
+  s_elec: 4.0
+  scattering_factors: {a1: 3.5392, a2: 2.6412, a3: 1.517, a4: 1.0243, b1: 10.2825,
+    b2: 4.2944, b3: 0.2615, b4: 26.1476, c: 0.2776}
+  specific_heat: 0.824000000954
+  symbol: F
+  van_der_waals_radii: 147.0
+  volume: 19.5699996948
+  z: 9.0
+Fe:
+  HHI_P: 2400.0
+  HHI_R: 1400.0
+  atomic_radii: 140.0
+  boil: 3134.0
+  covalent_radii: 125.0
+  d_elec: 6.0
+  density: 7.87400007248
+  electronegativity: 1.83000004292
+  f_elec: 0.0
+  first_ionization_energy: 7.90240001678
+  group: 8.0
+  mass: 55.8450012207
+  melt: 1808.15002441
+  name: Iron
+  p_elec: 0.0
+  period: 4.0
+  production: 56300.0
+  s_elec: 2.0
+  scattering_factors: {a1: 11.7695, a2: 7.3573, a3: 3.5222, a4: 2.3045, b1: 4.7611,
+    b2: 0.3072, b3: 15.3535, b4: 76.880501, c: 1.0369}
+  specific_heat: 0.449000000954
+  symbol: Fe
+  van_der_waals_radii: -1.0
+  volume: 11.1599998474
+  z: 26.0
+Fm: {atomic_radii: -1.0, boil: -1.0, covalent_radii: -1.0, d_elec: 0.0, density: -1.0,
+  electronegativity: 1.29999995232, f_elec: 0.0, first_ionization_energy: 6.5, group: 0.0,
+  mass: 257.0, melt: -1.0, name: Fermium, p_elec: 0.0, period: 7.0, production: 0.0,
+  s_elec: 0.0, specific_heat: -1.0, symbol: Fm, van_der_waals_radii: -1.0, volume: -1.0,
+  z: 100.0}
+Fr:
+  atomic_radii: -1.0
+  boil: 950.0
+  covalent_radii: -1.0
+  d_elec: 0.0
+  density: 1.87000000477
+  electronegativity: 0.699999988079
+  f_elec: 0.0
+  first_ionization_energy: 4.07270002365
+  group: 1.0
+  mass: 223.0
+  melt: 300.149993896
+  name: Francium
+  p_elec: 0.0
+  period: 7.0
+  production: 0.0010000000475
+  s_elec: 0.0
+  scattering_factors: {a1: 35.929901, a2: 23.054701, a3: 12.1439, a4: 2.11253, b1: 0.646453,
+    b2: 4.17619, b3: 23.1052, b4: 150.645004, c: 13.7247}
+  specific_heat: -1.0
+  symbol: Fr
+  van_der_waals_radii: -1.0
+  volume: -1.0
+  z: 87.0
+Ga:
+  HHI_P: 5500.0
+  HHI_R: 1900.0
+  atomic_radii: 130.0
+  boil: 2477.0
+  covalent_radii: 126.0
+  d_elec: 10.0
+  density: 5.90700006485
+  electronegativity: 1.80999994278
+  f_elec: 0.0
+  first_ionization_energy: 5.99930000305
+  group: 13.0
+  mass: 69.7229995728
+  melt: 302.910003662
+  name: Gallium
+  p_elec: 1.0
+  period: 4.0
+  production: 19.0
+  s_elec: 2.0
+  scattering_factors: {a1: 15.2354, a2: 6.7006, a3: 4.3591, a4: 2.9623, b1: 3.0669,
+    b2: 0.2412, b3: 10.7805, b4: 61.413502, c: 1.7189}
+  specific_heat: 0.370999991894
+  symbol: Ga
+  van_der_waals_radii: 187.0
+  volume: 20.0300006866
+  z: 31.0
+Gd:
+  HHI_P: 9500.0
+  HHI_R: 3100.0
+  atomic_radii: 180.0
+  boil: 3546.0
+  covalent_radii: -1.0
+  d_elec: 1.0
+  density: 7.89499998093
+  electronegativity: 1.20000004768
+  f_elec: 7.0
+  first_ionization_energy: 6.15010023117
+  group: 0.0
+  mass: 157.25
+  melt: 1585.15002441
+  name: Gadolinium
+  p_elec: 0.0
+  period: 6.0
+  production: 6.19999980927
+  s_elec: 2.0
+  scattering_factors: {a1: 25.0709, a2: 19.0798, a3: 13.8518, a4: 3.54545, b1: 2.25341,
+    b2: 0.181951, b3: 12.9331, b4: 101.398003, c: 2.4196}
+  specific_heat: 0.236000001431
+  symbol: Gd
+  van_der_waals_radii: -1.0
+  volume: 32.5299987793
+  z: 64.0
+Ge:
+  HHI_P: 5300.0
+  HHI_R: 1900.0
+  atomic_radii: 125.0
+  boil: 3106.0
+  covalent_radii: 122.0
+  d_elec: 10.0
+  density: 5.32299995422
+  electronegativity: 2.00999999046
+  f_elec: 0.0
+  first_ionization_energy: 7.89940023422
+  group: 14.0
+  mass: 72.6399993896
+  melt: 1211.44995117
+  name: Germanium
+  p_elec: 2.0
+  period: 4.0
+  production: 1.5
+  s_elec: 2.0
+  scattering_factors: {a1: 16.0816, a2: 6.3747, a3: 3.7068, a4: 3.683, b1: 2.8509,
+    b2: 0.2516, b3: 11.4468, b4: 54.762501, c: 2.1313}
+  specific_heat: 0.319999992847
+  symbol: Ge
+  van_der_waals_radii: -1.0
+  volume: 23.8400001526
+  z: 32.0
+H:
+  atomic_radii: 25.0
+  boil: 20.2800006866
+  covalent_radii: 38.0
+  d_elec: 0.0
+  density: 8.98799989955e-05
+  electronegativity: 2.20000004768
+  f_elec: 0.0
+  first_ionization_energy: 13.598400116
+  group: 1.0
+  mass: 1.00794005394
+  melt: 14.1750001907
+  name: Hydrogen
+  p_elec: 0.0
+  period: 1.0
+  production: 1400.0
+  s_elec: 1.0
+  scattering_factors: {a1: 0.489918, a2: 0.262003, a3: 0.196767, a4: 0.049879, b1: 20.6593,
+    b2: 7.74039, b3: 49.551899, b4: 2.20159, c: 0.001305}
+  specific_heat: 14.3039999008
+  symbol: H
+  van_der_waals_radii: 120.0
+  volume: 9.64875030518
+  z: 1.0
+He:
+  HHI_P: 3200.0
+  HHI_R: 3900.0
+  atomic_radii: 31.0
+  boil: 4.21999979019
+  covalent_radii: 32.0
+  d_elec: 0.0
+  density: 0.000178500005859
+  electronegativity: 0.0
+  f_elec: 0.0
+  first_ionization_energy: 24.5874004364
+  group: 18.0
+  mass: 4.00260019302
+  melt: -1.0
+  name: Helium
+  p_elec: 0.0
+  period: 1.0
+  production: 0.00800000037998
+  s_elec: 2.0
+  scattering_factors: {a1: 0.8734, a2: 0.6309, a3: 0.3112, a4: 0.178, b1: 9.1037,
+    b2: 3.3568, b3: 22.927601, b4: 0.9821, c: 0.0064}
+  specific_heat: 5.19299983978
+  symbol: He
+  van_der_waals_radii: 140.0
+  volume: 15.5200004578
+  z: 2.0
+Hf:
+  HHI_P: 3400.0
+  HHI_R: 2600.0
+  atomic_radii: 155.0
+  boil: 4876.0
+  covalent_radii: 150.0
+  d_elec: 2.0
+  density: 13.3100004196
+  electronegativity: 1.29999995232
+  f_elec: 14.0
+  first_ionization_energy: 6.82506990433
+  group: 4.0
+  mass: 178.490005493
+  melt: 2500.14990234
+  name: Hafnium
+  p_elec: 0.0
+  period: 6.0
+  production: 3.0
+  s_elec: 2.0
+  scattering_factors: {a1: 29.143999, a2: 15.1726, a3: 14.7586, a4: 4.30013, b1: 1.83262,
+    b2: 9.5999, b3: 0.275116, b4: 72.028999, c: 8.58154}
+  specific_heat: 0.143999993801
+  symbol: Hf
+  van_der_waals_radii: -1.0
+  volume: 22.3050003052
+  z: 72.0
+Hg:
+  HHI_P: 5500.0
+  HHI_R: 3100.0
+  atomic_radii: 150.0
+  boil: 630.0
+  covalent_radii: 149.0
+  d_elec: 10.0
+  density: 13.5335998535
+  electronegativity: 2.0
+  f_elec: 14.0
+  first_ionization_energy: 10.4375
+  group: 12.0
+  mass: 200.589996338
+  melt: 234.429992676
+  name: Mercury
+  p_elec: 0.0
+  period: 6.0
+  production: 0.0850000008941
+  s_elec: 2.0
+  scattering_factors: {a1: 20.680901, a2: 19.0417, a3: 21.657499, a4: 5.9676, b1: 0.545,
+    b2: 8.4484, b3: 1.5729, b4: 38.3246, c: 12.6089}
+  specific_heat: 0.140000000596
+  symbol: Hg
+  van_der_waals_radii: 155.0
+  volume: 32.7167015076
+  z: 80.0
+Ho:
+  HHI_P: 9500.0
+  HHI_R: 3100.0
+  atomic_radii: 175.0
+  boil: 2993.0
+  covalent_radii: -1.0
+  d_elec: 0.0
+  density: 8.79500007629
+  electronegativity: 1.23000001907
+  f_elec: 11.0
+  first_ionization_energy: 6.02150011063
+  group: 0.0
+  mass: 164.929992676
+  melt: 1743.15002441
+  name: Holmium
+  p_elec: 0.0
+  period: 6.0
+  production: 1.29999995232
+  s_elec: 2.0
+  scattering_factors: {a1: 26.9049, a2: 17.294001, a3: 14.5583, a4: 3.63837, b1: 2.07051,
+    b2: 0.19794, b3: 11.4407, b4: 92.656601, c: 4.56796}
+  specific_heat: 0.165000006557
+  symbol: Ho
+  van_der_waals_radii: -1.0
+  volume: 31.0333003998
+  z: 67.0
+Hs: {atomic_radii: -1.0, boil: -1.0, covalent_radii: -1.0, d_elec: 0.0, density: 41.0,
+  electronegativity: -1.0, f_elec: 0.0, first_ionization_energy: -1.0, group: 8.0,
+  mass: 267.0, melt: -1.0, name: Hassium, p_elec: 0.0, period: 7.0, production: 0.0,
+  s_elec: 0.0, specific_heat: -1.0, symbol: Hs, van_der_waals_radii: -1.0, volume: -1.0,
+  z: 108.0}
+I:
+  HHI_P: 4900.0
+  HHI_R: 4800.0
+  atomic_radii: 140.0
+  boil: 457.399993896
+  covalent_radii: 133.0
+  d_elec: 10.0
+  density: 4.92999982834
+  electronegativity: 2.66000008583
+  f_elec: 0.0
+  first_ionization_energy: 10.4512996674
+  group: 17.0
+  mass: 126.903999329
+  melt: 386.649993896
+  name: Iodine
+  p_elec: 5.0
+  period: 5.0
+  production: 0.449999988079
+  s_elec: 2.0
+  scattering_factors: {a1: 20.1472, a2: 18.9949, a3: 7.5138, a4: 2.2735, b1: 4.347,
+    b2: 0.3814, b3: 27.766001, b4: 66.877602, c: 4.0712}
+  specific_heat: 0.21400000155
+  symbol: I
+  van_der_waals_radii: 198.0
+  volume: 44.0999984741
+  z: 53.0
+In:
+  HHI_P: 3300.0
+  HHI_R: 2000.0
+  atomic_radii: 155.0
+  boil: 2345.0
+  covalent_radii: 144.0
+  d_elec: 10.0
+  density: 7.30999994278
+  electronegativity: 1.77999997139
+  f_elec: 0.0
+  first_ionization_energy: 5.78635978699
+  group: 13.0
+  mass: 114.818000793
+  melt: 429.910003662
+  name: Indium
+  p_elec: 1.0
+  period: 5.0
+  production: 0.25
+  s_elec: 2.0
+  scattering_factors: {a1: 19.162399, a2: 18.559601, a3: 4.2948, a4: 2.0396, b1: 0.5476,
+    b2: 6.3776, b3: 25.849899, b4: 92.802902, c: 4.9391}
+  specific_heat: 0.232999995351
+  symbol: In
+  van_der_waals_radii: 193.0
+  volume: 26.8500003815
+  z: 49.0
+Ir:
+  HHI_P: 5500.0
+  HHI_R: 9100.0
+  atomic_radii: 135.0
+  boil: 4701.0
+  covalent_radii: 137.0
+  d_elec: 7.0
+  density: 22.5599994659
+  electronegativity: 2.20000004768
+  f_elec: 14.0
+  first_ionization_energy: 8.96700000763
+  group: 9.0
+  mass: 192.216995239
+  melt: 2716.14990234
+  name: Iridium
+  p_elec: 0.0
+  period: 6.0
+  production: 0.0010000000475
+  s_elec: 2.0
+  scattering_factors: {a1: 27.304899, a2: 16.729601, a3: 15.6115, a4: 5.83377, b1: 1.59279,
+    b2: 8.86553, b3: 0.417916, b4: 45.001099, c: 11.4722}
+  specific_heat: 0.130999997258
+  symbol: Ir
+  van_der_waals_radii: -1.0
+  volume: 14.4099998474
+  z: 77.0
+K:
+  HHI_P: 1700.0
+  HHI_R: 7200.0
+  atomic_radii: 220.0
+  boil: 1032.0
+  covalent_radii: 196.0
+  d_elec: 0.0
+  density: 0.861999988556
+  electronegativity: 0.819999992847
+  f_elec: 0.0
+  first_ionization_energy: 4.34066009521
+  group: 1.0
+  mass: 39.0983009338
+  melt: 336.5
+  name: Potassium
+  p_elec: 0.0
+  period: 4.0
+  production: 20900.0
+  s_elec: 1.0
+  scattering_factors: {a1: 8.2186, a2: 7.4398, a3: 1.0519, a4: 0.8659, b1: 12.7949,
+    b2: 0.7748, b3: 213.186996, b4: 41.684101, c: 1.4228}
+  specific_heat: 0.757000029087
+  symbol: K
+  van_der_waals_radii: 275.0
+  volume: 71.3199996948
+  z: 19.0
+Kr:
+  atomic_radii: 88.0
+  boil: 119.930000305
+  covalent_radii: 110.0
+  d_elec: 0.0
+  density: 0.00373300001957
+  electronegativity: 3.0
+  f_elec: 0.0
+  first_ionization_energy: 13.9996004105
+  group: 18.0
+  mass: 83.797996521
+  melt: 115.930000305
+  name: Krypton
+  p_elec: 0.0
+  period: 4.0
+  production: 0.0010000000475
+  s_elec: 0.0
+  scattering_factors: {a1: 17.355499, a2: 6.7286, a3: 5.5493, a4: 3.5375, b1: 1.9384,
+    b2: 16.5623, b3: 0.2261, b4: 39.397202, c: 2.825}
+  specific_heat: 0.247999995947
+  symbol: Kr
+  van_der_waals_radii: 202.0
+  volume: 42.3450012207
+  z: 36.0
+La:
+  HHI_P: 9500.0
+  HHI_R: 3100.0
+  atomic_radii: 195.0
+  boil: 3737.0
+  covalent_radii: 169.0
+  d_elec: 1.0
+  density: 6.14499998093
+  electronegativity: 1.10000002384
+  f_elec: 0.0
+  first_ionization_energy: 5.57690000534
+  group: 0.0
+  mass: 138.904998779
+  melt: 1193.15002441
+  name: Lanthanum
+  p_elec: 0.0
+  period: 6.0
+  production: 39.0
+  s_elec: 2.0
+  scattering_factors: {a1: 20.577999, a2: 19.599001, a3: 11.3727, a4: 3.28719, b1: 2.94817,
+    b2: 0.244475, b3: 18.7726, b4: 133.123993, c: 2.14678}
+  specific_heat: 0.194999992847
+  symbol: La
+  van_der_waals_radii: -1.0
+  volume: 36.6800003052
+  z: 57.0
+Li:
+  HHI_P: 2900.0
+  HHI_R: 4200.0
+  atomic_radii: 145.0
+  boil: 1615.0
+  covalent_radii: 134.0
+  d_elec: 0.0
+  density: 0.533999979496
+  electronegativity: 0.980000019073
+  f_elec: 0.0
+  first_ionization_energy: 5.39171981812
+  group: 1.0
+  mass: 6.94099998474
+  melt: 453.850006104
+  name: Lithium
+  p_elec: 0.0
+  period: 2.0
+  production: 20.0
+  s_elec: 3.0
+  scattering_factors: {a1: 1.1282, a2: 0.7508, a3: 0.6175, a4: 0.4653, b1: 3.9546,
+    b2: 1.0524, b3: 85.390503, b4: 168.261002, c: 0.0377}
+  specific_heat: 3.58200001717
+  symbol: Li
+  van_der_waals_radii: 182.0
+  volume: 18.3299999237
+  z: 3.0
+Lr: {atomic_radii: -1.0, boil: -1.0, covalent_radii: -1.0, d_elec: 0.0, density: -1.0,
+  electronegativity: 1.29999995232, f_elec: 0.0, first_ionization_energy: 4.90000009537,
+  group: 3.0, mass: 262.0, melt: -1.0, name: Lawrencium, p_elec: 0.0, period: 7.0,
+  production: 0.0, s_elec: 0.0, specific_heat: -1.0, symbol: Lr, van_der_waals_radii: -1.0,
+  volume: -1.0, z: 103.0}
+Lu:
+  HHI_P: 9500.0
+  HHI_R: 3100.0
+  atomic_radii: 175.0
+  boil: 3675.0
+  covalent_radii: 160.0
+  d_elec: 1.0
+  density: 9.84000015259
+  electronegativity: 1.26999998093
+  f_elec: 14.0
+  first_ionization_energy: 5.42589998245
+  group: 3.0
+  mass: 174.966995239
+  melt: 1936.15002441
+  name: Lutetium
+  p_elec: 0.0
+  period: 0.0
+  production: 0.800000011921
+  s_elec: 2.0
+  scattering_factors: {a1: 28.947599, a2: 15.2208, a3: 15.1, a4: 3.71601, b1: 1.90182,
+    b2: 9.98519, b3: 0.261033, b4: 84.329803, c: 7.97628}
+  specific_heat: 0.153999999166
+  symbol: Lu
+  van_der_waals_radii: -1.0
+  volume: 29.3500003815
+  z: 71.0
+Md: {atomic_radii: -1.0, boil: -1.0, covalent_radii: -1.0, d_elec: 0.0, density: -1.0,
+  electronegativity: 1.29999995232, f_elec: 0.0, first_ionization_energy: 6.57999992371,
+  group: 0.0, mass: 258.0, melt: -1.0, name: Mendelevium, p_elec: 0.0, period: 7.0,
+  production: 0.0, s_elec: 0.0, specific_heat: -1.0, symbol: Md, van_der_waals_radii: -1.0,
+  volume: -1.0, z: 101.0}
+Mg:
+  HHI_P: 5300.0
+  HHI_R: 500.0
+  atomic_radii: 150.0
+  boil: 1363.0
+  covalent_radii: 130.0
+  d_elec: 0.0
+  density: 1.73800003529
+  electronegativity: 1.30999994278
+  f_elec: 0.0
+  first_ionization_energy: 7.64624023438
+  group: 2.0
+  mass: 24.3050003052
+  melt: 923.150024414
+  name: Magnesium
+  p_elec: 0.0
+  period: 3.0
+  production: 23300.0
+  s_elec: 2.0
+  scattering_factors: {a1: 5.4204, a2: 2.1735, a3: 1.2269, a4: 2.3073, b1: 2.8275,
+    b2: 79.261101, b3: 0.3808, b4: 7.1937, c: 0.8584}
+  specific_heat: 1.02300000191
+  symbol: Mg
+  van_der_waals_radii: 173.0
+  volume: 22.8950004578
+  z: 12.0
+Mn:
+  HHI_P: 1600.0
+  HHI_R: 1800.0
+  atomic_radii: 140.0
+  boil: 2334.0
+  covalent_radii: 139.0
+  d_elec: 5.0
+  density: 7.44000005722
+  electronegativity: 1.54999995232
+  f_elec: 0.0
+  first_ionization_energy: 7.43402004242
+  group: 7.0
+  mass: 54.9379997253
+  melt: 1519.15002441
+  name: Manganese
+  p_elec: 0.0
+  period: 4.0
+  production: 950.0
+  s_elec: 2.0
+  scattering_factors: {a1: 11.2819, a2: 7.3573, a3: 3.0193, a4: 2.2441, b1: 5.3409,
+    b2: 0.3432, b3: 17.867399, b4: 83.754303, c: 1.0896}
+  specific_heat: 0.479000002146
+  symbol: Mn
+  van_der_waals_radii: -1.0
+  volume: 10.6428003311
+  z: 25.0
+Mo:
+  HHI_P: 2400.0
+  HHI_R: 5300.0
+  atomic_radii: 145.0
+  boil: 4912.0
+  covalent_radii: 145.0
+  d_elec: 5.0
+  density: 10.220000267
+  electronegativity: 2.16000008583
+  f_elec: 0.0
+  first_ionization_energy: 7.09243011475
+  group: 6.0
+  mass: 95.9599990845
+  melt: 2890.14990234
+  name: Molybdenum
+  p_elec: 0.0
+  period: 5.0
+  production: 1.20000004768
+  s_elec: 1.0
+  scattering_factors: {a1: 3.7025, a2: 17.2356, a3: 12.8876, a4: 3.7429, b1: 0.2772,
+    b2: 1.0958, b3: 11.004, b4: 61.658401, c: 4.3875}
+  specific_heat: 0.250999987125
+  symbol: Mo
+  van_der_waals_radii: -1.0
+  volume: 15.8000001907
+  z: 42.0
+Mt: {atomic_radii: -1.0, boil: -1.0, covalent_radii: -1.0, d_elec: 0.0, density: 35.0,
+  electronegativity: -1.0, f_elec: 0.0, first_ionization_energy: -1.0, group: 9.0,
+  mass: 268.0, melt: -1.0, name: Meitnerium, p_elec: 0.0, period: 7.0, production: 0.0,
+  s_elec: 0.0, specific_heat: -1.0, symbol: Mt, van_der_waals_radii: -1.0, volume: -1.0,
+  z: 109.0}
+N:
+  HHI_P: 1300.0
+  HHI_R: 500.0
+  atomic_radii: 65.0
+  boil: 77.3600006104
+  covalent_radii: 75.0
+  d_elec: 0.0
+  density: 0.00125059997663
+  electronegativity: 3.03999996185
+  f_elec: 0.0
+  first_ionization_energy: 14.5340995789
+  group: 15.0
+  mass: 14.0066995621
+  melt: 63.2900009155
+  name: Nitrogen
+  p_elec: 3.0
+  period: 2.0
+  production: 19.0
+  s_elec: 4.0
+  scattering_factors: {a1: 12.2126, a2: 3.1322, a3: 2.0125, a4: 1.1663, b1: 0.0057,
+    b2: 9.8933, b3: 28.997499, b4: 0.5826, c: -11.529}
+  specific_heat: 1.03999996185
+  symbol: N
+  van_der_waals_radii: 155.0
+  volume: 17.4724998474
+  z: 7.0
+Na:
+  HHI_P: 1100.0
+  HHI_R: 500.0
+  atomic_radii: 180.0
+  boil: 1156.0
+  covalent_radii: 154.0
+  d_elec: 0.0
+  density: 0.971000015736
+  electronegativity: 0.930000007153
+  f_elec: 0.0
+  first_ionization_energy: 5.13908004761
+  group: 1.0
+  mass: 22.9897994995
+  melt: 371.149993896
+  name: Sodium
+  p_elec: 0.0
+  period: 3.0
+  production: 23600.0
+  s_elec: 1.0
+  scattering_factors: {a1: 4.7626, a2: 3.1736, a3: 1.2674, a4: 1.1128, b1: 3.285,
+    b2: 8.8422, b3: 0.3136, b4: 129.423996, c: 0.676}
+  specific_heat: 1.22800004482
+  symbol: Na
+  van_der_waals_radii: 227.0
+  volume: 34.1199989319
+  z: 11.0
+Nb:
+  HHI_P: 8500.0
+  HHI_R: 8800.0
+  atomic_radii: 145.0
+  boil: 5017.0
+  covalent_radii: 137.0
+  d_elec: 4.0
+  density: 8.56999969482
+  electronegativity: 1.60000002384
+  f_elec: 0.0
+  first_ionization_energy: 6.75885009766
+  group: 5.0
+  mass: 92.9064025879
+  melt: 2741.14990234
+  name: Niobium
+  p_elec: 0.0
+  period: 5.0
+  production: 20.0
+  s_elec: 1.0
+  scattering_factors: {a1: 17.614201, a2: 12.0144, a3: 4.04183, a4: 3.53346, b1: 1.18865,
+    b2: 11.766, b3: 0.204785, b4: 69.7957, c: 3.75591}
+  specific_heat: 0.264999985695
+  symbol: Nb
+  van_der_waals_radii: -1.0
+  volume: 18.2600002289
+  z: 41.0
+Nd:
+  HHI_P: 9500.0
+  HHI_R: 3100.0
+  atomic_radii: 185.0
+  boil: 3347.0
+  covalent_radii: -1.0
+  d_elec: 0.0
+  density: 7.00699996948
+  electronegativity: 1.13999998569
+  f_elec: 4.0
+  first_ionization_energy: 5.52500009537
+  group: 0.0
+  mass: 144.242004395
+  melt: 1289.15002441
+  name: Neodymium
+  p_elec: 0.0
+  period: 6.0
+  production: 41.5
+  s_elec: 2.0
+  scattering_factors: {a1: 22.6845, a2: 19.6847, a3: 12.774, a4: 2.85137, b1: 2.66248,
+    b2: 0.210628, b3: 15.885, b4: 137.903, c: 1.98486}
+  specific_heat: 0.189999997616
+  symbol: Nd
+  van_der_waals_radii: -1.0
+  volume: 35.2599983215
+  z: 60.0
+Ne:
+  atomic_radii: 38.0
+  boil: 27.0699996948
+  covalent_radii: 69.0
+  d_elec: 0.0
+  density: 0.000899899983779
+  electronegativity: 0.0
+  f_elec: 0.0
+  first_ionization_energy: 21.5645999908
+  group: 18.0
+  mass: 20.1797008514
+  melt: 24.702999115
+  name: Neon
+  p_elec: 0.0
+  period: 2.0
+  production: 0.00499999988824
+  s_elec: 0.0
+  scattering_factors: {a1: 3.9553, a2: 3.1125, a3: 1.4546, a4: 1.1251, b1: 8.4042,
+    b2: 3.4262, b3: 0.2306, b4: 21.718399, c: 0.3515}
+  specific_heat: 1.02999997139
+  symbol: Ne
+  van_der_waals_radii: 154.0
+  volume: 16.3199996948
+  z: 10.0
+Ni:
+  HHI_P: 1000.0
+  HHI_R: 1500.0
+  atomic_radii: 135.0
+  boil: 3186.0
+  covalent_radii: 126.0
+  d_elec: 8.0
+  density: 8.91199970245
+  electronegativity: 1.90999996662
+  f_elec: 0.0
+  first_ionization_energy: 7.88100004196
+  group: 10.0
+  mass: 58.6934013367
+  melt: 1726.15002441
+  name: Nickel
+  p_elec: 0.0
+  period: 4.0
+  production: 84.0
+  s_elec: 2.0
+  scattering_factors: {a1: 12.8376, a2: 7.292, a3: 4.4438, a4: 2.38, b1: 3.8785, b2: 0.2565,
+    b3: 12.1763, b4: 66.342102, c: 1.0341}
+  specific_heat: 0.444000005722
+  symbol: Ni
+  van_der_waals_radii: -1.0
+  volume: 10.720000267
+  z: 28.0
+'No': {atomic_radii: -1.0, boil: -1.0, covalent_radii: -1.0, d_elec: 0.0, density: -1.0,
+  electronegativity: 1.29999995232, f_elec: 0.0, first_ionization_energy: 6.65000009537,
+  group: 0.0, mass: 259.0, melt: -1.0, name: Nobelium, p_elec: 0.0, period: 7.0, production: 0.0,
+  s_elec: 0.0, specific_heat: -1.0, symbol: 'No', van_der_waals_radii: -1.0, volume: -1.0,
+  z: 102.0}
+Np:
+  atomic_radii: 175.0
+  boil: 4273.0
+  covalent_radii: -1.0
+  d_elec: 1.0
+  density: 20.4500007629
+  electronegativity: 1.36000001431
+  f_elec: 4.0
+  first_ionization_energy: 6.26569986343
+  group: 0.0
+  mass: 237.0
+  melt: 913.150024414
+  name: Neptunium
+  p_elec: 0.0
+  period: 7.0
+  production: 0.0010000000475
+  s_elec: 2.0
+  scattering_factors: {a1: 36.187401, a2: 23.596399, a3: 15.6402, a4: 4.1855, b1: 0.511929,
+    b2: 3.25396, b3: 15.3622, b4: 97.490799, c: 13.3573}
+  specific_heat: -1.0
+  symbol: Np
+  van_der_waals_radii: -1.0
+  volume: 18.4587001801
+  z: 93.0
+O:
+  HHI_P: 500.0
+  HHI_R: 500.0
+  atomic_radii: 60.0
+  boil: 90.1999969482
+  covalent_radii: 73.0
+  d_elec: 0.0
+  density: 0.00142900005449
+  electronegativity: 3.44000005722
+  f_elec: 0.0
+  first_ionization_energy: 13.6181001663
+  group: 16.0
+  mass: 15.9994001389
+  melt: 50.5
+  name: Oxygen
+  p_elec: 4.0
+  period: 2.0
+  production: 461000.0
+  s_elec: 4.0
+  scattering_factors: {a1: 3.0485, a2: 2.2868, a3: 1.5463, a4: 0.867, b1: 13.2771,
+    b2: 5.7011, b3: 0.3239, b4: 32.908901, c: 0.2508}
+  specific_heat: 0.917999982834
+  symbol: O
+  van_der_waals_radii: 152.0
+  volume: 9.55875015259
+  z: 8.0
+Os:
+  HHI_P: 5500.0
+  HHI_R: 9100.0
+  atomic_radii: 130.0
+  boil: 5285.0
+  covalent_radii: 128.0
+  d_elec: 6.0
+  density: 22.6100006104
+  electronegativity: 2.20000004768
+  f_elec: 14.0
+  first_ionization_energy: 8.43819999695
+  group: 8.0
+  mass: 190.229995728
+  melt: 3300.14990234
+  name: Osmium
+  p_elec: 0.0
+  period: 6.0
+  production: 0.00200000009499
+  s_elec: 2.0
+  scattering_factors: {a1: 28.1894, a2: 16.155001, a3: 14.9305, a4: 5.67589, b1: 1.62903,
+    b2: 8.97948, b3: 0.382661, b4: 48.1647, c: 11.0005}
+  specific_heat: 0.129999995232
+  symbol: Os
+  van_der_waals_radii: -1.0
+  volume: 14.2650003433
+  z: 76.0
+P:
+  HHI_P: 2000.0
+  HHI_R: 5100.0
+  atomic_radii: 100.0
+  boil: 553.0
+  covalent_radii: 106.0
+  d_elec: 0.0
+  density: 1.82000005245
+  electronegativity: 2.19000005722
+  f_elec: 0.0
+  first_ionization_energy: 10.486700058
+  group: 15.0
+  mass: 30.9738006592
+  melt: 317.25
+  name: Phosphorus
+  p_elec: 3.0
+  period: 3.0
+  production: 1050.0
+  s_elec: 2.0
+  scattering_factors: {a1: 6.4345, a2: 4.1791, a3: 1.78, a4: 1.4908, b1: 1.9067, b2: 27.157,
+    b3: 0.526, b4: 68.164497, c: 1.1149}
+  specific_heat: 0.768999993801
+  symbol: P
+  van_der_waals_radii: 180.0
+  volume: 23.8129005432
+  z: 15.0
+Pa:
+  atomic_radii: 180.0
+  boil: 4300.0
+  covalent_radii: -1.0
+  d_elec: 1.0
+  density: 15.3699998856
+  electronegativity: 1.5
+  f_elec: 2.0
+  first_ionization_energy: 5.88999986649
+  group: 0.0
+  mass: 231.035995483
+  melt: 1873.15002441
+  name: Protactinium
+  p_elec: 0.0
+  period: 7.0
+  production: 0.0010000000475
+  s_elec: 2.0
+  scattering_factors: {a1: 35.884701, a2: 23.2948, a3: 14.1891, a4: 4.17287, b1: 0.547751,
+    b2: 3.41519, b3: 16.9235, b4: 105.250999, c: 13.4287}
+  specific_heat: -1.0
+  symbol: Pa
+  van_der_waals_radii: -1.0
+  volume: 24.7399997711
+  z: 91.0
+Pb:
+  HHI_P: 2700.0
+  HHI_R: 1800.0
+  atomic_radii: 180.0
+  boil: 2022.0
+  covalent_radii: 147.0
+  d_elec: 10.0
+  density: 11.3420000076
+  electronegativity: 2.32999992371
+  f_elec: 14.0
+  first_ionization_energy: 7.416659832
+  group: 14.0
+  mass: 207.199996948
+  melt: 600.75
+  name: Lead
+  p_elec: 2.0
+  period: 6.0
+  production: 14.0
+  s_elec: 2.0
+  scattering_factors: {a1: 31.061701, a2: 13.0637, a3: 18.441999, a4: 5.9696, b1: 0.6902,
+    b2: 2.3576, b3: 8.618, b4: 47.2579, c: 13.4118}
+  specific_heat: 0.128999993205
+  symbol: Pb
+  van_der_waals_radii: 202.0
+  volume: 31.1599998474
+  z: 82.0
+Pd:
+  HHI_P: 3200.0
+  HHI_R: 8000.0
+  atomic_radii: 140.0
+  boil: 3236.0
+  covalent_radii: 131.0
+  d_elec: 10.0
+  density: 12.0200004578
+  electronegativity: 2.20000004768
+  f_elec: 0.0
+  first_ionization_energy: 8.33689975739
+  group: 10.0
+  mass: 106.419998169
+  melt: 1825.15002441
+  name: Palladium
+  p_elec: 0.0
+  period: 5.0
+  production: 0.0149999996647
+  s_elec: 0.0
+  scattering_factors: {a1: 19.3319, a2: 15.5017, a3: 5.29537, a4: 0.605844, b1: 0.698655,
+    b2: 7.98929, b3: 25.2052, b4: 76.898598, c: 5.26593}
+  specific_heat: 0.244000002742
+  symbol: Pd
+  van_der_waals_radii: 163.0
+  volume: 15.1800003052
+  z: 46.0
+Pm:
+  HHI_P: 9500.0
+  HHI_R: 3100.0
+  atomic_radii: 185.0
+  boil: 3273.0
+  covalent_radii: -1.0
+  d_elec: 0.0
+  density: 7.26000022888
+  electronegativity: 1.12999999523
+  f_elec: 5.0
+  first_ionization_energy: 5.58199977875
+  group: 0.0
+  mass: 145.0
+  melt: 1204.15002441
+  name: Promethium
+  p_elec: 0.0
+  period: 6.0
+  production: 0.0010000000475
+  s_elec: 2.0
+  scattering_factors: {a1: 23.3405, a2: 19.609501, a3: 13.1235, a4: 2.87516, b1: 2.5627,
+    b2: 0.202088, b3: 15.1009, b4: 132.720993, c: 2.02876}
+  specific_heat: -1.0
+  symbol: Pm
+  van_der_waals_radii: -1.0
+  volume: 34.4324989319
+  z: 61.0
+Po:
+  atomic_radii: 190.0
+  boil: 1235.0
+  covalent_radii: -1.0
+  d_elec: 10.0
+  density: 9.31999969482
+  electronegativity: 2.0
+  f_elec: 14.0
+  first_ionization_energy: 8.41699981689
+  group: 16.0
+  mass: 210.0
+  melt: 527.150024414
+  name: Polonium
+  p_elec: 4.0
+  period: 6.0
+  production: 0.0010000000475
+  s_elec: 2.0
+  scattering_factors: {a1: 34.6726, a2: 15.4733, a3: 13.1138, a4: 7.0258, b1: 0.700999,
+    b2: 3.55078, b3: 9.55642, b4: 47.004501, c: 13.677}
+  specific_heat: -1.0
+  symbol: Po
+  van_der_waals_radii: -1.0
+  volume: -1.0
+  z: 84.0
+Pr:
+  HHI_P: 9500.0
+  HHI_R: 3100.0
+  atomic_radii: 185.0
+  boil: 3793.0
+  covalent_radii: -1.0
+  d_elec: 0.0
+  density: 6.77299976349
+  electronegativity: 1.12999999523
+  f_elec: 3.0
+  first_ionization_energy: 5.47300004959
+  group: 0.0
+  mass: 140.908004761
+  melt: 1204.15002441
+  name: Praseodymium
+  p_elec: 0.0
+  period: 6.0
+  production: 9.19999980927
+  s_elec: 2.0
+  scattering_factors: {a1: 22.044001, a2: 19.669701, a3: 12.3856, a4: 2.82428, b1: 2.77393,
+    b2: 0.222087, b3: 16.766899, b4: 143.643997, c: 2.0583}
+  specific_heat: 0.193000003695
+  symbol: Pr
+  van_der_waals_radii: -1.0
+  volume: 36.2200012207
+  z: 59.0
+Pt:
+  HHI_P: 5500.0
+  HHI_R: 9100.0
+  atomic_radii: 135.0
+  boil: 4098.0
+  covalent_radii: 128.0
+  d_elec: 9.0
+  density: 21.4599990845
+  electronegativity: 2.27999997139
+  f_elec: 14.0
+  first_ionization_energy: 8.95870018005
+  group: 10.0
+  mass: 195.083999634
+  melt: 2045.15002441
+  name: Platinum
+  p_elec: 0.0
+  period: 6.0
+  production: 0.00499999988824
+  s_elec: 1.0
+  scattering_factors: {a1: 27.005899, a2: 17.763901, a3: 15.7131, a4: 5.7837, b1: 1.51293,
+    b2: 8.81174, b3: 0.424593, b4: 38.610298, c: 11.6883}
+  specific_heat: 0.133000001311
+  symbol: Pt
+  van_der_waals_radii: 175.0
+  volume: 15.5399999619
+  z: 78.0
+Pu:
+  atomic_radii: 175.0
+  boil: 3501.0
+  covalent_radii: -1.0
+  d_elec: 0.0
+  density: 19.8400001526
+  electronegativity: 1.27999997139
+  f_elec: 6.0
+  first_ionization_energy: 6.02619981766
+  group: 0.0
+  mass: 244.0
+  melt: 913.150024414
+  name: Plutonium
+  p_elec: 0.0
+  period: 7.0
+  production: 0.0010000000475
+  s_elec: 2.0
+  scattering_factors: {a1: 36.525398, a2: 23.8083, a3: 16.7707, a4: 3.47947, b1: 0.499384,
+    b2: 3.26371, b3: 14.9455, b4: 105.980003, c: 13.3812}
+  specific_heat: -1.0
+  symbol: Pu
+  van_der_waals_radii: -1.0
+  volume: 20.7912998199
+  z: 94.0
+Ra:
+  atomic_radii: 215.0
+  boil: 2010.0
+  covalent_radii: -1.0
+  d_elec: 0.0
+  density: 5.5
+  electronegativity: 0.899999976158
+  f_elec: 0.0
+  first_ionization_energy: 5.27839994431
+  group: 2.0
+  mass: 226.0
+  melt: 973.150024414
+  name: Radium
+  p_elec: 0.0
+  period: 7.0
+  production: 0.0010000000475
+  s_elec: 2.0
+  scattering_factors: {a1: 35.763, a2: 22.906401, a3: 12.4739, a4: 3.21097, b1: 0.616341,
+    b2: 3.87135, b3: 19.988701, b4: 142.324997, c: 13.6211}
+  specific_heat: -1.0
+  symbol: Ra
+  van_der_waals_radii: -1.0
+  volume: -1.0
+  z: 88.0
+Rb:
+  HHI_P: 6000.0
+  HHI_R: 6000.0
+  atomic_radii: 235.0
+  boil: 961.0
+  covalent_radii: 211.0
+  d_elec: 0.0
+  density: 1.53199994564
+  electronegativity: 0.819999992847
+  f_elec: 0.0
+  first_ionization_energy: 4.17713022232
+  group: 1.0
+  mass: 85.4677963257
+  melt: 312.790008545
+  name: Rubidium
+  p_elec: 0.0
+  period: 5.0
+  production: 90.0
+  s_elec: 1.0
+  scattering_factors: {a1: 17.1784, a2: 9.6435, a3: 5.1399, a4: 1.5292, b1: 1.7888,
+    b2: 17.3151, b3: 0.2748, b4: 164.934006, c: 3.4873}
+  specific_heat: 0.363000005484
+  symbol: Rb
+  van_der_waals_radii: -1.0
+  volume: 89.0999984741
+  z: 37.0
+Re:
+  HHI_P: 3300.0
+  HHI_R: 3300.0
+  atomic_radii: 135.0
+  boil: 5869.0
+  covalent_radii: 159.0
+  d_elec: 5.0
+  density: 21.0200004578
+  electronegativity: 1.89999997616
+  f_elec: 14.0
+  first_ionization_energy: 7.83349990845
+  group: 7.0
+  mass: 186.207000732
+  melt: 3453.14990234
+  name: Rhenium
+  p_elec: 0.0
+  period: 6.0
+  production: 0.0010000000475
+  s_elec: 2.0
+  scattering_factors: {a1: 28.7621, a2: 15.7189, a3: 14.5564, a4: 5.44174, b1: 1.67191,
+    b2: 9.09227, b3: 0.3505, b4: 52.086102, c: 10.472}
+  specific_heat: 0.136999994516
+  symbol: Re
+  van_der_waals_radii: -1.0
+  volume: 14.8699998856
+  z: 75.0
+Rf: {atomic_radii: -1.0, boil: -1.0, covalent_radii: -1.0, d_elec: 0.0, density: 18.1000003815,
+  electronegativity: -1.0, f_elec: 0.0, first_ionization_energy: -1.0, group: 4.0,
+  mass: 261.0, melt: -1.0, name: Rutherfordium, p_elec: 0.0, period: 7.0, production: 0.0,
+  s_elec: 0.0, specific_heat: -1.0, symbol: Rf, van_der_waals_radii: -1.0, volume: -1.0,
+  z: 104.0}
+Rg: {atomic_radii: -1.0, boil: -1.0, covalent_radii: -1.0, d_elec: 0.0, density: -1.0,
+  electronegativity: -1.0, f_elec: 0.0, first_ionization_energy: -1.0, group: 11.0,
+  mass: 272.0, melt: -1.0, name: Roentgenium, p_elec: 0.0, period: 7.0, production: 0.0,
+  s_elec: 0.0, specific_heat: -1.0, symbol: Rg, van_der_waals_radii: -1.0, volume: -1.0,
+  z: 111.0}
+Rh:
+  HHI_P: 3200.0
+  HHI_R: 8000.0
+  atomic_radii: 135.0
+  boil: 3968.0
+  covalent_radii: 135.0
+  d_elec: 8.0
+  density: 12.4099998474
+  electronegativity: 2.27999997139
+  f_elec: 0.0
+  first_ionization_energy: 7.45889997482
+  group: 9.0
+  mass: 102.90599823
+  melt: 2239.14990234
+  name: Rhodium
+  p_elec: 0.0
+  period: 5.0
+  production: 0.0010000000475
+  s_elec: 1.0
+  scattering_factors: {a1: 19.2957, a2: 14.3501, a3: 4.73425, a4: 1.28918, b1: 0.751536,
+    b2: 8.21758, b3: 25.874901, b4: 98.606201, c: 5.328}
+  specific_heat: 0.243000000715
+  symbol: Rh
+  van_der_waals_radii: -1.0
+  volume: 13.9899997711
+  z: 45.0
+Rn:
+  atomic_radii: 120.0
+  boil: 211.300003052
+  covalent_radii: 145.0
+  d_elec: 0.0
+  density: 0.00973000004888
+  electronegativity: 2.20000004768
+  f_elec: 0.0
+  first_ionization_energy: 10.7484998703
+  group: 18.0
+  mass: 222.0
+  melt: 202.149993896
+  name: Radon
+  p_elec: 0.0
+  period: 6.0
+  production: 0.0010000000475
+  s_elec: 0.0
+  scattering_factors: {a1: 35.563099, a2: 21.281601, a3: 8.0037, a4: 7.4433, b1: 0.6631,
+    b2: 4.0691, b3: 14.0422, b4: 44.247299, c: 13.6905}
+  specific_heat: 0.0939999967813
+  symbol: Rn
+  van_der_waals_radii: -1.0
+  volume: -1.0
+  z: 86.0
+Ru:
+  HHI_P: 3200.0
+  HHI_R: 8000.0
+  atomic_radii: 130.0
+  boil: 4423.0
+  covalent_radii: 126.0
+  d_elec: 7.0
+  density: 12.3699998856
+  electronegativity: 2.20000004768
+  f_elec: 0.0
+  first_ionization_energy: 7.36049985886
+  group: 8.0
+  mass: 101.069999695
+  melt: 2523.14990234
+  name: Ruthenium
+  p_elec: 0.0
+  period: 5.0
+  production: 0.0010000000475
+  s_elec: 1.0
+  scattering_factors: {a1: 19.267401, a2: 12.9182, a3: 4.86337, a4: 1.56756, b1: 0.80852,
+    b2: 8.43467, b3: 24.7997, b4: 94.292801, c: 5.37874}
+  specific_heat: 0.238000005484
+  symbol: Ru
+  van_der_waals_radii: -1.0
+  volume: 13.7100000381
+  z: 44.0
+S:
+  HHI_P: 700.0
+  HHI_R: 1000.0
+  atomic_radii: 100.0
+  boil: 717.799987793
+  covalent_radii: 102.0
+  d_elec: 0.0
+  density: 2.06699991226
+  electronegativity: 2.57999992371
+  f_elec: 0.0
+  first_ionization_energy: 10.3599996567
+  group: 16.0
+  mass: 32.0649986267
+  melt: 388.510009766
+  name: Sulfur
+  p_elec: 4.0
+  period: 3.0
+  production: 350.0
+  s_elec: 2.0
+  scattering_factors: {a1: 6.9053, a2: 5.2034, a3: 1.4379, a4: 1.5863, b1: 1.4679,
+    b2: 22.215099, b3: 0.2536, b4: 56.172001, c: 0.8669}
+  specific_heat: 0.709999978542
+  symbol: S
+  van_der_waals_radii: 180.0
+  volume: 28.0034999847
+  z: 16.0
+Sb:
+  HHI_P: 7900.0
+  HHI_R: 3400.0
+  atomic_radii: 145.0
+  boil: 1860.0
+  covalent_radii: 138.0
+  d_elec: 10.0
+  density: 6.68499994278
+  electronegativity: 2.04999995232
+  f_elec: 0.0
+  first_ionization_energy: 8.60840034485
+  group: 15.0
+  mass: 121.760002136
+  melt: 904.049987793
+  name: Antimony
+  p_elec: 3.0
+  period: 5.0
+  production: 0.20000000298
+  s_elec: 2.0
+  scattering_factors: {a1: 19.6418, a2: 19.0455, a3: 5.0371, a4: 2.6827, b1: 5.3034,
+    b2: 0.4607, b3: 27.9074, b4: 75.282501, c: 4.5909}
+  specific_heat: 0.207000002265
+  symbol: Sb
+  van_der_waals_radii: -1.0
+  volume: 31.6299991608
+  z: 51.0
+Sc:
+  HHI_P: 5500.0
+  HHI_R: 4500.0
+  atomic_radii: 160.0
+  boil: 3109.0
+  covalent_radii: 144.0
+  d_elec: 1.0
+  density: 2.98900008202
+  electronegativity: 1.36000001431
+  f_elec: 0.0
+  first_ionization_energy: 6.56150007248
+  group: 3.0
+  mass: 44.9558982849
+  melt: 1812.15002441
+  name: Scandium
+  p_elec: 0.0
+  period: 4.0
+  production: 22.0
+  s_elec: 2.0
+  scattering_factors: {a1: 9.189, a2: 7.3679, a3: 1.6409, a4: 1.468, b1: 9.0213, b2: 0.5729,
+    b3: 136.108002, b4: 51.3531, c: 1.3329}
+  specific_heat: 0.568000018597
+  symbol: Sc
+  van_der_waals_radii: -1.0
+  volume: 23.7450008392
+  z: 21.0
+Se:
+  HHI_P: 2200.0
+  HHI_R: 1900.0
+  atomic_radii: 115.0
+  boil: 958.0
+  covalent_radii: 116.0
+  d_elec: 10.0
+  density: 4.80900001526
+  electronegativity: 2.54999995232
+  f_elec: 0.0
+  first_ionization_energy: 9.75238037109
+  group: 16.0
+  mass: 78.9599990845
+  melt: 494.149993896
+  name: Selenium
+  p_elec: 4.0
+  period: 4.0
+  production: 0.0500000007451
+  s_elec: 2.0
+  scattering_factors: {a1: 17.000601, a2: 5.8196, a3: 3.9731, a4: 4.3543, b1: 2.4098,
+    b2: 0.2726, b3: 15.2372, b4: 43.816299, c: 2.8409}
+  specific_heat: 0.321000009775
+  symbol: Se
+  van_der_waals_radii: 190.0
+  volume: 27.4433002472
+  z: 34.0
+Sg: {atomic_radii: -1.0, boil: -1.0, covalent_radii: -1.0, d_elec: 0.0, density: 35.0,
+  electronegativity: -1.0, f_elec: 0.0, first_ionization_energy: -1.0, group: 6.0,
+  mass: 266.0, melt: -1.0, name: Seaborgium, p_elec: 0.0, period: 7.0, production: 0.0,
+  s_elec: 0.0, specific_heat: -1.0, symbol: Sg, van_der_waals_radii: -1.0, volume: -1.0,
+  z: 106.0}
+Si:
+  HHI_P: 4700.0
+  HHI_R: 1000.0
+  atomic_radii: 110.0
+  boil: 3538.0
+  covalent_radii: 111.0
+  d_elec: 0.0
+  density: 2.32960009575
+  electronegativity: 1.89999997616
+  f_elec: 0.0
+  first_ionization_energy: 8.15168952942
+  group: 14.0
+  mass: 28.0855007172
+  melt: 1683.15002441
+  name: Silicon
+  p_elec: 2.0
+  period: 3.0
+  production: 282000.0
+  s_elec: 2.0
+  scattering_factors: {a1: 6.2915, a2: 3.0353, a3: 1.9891, a4: 1.541, b1: 2.4386,
+    b2: 32.333698, b3: 0.6785, b4: 81.693703, c: 1.1407}
+  specific_heat: 0.704999983311
+  symbol: Si
+  van_der_waals_radii: 210.0
+  volume: 20.4099998474
+  z: 14.0
+Sm:
+  HHI_P: 9500.0
+  HHI_R: 3100.0
+  atomic_radii: 185.0
+  boil: 2067.0
+  covalent_radii: -1.0
+  d_elec: 0.0
+  density: 7.51999998093
+  electronegativity: 1.16999995708
+  f_elec: 6.0
+  first_ionization_energy: 5.64359998703
+  group: 0.0
+  mass: 150.36000061
+  melt: 1345.15002441
+  name: Samarium
+  p_elec: 0.0
+  period: 6.0
+  production: 7.05000019073
+  s_elec: 2.0
+  scattering_factors: {a1: 24.0042, a2: 19.4258, a3: 13.4396, a4: 2.89604, b1: 2.47274,
+    b2: 0.196451, b3: 14.3996, b4: 128.007004, c: 2.20963}
+  specific_heat: 0.196999996901
+  symbol: Sm
+  van_der_waals_radii: -1.0
+  volume: 34.0625
+  z: 62.0
+Sn:
+  HHI_P: 2600.0
+  HHI_R: 1600.0
+  atomic_radii: 145.0
+  boil: 2875.0
+  covalent_radii: 141.0
+  d_elec: 10.0
+  density: 7.28700017929
+  electronegativity: 1.96000003815
+  f_elec: 0.0
+  first_ionization_energy: 7.3439002037
+  group: 14.0
+  mass: 118.709999084
+  melt: 505.209991455
+  name: Tin
+  p_elec: 2.0
+  period: 5.0
+  production: 2.29999995232
+  s_elec: 2.0
+  scattering_factors: {a1: 19.1889, a2: 19.1005, a3: 4.4585, a4: 2.4663, b1: 5.8303,
+    b2: 0.5031, b3: 26.8909, b4: 83.9571, c: 4.7821}
+  specific_heat: 0.228000000119
+  symbol: Sn
+  van_der_waals_radii: 217.0
+  volume: 36.1500015259
+  z: 50.0
+Sr:
+  HHI_P: 4200.0
+  HHI_R: 3000.0
+  atomic_radii: 200.0
+  boil: 1655.0
+  covalent_radii: 192.0
+  d_elec: 0.0
+  density: 2.6400001049
+  electronegativity: 0.949999988079
+  f_elec: 0.0
+  first_ionization_energy: 5.69490003586
+  group: 2.0
+  mass: 87.6200027466
+  melt: 1042.15002441
+  name: Strontium
+  p_elec: 0.0
+  period: 5.0
+  production: 370.0
+  s_elec: 2.0
+  scattering_factors: {a1: 17.566299, a2: 9.8184, a3: 5.422, a4: 2.6694, b1: 1.5564,
+    b2: 14.0988, b3: 0.1664, b4: 132.376007, c: 2.5064}
+  specific_heat: 0.300999999046
+  symbol: Sr
+  van_der_waals_radii: -1.0
+  volume: 53.9399986267
+  z: 38.0
+Ta:
+  HHI_P: 2300.0
+  HHI_R: 4800.0
+  atomic_radii: 145.0
+  boil: 5731.0
+  covalent_radii: 138.0
+  d_elec: 3.0
+  density: 16.6539993286
+  electronegativity: 1.5
+  f_elec: 14.0
+  first_ionization_energy: 7.54960012436
+  group: 5.0
+  mass: 180.947998047
+  melt: 3269.14990234
+  name: Tantalum
+  p_elec: 0.0
+  period: 6.0
+  production: 2.0
+  s_elec: 2.0
+  scattering_factors: {a1: 29.2024, a2: 15.2293, a3: 14.5135, a4: 4.76492, b1: 1.77333,
+    b2: 9.37046, b3: 0.295977, b4: 63.364399, c: 9.24354}
+  specific_heat: 0.140000000596
+  symbol: Ta
+  van_der_waals_radii: -1.0
+  volume: 18.2299995422
+  z: 73.0
+Tb:
+  HHI_P: 9500.0
+  HHI_R: 3100.0
+  atomic_radii: 175.0
+  boil: 3503.0
+  covalent_radii: -1.0
+  d_elec: 0.0
+  density: 8.22900009155
+  electronegativity: 1.20000004768
+  f_elec: 9.0
+  first_ionization_energy: 5.86380004883
+  group: 0.0
+  mass: 158.925003052
+  melt: 1630.15002441
+  name: Terbium
+  p_elec: 0.0
+  period: 6.0
+  production: 1.20000004768
+  s_elec: 2.0
+  scattering_factors: {a1: 25.8976, a2: 18.2185, a3: 14.3167, a4: 2.95354, b1: 2.24256,
+    b2: 0.196143, b3: 12.6648, b4: 115.362, c: 3.58924}
+  specific_heat: 0.181999996305
+  symbol: Tb
+  van_der_waals_radii: -1.0
+  volume: 31.9967002869
+  z: 65.0
+Tc:
+  atomic_radii: 135.0
+  boil: 5150.0
+  covalent_radii: 156.0
+  d_elec: 5.0
+  density: 11.5
+  electronegativity: 1.89999997616
+  f_elec: 0.0
+  first_ionization_energy: 7.28000020981
+  group: 7.0
+  mass: 98.0
+  melt: 2473.14990234
+  name: Technetium
+  p_elec: 0.0
+  period: 5.0
+  production: 0.0010000000475
+  s_elec: 2.0
+  scattering_factors: {a1: 19.1301, a2: 11.0948, a3: 4.64901, a4: 2.71263, b1: 0.864132,
+    b2: 8.14487, b3: 21.5707, b4: 86.847198, c: 5.40428}
+  specific_heat: -1.0
+  symbol: Tc
+  van_der_waals_radii: -1.0
+  volume: 14.5
+  z: 43.0
+Te:
+  HHI_P: 2900.0
+  HHI_R: 4900.0
+  atomic_radii: 140.0
+  boil: 1261.0
+  covalent_radii: 135.0
+  d_elec: 10.0
+  density: 6.23199987411
+  electronegativity: 2.09999990463
+  f_elec: 0.0
+  first_ionization_energy: 9.00959968567
+  group: 16.0
+  mass: 127.599998474
+  melt: 722.799987793
+  name: Tellurium
+  p_elec: 4.0
+  period: 5.0
+  production: 0.0010000000475
+  s_elec: 2.0
+  scattering_factors: {a1: 19.964399, a2: 19.0138, a3: 6.14487, a4: 2.5239, b1: 4.81742,
+    b2: 0.420885, b3: 28.5284, b4: 70.840302, c: 4.352}
+  specific_heat: 0.202000007033
+  symbol: Te
+  van_der_waals_radii: 206.0
+  volume: 34.7200012207
+  z: 52.0
+Th:
+  atomic_radii: 180.0
+  boil: 5061.0
+  covalent_radii: -1.0
+  d_elec: 2.0
+  density: 11.720000267
+  electronegativity: 1.29999995232
+  f_elec: 0.0
+  first_ionization_energy: 6.30670022964
+  group: 0.0
+  mass: 232.037994385
+  melt: 2028.15002441
+  name: Thorium
+  p_elec: 0.0
+  period: 7.0
+  production: 9.60000038147
+  s_elec: 2.0
+  scattering_factors: {a1: 35.564499, a2: 23.4219, a3: 12.7473, a4: 4.80703, b1: 0.563359,
+    b2: 3.46204, b3: 17.8309, b4: 99.172203, c: 13.4314}
+  specific_heat: 0.112999998033
+  symbol: Th
+  van_der_waals_radii: -1.0
+  volume: 32.1500015259
+  z: 90.0
+Ti:
+  HHI_P: 1100.0
+  HHI_R: 1600.0
+  atomic_radii: 140.0
+  boil: 3560.0
+  covalent_radii: 136.0
+  d_elec: 2.0
+  density: 4.53999996185
+  electronegativity: 1.53999996185
+  f_elec: 0.0
+  first_ionization_energy: 6.82810020447
+  group: 4.0
+  mass: 47.8670005798
+  melt: 1933.15002441
+  name: Titanium
+  p_elec: 0.0
+  period: 4.0
+  production: 5650.0
+  s_elec: 2.0
+  scattering_factors: {a1: 9.7595, a2: 7.3558, a3: 1.6991, a4: 1.9021, b1: 7.8508,
+    b2: 0.5, b3: 35.633801, b4: 116.105003, c: 1.2807}
+  specific_heat: 0.523000001907
+  symbol: Ti
+  van_der_waals_radii: -1.0
+  volume: 16.7567005157
+  z: 22.0
+Tl:
+  HHI_P: 6500.0
+  HHI_R: 6500.0
+  atomic_radii: 190.0
+  boil: 1746.0
+  covalent_radii: 148.0
+  d_elec: 10.0
+  density: 11.8500003815
+  electronegativity: 1.62000000477
+  f_elec: 14.0
+  first_ionization_energy: 6.10820007324
+  group: 13.0
+  mass: 204.382995605
+  melt: 577.150024414
+  name: Thallium
+  p_elec: 1.0
+  period: 6.0
+  production: 0.850000023842
+  s_elec: 2.0
+  scattering_factors: {a1: 27.5446, a2: 19.1584, a3: 15.538, a4: 5.52593, b1: 0.65515,
+    b2: 8.70751, b3: 1.96347, b4: 45.814899, c: 13.1746}
+  specific_heat: 0.128999993205
+  symbol: Tl
+  van_der_waals_radii: 196.0
+  volume: 31.2800006866
+  z: 81.0
+Tm:
+  HHI_P: 9500.0
+  HHI_R: 3100.0
+  atomic_radii: 175.0
+  boil: 2223.0
+  covalent_radii: -1.0
+  d_elec: 0.0
+  density: 9.32100009918
+  electronegativity: 1.25
+  f_elec: 13.0
+  first_ionization_energy: 6.18430995941
+  group: 0.0
+  mass: 168.934005737
+  melt: 1818.15002441
+  name: Thulium
+  p_elec: 0.0
+  period: 6.0
+  production: 0.519999980927
+  s_elec: 2.0
+  scattering_factors: {a1: 28.1819, a2: 15.8851, a3: 15.1542, a4: 2.98706, b1: 2.02859,
+    b2: 0.238849, b3: 10.9975, b4: 102.960999, c: 6.75621}
+  specific_heat: 0.159999996424
+  symbol: Tm
+  van_der_waals_radii: -1.0
+  volume: 30.3799991608
+  z: 69.0
+U:
+  atomic_radii: 175.0
+  boil: 4404.0
+  covalent_radii: -1.0
+  d_elec: 1.0
+  density: 18.9500007629
+  electronegativity: 1.37999999523
+  f_elec: 3.0
+  first_ionization_energy: 6.19404983521
+  group: 0.0
+  mass: 238.029006958
+  melt: 1405.15002441
+  name: Uranium
+  p_elec: 0.0
+  period: 7.0
+  production: 2.70000004768
+  s_elec: 2.0
+  scattering_factors: {a1: 36.0228, a2: 23.4128, a3: 14.9491, a4: 4.188, b1: 0.5293,
+    b2: 3.3253, b3: 16.092699, b4: 100.612999, c: 13.3966}
+  specific_heat: 0.115999996662
+  symbol: U
+  van_der_waals_radii: 186.0
+  volume: 20.0300006866
+  z: 92.0
+V:
+  HHI_P: 3300.0
+  HHI_R: 3400.0
+  atomic_radii: 135.0
+  boil: 3680.0
+  covalent_radii: 125.0
+  d_elec: 3.0
+  density: 6.11000013351
+  electronegativity: 1.62999999523
+  f_elec: 0.0
+  first_ionization_energy: 6.74620008469
+  group: 5.0
+  mass: 50.9415016174
+  melt: 2175.14990234
+  name: Vanadium
+  p_elec: 0.0
+  period: 4.0
+  production: 120.0
+  s_elec: 2.0
+  scattering_factors: {a1: 10.2971, a2: 7.3511, a3: 2.0703, a4: 2.0571, b1: 6.8657,
+    b2: 0.4385, b3: 26.893801, b4: 102.477997, c: 1.2199}
+  specific_heat: 0.488999992609
+  symbol: V
+  van_der_waals_radii: -1.0
+  volume: 13.1300001144
+  z: 23.0
+W:
+  HHI_P: 7000.0
+  HHI_R: 4300.0
+  atomic_radii: 135.0
+  boil: 5828.0
+  covalent_radii: 146.0
+  d_elec: 4.0
+  density: 19.25
+  electronegativity: 2.3599998951
+  f_elec: 14.0
+  first_ionization_energy: 7.8639998436
+  group: 6.0
+  mass: 183.839996338
+  melt: 3680.14990234
+  name: Tungsten
+  p_elec: 0.0
+  period: 6.0
+  production: 1.29999995232
+  s_elec: 2.0
+  scattering_factors: {a1: 29.0818, a2: 15.43, a3: 14.4327, a4: 5.11982, b1: 1.72029,
+    b2: 9.2259, b3: 0.321703, b4: 57.056, c: 9.8875}
+  specific_heat: 0.131999999285
+  symbol: W
+  van_der_waals_radii: -1.0
+  volume: 16.1399993896
+  z: 74.0
+Xe:
+  atomic_radii: 108.0
+  boil: 165.029998779
+  covalent_radii: 130.0
+  d_elec: 0.0
+  density: 0.00588699989021
+  electronegativity: 2.59999990463
+  f_elec: 0.0
+  first_ionization_energy: 12.1297998428
+  group: 18.0
+  mass: 131.292999268
+  melt: 161.449996948
+  name: Xenon
+  p_elec: 0.0
+  period: 5.0
+  production: 0.0010000000475
+  s_elec: 0.0
+  scattering_factors: {a1: 20.293301, a2: 19.0298, a3: 8.9767, a4: 1.99, b1: 3.9282,
+    b2: 0.344, b3: 26.4659, b4: 64.2658, c: 3.7118}
+  specific_heat: 0.158000007272
+  symbol: Xe
+  van_der_waals_radii: 216.0
+  volume: 58.506
+  z: 54.0
+Y:
+  HHI_P: 9800.0
+  HHI_R: 2600.0
+  atomic_radii: 180.0
+  boil: 3609.0
+  covalent_radii: 162.0
+  d_elec: 1.0
+  density: 4.46899986267
+  electronegativity: 1.22000002861
+  f_elec: 0.0
+  first_ionization_energy: 6.21710014343
+  group: 3.0
+  mass: 88.9058990479
+  melt: 1799.15002441
+  name: Yttrium
+  p_elec: 0.0
+  period: 5.0
+  production: 33.0
+  s_elec: 2.0
+  scattering_factors: {a1: 17.775999, a2: 10.2946, a3: 5.72629, a4: 3.26588, b1: 1.4029,
+    b2: 12.8006, b3: 0.125599, b4: 104.353996, c: 1.91213}
+  specific_heat: 0.298000007868
+  symbol: Y
+  van_der_waals_radii: -1.0
+  volume: 32.5400009155
+  z: 39.0
+Yb:
+  HHI_P: 9500.0
+  HHI_R: 3100.0
+  atomic_radii: 175.0
+  boil: 1469.0
+  covalent_radii: -1.0
+  d_elec: 0.0
+  density: 6.96500015259
+  electronegativity: 1.10000002384
+  f_elec: 14.0
+  first_ionization_energy: 6.25415992737
+  group: 0.0
+  mass: 173.054000854
+  melt: 1097.15002441
+  name: Ytterbium
+  p_elec: 0.0
+  period: 6.0
+  production: 3.20000004768
+  s_elec: 2.0
+  scattering_factors: {a1: 28.664101, a2: 15.4345, a3: 15.3087, a4: 2.98963, b1: 1.9889,
+    b2: 0.257119, b3: 10.6647, b4: 100.417, c: 7.56672}
+  specific_heat: 0.155000001192
+  symbol: Yb
+  van_der_waals_radii: -1.0
+  volume: 40.2299995422
+  z: 70.0
+Zn:
+  HHI_P: 1600.0
+  HHI_R: 1900.0
+  atomic_radii: 135.0
+  boil: 1180.0
+  covalent_radii: 131.0
+  d_elec: 10.0
+  density: 7.13399982452
+  electronegativity: 1.64999997616
+  f_elec: 0.0
+  first_ionization_energy: 9.39420032501
+  group: 12.0
+  mass: 65.3799972534
+  melt: 692.880004883
+  name: Zinc
+  p_elec: 0.0
+  period: 4.0
+  production: 70.0
+  s_elec: 2.0
+  scattering_factors: {a1: 14.0743, a2: 7.0318, a3: 5.1652, a4: 2.41, b1: 3.2655,
+    b2: 0.2333, b3: 10.3163, b4: 58.709702, c: 1.3041}
+  specific_heat: 0.388000011444
+  symbol: Zn
+  van_der_waals_radii: 139.0
+  volume: 14.8249998093
+  z: 30.0
+Zr:
+  HHI_P: 3400.0
+  HHI_R: 2600.0
+  atomic_radii: 155.0
+  boil: 4682.0
+  covalent_radii: 148.0
+  d_elec: 2.0
+  density: 6.50600004196
+  electronegativity: 1.33000004292
+  f_elec: 0.0
+  first_ionization_energy: 6.63390016556
+  group: 4.0
+  mass: 91.2239990234
+  melt: 2125.14990234
+  name: Zirconium
+  p_elec: 0.0
+  period: 5.0
+  production: 165.0
+  s_elec: 2.0
+  scattering_factors: {a1: 17.876499, a2: 10.948, a3: 5.41732, a4: 3.65721, b1: 1.27618,
+    b2: 11.916, b3: 0.117622, b4: 87.662697, c: 2.06929}
+  specific_heat: 0.277999997139
+  symbol: Zr
+  van_der_waals_radii: -1.0
+  volume: 23.3899993896
+  z: 40.0

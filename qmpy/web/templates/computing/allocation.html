@@ -1,0 +1,38 @@
+{% extends "base_site.html" %}
+{% load i18n %}
+
+{% block content_title %}
+<h1> Allocation: <a href="/computing/allocation/{{allocation.name}}">{{ allocation.name }}</a></h1>
+{% endblock %}
+
+{% block sidebar %}
+<div id="sidebar" class="box">
+  <form action="" method="POST">{% csrf_token %}
+    <h1> Control panel </h1>
+    <label><input type="checkbox" {% if allocation.state == 1 %}checked{% endif %} name="active"> Active? </label><br>
+    <div style="float:left">
+      <h2> Authorized Users </h2>
+      <ul>
+        {% for user in users  %}
+        <input type="hidden" name="user_{{user.username}}" value="off">
+        <li><input type="checkbox" name="user_{{user.username}}" {% if user.included %}checked{% endif %}>
+        <a href="/computing/user/{{user.username}}">{{user.username}}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div style="float:left;margin-left:20px">
+      <h2> Authorized Projects </h2>
+      <ul>
+        {% for project in projects %}
+        <input type="hidden" name="project_{{project.name}}" value="off">
+        <li><input type="checkbox" name="project_{{project.name}}" {% if project.included %}checked {% endif %} value="on">
+        <a href="/computing/project/{{project.name}}">{{project.name}}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+    <hr>
+    <input type="submit" value="submit changes" style="float:right">
+  </form>
+</div>
+{% endblock %}

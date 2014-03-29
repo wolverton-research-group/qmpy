@@ -1,0 +1,131 @@
+{% extends "base_site.html" %}
+{% load admin_static %}
+{% load i18n %}
+
+{% block extrastyle %}
+<link rel="stylesheet" type="text/css" href="{% static "css/flot.css" %}"/>
+{% endblock %}
+
+{% block extrascript %}
+<script language="javascript" type="text/javascript" src={% static "js/flot/jquery.flot.pie.js" %}></script>
+
+<script language="javascript" type="text/javascript">
+  function labelFormatter(label, series) {
+        return "<div style='font-size:12pt; text-align:center; padding:2px; color:black;'>" + label + "<br/>" + Math.round(series.percent) + "%</div>";
+          }
+  $(function() {
+    $.plot("#placeholder", {{ plot | safe }}, { 
+      legend: {show: false},
+      series: { 
+        pie: { 
+          show: true,
+          label: {
+            background: { opacity: 0},
+            formatter: labelFormatter}
+          }
+        }
+      });
+    });
+  </script>
+{% endblock %}
+
+{% block content %}
+<!--- RESULTS -->
+{% if energy %}
+<h1>Relative phase compositions</h1>
+<h1> {{ pstr }} </h1>
+<h2 class="subhead"> &Delta;H = {{ energy | floatformat:-3}} eV/atom</h2>
+
+<div class="flot-container" style="width:300px;height300px;float:left">
+  <div id="placeholder" class="flot-placeholder"></div>
+</div>
+
+<div style="float:left">
+  <h1>Stable phases:</h1>
+  <table>
+    <thead>
+      <tr> 
+        <th>Name</th>
+        <th>Spacegroup</th>
+        <th>Formation Energy</th>
+        <th>Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p, amt in phase_comp.items %}
+      <tr class="clickableRow" href="/materials/entry/{{p.calculation.entry_id}}">
+        <td> {{ p.name }}</td>
+        <td> {{ p.calculation.entry.input.spacegroup.symbol }} </td>
+        <td> {{ p.energy | floatformat:-3 }}</td>
+        <td> {{ amt | floatformat:-2}} </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% if phase_data %}
+<div class="box" style="width:940px">
+  <h2> Phase data used to generate this ground state composition: </h2>
+  Add/remove/edit this data, and then recreate the phase diagram.
+  <form action="" method="post">{% csrf_token %}
+    <input type="hidden" name="search" value="{{search}}">
+    <input type="hidden" name="chem_pots" value="{{chem_pots}}">
+    <table id="thermodata">
+      <thead>
+        <tr>
+          <th>Include in GCLP</th>
+          <th>Composition</th>
+          <th>Formation Energy</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for phase in phase_data %}
+        <tr>
+          <input type="hidden" name="indices" value="{{phase.index}}">
+          <input type="hidden" name="use_{{phase.index}}" value="off">
+          <input type="hidden" name="id_{{phase.index}}" value="{{phase.id}}">
+          <td><input type="checkbox" name="use_{{phase.index}}" {% if phase.use %}checked{% endif %} value="on"></td>
+          <td><input type="text" size="12" name="composition_{{phase.index}}" value="{{phase.name}}"></td>
+          <td><input type="text" size="6" name="formationenergy_{{phase.index}}" value="{{phase.energy | floatformat:-3}}"></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <input type="submit" name="action" value="re-evaluate">
+  </form>
+</div>
+{% endif %}
+
+<div style="float:left;width:100%">
+  <h1> Method background </h1>
+
+  Grand canonical linear programming is a method developed by Wolverton <i>et. al.</i> for analyzing the complex ground state thermodynamics of metal hydrides. The method works by mapping a free energy minimization problem to a linear algebra problem. Using linear programming allows this problem to be solved nearly instantaneously even with a very large number of phases in a very high-dimensional phase space.
+
+  <h2> References </h2>
+  <i>
+    1. R. Akbarzadeh, A., Ozoliņš, V. & Wolverton, C. First-Principles Determination of Multicomponent Hydride Phase Diagrams: Application to the Li-Mg-N-H System. Advanced Materials 19, 3233–3239 (2007).<br>
+
+    2. Kirklin, S., Meredig, B. & Wolverton, C. High-Throughput Computational Screening of New Li-Ion Battery Anode Materials. Advanced Energy Materials 3, 252–262 (2013).<br>
+  </i>
+</div>
+</div>
+{% endblock %}
+
+{% block sidebar %}
+<div id="sidebar" class="box">
+  <h2 class="subhead"> Search for a composition or region </h2>
+  <form action="" method="POST">{% csrf_token %}
+    <input name='search' value="{{ search }}"/>
+    <input type='submit' name="action" value="submit"/>
+  </form>
+  Examples:<br>
+  <ul>
+    <li>Al2O3
+    <li>LiFeO2
+    <li>Cu2MnAl
+  </ul>
+
+</div>
+{% endblock %}

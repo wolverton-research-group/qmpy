@@ -1,0 +1,90 @@
+{% extends "base_site.html" %}
+{% load admin_static %}
+{% load i18n %}
+
+{% if warning %}
+{% block notice %}
+{{ warning }}
+{% endblock %}
+{% endif %}
+
+{% block content %}
+
+<div>
+	<h1> Structure discovery by database substitution </h1>
+</div>
+
+<div>
+	<form action="" method="post">{% csrf_token %}
+		<input type="text" name="search" value="{{ prev_search }}">
+		<input type="submit" value="submit">
+	</form>
+</div>
+
+<div>
+	To perform composition subtitution, search for materials by 
+	<ul>
+		<li>Li2O</li>
+		<li>{H,Li,K}O2</li>
+		<li>{H,Li,K}-O</li>
+		<li>{SS}-{F,O}</li>
+	</ul>
+</div>
+
+<!--- RESULTS -->
+{% if result %}
+<div>
+	{% for s, d in result %}
+	{% if subsearch %}
+	Subsearch: {{ s }}
+	{% endif %}
+	<table>
+		<thead>
+			<tr> 
+				<th>Use</th>
+				<th># of structures</th>
+				<th>Formation Energy</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for size, comps in d %}
+			<tr>
+				<td colspan="3"><b>{{ size }}<b></td>
+			</tr>
+			{% for comp in comps %}
+			<tr class="clickableRow" href="/materials/composition/{{ comp.name }}">
+				<td> {{ comp.html | safe }}</td>
+				<td> {{ comp.ndistinct }}</td>
+				<td> {{ comp.delta_e | floatformat:-3 }} </td>
+			</tr>
+			{% endfor %}
+			{% endfor %}
+	</tbody>
+	</table>
+	{% endfor %}
+</div>
+
+{% endif %}
+
+{% endblock %}
+
+{% block sidebar %}
+<h1> Recognized element groups </h1>
+<table>
+	<thead>
+		<tr>
+			<th>Key</th>
+			<th>Elements</th>
+		</tr>
+	</thead>
+	{% for k, v in element_groups.items %}
+	<tbody>
+		<tr>
+			<td>{{ k }}</td>
+			<td>{{ v }}</td>
+		</tr>
+	</tbody>
+	{% endfor %}
+</table>
+
+{% endblock %}

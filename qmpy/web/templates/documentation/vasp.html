@@ -1,0 +1,73 @@
+{% extends "documentation/doc_base.html" %}
+
+{% block title %}
+OQMD | Documentation - VASP
+{% endblock %}
+
+
+{% block extrahead %}
+{% endblock %}
+
+{% block content_title%}
+<h1>DFT Settings</h1>
+{% endblock %}
+
+
+{% block content %}
+
+<h2>General</h2>
+<p> All DFT calculations are performed with the <a href="https://www.vasp.at/" target="_blank">Vienna Ab-initio Simulation Package (VASP)</a>, version 5.3.2. 
+  The electron exchange and correlation are described with the generalized gradient approximation (GGA) of <a href="http://link.aps.org/doi/10.1103/PhysRevLett.77.3865">Perdew, Burke, and Ernzerhof</a> (PBE), using the potentials supplied by VASP with the <a href="http://link.aps.org/doi/10.1103/PhysRevB.59.1758">projected augmented wave (PAW)</a> method. 
+  PAW-PBE potentials for 89 elements are supplied with VASP and we follow the <a href="http://cms.mpi.univie.ac.at/vasp/vasp/Two_versions_PP_which_one_should_be_used.html" target="_blank">VASP guidelines</a> concerning the optimum choice of potentials. 
+  For the 4f elements, we employ potentials where the valence f-electrons are treated as core electrons (appended with _2 and _3). 
+  The complete list of elements in the OQMD, and their potentials, are listed <a href="/documentation/pots">here</a>. 
+  For all structures, gamma-centered k-point meshes were constructed based on reciprocal space cell dimensions and the k-point density, defined by the number of k-points per reciprocal atom (KPPRA). 
+  The electronic ground states were converged to within 0.0001 eV/atom and the crystal structure to within 0.001 eV/atom.
+<br>
+<h2> Relaxation Scheme </h2>
+The relaxation of a structure in the OQMD consists of four consecutive DFT calculations:
+	<h3>Initialize</h3>
+	 We begin with the given ICSD structure parameters and perform an initial, low quality static calculation. At this step we evaluate whether or not further calculations of the structure should include magnetism, as well as eliminate structures which are sufficiently unphysical as to prohibit the well behaved convergence of their electronic-structure. A KPPRA of 4000 is used.
+	<h3> Coarse Relax</h3>
+	Next, a coarse relaxation is performed with the plane wave basis set energy cutoff at the maximum defined in the VASP potentials of the elements in a given structure. The KPPRA is kept at 4000. 
+	<h3> Fine Relax</h3>
+	Then the structure undergoes a finer relaxation calculation with a higher energy cutoff and denser k-point mesh (KPPRA=6000). In these relaxation steps, partial orbital occupations are described by the Methfessel-Paxton method of order one, with a smearing width of 0.2 eV.
+	<h3> Standard</h3>
+	Lastly, a final, high quality static calculation of the structure is performed at an energy cutoff of 520 eV. This constant cutoff ensures all the energies calculated in OQMD are comparable as all the previous steps have used a cutoff which varies depending on the atomic species in the calculation. A denser k-point mesh is also employed, KPPRA=8000.
+
+  <br>
+<h2> Element-specific DFT Settings </h2>
+<p>Several element-specific settings are included as well. Any calculation containing 3d (Sc-Cu) or actinide elements are spin-polarized with a ferromagnetic alignment of spins to capture possible magnetism, with initial magnetic moments of 5 and 7 muB, respectively. It should be noted that this approach will not capture more complex magnetic ordering, such as antiferromagnetism, which <a href="http://prb.aps.org/abstract/PRB/v85/i11/e115104" target="_blank">has been found</a> to result in errors to the formation energy on the order of 10-20 meV/atom. For several transition metals, lanthanides, and actinides, the GGA+U approach is implemented to improve the exchange and correlation description of the localized charge density when in compounds with oxygen. We employed the Dudarev approach to GGA+U, where the only input parameter is U-J. For several transition metals, <a href="http://prb.aps.org/abstract/PRB/v73/i19/e195107" target="_blank">previously determined</a> U-J values were used, whereas for others a value of 4 eV was assumed. All U-J values are given in the following table:
+
+<table>
+	<thead>
+		<tr>
+			<th><b>Element</b></td>
+			<th style="text-align:center"> Cr </td>
+			<th style="text-align:center"> Mn </td>
+			<th style="text-align:center"> Fe </td>
+			<th style="text-align:center"> Co </td>
+			<th style="text-align:center"> Ni </td>
+			<th style="text-align:center"> Cu </td>
+			<th style="text-align:center"> Th </td>
+			<th style="text-align:center"> U  </td>
+			<th style="text-align:center"> Np </td>
+			<th style="text-align:center"> Pu </td>
+    </tr>
+  </thead>
+  <tbody>
+		<tr>
+      <td> <b>U-J</b> </td>
+			<td style="text-align:center">3.5 </td>
+			<td style="text-align:center">3.8 </td>
+			<td style="text-align:center">4.0 </td>
+			<td style="text-align:center">3.3 </td>
+      <td style="text-align:center">6.4 </td>
+      <td style="text-align:center">4.0 </td>
+			<td style="text-align:center">4.0 </td>
+			<td style="text-align:center">4.0 </td>
+			<td style="text-align:center">4.0 </td>
+			<td style="text-align:center">4.0 </td>
+	</tbody>
+</table>
+{% endblock %} 

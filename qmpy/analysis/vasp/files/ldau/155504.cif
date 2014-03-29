@@ -1,0 +1,78 @@
+#(C) 2011 by Fachinformationszentrum Karlsruhe. All rights reserved.
+data_155504-ICSD
+_database_code_ICSD 155504
+_audit_creation_date 2007-08-01
+_chemical_name_systematic 'Indium(I) trichromate(V)'
+_chemical_formula_structural 'In (Cr3 O8)'
+_chemical_formula_sum 'Cr3 In1 O8'
+_chemical_name_structure_type NaV(SO4)2
+_exptl_crystal_density_diffrn 4.24
+_cell_measurement_temperature 0.
+_cell_measurement_pressure 101.325
+#Default value included by FIZ Karlsruhe
+_publ_section_title
+;
+Density-functional calculations of the crystal structures and properties of Cs
+Cr3 O8 and A Cr3 O8 (A = In, Tl, Cu, Ag, Au)
+;
+loop_
+_citation_id
+_citation_journal_full
+_citation_year
+_citation_journal_volume
+_citation_page_first
+_citation_page_last
+_citation_journal_id_ASTM
+primary 'Physical Review, Serie 3. B - Condensed Matter (18,1978-)' 2006 73
+184101-1 184101-8 PRBMDO
+loop_
+_publ_author_name
+'Vidya, R.'
+'Ravindran, P.'
+'Kjekshus, A.'
+'Fjellvag, H.'
+_cell_length_a 8.4711
+_cell_length_b 5.6404
+_cell_length_c 6.5323
+_cell_angle_alpha 90.
+_cell_angle_beta 90.04
+_cell_angle_gamma 90.
+_cell_volume 312.12
+_cell_formula_units_Z 2
+_symmetry_space_group_name_H-M 'C 1 2/m 1'
+_symmetry_Int_Tables_number 12
+loop_
+_symmetry_equiv_pos_site_id
+_symmetry_equiv_pos_as_xyz
+1 '-x, y, -z'
+2 '-x, -y, -z'
+3 'x, -y, z'
+4 'x, y, z'
+5 '-x+1/2, y+1/2, -z'
+6 '-x+1/2, -y+1/2, -z'
+7 'x+1/2, -y+1/2, z'
+8 'x+1/2, y+1/2, z'
+loop_
+_atom_type_symbol
+_atom_type_oxidation_number
+In1+ 1
+Cr5+ 5
+O2- -2
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_symbol
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_B_iso_or_equiv
+_atom_site_occupancy
+_atom_site_attached_hydrogens
+In1 In1+ 2 a 0. 0. 0. 0.0 1. 0
+Cr1 Cr5+ 2 c 0. 0. 0.5 0.0 1. 0
+Cr2 Cr5+ 4 i 0.3576 0. 0.2641 0.0 1. 0
+O1 O2- 4 i 0.7771 0. 0.5478 0.0 1. 0
+O2 O2- 4 i 0.7428 0. 0.9571 0.0 1. 0
+O3 O2- 8 j 0.9721 0.7614 0.2741 0.0 1. 0
+#End of data_155504-ICSD

@@ -1,0 +1,125 @@
+{% extends "base_site.html" %}
+{% load admin_static %}
+{% load i18n %}
+
+{% block content_title %}
+<h1> Phase diagram creation </h1>
+{% endblock %}
+
+{% block extrastyle %}
+<link rel="stylesheet" type="text/css" href="{% static "css/flot.css" %}"/>
+{% endblock %}
+
+
+{% block content %}
+
+<script id="source" language="javascript" type="text/javascript">
+    $(function() {
+        {{ flotscript | safe}}
+        });
+  </script>
+
+<div class="flot-container" style="width:500px;height:400px;float:left">
+  <div id="placeholder" class="flot-placeholder"></div>
+</div>
+
+{% if phase_data %}
+<div class="box" style="width:940px">
+  <h1> Customize Phase Diagram </h1>
+  <form action="" method="post">{% csrf_token %}
+    <input type="hidden" name="search" value="{{search}}">
+    <input type="hidden" name="chem_pots" value="{{chem_pots}}">
+    Hide phases more than <input type="text" name="stability" value={{stability}}> above the convex hull.<br>
+
+  <h2> Phase data used to generate this ground state composition: </h2>
+  Add/remove/edit this data, and then recreate the phase diagram.
+    <table id="thermodata">
+      <thead>
+        <tr>
+          <th>Use</th>
+          <th>Label</th>
+          <th>Composition</th>
+          <th>Formation Energy</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for phase in phase_data %}
+        <tr>
+          <input type="hidden" name="indices" value="{{phase.index}}">
+          <input type="hidden" name="use_{{phase.index}}" value="off">
+          <input type="hidden" name="label_{{phase.index}}" value="off">
+          <input type="hidden" name="id_{{phase.index}}" value="{{phase.id}}">
+          <td><input type="checkbox" name="use_{{phase.index}}" {% if phase.use %}checked{% endif %} value="on"></td>
+          <td><input type="checkbox" name="label_{{phase.index}}" {% if phase.show_label %}checked{% endif %} value="on"></td>
+          <td><input type="text" size="12" name="composition_{{phase.index}}" value="{{phase.name}}"></td>
+          <td><input type="text" size="6" name="formationenergy_{{phase.index}}" value="{{phase.energy | floatformat:-3}}"></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <input type="submit" name="action" value="re-evaluate">
+  </form>
+</div>
+{% endif %}
+
+<div style="width:100%;float:left">
+<h2> Method background </h2>
+
+<h3> Phase diagrams </h3>
+This utility uses the qhull algorithm to create phase diagrams for arbitrary regions of phase space. Depending on the dimensionality of the requested phase diagram, different plots are made. 
+<ul>
+  <li>2-D phase diagrams, we produce the convex hull</li>
+  <li>3-D phase diagrams we give create the Gibbs' triangle</li>
+  <li>4-D phase diagrams, an isometric shot of the Gibbs tetrahedron</li>
+  <li>Higher-order phase diagrams, we create a graph depiction of the phase equilibria data. In these plots, every line corresponds to 2-phase equilibrium.
+</ul>
+
+<h3> Formation energies </h3>
+The formation energies supplied to this tool were calculated using elemental reference states which are a combination of DFT total energies of elemental phases, fit to experimental formation energies (the gases, and ionic solids), corrected to remove the effects of DFT+U.
+
+<h3> References </h3>
+
+<i>
+  1. Barber, C., Dobkin, D. & Huhdanpaa, H. The quickhull algorithm for convex hulls. ACM Transactions on Mathematical Software 22, 469–483 (1996).<br>
+  2. Stevanović, V., Lany, S., Zhang, X. & Zunger, A. Correcting density functional theory for accurate predictions of compound enthalpies of formation: Fitted elemental-phase reference energies. Physical Review B 85, 115104 (2012).
+</i>
+</div>
+
+{% endblock %}
+
+{% block sidebar %}
+<div id="sidebar" class="box">
+  <form action="" method="POST">{% csrf_token %}
+    <h2 class="subhead"> Specify a region of phase space:</h2>
+    <input name='search' value="{{ search }}"/>
+    <br>Examples:<br>
+    <ul>
+      <li>Fe-O
+      <li>Li-H-O
+      <li>Li2O-Fe2O3
+    </ul>
+    <h2 class="subhead"> Specify chemical potentials or ranges of chemical potentials</h2>
+    <input name="chem_pots" value="{{ chem_pots}}">
+    <br>Use in combination with a composition or composition range to check stability as a function of chemical potential.<br>
+    Examples:<br>
+    <ul>
+      <li>O
+      <li>Li=-1.8
+      <li>O=0:-5
+      <li>O=0:-5 Li=0:-5
+    </ul>
+    <input type='submit'  name="action" value="submit"/><br>
+    <br><br>
+    Use custom phase data file: <input type="file" name="custom_phase_data"><br>
+    File format:
+    <pre>
+    Composition delta_e
+    A 0.0
+    B 0.0
+    AB -2.5
+    AB2 -3.0
+  </pre>
+  </form>
+
+</div>
+{% endblock %}

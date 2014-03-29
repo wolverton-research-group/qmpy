@@ -1,0 +1,68 @@
+{% extends "base_site.html" %}
+
+{% block title %}Task: {{ task.id }}{% endblock %}
+
+{% block content %}
+
+<h1> Task: {{task.id}}</h1>
+<h2> Status: 
+{% if task.state == 2 %} Completed
+{% elif task.state == 1 %} Running 
+{% elif task.state == 0 %} Queued 
+{% elif task.state == -1 %} Encountered Error
+{% elif task.state == -2 %} Held
+{% endif %}</h2>
+
+  <h2>Details:</h2>
+  <ul>
+    <li> Created: {{task.created}}</li>
+    {% if task.state == 2 %}
+    <li> Finished: {{task.finished }}</li>
+    {% elif task.eligible_to_run %}
+    <li> Eligible to run </li>
+    {% endif %}
+    <li> Priority: {{ task.priority }}</li>
+    {% if task.kwargs %}
+    <li> Keyword arguments: {{ task.kwargs }}</li>
+    {% endif %}
+  </ul>
+
+  <h2> Related objects </h2>
+  <ul>
+    <li> Entry: <a href="/materials/entry/{{task.entry_id}}">{{task.entry_id}}</a>
+    <li> Projects: {% for p in task.projects %}<a href="/computing/project/{{p.name}}">{{p.name}} </a>{% endfor %}
+  </ul>
+
+  <h2> Related jobs </h2>
+  <table>
+    <thead>
+      <th>Job ID</th>
+      <th>State</th>
+      <th>Host</th>
+      <th>User</th>
+      <th>Run path</th>
+    </thead>
+    <tbody>
+      {% for job in task.job_set.all %}
+      <tr class=clickableRow href="/computing/job/{{job.id}}">
+        <td>{{job.id}}</td>
+        <td>{{job.state}}</td>
+        <td>{{job.account.host.name}}</td>
+        <td>{{job.account.user.name}}</td>
+        <td>{{job.run_path}}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+{% endblock %}
+
+{% block sidebar %}
+<div id="sidebar" class="box">
+  <h1> Control panel </h1>
+  <form action="" method="post">{% csrf_token %}
+    If you press this button, this task will be cancelled. Any related jobs will still finish, but no subsequent calculations will be started. Don't press it unless you mean it!
+    <input type="button" value="Cancel Task" onclick="this.form.submit();">
+  </form>
+</div>
+{% endblock %}

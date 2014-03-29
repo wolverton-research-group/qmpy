@@ -1,0 +1,35 @@
+#= General Settings =#
+  PREC = MED
+  ISTART = 1
+  ICHARG = 1
+ ISPIN = 2
+ MAGMOMS =   MAGMOMS = 3*5.0000 9*0.0000
+
+#= LDA+U Fields =#
+ LDAU = .TRUE.
+ LDAUPRINT = 1
+ LDAUU = 3.5 0.0 0.0
+ LDAUJ = 0 0 0
+ LDAUL = 2 -1 -1
+
+#= Parallelization =#
+  NSIM = 1
+  NPAR = 2
+
+#= Ionic Relaxation Settings =#
+  NSW = 0
+
+#= Electronic Relxation Settings =#
+  ENCUT = 520
+  NELMIN = 5
+  ALGO = FAST
+
+#= Write flags =#
+  LELF = .FALSE.
+  LHVAR = .FALSE.
+
+#= DOS =#
+  ISMEAR = -5
+  SIGMA = 0.20000000
+
+# Uncategorized

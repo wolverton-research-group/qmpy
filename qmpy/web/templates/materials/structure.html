@@ -1,0 +1,111 @@
+{% extends "base_site.html" %}
+{% load admin_static %}
+{% load i18n %}
+
+{% block extrastyle %}
+<link rel="stylesheet" type="text/css" href="{% static "css/flot.css" %}"/>
+{% endblock %}
+
+{% block extrascript %}
+
+{% endblock %} 
+
+{% block content %}
+<h1> <a href="/materials/composition/{{structure.name}}">{{ structure.composition.html|safe}}</a></h1>
+Entry: <a href="/materials/entry/{{structure.entry_id}}">
+	{{ structure.entry_id }}</a><br>
+Spacegroup: <a href="/analysis/spacegroup/{{structure.spacegroup_id}}">
+	{{structure.spacegroup_id}}</a><br>
+<a href="/materials/export/primitive/poscar/{{structure.id}}">Download POSCAR</a><br>
+<a href="/materials/kpoints/8000/{{structure.id}}/KPOINTS">Download KPOINTS file</a>
+
+<h2> Lattice parameters </h2>
+{{ lpstr |safe }}
+
+<h2> Atomic coordinates </h2>
+<table>
+	<thead>
+		<tr>
+			<th>Element</th>
+			<th>x</th>
+			<th>y</th>
+			<th>z</th>
+			<th>oxidation state</th>
+      <th>Site occupancy</th>
+      {% if structure.magmom %}
+			<th>magnetic moment</th>
+      {% endif %}
+		</tr>
+	</thead>
+	<tbody>
+		{% for atom in structure.sites %}
+		<tr>
+			<td>{{atom.label}}</td>
+			<td>{{atom.x |floatformat:-3 }}</td>
+			<td>{{atom.y |floatformat:-3 }}</td>
+			<td>{{atom.z |floatformat:-3 }}</td>
+			<td>{{atom.ox | floatformat:-2}}</td>
+      <td>{{atom.occupancy}}</td>
+      {% if structure.magmom %}
+			<td>{{atom.magmom | floatformat:-2}}</td>
+      {% endif %}
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
+{% endblock %}
+
+{% block sidebar %}
+<div id="sidebar" class="box">
+  <script type="text/javascript" src={% static "js/jsmol/JSmol.min.js" %}></script>
+  <div id="jmol">
+    <h1> Visualization </h1>
+    <script>
+      var Info = {
+        j2sPath: "{% static 'js/jsmol/j2s' %}",
+        {% if primitive %}
+        src: "/materials/export/primitive/cif/{{structure.id}}",
+        {% else %}
+        src: "/materials/export/conventional/cif/{{structure.id}}",
+        {% endif %}
+        use: "HTML5",
+        width: 400,
+        height: 300,
+      };
+      jma = Jmol.getApplet("myJmol", Info);
+    </script>
+  </div>
+
+  <form action="" method="POST">{% csrf_token %}
+    <input id="rPrim" type="radio" name="primitive" value="1" 
+    onclick="this.form.submit();" {% if primitive %}checked{% endif %}>
+    <label for="rPrim">Primitive Cell</label>
+    <input id="rConv" type="radio" name="primitive" value="0" 
+    onclick="this.form.submit();" {% if not primitive %}checked{% endif %}>
+    <label for="rConv">Conventional Cell</label>
+  </form>
+
+  <h1> Pair distribution function</h1>
+  <script language="javascript" type="text/javascript" src={% static "js/flot/jquery.flot.js" %}></script>
+  <script language="javascript" type="text/javascript">
+  $(function() {
+      {{ pdf | safe }}
+      });
+  </script>
+  <div class="flot-container">
+    <div id="pdf" class="flot-placeholder"></div>
+  </div>
+
+  <h1> X-ray Diffraction Peak Locations</h1>
+  <script language="javascript" type="text/javascript">
+  $(function() {
+      {{ xrd | safe }}
+      });
+  </script>
+  <div class="flot-container">
+    <div id="xrd" class="flot-placeholder"></div>
+  </div>
+  <a href="/materials/xrd/{{structure.id}}.csv">Download data</a>
+
+</div>
+{% endblock %}

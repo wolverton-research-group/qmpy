@@ -1,0 +1,56 @@
+{% extends "base_site.html" %}
+{% load admin_static %}
+{% load i18n %}
+
+{% block content_title %}
+<h1> Chemical potential determination </h1>
+{% endblock %}
+
+{% block extrastyle %}
+<link rel="stylesheet" type="text/css" href="{% static "css/flot.css" %}"/>
+{% endblock %}
+
+
+{% block content %}
+
+{% if flotscript %} 
+<h1> Stability window</h1>
+<script id="source" language="javascript" type="text/javascript">
+    $(function() {
+        {{ flotscript | safe}}
+        });
+  </script>
+
+<div class="flot-container" style="width:500px;height:400px;float:left">
+  <div id="placeholder" class="flot-placeholder"></div>
+</div>
+{% endif %}
+
+<ul>
+  {% for eq, pots in chem_pots.items %}
+  <li> {{ eq }}
+  <ul>
+    {% for k, v in pots.items %}
+    <li> {{k}}: {{v}}
+    {% endfor %}
+  </ul>
+  {% endfor %}
+</ul>
+
+{% endblock %}
+
+{% block sidebar %}
+<div id="sidebar" class="box">
+  <form action="" method="POST">{% csrf_token %}
+    <h2 class="subhead"> Specify a region of phase space:</h2>
+    <input name='search' value="{{ search }}"/><br>
+    <input type='submit'  name="action" value="submit"/><br>
+    <br>Examples:<br>
+    <ul>
+      <li>Fe4O10Li1
+    </ul>
+  </pre>
+  </form>
+
+</div>
+{% endblock %}

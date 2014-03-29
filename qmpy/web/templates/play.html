@@ -1,0 +1,85 @@
+{% extends "base_site.html" %}
+{% load admin_static %}
+
+{% block content %}
+<script type="text/javascript" src={% static "js/three.min.js" %}></script>
+
+<script type="text/javascript">
+
+  init()
+
+  function init() {
+    // set the scene size
+    var WIDTH = 300,
+        HEIGHT = 300;
+    
+    // set some camera attributes
+    var VIEW_ANGLE = 45,
+        ASPECT = WIDTH / HEIGHT,
+        NEAR = 0.1,
+        FAR = 10000;
+    
+    // get the DOM element to attach to
+    // - assume we've got jQuery to hand
+    var $container = $('#content');
+    
+    // create a WebGL renderer, camera
+    // and a scene
+    var renderer = new THREE.WebGLRenderer();
+    var camera = 
+      new THREE.PerspectiveCamera(
+          VIEW_ANGLE, 
+          ASPECT,
+          NEAR,
+          FAR);
+    
+    var scene = new THREE.Scene();
+    
+    // add the camera to the scene
+    scene.add(camera);
+    
+    // so pull it back
+    camera.position.x = 0.5;
+    camera.position.y = 0.43302;
+    camera.position.z = 2;
+    
+    // start the renderer
+    renderer.setSize(WIDTH, HEIGHT);
+    
+    // attach the render-supplied DOM element
+    $container.append(renderer.domElement);
+
+    // Make a material
+    var material = new THREE.LineBasicMaterial({
+                color: 0x0000ff
+                });
+
+    // Draw some lines
+
+
+    var verts = [[[0.0, 0.5], [0.0, 0.866025403784]],
+       [[0.5, 0.666666666667], [0.866025403784, 0.0]],
+       [[0.716981132075, 0.666666666667], [0.490203058746, 0.0]],
+       [[0.793103448276, 0.666666666667], [0.358355339497, 0.0]],
+       [[1.0, 0.666666666667], [0.0, 0.0]],
+       [[0.716981132075, 0.793103448276], [0.490203058746, 0.358355339497]],
+       [[0.0, 0.666666666667], [0.0, 0.0]],
+       [[0.793103448276, 1.0], [0.358355339497, 0.0]],
+       [[0.716981132075, 0.5], [0.490203058746, 0.866025403784]]];
+
+    for (var i=0; i<verts.length; i++) {
+      geometry = new THREE.Geometry();
+      geometry.vertices.push(new THREE.Vector3(verts[i][0][0], verts[i][1][0], 0.0));
+      geometry.vertices.push(new THREE.Vector3(verts[i][0][1], verts[i][1][1], 0.0));
+
+      line = new THREE.Line(geometry, material);
+      scene.add(line);
+    }
+
+    // draw!
+    renderer.render(scene, camera);
+  }
+
+</script>
+
+{% endblock %}

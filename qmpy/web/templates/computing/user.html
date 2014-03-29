@@ -1,0 +1,23 @@
+{% extends "base_site.html" %}
+
+{% block title %}{{ user.username }}{% endblock %}
+
+{% block content %}
+
+<h1> {{ user.username }} </h1>
+
+<h2> {{ user.username }}'s accounts </h2>
+<ul id="nav-global">
+	{% for acc in user.account_set.all %}
+	<li><a href="/computing/host/{{acc.host.name}}"> {{acc.host.name}}</a></li>
+	{% endfor %}
+</ul>
+
+<h2> {{ user.username }}'s projects </h2>
+<ul id="nav-global">
+	{% for proj in user.project_set.all %}
+	<li><a href="/computing/project/{{proj.name}}"> {{proj.name}}</a></li>
+	{% endfor %}
+</ul>
+
+{% endblock %}

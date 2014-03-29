@@ -1,0 +1,54 @@
+{% extends "base_site.html" %}
+
+{% block content_title %}
+Job: <a href="/computing/job/{{job.id}}">{{ job.id }}</a>
+{% endblock %}
+
+{% block content %}
+
+<h1>Job: {{ job.id }}</h1>
+<h2>Status: 
+  {% if job.state == 2 %} Complete
+  {% elif job.state == 1 %} Running
+  {% elif job.state == 0 %} Not yet submitted
+  {% elif job.state == -1 %} Encountered error
+  {% endif %}
+</h2>
+
+<h2>Details:</h2>
+<ul>
+  <li> Account: <a href="/computing/user/{{job.account.user.username}}">{{job.account.user.username}}</a>@<a href="/computing/host/{{job.account.host.name}}">{{job.account.host.name}}</a></li>
+  <li> Path: {{ job.run_path }}</li>
+  <li> Submitted: {{job.created}}</li>
+  {% if job.state == 2 %}
+  <li> Finished: {{job.finished }}</li>
+  {% endif %}
+</ul>
+
+<h2> Related objects </h2>
+<ul>
+  <li> Entry: <a href="/materials/entry/{{job.task.entry_id}}">{{job.task.entry_id}}</a>
+  <li> Task: <a href="/computing/task/{{job.task_id}}">{{job.task_id}}</a>
+  <li> Calculation: <a href="/analysis/calculation/{{job.calculation.id}}">{{job.calculation.id}}</a>
+</ul>
+
+{% if stdout %}
+<div class=box style="width:640px;margin:10px">
+<h2> Calculation standard out: </h2>
+<pre> {{ stdout | safe }}</pre>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block sidebar %}
+{% if job.state == 1 %}
+<div id="sidebar" class="box">
+  <h1> Control panel </h1>
+  <form action="" method="post">{% csrf_token %}
+    If you press this button, this job will be cancelled, and collected. So don't press it unless you mean it!
+    <input type="button" value="Cancel Job" onclick="this.form.submit();">
+  </form>
+</div>
+{% endif %}
+{% endblock %}

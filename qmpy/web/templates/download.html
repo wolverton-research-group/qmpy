@@ -1,0 +1,24 @@
+{% extends "base_site.html" %}
+{% load admin_static %}
+
+{% block title %}
+OQMD | Download
+{% endblock %}
+
+
+{% block extrahead %}
+{% endblock %}
+
+{% block content %}
+
+<h1> Download </h1>
+
+<p>
+Download the database at: <a href="{% static 'downloads/database.tgz' %}">Download</a>
+</p>
+
+<p>
+Download the codebase to support it at: <a href="https://pypi.python.org/pypi/qmpy">Download</a>
+</p>
+
+{% endblock %} 

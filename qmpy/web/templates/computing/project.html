@@ -1,0 +1,148 @@
+{% extends "base_site.html" %}
+{% load admin_static %}
+{% load i18n %}
+
+{% block extrastyle %}
+<link rel="stylesheet" type="text/css" href="{% static "css/flot.css" %}"/>
+{% endblock %}
+
+{% block extrascript %}
+<script language="javascript" type="text/javascript" src={% static "js/flot/jquery.flot.pie.js" %}></script>
+
+<script language="javascript" type="text/javascript">
+  $(function() {
+    $.plot("#placeholder", {{ plot | safe }}, {
+          legend: {position: "ne", margin: 1,
+                   labelFormatter: function(label, series) {
+                   return '<a href="/computing/project/'+label+'/{{project.name}}">'+label+'</a>';
+                   }},
+          series: { 
+            pie: { 
+              show: true
+            } 
+          }
+        }
+      );
+    });
+  </script>
+{% endblock %}
+
+{% block content_title %}
+<h1>Project: <a href="/computing/project/{{project.name}}">{{ project.name }}</a></h1>
+{% endblock %}
+
+{% block content %}
+<div>
+  <h2> Summary</h2>
+  <div clsss="flot-container" style="width:250px;height:250px;float:left">
+    <div id="placeholder" class="flot-placeholder"></div>
+  </div>
+
+  <div style="float:right;height:280px; width:200px; margin-top:30px;">
+    <table>
+      <tr>
+        <td># of tasks</td>
+        <td>{{project.task_set.count}}</td></tr>
+      <tr class="clickableRow" href="/computing/project/completed/{{project.name}}">
+        <td>Completed</td>
+        <td>{{project.completed.count}}</td></tr>
+      <tr class="clickableRow" href="/computing/project/running/{{project.name}}">
+        <td>Running</td>
+        <td>{{project.running.count}}</td></tr>
+      <tr class="clickableRow" href="/computing/project/waiting/{{project.name}}">
+        <td>Waiting</td>
+        <td>{{project.waiting.count}}</td></tr>
+      <tr class="clickableRow" href="/computing/project/failed/{{project.name}}">
+        <td>Failed</td>
+        <td>{{project.failed.count}}</td></tr>
+    </table>
+  </div>
+</div>
+
+<div style="float:left">
+  <h2> Upcoming tasks </h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Priority</th>
+        <th>Composition</th>
+        <th>Running since</th>
+        <th>Module</th>
+        <th>Extra arguments</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for j in upcoming %}
+      <tr class=clickableRow href="/computing/task/{{j.id}}">
+        <td>{{j.priority}}</td>
+        <td>{{j.entry.name}}</td>
+        <td>{{j.created}}</td>
+        <td>{{j.module}}</td>
+        <td>{{j.kwargs}}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div style="margin-top:30px;width:100%;float:left">
+  <h2>Currently running</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Composition</th>
+        <th>Running since</th>
+        <th>Module</th>
+        <th>Extra arguments</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for j in project.running %}
+      <tr class=clickableRow href="/computing/task/{{j.id}}">
+        <td>{{j.entry.name}}</td>
+        <td>{{j.created}}</td>
+        <td>{{j.module}}</td>
+        <td>{{j.kwargs}}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block sidebar %}
+<div id="sidebar" class="box">
+    <h1> Control panel </h1>
+    <form action="" method="post">{% csrf_token %}
+      <ul style="margin-left:5px;padding:1px">
+        <li><label><input type="checkbox" {% if project.active %}checked{% endif %} name="active"> Active? </label><br>
+        <li>Priority <input type="text" value="{{project.priority}}" name='priority'> <br>
+        (higher numbers are lower priority)</li>
+      <br>
+
+      <div style="float:left">
+        <h2> Allocations </h2>
+        <ul>
+          {% for alloc in allocations %}
+          <input type="hidden" name="alloc_{{alloc.name}}" value="off">
+          <li><input type="checkbox" name="alloc_{{alloc.name}}" {% if alloc.included %}checked{% endif %} value="on">
+          <a href="/computing/allocation/{{alloc.name}}">{{ alloc.name }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <div style="float:left">
+        <h2> Users  </h2>
+        <ul>
+          {% for user in users %}
+          <input type="hidden" name="user_{{user.username}}" value="off">
+          <li><input type="checkbox" name="user_{{user.username}}" {% if user.included %}checked{% endif %} value="on">
+          <a href="/computing/user/{{ user.username }}">{{user.username}}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <hr>
+      <input type="submit" value="submit changes" style="float:right">
+    </form>
+</div>
+{% endblock %}

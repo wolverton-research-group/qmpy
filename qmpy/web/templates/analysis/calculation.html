@@ -1,0 +1,199 @@
+{% extends "base_site.html" %}
+{% load admin_static %}
+
+{% block title %}{{ calculation.input.name }}{% endblock %}
+
+{% block extrastyle %}
+<link rel="stylesheet" type="text/css" href="{% static "css/flot.css" %}"/>
+{% endblock %}
+
+{% block extrascript %}
+<script id="source" language="javascript" type="text/javascript">
+    $(function() {
+        {{ dos | safe }}
+        });
+    
+  </script>
+{% endblock %}
+
+
+{% block content %}
+<h1>Calculation Report:</h1>
+Calculation "{{calculation.label}}" of entry <a href="/materials/entry/{{calculation.entry_id}}"> {{calculation.entry_id}}</a> ( {{calculation.configuration}} settings )<br>
+{% if calculation.input %}
+Composition: <a href="/materials/composition/{{calculation.composition}}">{{calculation.composition.html | safe}}</a><br>
+Input structure:<a href="/materials/structure/{{ calculation.input_id}}">{{ calculation.input_id }}</a>
+Output structure:<a href="/materials/structure/{{ calculation.output_id}}">{{ calculation.output_id }}</a>
+{% endif %}
+
+<h1>Summary</h1>
+<center>
+  <h2>
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Quantity</th>
+          <th scope="col">Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Energy [eV/atom]</td> 
+          <td> {{ calculation.energy_pa | floatformat:-3 }}</td></tr>
+        <tr>
+          <td>Volume [&#8491;<sup>3</sup>/atom]</td>
+          <td> {{ calculation.output.volume_pa | floatformat:-3 }} </td></tr>
+        <tr>
+          <td>Net magnetic moment [&mu;<sub>b</sub>/atom]</td> 
+          <td> {{ calculation.magmom_pa | floatformat:-3 }}</td></tr>
+        <tr>
+          <td>Band Gap [eV]</td>
+          <td> {{ calculation.band_gap | floatformat:-3 }}</td></tr>
+      </tbody>
+    </table>
+  </h2>
+</center>
+
+<div style="width:250px;float:left">
+  <center>
+    <h2>Input Structure</h2>
+    <h3>Lattice Vectors [&#8491;]</h3>
+    <table class=matrix>
+      {% for row in calculation.input.cell %}
+      <tr>
+        {% for val in row %}
+        <td>{{ val | floatformat:-3 }}</td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </table>
+  </center>
+</div>
+
+<div style="width:250px;float:left">
+  <center>
+    <h2>Output Structure</h2>
+    <h3>Lattice Vectors [&#8491;]</h3>
+    <table class=matrix>
+      {% for row in calculation.output.cell %}
+      <tr>
+        {% for val in row %}
+        <td>{{ val | floatformat:-3 }}</td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </table>
+  </center>
+</div>
+
+<div style="width:250px;float:left">
+  <center>
+    <h3>Stresses [eV/&#8491;]</h3>
+    <table class=matrix>
+      N/A
+    </table>
+  </center>
+</div>
+
+<div style="width:250px;height:150px;float:left">
+  <center>
+    <h3>Stresses [eV/&#8491;]</h3>
+    <table class=matrix>
+      <tr>
+        <td>{{ calculation.output.stresses.0 | floatformat:-3 }}</td>
+        <td>{{ calculation.output.stresses.3 | floatformat:-3 }}</td>
+        <td>{{ calculation.output.stresses.5 | floatformat:-3 }}</td></tr>
+      <tr>
+        <td>{{ calculation.output.stresses.3 | floatformat:-3 }}</td>
+        <td>{{ calculation.output.stresses.1 | floatformat:-3 }}</td>
+        <td>{{ calculation.output.stresses.4 | floatformat:-3 }}</td></tr>
+      <tr>
+        <td>{{ calculation.output.stresses.5 | floatformat:-3 }}</td>
+        <td>{{ calculation.output.stresses.4 | floatformat:-3 }}</td>
+        <td>{{ calculation.output.stresses.2 | floatformat:-3 }}</td></tr>
+    </table>
+  </center>
+</div>
+
+<div style="float:left">
+  <h2> Final positions </h2>
+  <center>
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th colspan=3>Position</th>
+          <th colspan=3>Forces</th>
+          <th></th>
+          <th></th></tr>
+        <tr>
+          <th>species</th>
+          <th>x</th>
+          <th>y</th>
+          <th>z</th>
+          <th>f<sub>x</sub></th>
+          <th>f<sub>x</sub></th>
+          <th>f<sub>x</sub></th>
+          <th>charge</th>
+          <th>magmom</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for atom in calculation.output.atoms %}
+        <tr>
+          <td>{{ atom.species }} </td>
+          <td>{{atom.x | floatformat:4}}</td>
+          <td>{{atom.y | floatformat:4}}</td>
+          <td>{{atom.z | floatformat:4}}</td>
+          <td>{{atom.fx | floatformat:4}}</td>
+          <td>{{atom.fy | floatformat:4}}</td>
+          <td>{{atom.fz | floatformat:4}}</td>
+          <td>{{atom.charge | floatformat:-3}}</td>
+          <td>{{atom.magmom | floatformat:-3}}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </center>
+</div>
+
+{% if dos %}
+<div class="flot-container" style="width:540px;float:left">
+  <div id="placeholder" class="flot-placeholder"></div>
+</div>
+{% endif %}
+
+{% if stdout %}
+<div class=box style="width:640px;margin:10px">
+  <h2> Calculation stdout </h2>
+  <pre> {{ stdout | safe }}</pre>
+</div>
+{% endif %}
+
+{% if stderr %}
+<div class=box style="width:640px;margin:10px">
+  <h2> Calculation stderr <h2>
+  <pre> {{ stderr | safe }}</pre>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block sidebar %}
+<div id="sidebar" class="box">
+  <h2> INCAR settings </h2>
+  <code>
+    {{ calculation.INCAR | linebreaks }}
+  </code>
+
+  <h2> KPOINTS </h2>
+  <code>
+    {{ calculation.KPOINTS | linebreaks}}
+  </code>
+
+  <h2> Potentials </h2>
+  <code>
+    {{ calculation.potentials | join:", " }}
+  </code>
+</div>
+{% endblock %} 

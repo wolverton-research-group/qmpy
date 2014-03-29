@@ -1,0 +1,7 @@
+#Elastic constants of PbS (GPa) from Anderson, Physical Acoustics 1965 (measured at 293 K)
+126.9 29.7 29.7 0 0 0
+29.7 126.9 29.7 0 0 0
+29.7 29.7 126.9 0 0 0
+0 0 0 24.8 0 0
+0 0 0 0 24.8 0
+0 0 0 0 0 24.8

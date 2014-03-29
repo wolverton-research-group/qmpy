@@ -1,0 +1,92 @@
+#(C) 2010 by Fachinformationszentrum Karlsruhe. All rights reserved.
+data_1-ICSD
+_database_code_ICSD 1
+_audit_creation_date 1986-07-25
+_audit_update_record 2010-08-01
+_chemical_name_systematic 'Oxotetratellurium dichromate(III)'
+_chemical_formula_structural '(Te4 O) (Cr2 O10)'
+_chemical_formula_sum 'Cr2 O11 Te4'
+_exptl_crystal_density_diffrn 5.17
+_cell_measurement_temperature 293.
+#Default value included by FIZ Karlsruhe
+_cell_measurement_pressure 101.325
+#Default value included by FIZ Karlsruhe
+_publ_section_title
+'Cr2 Te4 O11: une structure a anions complexes (Cr2 O10)(14-)'
+loop_
+_citation_id
+_citation_journal_full
+_citation_year
+_citation_journal_volume
+_citation_page_first
+_citation_page_last
+_citation_journal_id_ASTM
+primary 'Acta Crystallographica B (24,1968-38,1982)' 1976 32 175 180 ACBCAR
+loop_
+_publ_author_name
+'Meunier, G.'
+'Frit, B.'
+'Galy, J.'
+_cell_length_a 7.016(3)
+_cell_length_b 7.545(3)
+_cell_length_c 9.728(3)
+_cell_angle_alpha 90.
+_cell_angle_beta 99.69(5)
+_cell_angle_gamma 90.
+_cell_volume 507.61
+_cell_formula_units_Z 2
+_symmetry_space_group_name_H-M 'P 1 21/c 1'
+_symmetry_Int_Tables_number 14
+_refine_ls_R_factor_all 0.034
+loop_
+_symmetry_equiv_pos_site_id
+_symmetry_equiv_pos_as_xyz
+1 'x, -y+1/2, z+1/2'
+2 '-x, -y, -z'
+3 '-x, y+1/2, -z+1/2'
+4 'x, y, z'
+loop_
+_atom_type_symbol
+_atom_type_oxidation_number
+Te4+ 4
+Cr3+ 3
+O2- -2
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_symbol
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_B_iso_or_equiv
+_atom_site_occupancy
+_atom_site_attached_hydrogens
+Te1 Te4+ 4 e 0.1397(1) 0.8599(1) 0.1762(1) . 1. 0
+Te2 Te4+ 4 e 0.6723(1) 0.8618(2) 0.4158(1) . 1. 0
+Cr1 Cr3+ 4 e 0.3192(3) 0.5019(3) 0.3842(2) . 1. 0
+O1 O2- 4 e 0.158(1) 0.649(1) 0.4866(7) . 1. 0
+O2 O2- 4 e 0.563(1) 0.641(2) 0.4517(8) . 1. 0
+O3 O2- 4 e 0.468(1) 0.375(1) 0.2623(8) . 1. 0
+O4 O2- 4 e 0.127(1) 0.314(1) 0.3429(9) . 1. 0
+O5 O2- 4 e 0.205(1) 0.644(1) 0.2121(7) . 1. 0
+O6 O2- 2 d 0.5 0 0.5 . 1. 0
+loop_
+_atom_site_aniso_label
+_atom_site_aniso_type_symbol
+_atom_site_aniso_beta_11
+_atom_site_aniso_beta_22
+_atom_site_aniso_beta_33
+_atom_site_aniso_beta_12
+_atom_site_aniso_beta_13
+_atom_site_aniso_beta_23
+Te1 Te4+ 0.0026 0.0021 0.0019 0.0001 0 0.0002
+Te2 Te4+ 0.0092 0.0046 0.0018 0.0034 -.0015 -.001
+Cr1 Cr3+ 0.0018 0.0022 0.0007 0.0003 0 -.0002
+O1 O2- 0.0049 0.0037 0.0016 0.0019 0.0013 0.0005
+O2 O2- 0.0059 0.0057 0.0015 0.0031 0.0006 0.0008
+O3 O2- 0.0025 0.0052 0.0015 0.0002 0 -.0009
+O4 O2- 0.0003 0.0029 0.0029 -.0007 -.0011 -.0011
+O5 O2- 0.0059 0.0033 0.0004 0.0016 0.0009 0.0016
+O6 O2- 0.0251 0.0121 0.0087 0.0081 -.0003 0.0003
+#End of data_1-ICSD

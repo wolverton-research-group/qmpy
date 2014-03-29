@@ -1,0 +1,135 @@
+{% extends "base_site.html" %}
+{% load admin_static %}
+{% load i18n %}
+
+{% block title %}{{ s.name }}{% endblock %}
+
+{% block extrastyle %}
+<link rel="stylesheet" type="text/css" href="{% static "css/flot.css" %}"/>
+{% endblock %}
+
+{% block extrascript %}
+<script language="javascript" type="text/javascript">
+  $(function() {
+      {{ plot | safe }}
+      });
+    </script>
+
+    <script language="javascript" type="text/javascript">
+      $(function() {
+          {{ pd | safe }}
+          });
+        </script>
+
+        <script type='text/javascript'>//<![CDATA[ 
+          window.onload=function(){
+            var theForm = document.getElementById('theForm');
+            var theInput = document.getElementById('subj');
+            theForm.onsubmit = function(e) {
+              location = "/materials/composition/" + encodeURIComponent(theInput.value);
+              return false;
+            }
+          }//]]>  
+        </script>
+        {% endblock %}
+
+{% block content_title %}
+<h1>Region: {{ search }}</h1>
+{% endblock %}
+
+{% block content %}
+
+<div class="box">
+  <div style="width:450px;height:400px;padding:30px;">
+    <div id="phasediagram" class="flot-placeholder"></div>
+  </div>
+</div>
+
+<div style="float:left">
+  {% if stable %}
+  <h2> Stable phases </h2>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Spacegroup</th>
+        <th>Formation Energy [eV/atom]</th>
+        <th>Prototype</th>
+        <th># of atoms</th>
+        <th>Reference</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for entry in stable %}
+      <tr class=clickableRow href="/materials/entry/{{ entry.id }}">
+        <td>{{ entry.html | safe }}</td>
+        <td>{{ entry.spacegroup.symbol }}</td>
+        <td>{{ entry.energy |floatformat:-3 }}</td>
+        <td>{{ entry.prototype.name }}</td>
+        <td>{{ entry.natoms }}</td>
+        <td>{{ entry.reference.citation }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+
+{% if results %}
+<div style="padding-top:20px;float:left">
+<h1> Compounds contained in this region of phase space </h1>
+<table>
+<thead>
+  <tr>
+    <th>ID</th>
+    <th>Composition</th>
+    <th>Spacegroup</th>
+    <th>Formation Energy [eV/atom]</th>
+    <th>Prototype</th>
+    <th># of atoms</th>
+    <th>Reference</th>
+  </tr>
+</thead>
+
+<tbody>
+  {% for group, entries in results %}
+  <tr class=clickableRow href="/materials/composition/{{group}}">
+    <td colspan="6"><h2>{{group}}</h2></td>
+  </tr>
+  {% for entry in entries %}
+  <tr class=clickableRow href="/materials/entry/{{ entry.id }}">
+    <td>{{ entry.id }}</td>
+    <td>{{ entry.html | safe }}</td>
+    <td>{{ entry.spacegroup.symbol }}</td>
+    <td>{{ entry.energy |floatformat:-3 }}</td>
+    <td>{{ entry.prototype.name }}</td>
+    <td>{{ entry.natoms }}</td>
+    <td>{{ entry.reference.citation }}</td>
+  </tr>
+  {% endfor %}
+  {% endfor %}
+</tbody>
+</table>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block sidebar %}
+<div id="sidebar" class="box">
+  <h2 class="subhead"> Search for a composition or region </h2>
+  <form id="theForm">
+    <input id='subj' value="{{ search }}"/>
+    <input type='submit'/>
+  </form>
+  Examples:<br>
+  <ul>
+    <li>Al2O3
+    <li>LiFeO2
+    <li>Cu2MnAl
+    <li>Fe-O
+    <li>Ni-Ti-Al
+  </ul>
+
+</div>
+{% endblock %}

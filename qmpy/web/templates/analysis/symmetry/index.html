@@ -1,0 +1,46 @@
+{% extends "base_site.html" %}
+{% load admin_static %}
+{% load i18n %}
+
+{% block extrastyle %}
+<script type="text/javascript" src={% static "js/jsmol/JSmol.min.js" %}></script>
+{% endblock %}
+
+{% block content %}
+<h1> Symmetry Analyzer </h1>
+Copy and paste your own structure data, in any format readable by ASE into the text box below.
+
+<script>
+	jQuery(document).ready(function($) {
+		$(".clickableRow").click(function() {
+			window.document.location = $(this).attr("href")
+		});
+	});
+</script>
+
+<div>
+	<h1> Structure data </h1>
+</div>
+
+<div>
+	<form action="" method="post">{% csrf_token %}
+		<textarea cols="40" rows="30" name="crystal_data">
+{{ crystal_data }}
+		</textarea><br>
+		<input type="submit" value="submit">
+	</form>
+</div>
+
+<!--- RESULTS -->
+
+{% if data %}
+<div>
+	<ul>
+		<li>Spacegroup: <a href="/analysis/symmetry/{{data.spacegroup}}">
+			{{ data.spacegroup }}</a></li>
+	</ul>
+</div>
+{% endif %}
+
+{% endblock %}
+

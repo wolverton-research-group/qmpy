@@ -1,0 +1,31 @@
+{% extends "base_site.html" %}
+{% load admin_static %}
+
+{% block extrastyle %}
+<script type="text/javascript" src={% static "js/jsmol/JSmol.min.js" %}></script>
+{% endblock %}
+
+{% block title %}Operation: {{ operation.id }}{% endblock %}
+
+{% block content %}
+<h1> Operation: {{operation}}</h1>
+
+<h2> Spacegroups possessing this symmetry </h2>
+<table>
+	<thead>
+		<tr>
+			<th>International symbol</th>
+			<th>Number</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for spg in operation.spacegroup_set.all %}
+		<tr class=clickableRow href="/analysis/spacegroup/{{spg.id}}">
+			<td>{{spg.symbol}}</td>
+			<td>{{spg.number}}</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
+
+{% endblock %}
