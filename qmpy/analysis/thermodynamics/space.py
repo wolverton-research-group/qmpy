@@ -968,7 +968,7 @@ class PhaseSpace(object):
             energy, gclp_phases = self.gclp(p.unit_comp, phases=phases)
             p.stability = p.energy - energy
 
-    def compute_stabilities(self, phases=None, save=False):
+    def compute_stabilities(self, phases=None, save=False, new_only=False):
         """
         Calculate the stability for every Phase.
 
@@ -978,18 +978,28 @@ class PhaseSpace(object):
 
             save:
                 If True, save the value for stability to the database. 
+
+            new_only:
+                If True, only compute the stability for Phases which did not
+                import a stability from the OQMD. False by default.
         """
         from qmpy.analysis.vasp.calculation import Calculation
         if phases is None:
             phases = self.phases
         for p in phases:
-            #if not p.stability:
+            if new_only:
+                if not p.stability is None:
+                    continue
             self.compute_stability(p)
             qs = qmpy.FormationEnergy.objects.filter(id=p.id)
             if save:
                 qs.update(stability=p.stability)
 
     def save_tie_lines(self):
+        """
+        Save all tie lines in this PhaseSpace to the OQMD. Stored in
+        Formation.equilibrium
+        """
         for p1, p2 in self.tie_lines:
             p1.formation.equilibrium.add(p2.formation)
 
@@ -1012,6 +1022,7 @@ class PhaseSpace(object):
     renderer = None
     @property
     def phase_diagram(self, **kwargs):
+        """Renderer of a phase diagram of the PhaseSpace"""
         if self.renderer is None:
             self.get_phase_diagram(**kwargs)
         return self.renderer
