@@ -2,8 +2,8 @@
 import os.path
 INSTALL_PATH=os.path.dirname(os.path.abspath(__file__)).replace('qmpy/db','')
 
-#DEBUG = False
-DEBUG = True
+DEBUG = False
+#DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -15,7 +15,7 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql', 
-        'NAME': 'qmdb_dev', 
+        'NAME': 'qmdb', 
         'USER': 'sjk648',                      
         'PASSWORD': '',                  
         'HOST': '',                      
@@ -23,7 +23,7 @@ DATABASES = {
     }
 }
 
-ALLOWED_HOSTS = ['www.oqmd.org', 'larue.northwestern.edu']
+ALLOWED_HOSTS = ['oqmd.org', 'larue.northwestern.edu']
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -173,3 +173,6 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 #        }
 
 AUTH_USER_MODEL = 'qmpy.User'
+
+GOOGLE_ANALYTICS_MODEL = True
+

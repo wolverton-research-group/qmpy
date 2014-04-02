@@ -3,7 +3,7 @@
 """
 qmpy is a package containing many tools for computational materials science. 
 """
-import pyximport; pyximport.install()
+#import pyximport; pyximport.install()
 import logging
 import logging.handlers
 import os

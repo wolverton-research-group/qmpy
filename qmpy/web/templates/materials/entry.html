@@ -51,15 +51,15 @@
   {% endif %}
 
 	{% if entry.prototype %}
-	<li>Structure derived from: 
+	<li>Prototype: 
 	<a href="/materials/prototype/{{ entry.prototype_id }}">{{entry.prototype_id}}</a>
 	</li>{% endif %}
 
-  <li> Input structure: <a href="/materials/structure/{{entry.input.id}}">
-    {{entry.input.id}}</a></li>
+  <li> Structure: <a href="/materials/structure/{{entry.structure.id}}">
+    {{entry.structure.id}}</a></li>
   <li> Spacegroup: <a href="/analysis/symmetry/spacegroup/{{entry.structure.spacegroup}}">
     {{entry.structure.spacegroup.symbol}}</a></li>
-  <li> # of atoms: {{entry.input.natoms}}</li>
+  <li> # of atoms: {{entry.structure.natoms}}</li>
 
   <li> Path: {{entry.path}} </li>
 

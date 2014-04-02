@@ -1,9 +1,9 @@
-#/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import cif
 import poscar
 import ase
+import ase.io
 
 class StructureFormatError(Exception):
     """Problem reading an input file"""
@@ -32,13 +32,23 @@ def read(source_file, *args, **kwargs):
         >>> io.read(INSTALL_PATH+'/io/files/fe3o4.cif')
 
     """
-    if 'cif' in source_file:
-        return cif.read(source_file, *args, **kwargs)
-    elif ( 'POSCAR' in source_file or
-            'CONTCAR' in source_file ):
-        return poscar.read(source_file, *args, **kwargs)
-    else:
-        return ase.read(source_file, *args, **kwargs)
+    try:
+        if 'cif' in source_file:
+            return cif.read(source_file, *args, **kwargs)
+        elif ( 'POSCAR' in source_file or
+                'CONTCAR' in source_file ):
+            return poscar.read(source_file, *args, **kwargs)
+        else:
+            return ase.io.read(source_file, *args, **kwargs)
+    except:
+        try:
+            return poscar.read(source_file, *args, **kwargs)
+        except Exception:
+            pass
+        try:
+            return cif.read(source_file, *args, **kwargs)
+        except Exception:
+            pass
     raise FormatNotSupportedError('The file %s is in an unrecognized format\
             and cannot be read' % source_file)
 
