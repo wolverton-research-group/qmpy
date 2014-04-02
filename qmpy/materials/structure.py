@@ -984,7 +984,7 @@ class Structure(models.Model, object):
         while self.natoms*np.product(kpts) < kppra:
             prev_kpts = kpts.copy()
             refk = np.array(np.ones(3)*refr)*scale
-            kpts = np.array(map(np.ceil, refk))
+            kpts = np.array(map(np.round, refk))
             scale += 1
 
         upper = kppra - np.product(prev_kpts)*self.natoms
@@ -1156,7 +1156,7 @@ class Structure(models.Model, object):
                 return False
         return True
 
-    def find_nearest_neighbors(self, method='closest', tol=0.1, limit=5.0):
+    def find_nearest_neighbors(self, method='closest', tol=0.05, limit=5.0):
         """
         Calls :func:`~qmpy.get_nearest_neighbors()`  and assigns the nearest
         neighbor dictionary to `Structure._nearest_neighbors.
@@ -1207,16 +1207,11 @@ class Structure(models.Model, object):
         Examples::
             
             >>> s = io.read(INSTALL_PATH+'/io/files/fe3o4.cif')
-            >>> spin_lattice = s.get_spin_lattice(elements=['Fe'])
+            >>> sl = s.get_spin_lattice(elements=['Fe'])
             >>> sl.set_fraction(0.33333)
             >>> sl.fraction
             0.3333333333333333
             >>> sl.run_MC()
-            >>> sl.up_spins
-            [<Atom: Fe @ 0.5 0.0 0.0>, 
-             <Atom: Fe @ 0.0 0.5 0.0>, 
-             <Atom: Fe @ 0.0 0.0 0.5>, 
-             <Atom: Fe @ 0.5 0.5 0.5>]
 
         """
 
@@ -1228,10 +1223,14 @@ class Structure(models.Model, object):
             return struct.get_spin_lattice()
         self.find_nearest_neighbors()
         for a1 in self.atoms:
+            n0 = len(pairs)
             for a2 in a1.neighbors:
-                pairs.append([a1, a2])
+                #if a1 < a2:
+                #    continue
+                pairs.append((a1, a2))
 
         lattice = SpinLattice(pairs)
+        lattice.structure = self
         return lattice
 
     def displace_atom(structure, index, vector):
