@@ -68,21 +68,14 @@ linux system). Make sure that the database directory, and all files within
 it are owned by the user 'mysql'. On a typical linux installation this process
 might go like::
 
-    $ wget http://oqmd.org/static/downloads/database.tgz
-    $ tar -xvf database.tgz
-    $ mv qmdb /var/lib/mysql/qmdb
-    $ sudo chown -r mysql: /var/lib/mysql/qmdb
+    $ wget http://oqmd.org/static/downloads/qmdb.sql.gz
+    $ gunzip qmdb.sql.gz
+    $ mysql < qmdb.sql
 
 .. note:: 
     The name of the deployed database has changed since previous releases
-    (qmdb_prod). Please make sure you keep the database name the same as the
-    folder name it untars as.
-
-Finally, once this is done you need to 
-give any users that will be accessing the database permissions. 
-Do this from the mysql command line::
-
-    mysql> GRANT ALL PRIVILEGES ON *.* to '[username]'@'localhost'
+    (qmdb_prod). If your install isn't working, make sure that the database 
+    name agrees with what is found in qmpy/db/settings.py.
 
 Once this is done, you need to edit qmpy/db/settings.py. Set the DATABASES
 variable such that 'USER' is the user with permissions to access the newly
