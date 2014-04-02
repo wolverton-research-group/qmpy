@@ -23,7 +23,7 @@ DATABASES = {
     }
 }
 
-ALLOWED_HOSTS = ['www.oqmd.org', 'larue.northwestern.edu']
+ALLOWED_HOSTS = ['www.internal.oqmd.org', 'larue.northwestern.edu']
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -61,7 +61,7 @@ MEDIA_URL = '/media/'
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = '/var/www/oqmd.org/static/'
+STATIC_ROOT = '/var/www/internal.oqmd.org/static/'
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
