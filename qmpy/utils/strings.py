@@ -59,16 +59,16 @@ def parse_mu(value):
     return {elt: pot}
 
 def parse_comp(value):
-    comp = {}
+    comp = defaultdict(float)
     for elt, amt in re_formula.findall(value):
         if elt in ['D', 'T']:
             elt = 'H'
         if amt == '':
-            comp[elt] = 1
+            comp[elt] += 1
         elif is_integer(amt):
-            comp[elt] = int(round(float(amt)))
+            comp[elt] += int(round(float(amt)))
         else:
-            comp[elt] = float(amt)
+            comp[elt] += float(amt)
     return comp
 
 def parse_sitesym(sitesym, sep=','):

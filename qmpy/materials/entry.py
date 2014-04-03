@@ -437,6 +437,14 @@ class Entry(models.Model):
                     self._energy = de.delta_e
         return self._energy
 
+    @property
+    def stable(self):
+        forms = self.formationenergy_set.filter(fit='standard')
+        if not forms.exists():
+            return None
+        return any([ f.stability <= 0 for f in forms ])
+        
+
     _history = None
     @property
     def history_graph(self):

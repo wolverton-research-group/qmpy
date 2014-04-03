@@ -828,7 +828,10 @@ class PhaseSpace(object):
         while facets:
             facet = facets.pop(0)
             done_list.append(sorted(facet))
-            phases, E = self.get_minima(self.phase_dict.values(), facet)
+            try:
+                phases, E = self.get_minima(self.phase_dict.values(), facet)
+            except:
+                continue
             p = phase.Phase.from_phases(phases)
             if p in self.phases:
                 p = self.phase_dict[p.name]
@@ -899,8 +902,8 @@ class PhaseSpace(object):
 
         if pulp.GUROBI().available():
             prob.solve(pulp.GUROBI(msg=False))
-        if pulp.COINMP_DLL().available():
-            prob.solve(pulp.COINMP_DLL())
+        if pulp.COIN_CMD().available():
+            prob.solve(pulp.COIN_CMD())
         else:
             prob.solve()
 
@@ -934,8 +937,8 @@ class PhaseSpace(object):
 
         if pulp.GUROBI().available():
             prob.solve(pulp.GUROBI(msg=False))
-        if pulp.COINMP_DLL().available():
-            prob.solve(pulp.COINMP_DLL())
+        if pulp.COIN_CMD().available():
+            prob.solve(pulp.COIN_CMD())
         else:
             prob.solve()
 
@@ -1477,8 +1480,8 @@ class PhaseSpace(object):
         
         if pulp.GUROBI().available():
             prob.solve(pulp.GUROBI(msg=False))
-        if pulp.COINMP_DLL().available():
-            prob.solve(pulp.COINMP_DLL())
+        if pulp.COIN_CMD().available():
+            prob.solve(pulp.COIN_CMD())
         else:
             prob.solve()
 

@@ -56,21 +56,22 @@ Setting up the database
 =======================
 
 The database can be downloaded from
-http://oqmd.org/static/downloads/database.tgz or within qmpy you can run::
+http://oqmd.org/static/downloads/qmdb.sql.gz
 
-    >>> sync_database()
-
-and follow the command line prompts to download the database. 
-
-Once you have the database file, you must place the entire database directory 
-into into your mysql data folder, (most likely /var/lib/mysql/ on a 
-linux system). Make sure that the database directory, and all files within 
-it are owned by the user 'mysql'. On a typical linux installation this process
-might go like::
+Once you have the database file, you need to unzip it and load it into a
+database MySQL. On a typical linux installation this process will look like::
 
     $ wget http://oqmd.org/static/downloads/qmdb.sql.gz
     $ gunzip qmdb.sql.gz
     $ mysql < qmdb.sql
+
+
+.. note::
+    Assuming your install is on linux, and assuming you haven't used MySQL at
+    all, you will need to enter a mysql session as root ("mysql -u root -p"),
+    create a user within MySQL ("CREATE USER 'newuser'@'localhost';"), grant 
+    that user permissions ("GRANT ALL PRIVILEGES ON * . * TO
+    'newuser'@'localhost'; FLUSH PRIVILEGES;"). 
 
 .. note:: 
     The name of the deployed database has changed since previous releases
