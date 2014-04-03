@@ -2,7 +2,6 @@
 
 import numpy as np
 from CifFile import ReadCif, CifFile, CifBlock
-import warnings
 import itertools
 import logging
 
@@ -290,9 +289,6 @@ def read(cif_file, grammar=None):
         >>> s = io.cif.read(INSTALL_PATH+'io/files/fe3o4.cif')
 
     """
-    warnings.catch_warnings()
-    warnings.simplefilter("ignore")
-    warnings.warn("deprecated", DeprecationWarning)
     if grammar:
         cf = ReadCif(cif_file, grammar=grammar)
     else:
