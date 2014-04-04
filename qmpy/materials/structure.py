@@ -612,8 +612,6 @@ class Structure(models.Model, object):
         """
 
         # 1
-        if len(self) > 80 or len(other) > 80:
-            return False
         me = self.copy()
         you = other.copy()
 
