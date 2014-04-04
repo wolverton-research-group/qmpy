@@ -571,6 +571,8 @@ class Structure(models.Model, object):
         4. Check that the number of atoms of each element are the same in
         primitive cells
 
+        4b. Check that the spacegroup is the same.
+
         5. If needed check that the primitive cell volumes are the same
 
         6. Convert both primitive cells to reduced form There is one issue here - 
