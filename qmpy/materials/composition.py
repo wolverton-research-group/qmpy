@@ -1,11 +1,8 @@
 # qmpy/materials/composition.py
 
-from collections import defaultdict
-
 from django.db import models
 
 from qmpy.materials.element import Element
-from qmpy.data.meta_data import *
 from qmpy.utils import *
 import qmpy.analysis.thermodynamics as thermo
 

@@ -10,7 +10,7 @@ setup(
     url='http://pypi.python.org/pypi/qmpy',
     license='LICENSE.txt',
     description='Suite of computational materials science tools',
-    long_description=open('README.txt').read(),
+    long_description=open('README.md').read(),
     package_data = {'': ['*.yml', '*.txt', 'legacy.dat', '*.cfg', '*.rst']},
     dependency_links = [
         'https://bitbucket.org/jamesrhester/pycifrw/downloads/PyCifRW-3.6.1.tar.gz#egg=PyCifRW==3.6.1'],
