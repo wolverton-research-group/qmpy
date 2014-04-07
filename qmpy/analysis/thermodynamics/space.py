@@ -900,8 +900,8 @@ class PhaseSpace(object):
                 for p in phases ]) == float(constraint),\
                         'Conservation of '+elt
 
-        if pulp.GUROBI().available():
-            prob.solve(pulp.GUROBI(msg=False))
+        #if pulp.GUROBI().available():
+        #    prob.solve(pulp.GUROBI(msg=False))
         if pulp.COIN_CMD().available():
             prob.solve(pulp.COIN_CMD())
         else:
@@ -935,8 +935,8 @@ class PhaseSpace(object):
         prob += sum([ bvars[b] for b in bounds ]) == 1, \
                 'sum of bounds must be 1'
 
-        if pulp.GUROBI().available():
-            prob.solve(pulp.GUROBI(msg=False))
+        #if pulp.GUROBI().available():
+        #    prob.solve(pulp.GUROBI(msg=False))
         if pulp.COIN_CMD().available():
             prob.solve(pulp.COIN_CMD())
         if pulp.COINMP_DLL().available():
@@ -1480,8 +1480,8 @@ class PhaseSpace(object):
                     'identical %s composition on both sides' % celt
         prob += sum([ rvars[p] for p in phases ]) == 1
         
-        if pulp.GUROBI().available():
-            prob.solve(pulp.GUROBI(msg=False))
+        #if pulp.GUROBI().available():
+        #    prob.solve(pulp.GUROBI(msg=False))
         if pulp.COIN_CMD().available():
             prob.solve(pulp.COIN_CMD())
         if pulp.COINMP_DLL().available():
