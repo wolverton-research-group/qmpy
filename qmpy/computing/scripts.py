@@ -129,3 +129,41 @@ def static(entry, **kwargs):
         calc.write()
 
     return calc
+
+def wavefunction(entry, **kwargs):
+    if entry.calculations.get('wavefunction', Calculation()).converged:
+        return entry.calculations['wavefunction']
+
+    calc = static(entry, **kwargs)
+    if not calc.converged:
+        return calc
+
+    input = calc.input
+    calc = Calculation.setup(input, entry=entry,
+                                    configuration='static',
+                                    path=entry.path+'/hybrids/wavefunction',
+                                    chgcar=entry.path+'/static',
+                                    settings={'lwave':True},
+                                    **kwargs)
+    entry.calculations['wavefunction'] = calc
+    if not calc.converged:
+        calc.write()
+    return calc
+
+def hybrid(entry, **kwargs):
+    # first, get a wavecar
+    wave = wavefunction(entry, **kwargs)
+    if not wave.converged:
+        return wave
+
+    calcs = []
+    default = ['b3lyp', 'hse06', 'pbe0', 'vdw']
+    for hybrid in kwargs.get('forms', default):
+        calc = Calculation.setup(input, entry=entry,
+                                    configuration=hybrid,
+                                    path=entry.path+'/hybrids/'+hybrid,
+                                    wavecar=wave,
+                                    settings={'lwave':True},
+                                    **kwargs)
+        calcs.append(calc)
+    return calcs

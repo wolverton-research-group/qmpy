@@ -5,3 +5,4 @@ from ising import *
 from xrd import XRD
 from griddata import GridData
 from elastic import *
+from interface_finder import *

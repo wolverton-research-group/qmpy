@@ -3,6 +3,7 @@ import logging
 from renderable import *
 import qmpy
 import point
+from mpl_toolkits.mplot3d import Axes3D
 
 logger = logging.getLogger(__name__)
 
@@ -22,8 +23,17 @@ class Text(Renderable):
         return self.point.dim
 
     def draw_in_matplotlib(self, **kwargs):
-        plt.text(self.point.coord[0],
-                 self.point.coord[1], self.text, **kwargs)
+        if not kwargs.get('axes'):
+            axes = plt.gca()
+        else:
+            axes = kwargs['axes']
+
+        if len(self.point.coord) == 2:
+            x,y = self.point.coord
+            axes.text(x, y, self.text)
+        elif len(self.point.coord) == 3:
+            x,y,z = self.point.coord
+            axes.text(x, y, z, self.text)
 
     def get_flot_series(self, **kwargs):
         cmd = '\no = plot.pointOffset({{ x: {x}, y: {y} }});'.format(
