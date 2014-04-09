@@ -1,5 +1,8 @@
 import numpy as np
-import pyximport; pyximport.install()
+try:
+    import pyximport; pyximport.install()
+except ImportError:
+    pass
 import logging
 import logging.handlers
 import os, os.path
