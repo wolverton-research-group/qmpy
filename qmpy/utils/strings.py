@@ -172,7 +172,7 @@ def electronegativity(elt):
         return data.elements[elt]['electronegativity']
 
 def format_comp(comp, template='{elt}{amt}', delimiter=''):
-    elts = sorted(comp.keys(), key=lambda x: electronegativity(x))
+    elts = sorted(comp.keys(), key=lambda x: (electronegativity(x), x))
     coeffs = get_coeffs(comp)
     return delimiter.join(template.format(elt=k, amt=coeffs[k]) for k in elts)
 

@@ -101,7 +101,7 @@ class PhaseSpace(object):
         if isinstance(bounds, basestring):
             bounds = re.sub('[-,_]', ' ', bounds)
             bounds = [ unit_comp(parse_comp(b)) for b in bounds.split()]
-        elif isinstance(bounds, list):
+        elif isinstance(bounds, (list,set)):
             bounds = [ {elt:1} for elt in bounds ]
         elif isinstance(bounds, dict):
             bounds = [ {elt:1} for elt in bounds ]
@@ -900,8 +900,8 @@ class PhaseSpace(object):
                 for p in phases ]) == float(constraint),\
                         'Conservation of '+elt
 
-        #if pulp.GUROBI().available():
-        #    prob.solve(pulp.GUROBI(msg=False))
+        if pulp.GUROBI().available():
+            prob.solve(pulp.GUROBI(msg=False))
         if pulp.COIN_CMD().available():
             prob.solve(pulp.COIN_CMD())
         else:
@@ -961,15 +961,15 @@ class PhaseSpace(object):
         Compute the energy difference between the formation energy of a Phase,
         and the energy of the convex hull in the absence of that phase. 
         """
-        if self.phase_dict[p.name] != p:
-            stable = self.phase_dict[p.name]
-            p.stability = p.energy - stable.energy
-        elif len(p.comp) == 1:
+        #if self.phase_dict[p.name] != p:
+        #    stable = self.phase_dict[p.name]
+        #    p.stability = p.energy - stable.energy
+        if len(p.comp) == 1:
             stable = self.phase_dict[p.name]
             p.stability = p.energy - stable.energy
         else:
-            phases = self.phase_dict.values()
-            phases.remove(p)
+            phases = [ pp for pp in self.phase_dict.values() if 
+                    p.name != pp.name ]
             energy, gclp_phases = self.gclp(p.unit_comp, phases=phases)
             p.stability = p.energy - energy
 
