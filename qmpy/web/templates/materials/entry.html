@@ -4,7 +4,7 @@
 {% block title %}{{ entry.name }}{% endblock %}
 
 {% block extrascript %}
-<script type="text/javascript" src={% static "js/jsmol/JSmol.min.nojq.js" %}></script>
+<script type="text/javascript" src={% static "js/jsmol/JSmol.min.js" %}></script>
 {% endblock %} 
 
 {% block extrastyle %}
@@ -160,9 +160,8 @@
         height: 300,
         readyFunction: null,
         debug: false,
-        disableJ2SLoadMonitor: false,
-        disableInitialConsole: false,
-        allowJavaScript: false
+        disableJ2SLoadMonitor: true,
+        disableInitialConsole: true
       };
       jma = Jmol.getApplet("myJmol", Info);
     </script>
