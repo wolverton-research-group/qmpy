@@ -21,8 +21,9 @@ config.read(os.path.join(INSTALL_PATH,'configuration','site.cfg'))
 VASP_POTENTIALS = config.get('VASP', 'potential_path')
 
 if not os.path.exists(LOG_PATH):
+    oldmask = os.umask(666)
     os.mkdir(LOG_PATH)
-    os.chmod(LOG_PATH, stat.S_IREAD | stat.S_IWRITE)
+    os.umask(oldmask)
 
 # the default log level for normal loggers
 logLevel = logging.INFO
