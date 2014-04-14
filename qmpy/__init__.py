@@ -76,6 +76,9 @@ except ImportError:
 try:
     import pyspglib 
     FOUND_SPGLIB = True
+    logging.warn("Failed to import pyspglib."
+            'Download at: http://sourceforge.net/projects/spglib/ and'
+            'follow instructions for installing python API')
 except ImportError:
     FOUND_SPGLIB = False
 
