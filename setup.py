@@ -29,6 +29,6 @@ setup(
         "elementtree",
         "pyparsing<=1.9.9",
         "PyCifRW",
-        "PyYAML"
+        "PyYAML",
     ],
 )
