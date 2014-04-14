@@ -12,8 +12,6 @@ setup(
     description='Suite of computational materials science tools',
     long_description=open('README.md').read(),
     package_data = {'': ['*.yml', '*.txt', 'legacy.dat', '*.cfg', '*.rst']},
-    dependency_links = [
-        'https://bitbucket.org/jamesrhester/pycifrw/downloads/PyCifRW-3.6.1.tar.gz#egg=PyCifRW==3.6.1'],
     install_requires=[
         "Django >= 1.5",
         "PuLP",
@@ -29,6 +27,6 @@ setup(
         "elementtree",
         "pyparsing<=1.9.9",
         "PyCifRW",
-        "PyYAML",
+        "PyYAML"
     ],
 )
