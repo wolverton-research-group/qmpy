@@ -27,6 +27,7 @@ setup(
         "python-memcached",
         "python-ase",
         "django-extensions",
+        "elementtree",
         "argparse"
     ],
 )
