@@ -228,14 +228,17 @@ def sync_resources():
             alloc.save()
             proj.allocations.add(alloc)
 
-if not Spacegroup.objects.exists():
-    read_spacegroups()
+try:
+    if not Spacegroup.objects.exists():
+        read_spacegroups()
 
-if not Element.objects.exists():
-    read_elements()
+    if not Element.objects.exists():
+        read_elements()
 
-if not Potential.objects.exists():
-    read_potentials()
+    if not Potential.objects.exists():
+        read_potentials()
 
-if not Hubbard.objects.exists():
-    read_hubbards()
+    if not Hubbard.objects.exists():
+        read_hubbards()
+except:
+    pass

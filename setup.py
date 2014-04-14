@@ -26,9 +26,9 @@ setup(
         "python-memcached",
         "python-ase",
         "django-extensions",
+        "elementtree",
         "pyparsing<=1.9.9",
         "PyCifRW",
         "PyYAML",
-        "argparse"
     ],
 )
