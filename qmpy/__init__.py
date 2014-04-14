@@ -1,17 +1,13 @@
-<<<<<<< HEAD
 # qmpy/__init__.py
 
 """
 qmpy is a package containing many tools for computational materials science. 
 """
-#import pyximport; pyximport.install()
-=======
 import numpy as np
 try:
     import pyximport; pyximport.install()
 except ImportError:
     pass
->>>>>>> 38b24a15db2a84d0abfd92c503b14a9bf9dd0079
 import logging
 import logging.handlers
 import os, os.path
