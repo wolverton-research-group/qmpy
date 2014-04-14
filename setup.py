@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='qmpy',
-    version='0.4.8',
+    version='0.4.9',
     author='S. Kirklin',
     author_email='scott.kirklin@gmail.com',
     packages=find_packages(),
@@ -19,7 +19,6 @@ setup(
         "PuLP",
         "numpy >= 1.6.4",
         "scipy >= 0.12.0",
-        "PyYAML",
         "MySQL-python",
         "matplotlib",
         "networkx",
@@ -27,6 +26,9 @@ setup(
         "python-memcached",
         "python-ase",
         "django-extensions",
+        "pyparsing<=1.9.9",
+        "PyCifRW",
+        "PyYAML",
         "argparse"
     ],
 )
