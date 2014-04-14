@@ -76,10 +76,10 @@ except ImportError:
 try:
     import pyspglib 
     FOUND_SPGLIB = True
+except ImportError:
     logging.warn("Failed to import pyspglib."
             'Download at: http://sourceforge.net/projects/spglib/ and'
             'follow instructions for installing python API')
-except ImportError:
     FOUND_SPGLIB = False
 
 ### Kludge to get the django settings module into the path
