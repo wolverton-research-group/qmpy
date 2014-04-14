@@ -82,6 +82,12 @@ def prototype_view(request, name):
             data,
             RequestContext(request))
 
+def prototypes_view(request):
+    data = {}
+    return render_to_response('materials/prototypes.html',
+            data,
+            RequestContext(request))
+
 def export_xrd(request, structure_id):
     s = Structure.objects.get(pk=structure_id)
     xrd = s.get_xrd()

@@ -997,6 +997,11 @@ class Structure(models.Model, object):
         """Return atomic positions in cartesian coordinates."""
         return np.array([ atom.cart_coord for atom in self.atoms ]) 
 
+    @cartesian_coords.setter
+    def cartesian_coords(self, cc):
+        for atom, coord in zip(self.atoms, cc):
+            atom.cart_coord = coord
+
     @property
     def forces(self):
         """numpy.ndarray of forces on atoms."""
@@ -1823,6 +1828,38 @@ class Structure(models.Model, object):
             return False
         return True
 
+    def create_slab(self, indices, vacuum=10.0, surface=None, in_place=True):
+        if not in_place:
+            new = self.copy()
+            return new.create_slab(indices, vacuum=vacuum, surface=surface)
+
+    def create_vacuum(self, direction, amount, in_place=True):
+        """
+        Add vacuum along a lattice direction.
+
+        Arguments:
+            direction: direction to add the vacuum along. (0=x, 1=y, 2=z)
+            amount: amount of vacuum in Angstroms.
+
+        Keyword Arguments:
+            in_place: apply change to current structure, or return a new one.
+
+        Examples::
+            
+            >>> s = io.read(INSTALL_PATH+'/io/files/POSCAR_FCC')
+            >>> s.create_vacuum(2, 5)
+        """
+        if not in_place:
+            new = self.copy()
+            return new.create_vacuum(direction, amount)
+
+        cart_coords = self.cartesian_coords
+        new_cell = self.lat_params
+        new_cell[direction] += float(amount)
+        self.lat_params = new_cell
+        self.cartesian_coords = cart_coords
+        return self
+
     def make_perfect(self, in_place=True, tol=1e-1):
         """
         Constructs options for a 'perfect' lattice from the structure.
@@ -1856,7 +1893,7 @@ class Structure(models.Model, object):
         """
         if not in_place:
             new = self.copy()
-            return new.make_perfect(True)
+            return new.make_perfect(True, tol=tol)
 
         init_atoms = [ a.copy() for a in self.atoms ]
         init_comp = dict(self.comp)
@@ -1879,13 +1916,11 @@ class Structure(models.Model, object):
                 new.occupancy = 1.0
                 new.site = None
                 atoms.append(new)
-            elif abs(atom.occupancy) < 0.5:
+            elif abs(atom.occupancy) <= 0.5:
                 # then, empty any nearly empty sites
                 continue
             elif atom.occupancy >= 2:
                 raise StructureError('Site occupied by a molecule')
-            else:
-                continue
 
         self._sites = []
         self.atoms = atoms
@@ -1893,12 +1928,12 @@ class Structure(models.Model, object):
 
         if self.is_perfect:
             # total
-            if abs(1 - sum(self.comp.values())/n) > tol:
+            if abs(sum(self.comp.values()) - n) > tol:
                 hopeless = True
 
             for k in init_comp.keys():
-                d = init_comp[k] - self.comp.get(k,0.0)
-                if abs(d) > n*tol:
+                d = init_comp[k] - self.comp.get(k, 0.0)
+                if abs(d) > tol:
                     hopeless = True
                     break
             self.composition = Composition.get(self.comp)

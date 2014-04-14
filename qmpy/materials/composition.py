@@ -62,7 +62,7 @@ class Composition(models.Model):
         if self.space != other.space:
             return False
         for k in self.space:
-            if abs(self.unit_comp[k] - other.unit_comp[k]) > 1e-5:
+            if abs(self.unit_comp[k] - other.unit_comp[k]) > tol:
                 return False
         return True
 

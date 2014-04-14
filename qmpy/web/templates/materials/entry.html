@@ -158,8 +158,12 @@
         use: "HTML5",
         width: 400,
         height: 300,
+        readyFunction: null,
+        debug: false,
+        disableJ2SLoadMonitor: true,
+        disableInitialConsole: true
       };
-      JMolApplet = Jmol.getApplet("myJmol", Info);
+      jma = Jmol.getApplet("myJmol", Info);
     </script>
     <form action="" method="POST">{% csrf_token %}
       <input id="rPrim" type="radio" name="primitive" value="1" 
