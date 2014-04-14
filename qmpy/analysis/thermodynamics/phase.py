@@ -323,6 +323,9 @@ class Phase(object):
         else:
             self.energy = energy
 
+        if len(composition) == 1:
+            self.energy = 0
+
     @staticmethod
     def from_phases(phase_dict):
         """

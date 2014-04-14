@@ -235,14 +235,6 @@ class Entry(models.Model):
     def projects(self, projects):
         self._projects = [ Project.get(p) for p in projects ]
 
-    @property
-    def structure(self):
-        if 'final' in self.structures:
-            return self.structures['final']
-        if 'standard' in self.structures:
-            return self.structures['standard']
-        return self.input
-
     _structures = None
     @property
     def structures(self):
@@ -304,12 +296,19 @@ class Entry(models.Model):
     def structure(self):
         if 'final' in self.structures:
             return self.structures['final']
+        elif 'relaxed' in self.structures:
+            return self.structures['relaxed']
         elif 'relaxation' in self.structures:
             return self.structures['relaxation']
+        elif 'standard' in self.structures:
+            return self.structures['standard']
         elif 'fine_relax' in self.structures:
             return self.structures['fine_relax']
         else:
-            return self.structures['input']
+            try:
+                return self.structures['input']
+            except KeyError:
+                return None
 
     @input.setter
     def input(self, structure):
