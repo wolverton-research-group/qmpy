@@ -1,0 +1,1 @@
+python -i -c "from qmpy import *"

@@ -30,8 +30,13 @@ class Line(Renderable):
                    for i in range(self.dim) ]
 
     def draw_in_matplotlib(self, **kwargs):
+        if not kwargs.get('axes'):
+            axes = plt.gca()
+        else:
+            axes = kwargs['axes']
+
         options = dict(self.options)
-        plt.plot(*self.as_axes, **options)
+        axes.plot(*self.as_axes, **options)
 
     def get_flot_series(self, **kwargs):
         series = {'data': self.as_pairs, 'lines': {'show':True,

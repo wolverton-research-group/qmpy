@@ -130,6 +130,12 @@ class Task(models.Model):
         self.state = 2
         self.finished = datetime.now()
 
+    def hold(self):
+        self.state = -2
+
+    def fail(self):
+        self.state = -1
+
     def __str__(self):
         return '%s (%s: %s)' % (self.module, self.entry, self.entry.path)
 

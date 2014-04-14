@@ -1,7 +1,6 @@
 # qmpy/analysis/symmetry/spacegroup.py
 
 import os
-import warnings
 import fractions as frac
 import numpy as np
 import logging

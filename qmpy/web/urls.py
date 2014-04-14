@@ -24,6 +24,7 @@ urlpatterns += patterns('qmpy.web.views',
     url(r'^materials/composition/(?P<search>.*)$', 'composition_view'),
     url(r'^materials/entry/(?P<entry_id>.*)$', 'entry_view'),
     url(r'^materials/prototype/(?P<name>.*)$', 'prototype_view'),
+    url(r'^materials/prototypes$', 'prototypes_view'),
     url(r'^materials/keyword/(?P<keyword>.*)$', 'keyword_view'),
     url(r'^materials/generic_composition/(?P<search>.*)$', 'generic_composition_view'),
 

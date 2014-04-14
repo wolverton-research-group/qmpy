@@ -346,7 +346,7 @@ class Entry(models.Model):
     @property
     def unit_comp(self):
         """Composition dictionary, normalized to 1 atom."""
-        return normalize_comp(self.comp)
+        return unit_comp(self.comp)
 
     @property
     def red_comp(self):
@@ -423,7 +423,6 @@ class Entry(models.Model):
         """
         If the structure has been relaxed, returns the formation energy of the
         final relaxed structure. Otherwise, returns None.
-
         """
         if self._energy is None:
             if 'static' in self.calculations:

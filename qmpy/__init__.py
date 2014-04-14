@@ -1,27 +1,38 @@
+<<<<<<< HEAD
 # qmpy/__init__.py
 
 """
 qmpy is a package containing many tools for computational materials science. 
 """
 #import pyximport; pyximport.install()
+=======
+import numpy as np
+try:
+    import pyximport; pyximport.install()
+except ImportError:
+    pass
+>>>>>>> 38b24a15db2a84d0abfd92c503b14a9bf9dd0079
 import logging
 import logging.handlers
-import os
-from os.path import dirname, abspath
+import os, os.path
+import stat
 import sys
-import re
 import ConfigParser
 
-INSTALL_PATH = abspath(dirname(__file__))
-LOG_PATH = INSTALL_PATH+'/logs/'
+INSTALL_PATH = os.path.abspath(os.path.dirname(__file__))
+sys.path = [os.path.join(INSTALL_PATH, 'qmpy', 'db')] + sys.path
+
+LOG_PATH = os.path.join(INSTALL_PATH, 'logs')
 
 config = ConfigParser.ConfigParser()
-config.read(INSTALL_PATH+'/configuration/site.cfg')
+config.read(os.path.join(INSTALL_PATH,'configuration','site.cfg'))
 
 VASP_POTENTIALS = config.get('VASP', 'potential_path')
 
 if not os.path.exists(LOG_PATH):
+    oldmask = os.umask(666)
     os.mkdir(LOG_PATH)
+    os.umask(oldmask)
 
 # the default log level for normal loggers
 logLevel = logging.INFO
@@ -40,7 +51,8 @@ console.setFormatter(short_formatter)
 # uncomment to set debugging output for all normal loggers
 #console.setLevel(logging.DEBUG)
 
-general = logging.handlers.WatchedFileHandler(LOG_PATH+'qmpy.log')
+logfile = os.path.join(LOG_PATH, 'qmpy.log')
+general = logging.handlers.WatchedFileHandler(logfile)
 general.setFormatter(formatter)
 
 logger.addHandler(general)
@@ -91,10 +103,6 @@ from data import *
 
 import yaml
 import os
-
-from qmpy import INSTALL_PATH
-from qmpy.configuration import VASP_POTENTIALS, sync_resources
-from qmpy.models import *
 
 def read_spacegroups(numbers=None):
     data = open(INSTALL_PATH+'/data/spacegroups.yml').read()
@@ -168,9 +176,8 @@ def read_potentials():
                     pots = Potential.read_potcar(path+'/POTCAR')
                     for pot in pots:
                         pot.save()
-                except Exception, err:
+                except Exception:
                     print 'Couldn\'t load:', path
-
 
 def sync_resources():
     for host, data in hosts.items():
@@ -227,14 +234,17 @@ def sync_resources():
             alloc.save()
             proj.allocations.add(alloc)
 
-if not Spacegroup.objects.exists():
-    read_spacegroups()
+try:
+    if not Spacegroup.objects.exists():
+        read_spacegroups()
 
-if not Element.objects.exists():
-    read_elements()
+    if not Element.objects.exists():
+        read_elements()
 
-if not Potential.objects.exists():
-    read_potentials()
+    if not Potential.objects.exists():
+        read_potentials()
 
-if not Hubbard.objects.exists():
-    read_hubbards()
+    if not Hubbard.objects.exists():
+        read_hubbards()
+except:
+    pass

@@ -556,9 +556,12 @@ class Structure(models.Model, object):
                     return False
         return True
 
-    def compare(self, other, tol=0.1, volume=False, 
-                                       allow_distortions=False, 
-                                       wildcard=None):
+    def compare(self, other, tol=0.01,
+                             atom_tol=10,
+                             volume=False, 
+                             allow_distortions=False, 
+                             check_spacegroup=False,
+                             wildcard=None):
         """
         Credit to K. Michel for the algorithm.
 
@@ -644,6 +647,13 @@ class Structure(models.Model, object):
         me.reduce()
         you.reduce()
 
+        #6b
+        if check_spacegroup:
+            me.symmetrize()
+            you.symmetrize()
+            if me.spacegroup != you.spacegroup:
+                return False
+
         # 7
         try_again = False
         for a, b in zip(me.lat_params[3:], you.lat_params[3:]):
@@ -689,6 +699,9 @@ class Structure(models.Model, object):
 
         test_struct = you.copy()
 
+        eps = 2*tol*atom_tol#*me.volume**(1./3)
+        eps2 = eps**2
+
         for rot in rotations:
             # loop over all possible re-orientations of the cell
             inv = la.inv(rot)
@@ -700,15 +713,47 @@ class Structure(models.Model, object):
                     continue
 
                 test_struct.coords -= test_struct[i].coord
-                # check 
+                # check if all sites have a match
                 match = True
+                matches = []
+                vecs = []
                 for atom2 in test_struct:
-                    if not me.contains(atom2, tol=tol*10):
+                    best = 1000
+                    id = None
+                    vec = None
+                    for j, atom3 in enumerate(me):
+                        if j in matches:
+                            continue
+                        if atom2.element_id != atom3.element_id:
+                            continue
+                        d = me._get_vector(atom2, atom3)
+                        if any([ abs(dd) > eps for dd in d ]):
+                            continue
+                        d2 = d.dot(d)
+                        if d2 > eps2:
+                            continue
+
+                        # matching case
+                        if d2 < best:
+                            best = d2
+                            id = j
+                            vec = d
+
+                    if id is None:
                         match = False
                         break
+                    matches.append(id)
+                    vecs.append(vec)
 
-                if match:
+                if match == False:
+                    continue
+                vecs = np.array(vecs)
+                err = np.average(vecs, 0)
+                vecs -= err
+                if all([ d.dot(d)**0.5 < tol*atom_tol for d in vecs ]):
                     return True
+                #else:
+                #    print vecs
 
         logger.debug("Atoms don't match.")
         return False
@@ -788,6 +833,22 @@ class Structure(models.Model, object):
             if dist > limit:
                 return None
 
+        return dist
+
+    def _get_vector(self, atom1, atom2):
+
+        x, y, z = self.cell
+        xx = self.metrical_matrix[0,0]
+        yy = self.metrical_matrix[1,1]
+        zz = self.metrical_matrix[2,2]
+
+        vec = atom2.coord - atom1.coord
+        vec -= np.round(vec)
+        dist = np.dot(vec, self.cell)
+
+        dist -= round(dist.dot(x)/xx)*x
+        dist -= round(dist.dot(y)/yy)*y
+        dist -= round(dist.dot(z)/zz)*z
         return dist
 
     def add_atom(self, atom, tol=0.01):
@@ -933,6 +994,11 @@ class Structure(models.Model, object):
     def cartesian_coords(self):
         """Return atomic positions in cartesian coordinates."""
         return np.array([ atom.cart_coord for atom in self.atoms ]) 
+
+    @cartesian_coords.setter
+    def cartesian_coords(self, cc):
+        for atom, coord in zip(self.atoms, cc):
+            atom.cart_coord = coord
 
     @property
     def forces(self):
@@ -1268,7 +1334,7 @@ class Structure(models.Model, object):
             return new
 
         def disp():
-            dists = np.array(self.lp[:3])*distance
+            dists = np.array([ distance/i for i in self.lp[:3]])
             rands = [ random.random() for i in range(3) ]
             return dists*rands
 
@@ -1760,6 +1826,38 @@ class Structure(models.Model, object):
             return False
         return True
 
+    def create_slab(self, indices, vacuum=10.0, surface=None, in_place=True):
+        if not in_place:
+            new = self.copy()
+            return new.create_slab(indices, vacuum=vacuum, surface=surface)
+
+    def create_vacuum(self, direction, amount, in_place=True):
+        """
+        Add vacuum along a lattice direction.
+
+        Arguments:
+            direction: direction to add the vacuum along. (0=x, 1=y, 2=z)
+            amount: amount of vacuum in Angstroms.
+
+        Keyword Arguments:
+            in_place: apply change to current structure, or return a new one.
+
+        Examples::
+            
+            >>> s = io.read(INSTALL_PATH+'/io/files/POSCAR_FCC')
+            >>> s.create_vacuum(2, 5)
+        """
+        if not in_place:
+            new = self.copy()
+            return new.create_vacuum(direction, amount)
+
+        cart_coords = self.cartesian_coords
+        new_cell = self.lat_params
+        new_cell[direction] += float(amount)
+        self.lat_params = new_cell
+        self.cartesian_coords = cart_coords
+        return self
+
     def make_perfect(self, in_place=True, tol=1e-1):
         """
         Constructs options for a 'perfect' lattice from the structure.
@@ -1793,7 +1891,7 @@ class Structure(models.Model, object):
         """
         if not in_place:
             new = self.copy()
-            return new.make_perfect(True)
+            return new.make_perfect(True, tol=tol)
 
         init_atoms = [ a.copy() for a in self.atoms ]
         init_comp = dict(self.comp)
@@ -1816,13 +1914,11 @@ class Structure(models.Model, object):
                 new.occupancy = 1.0
                 new.site = None
                 atoms.append(new)
-            elif abs(atom.occupancy) < 0.5:
+            elif abs(atom.occupancy) <= 0.5:
                 # then, empty any nearly empty sites
                 continue
             elif atom.occupancy >= 2:
                 raise StructureError('Site occupied by a molecule')
-            else:
-                continue
 
         self._sites = []
         self.atoms = atoms
@@ -1830,12 +1926,12 @@ class Structure(models.Model, object):
 
         if self.is_perfect:
             # total
-            if abs(1 - sum(self.comp.values())/n) > tol:
+            if abs(sum(self.comp.values()) - n) > tol:
                 hopeless = True
 
             for k in init_comp.keys():
-                d = init_comp[k] - self.comp.get(k,0.0)
-                if abs(d) > n*tol:
+                d = init_comp[k] - self.comp.get(k, 0.0)
+                if abs(d) > tol:
                     hopeless = True
                     break
             self.composition = Composition.get(self.comp)

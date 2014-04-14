@@ -1,11 +1,8 @@
 # qmpy/materials/composition.py
 
-from collections import defaultdict
-
 from django.db import models
 
 from qmpy.materials.element import Element
-from qmpy.data.meta_data import *
 from qmpy.utils import *
 import qmpy.analysis.thermodynamics as thermo
 
@@ -65,7 +62,7 @@ class Composition(models.Model):
         if self.space != other.space:
             return False
         for k in self.space:
-            if abs(self.unit_comp[k] - other.unit_comp[k]) > 1e-5:
+            if abs(self.unit_comp[k] - other.unit_comp[k]) > tol:
                 return False
         return True
 
