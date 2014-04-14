@@ -26,7 +26,7 @@ setup(
         "django-extensions",
         "elementtree",
         "pyparsing<=1.9.9",
-        "PyCifRW",
+        "PyCifRW==3.6.2",
         "PyYAML"
     ],
 )
