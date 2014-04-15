@@ -11,7 +11,7 @@ before_install:
   - sudo apt-get install -qq libatlas-dev libatlas-base-dev liblapack-dev gfortran
   - sudo apt-get update -qq
   - pip install numpy
-  - "pip install scipy &> /dev/null"
+  - pip install scipy
 before_script:
   - wget http://downloads.sourceforge.net/project/spglib/spglib/spglib-1.6/spglib-1.6.0.tar.gz
   - tar -xvf spglib-1.6.0.tar.gz
