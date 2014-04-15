@@ -190,6 +190,9 @@ Analysis Tools
 .. autoclass:: XRD
   :members:
 
+.. autoclass:: Peak
+  :members:
+
 .. autoclass:: Miedema
   :members:
 

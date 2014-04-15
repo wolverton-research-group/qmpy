@@ -67,7 +67,9 @@ class Miedema(object):
     def P(self):
         """
         Chooses a value of P based on the transition metal status of the elements
-        A and B. There are 3 values of P for the cases where:
+        A and B. 
+        
+        There are 3 values of P for the cases where:
             both A and B are TM
             only one of A and B is a TM
             neither are TMs.

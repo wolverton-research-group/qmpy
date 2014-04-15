@@ -1226,8 +1226,24 @@ class Structure(models.Model, object):
 
     def find_nearest_neighbors(self, method='closest', tol=0.05, limit=5.0):
         """
-        Calls :func:`~qmpy.get_nearest_neighbors()`  and assigns the nearest
-        neighbor dictionary to `Structure._nearest_neighbors.
+        Determine the nearest neighbors for all Atoms in Structure.
+
+        Calls :func:`~qmpy.get_nearest_neighbors()` and assigns the nearest
+        neighbor dictionary to `Structure._neighbor_dict`. Each atom is also
+        given a list, `nearest_neighbors` that contains the nearest neighbor
+        atoms. For atoms which have the "same" atom as a nearest neighbor across
+        different periodic boundaries, a single atom may appear multiple times
+        on the list.
+
+        Keyword Arguments:
+            limit: How far to look from each atom for nearest neighbors.
+            Default=5.0.
+
+            tol: A tolerance which determines how much further than the closest
+            atom a second atom can be and still be a part of the nearest
+            neighbor shell.
+
+        Returns: None
         """
         self._neighbor_dict = find_nearest_neighbors(self, method=method,
                                                            tol=tol, 
