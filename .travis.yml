@@ -9,12 +9,12 @@ script: nosetests
 virtualenv:
   system_site_packages: true
 before_install:
+  - sudo apt-get install -qq libatlas-dev libatlas-base-dev liblapack-dev gfortran
+  - sudo apt-get update -qq
   - pip install numpy
   - pip install python-dateutil
   - pip install pytz
   - pip install scipy
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq libatlas-dev libatlas-base-dev liblapack-dev gfortran
 virtualenv:
   system_site_packages: true
 # command to install dependencies
