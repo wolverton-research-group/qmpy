@@ -11,10 +11,16 @@ before_install:
   - sudo apt-get install -qq libatlas-dev libatlas-base-dev liblapack-dev gfortran
   - sudo apt-get update -qq
   - pip install numpy
-  - pip install python-dateutil
-  - pip install pytz
-  - pip install scipy
+  - "pip install scipy &> /dev/null"
 before_script:
+  - wget http://downloads.sourceforge.net/project/spglib/spglib/spglib-1.6/spglib-1.6.0.tar.gz
+  - tar -xvf spglib-1.6.0.tar.gz
+  - cd spglib-1.6.0
+  - ./configure
+  - make
+  - cd python/ase
+  - python setup.py install
+  - cd ../../..
   - mysql -e 'create database qmdb_dev;'
 script:
   - cd qmpy/db
