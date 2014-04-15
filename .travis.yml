@@ -2,7 +2,7 @@ language: python
 python:
   - "2.7"
 before_install:
- - sudo apt-get install -qq python-numpy python-scipy
+ - sudo apt-get install -qq python-numpy python-scipy libblas-dev libatlas-dev liblapack-dev
  - pip install matplotlib
 virtualenv:
   system_site_packages: true
