@@ -229,5 +229,6 @@ def entire(x):
 
 def wrap(x, tol=1e-4):
     x -= np.floor(x)
-    x[abs(abs(x) - 1) < tol] -= 1
+    x[abs(x) < tol] = 0
+    x[abs(abs(x) - 1) < tol] = 0
     return x

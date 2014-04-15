@@ -1,17 +1,10 @@
 from qmpy import *
+import time
 from django.test import TestCase
 
 class ElementTestCase(TestCase):
     def setUp(self):
-        elements = open(INSTALL_PATH+'/data/elements/data.yml').read()
-        elts = []
-        for elt, data in yaml.load(elements).items():
-            e = Element(**data)
-            elts.append(e)
-        try:
-            Element.objects.bulk_create(elts)
-        except:
-            pass
+        read_elements()
 
     def test_get(self):
         fe = Element.get('Fe')
@@ -69,15 +62,7 @@ class AtomTestCase(TestCase):
 
 class CompositionTestCase(TestCase):
     def setUp(self):
-        elements = open(INSTALL_PATH+'/data/elements/data.yml').read()
-        elts = []
-        for elt, data in yaml.load(elements).items():
-            e = Element(**data)
-            elts.append(e)
-        try:
-            Element.objects.bulk_create(elts)
-        except:
-            pass
+        read_elements()
 
     def test_get(self):
         for c, a in [ ('Fe2O3', {'Fe':2, 'O':3}),
@@ -90,15 +75,8 @@ class CompositionTestCase(TestCase):
 
 class StructureTestCase(TestCase):
     def setUp(self):
-        elements = open(INSTALL_PATH+'/data/elements/data.yml').read()
-        elts = []
-        for elt, data in yaml.load(elements).items():
-            e = Element(**data)
-            elts.append(e)
-        try:
-            Element.objects.bulk_create(elts)
-        except:
-            pass
+        read_elements()
+        read_spacegroups([229, 221, 225, 216])
 
         self.bcc = io.read(INSTALL_PATH+'/io/files/POSCAR_BCC')
         self.fcc = io.read(INSTALL_PATH+'/io/files/POSCAR_FCC')
@@ -136,17 +114,19 @@ class StructureTestCase(TestCase):
                                                      [0.5, 0.5, 0.0],
                                                      [0.5, 0.25, 0.75]]))
 
-        natoms = len(self.fcc) * roundclose(la.det([[3,1,4],[-1,5,1],[0,1,4]]))
-        new = self.fcc.transform([[3,1,4],[-1,5,1],[0,1,4]], in_place=False)
+        natoms = len(self.fcc) * roundclose(la.det([[1,1,0],[-1,2,1],[0,1,2]]))
+        new = self.fcc.transform([[1,1,0],[-1,2,1],[0,1,2]], in_place=False)
         self.assertEqual(len(new), natoms)
         right = io.read(INSTALL_PATH+'/io/files/POSCAR_trans')
+        new.sort()
+        right.sort()
         self.assertTrue(np.allclose(new.coords, right.coords))
         self.assertTrue(np.allclose(new.cell, right.cell))
         self.assertEqual(new, self.fcc)
 
         # translate
-        new= self.fcc.recenter(1, in_place=False)
-        self.assertTrue(np.allclose(n.coords[0], [0.5,0.5,0.0]))
+        new = self.fcc.recenter(1, in_place=False)
+        self.assertTrue(np.allclose(new.coords[0], [0.5,0.5,0.0]))
         self.assertEqual(new, self.fcc)
 
         new = self.fcc.translate([0.5,0.1,-0.9], in_place=False)
@@ -165,7 +145,7 @@ class StructureTestCase(TestCase):
 class EntryTestCase(TestCase):
     def setUp(self):
         read_elements()
-        read_spacegroups([74])
+        read_spacegroups([62, 74, 225, 123])
         self.entry = Entry.create(INSTALL_PATH+'/io/files/fe3o4.cif')
 
     def test_create(self):

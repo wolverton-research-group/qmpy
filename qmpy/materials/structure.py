@@ -871,7 +871,7 @@ class Structure(models.Model, object):
         self.spacegroup = None
 
     def sort(self):
-        self.atoms = sorted(self.atoms)
+        self.atoms = sorted(self.atoms) 
 
     def set_composition(self, value=None):
         if value is None:

@@ -72,7 +72,7 @@ copyright = u'2014, Scott Kirklin'
 # built documents.
 #
 # The short X.Y version.
-version = '0.3.4'
+version = '0.4.9'
 # The full version, including alpha/beta/rc tags.
 release = '0.3.4'
 

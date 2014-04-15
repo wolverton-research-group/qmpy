@@ -18,4 +18,6 @@ before_install:
 virtualenv:
   system_site_packages: true
 # command to install dependencies
-script: true
+script:
+  - cd qmpy/db
+  - python manage.py test qmpy

@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='qmpy',
-    version='0.4.9',
+    version='0.4.9a',
     author='S. Kirklin',
     author_email='scott.kirklin@gmail.com',
     packages=find_packages(),
@@ -16,7 +16,7 @@ setup(
         "Django >= 1.5",
         "PuLP",
         "numpy >= 1.6.4",
-        "scipy >= 0.10.0",
+        "scipy >= 0.12.0",
         "MySQL-python",
         "matplotlib",
         "networkx",

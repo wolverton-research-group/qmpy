@@ -135,10 +135,12 @@ def read_spacegroups(numbers=None):
 def read_elements():
     elements = open(INSTALL_PATH+'/data/elements/data.yml').read()
     Element.objects.all().delete()
-
+    elts = []
     for elt, data in yaml.load(elements).items():
-        e = Element(**data)
-        e.save()
+        e = Element()
+        e.__dict__.update(data)
+        elts.append(e)
+    Element.objects.bulk_create(elts)
 
 def read_hubbards():
     hubs = open(INSTALL_PATH+'/configuration/vasp_settings/hubbards.yml').read()
