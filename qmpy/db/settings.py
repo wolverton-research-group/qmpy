@@ -123,7 +123,6 @@ INSTALLED_APPS = (
     'django_extensions',
     'django.contrib.admin',
     'django.contrib.admindocs',
-    'google_analytics',
     'qmpy',
 )
 
