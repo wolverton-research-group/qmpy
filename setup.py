@@ -10,8 +10,8 @@ setup(
     url='http://pypi.python.org/pypi/qmpy',
     license='LICENSE.txt',
     description='Suite of computational materials science tools',
+    include_package_data=True,
     long_description=open('README.md').read(),
-    package_data = {'': ['*.yml', '*.txt', 'legacy.dat', '*.cfg', '*.rst']},
     install_requires=[
         "Django >= 1.5",
         "PuLP",

@@ -1,6 +1,9 @@
 from qmpy import *
 from django.test import TestCase
 
+peak_locations = [
+        ]
+
 class MiedemaTestCase(TestCase):
     def setUp(self):
         read_elements()

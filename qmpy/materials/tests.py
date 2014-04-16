@@ -1,5 +1,7 @@
 from qmpy import *
 import time
+import tempfile
+import shutil
 from django.test import TestCase
 
 class ElementTestCase(TestCase):
@@ -146,47 +148,56 @@ class EntryTestCase(TestCase):
     def setUp(self):
         read_elements()
         read_spacegroups([62, 74, 225, 123])
-        self.entry = Entry.create(INSTALL_PATH+'/io/files/fe3o4.cif')
+        self.dirs = {}
+        self.entries = {}
+        for f in ['POSCAR_FCC', 'POSCAR_FCC2', 'partial.cif',
+                     'perfect.cif', 'partial_mix.cif', 'partial_vac.cif']:
+            tdir = tempfile.mkdtemp(dir='/tmp/')
+            shutil.copy(INSTALL_PATH+'/io/files/'+f, tdir)
+            self.dirs[f] = tdir
+            self.entries[f] = Entry.create(tdir+'/'+f)
+
+    def tearDown(self):
+        for d in self.dirs.values():
+            for f in os.listdir(d):
+                os.remove(d+'/'+f)
+            os.removedirs(d)
 
     def test_create(self):
-        edir = INSTALL_PATH+'/io/files/entry_test/'
         # normal
-        entry = Entry.create(edir+'original/POSCAR_FCC')
+        entry = Entry.create(self.dirs['POSCAR_FCC']+'/POSCAR_FCC')
         self.assertEqual(entry.holds, [])
         self.assertEqual(entry.keywords, [])
         entry.save()
 
         # duplicate
-        s = io.read(edir+'duplicate/POSCAR_FCC')
-        entry = Entry.create(edir+'duplicate/POSCAR_FCC')
+        entry = Entry.create(self.dirs['POSCAR_FCC2']+'/POSCAR_FCC2')
         self.assertEqual(entry.holds, ['duplicate'])
         self.assertEqual(entry.keywords, [])
         entry.save()
 
         # solid solution
-        entry = Entry.create(edir+'partial/partial.cif')
-        self.assertEqual(entry.holds, ['partial occupancy'])
+        entry = Entry.create(self.dirs['partial.cif']+'/partial.cif')
+        self.assertEqual(set(entry.holds), set(['partial occupancy', 
+                                       'composition mismatch in cif']))
         self.assertEqual(entry.keywords, ['solid solution'])
         entry.save()
 
         # perfect reference structure
-        perfect = Entry.create(edir+'perfect/perfect.cif')
+        perfect = Entry.create(self.dirs['perfect.cif']+'/perfect.cif')
         self.assertEqual(perfect.holds, [])
         self.assertEqual(perfect.keywords, [])
         perfect.save()
 
         # vacancies
-        entry = Entry.create(edir+'vac/partial_vac.cif')
-        self.assertEqual(entry.holds, ['partial occupancy'])
+        entry = Entry.create(self.dirs['partial_vac.cif']+'/partial_vac.cif')
+        self.assertEqual(set(entry.holds), set(['partial occupancy',
+                                           'composition mismatch in cif']))
         self.assertEqual(entry.keywords, [])
         #self.assertEqual(entry.duplicate_of.id, perfect.id)
 
         # anti-site defects
-        entry = Entry.create(edir+'mix/partial_mix.cif')
-        self.assertEqual(entry.holds, ['partial occupancy'])
+        entry = Entry.create(self.dirs['partial_mix.cif']+'/partial_mix.cif')
+        self.assertEqual(set(entry.holds), set(['partial occupancy']))
         self.assertEqual(entry.keywords, ['solid solution'])
         #self.assertEqual(entry.duplicate_of.id, perfect.id)
-
-    def test_elements(self):
-        self.assertEqual(self.entry.elements, 
-                [Element.get('Fe'), Element.get('O')])

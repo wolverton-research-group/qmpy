@@ -1,0 +1,31 @@
+#= General Settings =#
+  PREC = ACC
+  ISTART = 1
+  ICHARG = 1
+ ISPIN = 1
+
+#= Parallelization =#
+
+#= Ionic Relaxation Settings =#
+  NSW = 60
+  IBRION = 2
+  ISIF = 3
+
+#= Electronic Relxation Settings =#
+  NELMIN = 5
+  ALGO = FAST
+
+#= Write flags =#
+  LCHARG = .TRUE.
+  LWAVE = .FALSE.
+  LELF = .FALSE.
+  LHVAR = .FALSE.
+  LVTOT = .FALSE.
+
+#= DOS =#
+  ISMEAR = 1
+  SIGMA = 0.2
+
+#= Uncategorized/OQMD codes  =#
+  MAGNETISM = FERRO
+  LORBIT = 11
