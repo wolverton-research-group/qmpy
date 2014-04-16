@@ -14,13 +14,28 @@ or::
 
     >>> easy_install -U qmpy
 
------------
-From source
------------
+.. note::
+    Using pip or easy_install to install scipy or numpy can be unreliable. It
+    is better to install from a proper repository for your linux distribution.
+    However, if that version of SciPy is earlier than 0.12.0 you will need to
+    obtain another installation. If necessary, you can obtain the needed
+    libraries with::
 
-Download the source at http://pypi.python.org/pypi/qmpy. However, if you want 
-to install qmpy from source, you will be responsible for ensuring that you have 
-all of the following required packages installed. 
+        $ sudo apt-get install libatlas-dev libatlas-base-dev 
+        $ sudo apt-get install liblapack-dev gfortran
+
+----------------
+From GitHub repo
+----------------
+
+Obtain the source with::
+
+    $ git clone https://github.com/wolverton-research-group/qmpy.git
+    $ cd qmpy
+    $ python setup.py install
+
+Be aware that f you want to install qmpy from source, you will be responsible 
+for ensuring that you have all of the following required packages installed. 
 
 -----------------
 Required Packages
@@ -33,18 +48,16 @@ Required Packages
 * python-MySQL (https://pypi.python.org/pypi/MySQL-python)
 * python-memcached
 * django-extensions
+* PuLP (https://pythonhosted.org/PuLP/) (required for grand canonical linear
+  programming and high-dimensional phase diagram slices)
 
 --------------------
 Recommended Packages
 --------------------
 
 * matplotlib (http://matplotlib.org/) (required for creating figures)
-* pyflot (https://github.com/andrefsp/pyflot) (required for rendering figures
-  for html)
 * networx (http://networkx.github.io/) (required for creating spin lattices,
   and some high-dimensional phase diagram analysis)
-* PuLP (https://pythonhosted.org/PuLP/) (required for grand canonical linear
-  programming and high-dimensional phase diagram slices)
 
 .. warning::
  In order for pulp to work, you must have a working linear programming
@@ -65,7 +78,6 @@ database MySQL. On a typical linux installation this process will look like::
     $ gunzip qmdb.sql.gz
     $ mysql < qmdb.sql
 
-
 .. note::
     Assuming your install is on linux, and assuming you haven't used MySQL at
     all, you will need to enter a mysql session as root ("mysql -u root -p"),
@@ -73,14 +85,14 @@ database MySQL. On a typical linux installation this process will look like::
     that user permissions ("GRANT ALL PRIVILEGES ON * . * TO
     'newuser'@'localhost'; FLUSH PRIVILEGES;"). 
 
-.. note:: 
+.. note::
     The name of the deployed database has changed since previous releases
-    (qmdb_prod). If your install isn't working, make sure that the database 
+    (qmdb_prod). If your install isn't working, make sure that the database
     name agrees with what is found in qmpy/db/settings.py.
 
 Once this is done, you need to edit qmpy/db/settings.py. Set the DATABASES
 variable such that 'USER' is the user with permissions to access the newly
-installed database. 
+installed database.
 
 .. note:: For windows/cygwin users:
     To use MySQL in Cygwin, you need to install MySQL via the Oracle website for

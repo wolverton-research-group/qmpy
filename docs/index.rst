@@ -23,8 +23,8 @@ Wolverton's group at Northwestern University (http://wolverton.northwestern.edu)
 Contribute
 ==========
 
-- Issue Tracker: http://code.google.com/p/qmpy/issues
-- Source: http://code.google.com/p/qmpy/source
+- Issue Tracker: http://github.com/wolverton-research-group/qmpy/issues
+- Source: http://github.com/wolverton-research-group/qmpy
 
 Support
 =======

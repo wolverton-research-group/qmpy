@@ -329,11 +329,7 @@ class Spacegroup(models.Model):
 
     @staticmethod
     def get(number):
-        try:
-            return Spacegroup.objects.get(number=number)
-        except Spacegroup.DoesNotExist:
-            logger.error('Spacegroup #%s does not exist.' % number)
-            return None
+        return Spacegroup.objects.get(number=number)
 
     @property
     def sym_ops(self):

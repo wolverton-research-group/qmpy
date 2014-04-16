@@ -82,6 +82,9 @@ try:
     import pyspglib 
     FOUND_SPGLIB = True
 except ImportError:
+    logging.warn("Failed to import pyspglib."
+            'Download at: http://sourceforge.net/projects/spglib/ and'
+            'follow instructions for installing python API')
     FOUND_SPGLIB = False
 
 ### Kludge to get the django settings module into the path
@@ -137,10 +140,12 @@ def read_spacegroups(numbers=None):
 def read_elements():
     elements = open(INSTALL_PATH+'/data/elements/data.yml').read()
     Element.objects.all().delete()
-
+    elts = []
     for elt, data in yaml.load(elements).items():
-        e = Element(**data)
-        e.save()
+        e = Element()
+        e.__dict__.update(data)
+        elts.append(e)
+    Element.objects.bulk_create(elts)
 
 def read_hubbards():
     hubs = open(INSTALL_PATH+'/configuration/vasp_settings/hubbards.yml').read()

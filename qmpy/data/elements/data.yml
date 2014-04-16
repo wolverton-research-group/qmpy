@@ -1,6 +1,7 @@
 Ac:
   atomic_radii: 195.0
   boil: 3471.0
+  color: '#70ABFA'
   covalent_radii: -1.0
   d_elec: 1.0
   density: 10.0699996948
@@ -27,6 +28,7 @@ Ag:
   HHI_R: 1400.0
   atomic_radii: 160.0
   boil: 2435.0
+  color: '#C0C0C0'
   covalent_radii: 153.0
   d_elec: 10.0
   density: 10.5010004044
@@ -53,6 +55,7 @@ Al:
   HHI_R: 1000.0
   atomic_radii: 125.0
   boil: 2792.0
+  color: '#BFA6A6'
   covalent_radii: 118.0
   d_elec: 0.0
   density: 2.69799995422
@@ -77,6 +80,7 @@ Al:
 Am:
   atomic_radii: 175.0
   boil: 2880.0
+  color: '#545CF2'
   covalent_radii: -1.0
   d_elec: 0.0
   density: 13.6899995804
@@ -101,6 +105,7 @@ Am:
 Ar:
   atomic_radii: 71.0
   boil: 87.3000030518
+  color: '#80D1E3'
   covalent_radii: 97.0
   d_elec: 0.0
   density: 0.00178369996138
@@ -127,6 +132,7 @@ As:
   HHI_R: 4000.0
   atomic_radii: 115.0
   boil: 887.0
+  color: '#BD80E3'
   covalent_radii: 119.0
   d_elec: 10.0
   density: 5.77600002289
@@ -151,6 +157,7 @@ As:
 At:
   atomic_radii: -1.0
   boil: 610.0
+  color: '#754F45'
   covalent_radii: -1.0
   d_elec: 0.0
   density: 7.0
@@ -177,6 +184,7 @@ Au:
   HHI_R: 1000.0
   atomic_radii: 135.0
   boil: 3129.0
+  color: '#FFD123'
   covalent_radii: 144.0
   d_elec: 10.0
   density: 19.281999588
@@ -203,6 +211,7 @@ B:
   HHI_R: 2000.0
   atomic_radii: 85.0
   boil: 4200.0
+  color: '#FFB5B5'
   covalent_radii: 82.0
   d_elec: 0.0
   density: 2.33999991417
@@ -229,6 +238,7 @@ Ba:
   HHI_R: 2300.0
   atomic_radii: 215.0
   boil: 2170.0
+  color: '#00C900'
   covalent_radii: 198.0
   d_elec: 0.0
   density: 3.59400010109
@@ -255,6 +265,7 @@ Be:
   HHI_R: 4000.0
   atomic_radii: 105.0
   boil: 2742.0
+  color: '#C2FF00'
   covalent_radii: 90.0
   d_elec: 0.0
   density: 1.85000002384
@@ -276,9 +287,9 @@ Be:
   van_der_waals_radii: -1.0
   volume: 7.90999984741
   z: 4.0
-Bh: {atomic_radii: -1.0, boil: -1.0, covalent_radii: -1.0, d_elec: 0.0, density: 37.0,
-  electronegativity: -1.0, f_elec: 0.0, first_ionization_energy: -1.0, group: 7.0,
-  mass: 264.0, melt: -1.0, name: Bohrium, p_elec: 0.0, period: 7.0, production: 0.0,
+Bh: {atomic_radii: -1.0, boil: -1.0, color: '#E00038', covalent_radii: -1.0, d_elec: 0.0,
+  density: 37.0, electronegativity: -1.0, f_elec: 0.0, first_ionization_energy: -1.0,
+  group: 7.0, mass: 264.0, melt: -1.0, name: Bohrium, p_elec: 0.0, period: 7.0, production: 0.0,
   s_elec: 0.0, specific_heat: -1.0, symbol: Bh, van_der_waals_radii: -1.0, volume: -1.0,
   z: 107.0}
 Bi:
@@ -286,6 +297,7 @@ Bi:
   HHI_R: 6000.0
   atomic_radii: 160.0
   boil: 1837.0
+  color: '#9E4FB5'
   covalent_radii: 146.0
   d_elec: 10.0
   density: 9.80700016022
@@ -310,6 +322,7 @@ Bi:
 Bk:
   atomic_radii: -1.0
   boil: 983.0
+  color: '#8A4FE3'
   covalent_radii: -1.0
   d_elec: 0.0
   density: 14.7899999619
@@ -336,6 +349,7 @@ Br:
   HHI_R: 6900.0
   atomic_radii: 115.0
   boil: 332.0
+  color: '#A62929'
   covalent_radii: 114.0
   d_elec: 10.0
   density: 3.12199997902
@@ -362,6 +376,7 @@ C:
   HHI_R: 500.0
   atomic_radii: 70.0
   boil: 4300.0
+  color: '#909090'
   covalent_radii: 77.0
   d_elec: 0.0
   density: 2.26699995995
@@ -388,6 +403,7 @@ Ca:
   HHI_R: 1500.0
   atomic_radii: 180.0
   boil: 1757.0
+  color: '#3DFF00'
   covalent_radii: 174.0
   d_elec: 0.0
   density: 1.53999996185
@@ -414,6 +430,7 @@ Cd:
   HHI_R: 1300.0
   atomic_radii: 155.0
   boil: 1040.0
+  color: '#FFD98F'
   covalent_radii: 148.0
   d_elec: 10.0
   density: 8.68999958038
@@ -440,6 +457,7 @@ Ce:
   HHI_R: 3100.0
   atomic_radii: 185.0
   boil: 3716.0
+  color: '#FFFFC7'
   covalent_radii: -1.0
   d_elec: 1.0
   density: 6.76999998093
@@ -464,6 +482,7 @@ Ce:
 Cf:
   atomic_radii: -1.0
   boil: 1173.0
+  color: '#A136D4'
   covalent_radii: -1.0
   d_elec: 0.0
   density: 15.1000003815
@@ -490,6 +509,7 @@ Cl:
   HHI_R: 1500.0
   atomic_radii: 100.0
   boil: 239.11000061
+  color: '#1FF01F'
   covalent_radii: 99.0
   d_elec: 0.0
   density: 0.00321400002576
@@ -514,6 +534,7 @@ Cl:
 Cm:
   atomic_radii: -1.0
   boil: 3383.0
+  color: '#785CE3'
   covalent_radii: -1.0
   d_elec: 0.0
   density: 13.5100002289
@@ -545,6 +566,7 @@ Co:
   HHI_R: 2700.0
   atomic_radii: 135.0
   boil: 3200.0
+  color: '#F090A0'
   covalent_radii: 121.0
   d_elec: 7.0
   density: 8.85999965668
@@ -571,6 +593,7 @@ Cr:
   HHI_R: 4100.0
   atomic_radii: 140.0
   boil: 2944.0
+  color: '#8A99C7'
   covalent_radii: 127.0
   d_elec: 5.0
   density: 7.15000009537
@@ -597,6 +620,7 @@ Cs:
   HHI_R: 6000.0
   atomic_radii: 260.0
   boil: 944.0
+  color: '#57178F'
   covalent_radii: 225.0
   d_elec: 0.0
   density: 1.87300002575
@@ -623,6 +647,7 @@ Cu:
   HHI_R: 1500.0
   atomic_radii: 135.0
   boil: 2835.0
+  color: '#C88033'
   covalent_radii: 138.0
   d_elec: 10.0
   density: 8.96000003815
@@ -644,9 +669,9 @@ Cu:
   van_der_waals_radii: 140.0
   volume: 11.720000267
   z: 29.0
-Db: {atomic_radii: -1.0, boil: -1.0, covalent_radii: -1.0, d_elec: 0.0, density: 39.0,
-  electronegativity: -1.0, f_elec: 0.0, first_ionization_energy: -1.0, group: 5.0,
-  mass: 262.0, melt: -1.0, name: Dubnium, p_elec: 0.0, period: 7.0, production: 0.0,
+Db: {atomic_radii: -1.0, boil: -1.0, color: '#D1004F', covalent_radii: -1.0, d_elec: 0.0,
+  density: 39.0, electronegativity: -1.0, f_elec: 0.0, first_ionization_energy: -1.0,
+  group: 5.0, mass: 262.0, melt: -1.0, name: Dubnium, p_elec: 0.0, period: 7.0, production: 0.0,
   s_elec: 0.0, specific_heat: -1.0, symbol: Db, van_der_waals_radii: -1.0, volume: -1.0,
   z: 105.0}
 Ds: {atomic_radii: -1.0, boil: -1.0, covalent_radii: -1.0, d_elec: 0.0, density: -1.0,
@@ -659,6 +684,7 @@ Dy:
   HHI_R: 3100.0
   atomic_radii: 175.0
   boil: 2840.0
+  color: '#1FFFC7'
   covalent_radii: -1.0
   d_elec: 0.0
   density: 8.55000019073
@@ -685,6 +711,7 @@ Er:
   HHI_R: 3100.0
   atomic_radii: 175.0
   boil: 3503.0
+  color: '#00E675'
   covalent_radii: -1.0
   d_elec: 0.0
   density: 9.06599998474
@@ -706,8 +733,8 @@ Er:
   van_der_waals_radii: -1.0
   volume: 30.8250007629
   z: 68.0
-Es: {atomic_radii: -1.0, boil: -1.0, covalent_radii: -1.0, d_elec: 0.0, density: 13.5,
-  electronegativity: 1.29999995232, f_elec: 0.0, first_ionization_energy: 6.42000007629,
+Es: {atomic_radii: -1.0, boil: -1.0, color: '#B31FD4', covalent_radii: -1.0, d_elec: 0.0,
+  density: 13.5, electronegativity: 1.29999995232, f_elec: 0.0, first_ionization_energy: 6.42000007629,
   group: 0.0, mass: 252.0, melt: 1133.15002441, name: Einsteinium, p_elec: 0.0, period: 7.0,
   production: 0.0, s_elec: 0.0, specific_heat: -1.0, symbol: Es, van_der_waals_radii: -1.0,
   volume: -1.0, z: 99.0}
@@ -716,6 +743,7 @@ Eu:
   HHI_R: 3100.0
   atomic_radii: 185.0
   boil: 1802.0
+  color: '#61FFC7'
   covalent_radii: -1.0
   d_elec: 0.0
   density: 5.24300003052
@@ -742,6 +770,7 @@ F:
   HHI_R: 1500.0
   atomic_radii: 50.0
   boil: 85.0299987793
+  color: '#90E050'
   covalent_radii: 71.0
   d_elec: 0.0
   density: 0.00169599999208
@@ -768,6 +797,7 @@ Fe:
   HHI_R: 1400.0
   atomic_radii: 140.0
   boil: 3134.0
+  color: '#E06633'
   covalent_radii: 125.0
   d_elec: 6.0
   density: 7.87400007248
@@ -789,14 +819,15 @@ Fe:
   van_der_waals_radii: -1.0
   volume: 11.1599998474
   z: 26.0
-Fm: {atomic_radii: -1.0, boil: -1.0, covalent_radii: -1.0, d_elec: 0.0, density: -1.0,
-  electronegativity: 1.29999995232, f_elec: 0.0, first_ionization_energy: 6.5, group: 0.0,
-  mass: 257.0, melt: -1.0, name: Fermium, p_elec: 0.0, period: 7.0, production: 0.0,
+Fm: {atomic_radii: -1.0, boil: -1.0, color: '#B31FBA', covalent_radii: -1.0, d_elec: 0.0,
+  density: -1.0, electronegativity: 1.29999995232, f_elec: 0.0, first_ionization_energy: 6.5,
+  group: 0.0, mass: 257.0, melt: -1.0, name: Fermium, p_elec: 0.0, period: 7.0, production: 0.0,
   s_elec: 0.0, specific_heat: -1.0, symbol: Fm, van_der_waals_radii: -1.0, volume: -1.0,
   z: 100.0}
 Fr:
   atomic_radii: -1.0
   boil: 950.0
+  color: '#420066'
   covalent_radii: -1.0
   d_elec: 0.0
   density: 1.87000000477
@@ -823,6 +854,7 @@ Ga:
   HHI_R: 1900.0
   atomic_radii: 130.0
   boil: 2477.0
+  color: '#C28F8F'
   covalent_radii: 126.0
   d_elec: 10.0
   density: 5.90700006485
@@ -849,6 +881,7 @@ Gd:
   HHI_R: 3100.0
   atomic_radii: 180.0
   boil: 3546.0
+  color: '#45FFC7'
   covalent_radii: -1.0
   d_elec: 1.0
   density: 7.89499998093
@@ -875,6 +908,7 @@ Ge:
   HHI_R: 1900.0
   atomic_radii: 125.0
   boil: 3106.0
+  color: '#668F8F'
   covalent_radii: 122.0
   d_elec: 10.0
   density: 5.32299995422
@@ -899,6 +933,7 @@ Ge:
 H:
   atomic_radii: 25.0
   boil: 20.2800006866
+  color: '#FFFFFF'
   covalent_radii: 38.0
   d_elec: 0.0
   density: 8.98799989955e-05
@@ -925,6 +960,7 @@ He:
   HHI_R: 3900.0
   atomic_radii: 31.0
   boil: 4.21999979019
+  color: '#D9FFFF'
   covalent_radii: 32.0
   d_elec: 0.0
   density: 0.000178500005859
@@ -951,6 +987,7 @@ Hf:
   HHI_R: 2600.0
   atomic_radii: 155.0
   boil: 4876.0
+  color: '#4DC2FF'
   covalent_radii: 150.0
   d_elec: 2.0
   density: 13.3100004196
@@ -977,6 +1014,7 @@ Hg:
   HHI_R: 3100.0
   atomic_radii: 150.0
   boil: 630.0
+  color: '#B8B8D0'
   covalent_radii: 149.0
   d_elec: 10.0
   density: 13.5335998535
@@ -1003,6 +1041,7 @@ Ho:
   HHI_R: 3100.0
   atomic_radii: 175.0
   boil: 2993.0
+  color: '#00FF9C'
   covalent_radii: -1.0
   d_elec: 0.0
   density: 8.79500007629
@@ -1024,9 +1063,9 @@ Ho:
   van_der_waals_radii: -1.0
   volume: 31.0333003998
   z: 67.0
-Hs: {atomic_radii: -1.0, boil: -1.0, covalent_radii: -1.0, d_elec: 0.0, density: 41.0,
-  electronegativity: -1.0, f_elec: 0.0, first_ionization_energy: -1.0, group: 8.0,
-  mass: 267.0, melt: -1.0, name: Hassium, p_elec: 0.0, period: 7.0, production: 0.0,
+Hs: {atomic_radii: -1.0, boil: -1.0, color: '#E6002E', covalent_radii: -1.0, d_elec: 0.0,
+  density: 41.0, electronegativity: -1.0, f_elec: 0.0, first_ionization_energy: -1.0,
+  group: 8.0, mass: 267.0, melt: -1.0, name: Hassium, p_elec: 0.0, period: 7.0, production: 0.0,
   s_elec: 0.0, specific_heat: -1.0, symbol: Hs, van_der_waals_radii: -1.0, volume: -1.0,
   z: 108.0}
 I:
@@ -1034,6 +1073,7 @@ I:
   HHI_R: 4800.0
   atomic_radii: 140.0
   boil: 457.399993896
+  color: '#940094'
   covalent_radii: 133.0
   d_elec: 10.0
   density: 4.92999982834
@@ -1060,6 +1100,7 @@ In:
   HHI_R: 2000.0
   atomic_radii: 155.0
   boil: 2345.0
+  color: '#A67573'
   covalent_radii: 144.0
   d_elec: 10.0
   density: 7.30999994278
@@ -1086,6 +1127,7 @@ Ir:
   HHI_R: 9100.0
   atomic_radii: 135.0
   boil: 4701.0
+  color: '#175487'
   covalent_radii: 137.0
   d_elec: 7.0
   density: 22.5599994659
@@ -1112,6 +1154,7 @@ K:
   HHI_R: 7200.0
   atomic_radii: 220.0
   boil: 1032.0
+  color: '#8F40D4'
   covalent_radii: 196.0
   d_elec: 0.0
   density: 0.861999988556
@@ -1136,6 +1179,7 @@ K:
 Kr:
   atomic_radii: 88.0
   boil: 119.930000305
+  color: '#5CB8D1'
   covalent_radii: 110.0
   d_elec: 0.0
   density: 0.00373300001957
@@ -1162,6 +1206,7 @@ La:
   HHI_R: 3100.0
   atomic_radii: 195.0
   boil: 3737.0
+  color: '#70D4FF'
   covalent_radii: 169.0
   d_elec: 1.0
   density: 6.14499998093
@@ -1188,6 +1233,7 @@ Li:
   HHI_R: 4200.0
   atomic_radii: 145.0
   boil: 1615.0
+  color: '#CC80FF'
   covalent_radii: 134.0
   d_elec: 0.0
   density: 0.533999979496
@@ -1209,8 +1255,8 @@ Li:
   van_der_waals_radii: 182.0
   volume: 18.3299999237
   z: 3.0
-Lr: {atomic_radii: -1.0, boil: -1.0, covalent_radii: -1.0, d_elec: 0.0, density: -1.0,
-  electronegativity: 1.29999995232, f_elec: 0.0, first_ionization_energy: 4.90000009537,
+Lr: {atomic_radii: -1.0, boil: -1.0, color: '#C70066', covalent_radii: -1.0, d_elec: 0.0,
+  density: -1.0, electronegativity: 1.29999995232, f_elec: 0.0, first_ionization_energy: 4.90000009537,
   group: 3.0, mass: 262.0, melt: -1.0, name: Lawrencium, p_elec: 0.0, period: 7.0,
   production: 0.0, s_elec: 0.0, specific_heat: -1.0, symbol: Lr, van_der_waals_radii: -1.0,
   volume: -1.0, z: 103.0}
@@ -1219,6 +1265,7 @@ Lu:
   HHI_R: 3100.0
   atomic_radii: 175.0
   boil: 3675.0
+  color: '#00AB24'
   covalent_radii: 160.0
   d_elec: 1.0
   density: 9.84000015259
@@ -1240,8 +1287,8 @@ Lu:
   van_der_waals_radii: -1.0
   volume: 29.3500003815
   z: 71.0
-Md: {atomic_radii: -1.0, boil: -1.0, covalent_radii: -1.0, d_elec: 0.0, density: -1.0,
-  electronegativity: 1.29999995232, f_elec: 0.0, first_ionization_energy: 6.57999992371,
+Md: {atomic_radii: -1.0, boil: -1.0, color: '#B30DA6', covalent_radii: -1.0, d_elec: 0.0,
+  density: -1.0, electronegativity: 1.29999995232, f_elec: 0.0, first_ionization_energy: 6.57999992371,
   group: 0.0, mass: 258.0, melt: -1.0, name: Mendelevium, p_elec: 0.0, period: 7.0,
   production: 0.0, s_elec: 0.0, specific_heat: -1.0, symbol: Md, van_der_waals_radii: -1.0,
   volume: -1.0, z: 101.0}
@@ -1250,6 +1297,7 @@ Mg:
   HHI_R: 500.0
   atomic_radii: 150.0
   boil: 1363.0
+  color: '#8AFF00'
   covalent_radii: 130.0
   d_elec: 0.0
   density: 1.73800003529
@@ -1276,6 +1324,7 @@ Mn:
   HHI_R: 1800.0
   atomic_radii: 140.0
   boil: 2334.0
+  color: '#9C7AC7'
   covalent_radii: 139.0
   d_elec: 5.0
   density: 7.44000005722
@@ -1302,6 +1351,7 @@ Mo:
   HHI_R: 5300.0
   atomic_radii: 145.0
   boil: 4912.0
+  color: '#54B5B5'
   covalent_radii: 145.0
   d_elec: 5.0
   density: 10.220000267
@@ -1323,16 +1373,17 @@ Mo:
   van_der_waals_radii: -1.0
   volume: 15.8000001907
   z: 42.0
-Mt: {atomic_radii: -1.0, boil: -1.0, covalent_radii: -1.0, d_elec: 0.0, density: 35.0,
-  electronegativity: -1.0, f_elec: 0.0, first_ionization_energy: -1.0, group: 9.0,
-  mass: 268.0, melt: -1.0, name: Meitnerium, p_elec: 0.0, period: 7.0, production: 0.0,
-  s_elec: 0.0, specific_heat: -1.0, symbol: Mt, van_der_waals_radii: -1.0, volume: -1.0,
-  z: 109.0}
+Mt: {atomic_radii: -1.0, boil: -1.0, color: '#EB0026', covalent_radii: -1.0, d_elec: 0.0,
+  density: 35.0, electronegativity: -1.0, f_elec: 0.0, first_ionization_energy: -1.0,
+  group: 9.0, mass: 268.0, melt: -1.0, name: Meitnerium, p_elec: 0.0, period: 7.0,
+  production: 0.0, s_elec: 0.0, specific_heat: -1.0, symbol: Mt, van_der_waals_radii: -1.0,
+  volume: -1.0, z: 109.0}
 N:
   HHI_P: 1300.0
   HHI_R: 500.0
   atomic_radii: 65.0
   boil: 77.3600006104
+  color: '#3050F8'
   covalent_radii: 75.0
   d_elec: 0.0
   density: 0.00125059997663
@@ -1359,6 +1410,7 @@ Na:
   HHI_R: 500.0
   atomic_radii: 180.0
   boil: 1156.0
+  color: '#AB5CF2'
   covalent_radii: 154.0
   d_elec: 0.0
   density: 0.971000015736
@@ -1385,6 +1437,7 @@ Nb:
   HHI_R: 8800.0
   atomic_radii: 145.0
   boil: 5017.0
+  color: '#73C2C9'
   covalent_radii: 137.0
   d_elec: 4.0
   density: 8.56999969482
@@ -1411,6 +1464,7 @@ Nd:
   HHI_R: 3100.0
   atomic_radii: 185.0
   boil: 3347.0
+  color: '#C7FFC7'
   covalent_radii: -1.0
   d_elec: 0.0
   density: 7.00699996948
@@ -1435,6 +1489,7 @@ Nd:
 Ne:
   atomic_radii: 38.0
   boil: 27.0699996948
+  color: '#B3E3F5'
   covalent_radii: 69.0
   d_elec: 0.0
   density: 0.000899899983779
@@ -1461,6 +1516,7 @@ Ni:
   HHI_R: 1500.0
   atomic_radii: 135.0
   boil: 3186.0
+  color: '#50D050'
   covalent_radii: 126.0
   d_elec: 8.0
   density: 8.91199970245
@@ -1482,14 +1538,15 @@ Ni:
   van_der_waals_radii: -1.0
   volume: 10.720000267
   z: 28.0
-'No': {atomic_radii: -1.0, boil: -1.0, covalent_radii: -1.0, d_elec: 0.0, density: -1.0,
-  electronegativity: 1.29999995232, f_elec: 0.0, first_ionization_energy: 6.65000009537,
+'No': {atomic_radii: -1.0, boil: -1.0, color: '#BD0D87', covalent_radii: -1.0, d_elec: 0.0,
+  density: -1.0, electronegativity: 1.29999995232, f_elec: 0.0, first_ionization_energy: 6.65000009537,
   group: 0.0, mass: 259.0, melt: -1.0, name: Nobelium, p_elec: 0.0, period: 7.0, production: 0.0,
   s_elec: 0.0, specific_heat: -1.0, symbol: 'No', van_der_waals_radii: -1.0, volume: -1.0,
   z: 102.0}
 Np:
   atomic_radii: 175.0
   boil: 4273.0
+  color: '#0080FF'
   covalent_radii: -1.0
   d_elec: 1.0
   density: 20.4500007629
@@ -1516,6 +1573,7 @@ O:
   HHI_R: 500.0
   atomic_radii: 60.0
   boil: 90.1999969482
+  color: '#FF0D0D'
   covalent_radii: 73.0
   d_elec: 0.0
   density: 0.00142900005449
@@ -1542,6 +1600,7 @@ Os:
   HHI_R: 9100.0
   atomic_radii: 130.0
   boil: 5285.0
+  color: '#266696'
   covalent_radii: 128.0
   d_elec: 6.0
   density: 22.6100006104
@@ -1568,6 +1627,7 @@ P:
   HHI_R: 5100.0
   atomic_radii: 100.0
   boil: 553.0
+  color: '#FF8000'
   covalent_radii: 106.0
   d_elec: 0.0
   density: 1.82000005245
@@ -1592,6 +1652,7 @@ P:
 Pa:
   atomic_radii: 180.0
   boil: 4300.0
+  color: '#00A1FF'
   covalent_radii: -1.0
   d_elec: 1.0
   density: 15.3699998856
@@ -1618,6 +1679,7 @@ Pb:
   HHI_R: 1800.0
   atomic_radii: 180.0
   boil: 2022.0
+  color: '#575961'
   covalent_radii: 147.0
   d_elec: 10.0
   density: 11.3420000076
@@ -1644,6 +1706,7 @@ Pd:
   HHI_R: 8000.0
   atomic_radii: 140.0
   boil: 3236.0
+  color: '#006985'
   covalent_radii: 131.0
   d_elec: 10.0
   density: 12.0200004578
@@ -1670,6 +1733,7 @@ Pm:
   HHI_R: 3100.0
   atomic_radii: 185.0
   boil: 3273.0
+  color: '#A3FFC7'
   covalent_radii: -1.0
   d_elec: 0.0
   density: 7.26000022888
@@ -1694,6 +1758,7 @@ Pm:
 Po:
   atomic_radii: 190.0
   boil: 1235.0
+  color: '#AB5C00'
   covalent_radii: -1.0
   d_elec: 10.0
   density: 9.31999969482
@@ -1720,6 +1785,7 @@ Pr:
   HHI_R: 3100.0
   atomic_radii: 185.0
   boil: 3793.0
+  color: '#D9FFC7'
   covalent_radii: -1.0
   d_elec: 0.0
   density: 6.77299976349
@@ -1746,6 +1812,7 @@ Pt:
   HHI_R: 9100.0
   atomic_radii: 135.0
   boil: 4098.0
+  color: '#D0D0E0'
   covalent_radii: 128.0
   d_elec: 9.0
   density: 21.4599990845
@@ -1770,6 +1837,7 @@ Pt:
 Pu:
   atomic_radii: 175.0
   boil: 3501.0
+  color: '#006BFF'
   covalent_radii: -1.0
   d_elec: 0.0
   density: 19.8400001526
@@ -1794,6 +1862,7 @@ Pu:
 Ra:
   atomic_radii: 215.0
   boil: 2010.0
+  color: '#007D00'
   covalent_radii: -1.0
   d_elec: 0.0
   density: 5.5
@@ -1820,6 +1889,7 @@ Rb:
   HHI_R: 6000.0
   atomic_radii: 235.0
   boil: 961.0
+  color: '#702EB0'
   covalent_radii: 211.0
   d_elec: 0.0
   density: 1.53199994564
@@ -1846,6 +1916,7 @@ Re:
   HHI_R: 3300.0
   atomic_radii: 135.0
   boil: 5869.0
+  color: '#267DAB'
   covalent_radii: 159.0
   d_elec: 5.0
   density: 21.0200004578
@@ -1867,11 +1938,11 @@ Re:
   van_der_waals_radii: -1.0
   volume: 14.8699998856
   z: 75.0
-Rf: {atomic_radii: -1.0, boil: -1.0, covalent_radii: -1.0, d_elec: 0.0, density: 18.1000003815,
-  electronegativity: -1.0, f_elec: 0.0, first_ionization_energy: -1.0, group: 4.0,
-  mass: 261.0, melt: -1.0, name: Rutherfordium, p_elec: 0.0, period: 7.0, production: 0.0,
-  s_elec: 0.0, specific_heat: -1.0, symbol: Rf, van_der_waals_radii: -1.0, volume: -1.0,
-  z: 104.0}
+Rf: {atomic_radii: -1.0, boil: -1.0, color: '#CC0059', covalent_radii: -1.0, d_elec: 0.0,
+  density: 18.1000003815, electronegativity: -1.0, f_elec: 0.0, first_ionization_energy: -1.0,
+  group: 4.0, mass: 261.0, melt: -1.0, name: Rutherfordium, p_elec: 0.0, period: 7.0,
+  production: 0.0, s_elec: 0.0, specific_heat: -1.0, symbol: Rf, van_der_waals_radii: -1.0,
+  volume: -1.0, z: 104.0}
 Rg: {atomic_radii: -1.0, boil: -1.0, covalent_radii: -1.0, d_elec: 0.0, density: -1.0,
   electronegativity: -1.0, f_elec: 0.0, first_ionization_energy: -1.0, group: 11.0,
   mass: 272.0, melt: -1.0, name: Roentgenium, p_elec: 0.0, period: 7.0, production: 0.0,
@@ -1882,6 +1953,7 @@ Rh:
   HHI_R: 8000.0
   atomic_radii: 135.0
   boil: 3968.0
+  color: '#0A7D8C'
   covalent_radii: 135.0
   d_elec: 8.0
   density: 12.4099998474
@@ -1906,6 +1978,7 @@ Rh:
 Rn:
   atomic_radii: 120.0
   boil: 211.300003052
+  color: '#428296'
   covalent_radii: 145.0
   d_elec: 0.0
   density: 0.00973000004888
@@ -1932,6 +2005,7 @@ Ru:
   HHI_R: 8000.0
   atomic_radii: 130.0
   boil: 4423.0
+  color: '#248F8F'
   covalent_radii: 126.0
   d_elec: 7.0
   density: 12.3699998856
@@ -1958,6 +2032,7 @@ S:
   HHI_R: 1000.0
   atomic_radii: 100.0
   boil: 717.799987793
+  color: '#FFFF30'
   covalent_radii: 102.0
   d_elec: 0.0
   density: 2.06699991226
@@ -1984,6 +2059,7 @@ Sb:
   HHI_R: 3400.0
   atomic_radii: 145.0
   boil: 1860.0
+  color: '#9E63B5'
   covalent_radii: 138.0
   d_elec: 10.0
   density: 6.68499994278
@@ -2010,6 +2086,7 @@ Sc:
   HHI_R: 4500.0
   atomic_radii: 160.0
   boil: 3109.0
+  color: '#E6E6E6'
   covalent_radii: 144.0
   d_elec: 1.0
   density: 2.98900008202
@@ -2036,6 +2113,7 @@ Se:
   HHI_R: 1900.0
   atomic_radii: 115.0
   boil: 958.0
+  color: '#FFA100'
   covalent_radii: 116.0
   d_elec: 10.0
   density: 4.80900001526
@@ -2057,16 +2135,17 @@ Se:
   van_der_waals_radii: 190.0
   volume: 27.4433002472
   z: 34.0
-Sg: {atomic_radii: -1.0, boil: -1.0, covalent_radii: -1.0, d_elec: 0.0, density: 35.0,
-  electronegativity: -1.0, f_elec: 0.0, first_ionization_energy: -1.0, group: 6.0,
-  mass: 266.0, melt: -1.0, name: Seaborgium, p_elec: 0.0, period: 7.0, production: 0.0,
-  s_elec: 0.0, specific_heat: -1.0, symbol: Sg, van_der_waals_radii: -1.0, volume: -1.0,
-  z: 106.0}
+Sg: {atomic_radii: -1.0, boil: -1.0, color: '#D90045', covalent_radii: -1.0, d_elec: 0.0,
+  density: 35.0, electronegativity: -1.0, f_elec: 0.0, first_ionization_energy: -1.0,
+  group: 6.0, mass: 266.0, melt: -1.0, name: Seaborgium, p_elec: 0.0, period: 7.0,
+  production: 0.0, s_elec: 0.0, specific_heat: -1.0, symbol: Sg, van_der_waals_radii: -1.0,
+  volume: -1.0, z: 106.0}
 Si:
   HHI_P: 4700.0
   HHI_R: 1000.0
   atomic_radii: 110.0
   boil: 3538.0
+  color: '#F0C8A0'
   covalent_radii: 111.0
   d_elec: 0.0
   density: 2.32960009575
@@ -2093,6 +2172,7 @@ Sm:
   HHI_R: 3100.0
   atomic_radii: 185.0
   boil: 2067.0
+  color: '#8FFFC7'
   covalent_radii: -1.0
   d_elec: 0.0
   density: 7.51999998093
@@ -2119,6 +2199,7 @@ Sn:
   HHI_R: 1600.0
   atomic_radii: 145.0
   boil: 2875.0
+  color: '#668080'
   covalent_radii: 141.0
   d_elec: 10.0
   density: 7.28700017929
@@ -2145,6 +2226,7 @@ Sr:
   HHI_R: 3000.0
   atomic_radii: 200.0
   boil: 1655.0
+  color: '#00FF00'
   covalent_radii: 192.0
   d_elec: 0.0
   density: 2.6400001049
@@ -2171,6 +2253,7 @@ Ta:
   HHI_R: 4800.0
   atomic_radii: 145.0
   boil: 5731.0
+  color: '#4DA6FF'
   covalent_radii: 138.0
   d_elec: 3.0
   density: 16.6539993286
@@ -2197,6 +2280,7 @@ Tb:
   HHI_R: 3100.0
   atomic_radii: 175.0
   boil: 3503.0
+  color: '#30FFC7'
   covalent_radii: -1.0
   d_elec: 0.0
   density: 8.22900009155
@@ -2221,6 +2305,7 @@ Tb:
 Tc:
   atomic_radii: 135.0
   boil: 5150.0
+  color: '#3B9E9E'
   covalent_radii: 156.0
   d_elec: 5.0
   density: 11.5
@@ -2247,6 +2332,7 @@ Te:
   HHI_R: 4900.0
   atomic_radii: 140.0
   boil: 1261.0
+  color: '#D47A00'
   covalent_radii: 135.0
   d_elec: 10.0
   density: 6.23199987411
@@ -2271,6 +2357,7 @@ Te:
 Th:
   atomic_radii: 180.0
   boil: 5061.0
+  color: '#00BAFF'
   covalent_radii: -1.0
   d_elec: 2.0
   density: 11.720000267
@@ -2297,6 +2384,7 @@ Ti:
   HHI_R: 1600.0
   atomic_radii: 140.0
   boil: 3560.0
+  color: '#BFC2C7'
   covalent_radii: 136.0
   d_elec: 2.0
   density: 4.53999996185
@@ -2323,6 +2411,7 @@ Tl:
   HHI_R: 6500.0
   atomic_radii: 190.0
   boil: 1746.0
+  color: '#A6544D'
   covalent_radii: 148.0
   d_elec: 10.0
   density: 11.8500003815
@@ -2349,6 +2438,7 @@ Tm:
   HHI_R: 3100.0
   atomic_radii: 175.0
   boil: 2223.0
+  color: '#00D452'
   covalent_radii: -1.0
   d_elec: 0.0
   density: 9.32100009918
@@ -2373,6 +2463,7 @@ Tm:
 U:
   atomic_radii: 175.0
   boil: 4404.0
+  color: '#008FFF'
   covalent_radii: -1.0
   d_elec: 1.0
   density: 18.9500007629
@@ -2399,6 +2490,7 @@ V:
   HHI_R: 3400.0
   atomic_radii: 135.0
   boil: 3680.0
+  color: '#A6A6AB'
   covalent_radii: 125.0
   d_elec: 3.0
   density: 6.11000013351
@@ -2425,6 +2517,7 @@ W:
   HHI_R: 4300.0
   atomic_radii: 135.0
   boil: 5828.0
+  color: '#2194D6'
   covalent_radii: 146.0
   d_elec: 4.0
   density: 19.25
@@ -2449,6 +2542,7 @@ W:
 Xe:
   atomic_radii: 108.0
   boil: 165.029998779
+  color: '#429EB0'
   covalent_radii: 130.0
   d_elec: 0.0
   density: 0.00588699989021
@@ -2475,6 +2569,7 @@ Y:
   HHI_R: 2600.0
   atomic_radii: 180.0
   boil: 3609.0
+  color: '#94FFFF'
   covalent_radii: 162.0
   d_elec: 1.0
   density: 4.46899986267
@@ -2501,6 +2596,7 @@ Yb:
   HHI_R: 3100.0
   atomic_radii: 175.0
   boil: 1469.0
+  color: '#00BF38'
   covalent_radii: -1.0
   d_elec: 0.0
   density: 6.96500015259
@@ -2527,6 +2623,7 @@ Zn:
   HHI_R: 1900.0
   atomic_radii: 135.0
   boil: 1180.0
+  color: '#7D80B0'
   covalent_radii: 131.0
   d_elec: 10.0
   density: 7.13399982452
@@ -2553,6 +2650,7 @@ Zr:
   HHI_R: 2600.0
   atomic_radii: 155.0
   boil: 4682.0
+  color: '#94E0E0'
   covalent_radii: 148.0
   d_elec: 2.0
   density: 6.50600004196

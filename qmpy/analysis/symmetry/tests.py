@@ -47,8 +47,7 @@ class SpacegroupTestCase(TestCase):
 
     def test_spacegroup(self):
         ## getter
-        sg = Spacegroup.get(500)
-        self.assertEqual(sg, None)
+        self.assertRaises(Spacegroup.DoesNotExist, Spacegroup.get, 500)
 
         # some basic attributes
         sg = Spacegroup.get(225)
