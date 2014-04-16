@@ -5,7 +5,6 @@ import numpy as np
 from symmetry.routines import find_structure_symmetry
 import logging
 
-import qmpy
 from qmpy.data import elements
 from qmpy.utils import *
 
@@ -15,10 +14,13 @@ logger.setLevel(logging.DEBUG)
 class Peak(object):
     """
     Attributes:
-      angle (float) : Peak 2*theta angle in radians.
-      hkl (list) : HKL indices of the peak.
-      multiplicity (int) : Number of HKL indices which generate the peak.
-      intensity (
+      angle (float): 
+        Peak 2*theta angle in radians.
+      hkl (list): 
+        HKL indices of the peak.
+      multiplicity (int): 
+        Number of HKL indices which generate the peak.
+
     """
     def __init__(self, angle, multiplicity=None, intensity=None, hkl=None,
                               xrd=None, width=None, measured=False):

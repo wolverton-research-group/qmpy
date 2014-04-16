@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='qmpy',
-    version='0.4.9',
+    version='0.4.9a',
     author='S. Kirklin',
     author_email='scott.kirklin@gmail.com',
     packages=find_packages(),
@@ -10,10 +10,8 @@ setup(
     url='http://pypi.python.org/pypi/qmpy',
     license='LICENSE.txt',
     description='Suite of computational materials science tools',
+    include_package_data=True,
     long_description=open('README.md').read(),
-    package_data = {'': ['*.yml', '*.txt', 'legacy.dat', '*.cfg', '*.rst']},
-    dependency_links = [
-        'https://bitbucket.org/jamesrhester/pycifrw/downloads/PyCifRW-3.6.1.tar.gz#egg=PyCifRW==3.6.1'],
     install_requires=[
         "Django >= 1.5",
         "PuLP",
@@ -28,7 +26,7 @@ setup(
         "django-extensions",
         "elementtree",
         "pyparsing<=1.9.9",
-        "PyCifRW",
-        "PyYAML",
+        "PyCifRW==3.6.2",
+        "PyYAML"
     ],
 )

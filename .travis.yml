@@ -1,13 +1,27 @@
 language: python
 python:
   - "2.7"
-before_install:
- - sudo apt-get install -qq python-numpy python-scipy
+install: 
+  - pip install --use-mirrors pyparsing
+  - pip install --use-mirrors matplotlib
+  - "python setup.py install"
 virtualenv:
   system_site_packages: true
-# command to install dependencies
-install: 
-  - "python setup.py install"
-# # command to run tests
-script: 
-  - "python qmpy/db/settings.py test"
+before_install:
+  - sudo apt-get install -qq libatlas-dev libatlas-base-dev liblapack-dev gfortran
+  - sudo apt-get update -qq
+  - pip install numpy
+  - pip install scipy
+before_script:
+  - wget http://downloads.sourceforge.net/project/spglib/spglib/spglib-1.6/spglib-1.6.0.tar.gz
+  - tar -xvf spglib-1.6.0.tar.gz
+  - cd spglib-1.6.0
+  - ./configure
+  - make
+  - cd python/ase
+  - python setup.py install
+  - cd ../../..
+  - mysql -e 'create database qmdb_dev;'
+script:
+  - cd qmpy/db
+  - python manage.py test qmpy
