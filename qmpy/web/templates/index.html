@@ -34,6 +34,8 @@ OQMD
 {% block sidebar %} 
 <div id="sidebar" class="box">
   <h1> Current status </h1>
-  Database contains <b>{{ entries.count }}</b> entries, of which <b>{{ done.count }}</b> have been calculated. 
+  Database contains <b>{{ entries.count }}</b> entries, of which <b>{{ done.count }}</b> have been calculated. In addition, calculations are constantly on-going, there are {{ running.count }} new structures currently being run!
+  <br>
+  Recently completed compounds include: {% for calc in recent %} <a href="/materials/entry/{{calc.entry_id}}">{{calc.input.name}}</a> {% endfor %}
 </div>
 {% endblock %}
