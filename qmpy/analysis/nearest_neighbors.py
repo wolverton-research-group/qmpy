@@ -18,12 +18,12 @@ def find_nearest_neighbors(structure, method='closest', limit=5, tol=2e-1):
     For each atom in the `structure` assign the nearest neighbors.
 
     Keyword Arguments:
-        method ('closest'|'voronoi'):
-            closest: Assign nearest neighbors based on the following condition:
-                Atoms A and B are neighbors, if and only if there
-                is no atom C such that |AC| < |AB| and |BC| < |AB|.
-                Once all pairs of this kind have been assigned, the nearest
-                neighbors are those within `tol`% of the shortest distance.
+        method ('closest' or 'voronoi'):
+            closest: 
+                Atoms A and B are neighbors, if and only if there is no atom C 
+                such that AC < AB and BC < AB. Once all pairs of this kind 
+                have been assigned, the nearest neighbors are those within 
+                `tol` of the shortest distance.
 
             voronoi: 
                 Assign nearest neighbors based on voronoi construction.
@@ -38,7 +38,6 @@ def find_nearest_neighbors(structure, method='closest', limit=5, tol=2e-1):
             neighbor atoms.
 
         tol: Varied depending on the method being used.
-        
 
     Returns:
         dict of Atom:list of Atom pairs. For each atom in the structure, its

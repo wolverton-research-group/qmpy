@@ -104,7 +104,10 @@ class Atom(models.Model):
                     [ qmpy.elements[self.element_id]['z'], 
                       qmpy.elements[other.element_id]['z'] ]]
         comp_arr = np.array([ row for row in comp_arr if 
-                                  all( not x is None for x in row ) ]).T
+                                  all( not x is None for x in row ) ])
+        comp_arr = np.array([ row for row in comp_arr if 
+                                  not abs(row[0] - row[1]) < 1e-10 ]).T
+
         if len(comp_arr) == 0:
             raise AtomError
 

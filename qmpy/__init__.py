@@ -3,26 +3,32 @@
 """
 qmpy is a package containing many tools for computational materials science. 
 """
-import pyximport; pyximport.install()
 import numpy as np
+try:
+    import pyximport; pyximport.install()
+except ImportError:
+    pass
 import logging
 import logging.handlers
-import os
-from os.path import dirname, abspath
+import os, os.path
+import stat
 import sys
-import re
 import ConfigParser
 
-INSTALL_PATH = abspath(dirname(__file__))
-LOG_PATH = INSTALL_PATH+'/logs/'
+INSTALL_PATH = os.path.abspath(os.path.dirname(__file__))
+sys.path = [os.path.join(INSTALL_PATH, 'qmpy', 'db')] + sys.path
+
+LOG_PATH = os.path.join(INSTALL_PATH, 'logs')
 
 config = ConfigParser.ConfigParser()
-config.read(INSTALL_PATH+'/configuration/site.cfg')
+config.read(os.path.join(INSTALL_PATH,'configuration','site.cfg'))
 
 VASP_POTENTIALS = config.get('VASP', 'potential_path')
 
 if not os.path.exists(LOG_PATH):
+    oldmask = os.umask(666)
     os.mkdir(LOG_PATH)
+    os.umask(oldmask)
 
 # the default log level for normal loggers
 logLevel = logging.INFO
@@ -41,7 +47,8 @@ console.setFormatter(short_formatter)
 # uncomment to set debugging output for all normal loggers
 #console.setLevel(logging.DEBUG)
 
-general = logging.handlers.WatchedFileHandler(LOG_PATH+'qmpy.log')
+logfile = os.path.join(LOG_PATH, 'qmpy.log')
+general = logging.handlers.WatchedFileHandler(logfile)
 general.setFormatter(formatter)
 
 logger.addHandler(general)
@@ -75,6 +82,9 @@ try:
     import pyspglib 
     FOUND_SPGLIB = True
 except ImportError:
+    logging.warn("Failed to import pyspglib."
+            'Download at: http://sourceforge.net/projects/spglib/ and'
+            'follow instructions for installing python API')
     FOUND_SPGLIB = False
 
 ### Kludge to get the django settings module into the path
@@ -92,10 +102,6 @@ from data import *
 
 import yaml
 import os
-
-from qmpy import INSTALL_PATH
-from qmpy.configuration import VASP_POTENTIALS, sync_resources
-from qmpy.models import *
 
 def read_spacegroups(numbers=None):
     data = open(INSTALL_PATH+'/data/spacegroups.yml').read()
@@ -134,10 +140,12 @@ def read_spacegroups(numbers=None):
 def read_elements():
     elements = open(INSTALL_PATH+'/data/elements/data.yml').read()
     Element.objects.all().delete()
-
+    elts = []
     for elt, data in yaml.load(elements).items():
-        e = Element(**data)
-        e.save()
+        e = Element()
+        e.__dict__.update(data)
+        elts.append(e)
+    Element.objects.bulk_create(elts)
 
 def read_hubbards():
     hubs = open(INSTALL_PATH+'/configuration/vasp_settings/hubbards.yml').read()
@@ -169,9 +177,8 @@ def read_potentials():
                     pots = Potential.read_potcar(path+'/POTCAR')
                     for pot in pots:
                         pot.save()
-                except Exception, err:
+                except Exception:
                     print 'Couldn\'t load:', path
-
 
 def sync_resources():
     for host, data in hosts.items():
@@ -228,14 +235,17 @@ def sync_resources():
             alloc.save()
             proj.allocations.add(alloc)
 
-if not Spacegroup.objects.exists():
-    read_spacegroups()
+try:
+    if not Spacegroup.objects.exists():
+        read_spacegroups()
 
-if not Element.objects.exists():
-    read_elements()
+    if not Element.objects.exists():
+        read_elements()
 
-if not Potential.objects.exists():
-    read_potentials()
+    if not Potential.objects.exists():
+        read_potentials()
 
-if not Hubbard.objects.exists():
-    read_hubbards()
+    if not Hubbard.objects.exists():
+        read_hubbards()
+except:
+    pass

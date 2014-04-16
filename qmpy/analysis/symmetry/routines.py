@@ -2,9 +2,10 @@ import fractions as frac
 import numpy as np
 import logging
 
-import pyspglib._spglib as spg
-
 import qmpy
+if qmpy.FOUND_SPGLIB:
+    import pyspglib._spglib as spg
+
 import qmpy.data as data
 from qmpy.utils import *
 

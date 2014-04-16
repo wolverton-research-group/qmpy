@@ -61,6 +61,10 @@ Spacegroup: <a href="/analysis/spacegroup/{{structure.spacegroup_id}}">
   <div id="jmol">
     <h1> Visualization </h1>
     <script>
+      jmol_isReady = function(applet) {
+          document.title = (applet._id + " is ready")
+          }
+
       var Info = {
         j2sPath: "{% static 'js/jsmol/j2s' %}",
         {% if primitive %}
@@ -71,6 +75,11 @@ Spacegroup: <a href="/analysis/spacegroup/{{structure.spacegroup_id}}">
         use: "HTML5",
         width: 400,
         height: 300,
+        readyFunction: jmol_isReady,
+        debug: false,
+        disableJ2SLoadMonitor: true,
+        disableInitialConsole: true,
+        allowJavaScript: true
       };
       jma = Jmol.getApplet("myJmol", Info);
     </script>

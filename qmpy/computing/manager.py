@@ -89,10 +89,8 @@ class TaskManager(daemon.Daemon):
         while True:
             check_die()
             ddb.reset_queries()
-
             for host in rsc.Host.objects.filter(state=1):
                 self.fill_host(host, project=project)
-
             check_die(60)
 
     def fill_host(self, host, project=None):
@@ -121,16 +119,14 @@ class TaskManager(daemon.Daemon):
         except queue.ResourceUnavailableError:
             raise
         except vasp.VaspError, err:
-            task.state = -1
+            task.fail()
             task.save()
             tlogger.warn('VASP error: %s', err)
             return
         except Exception, err:
-            task.entry.reset()
-            tlogger.warn('Resetting Entry %s' % task.entry.id)
-            #task.state = -2
-            #task.save()
-            #tlogger.warn('Unknown error reading VASP outputs: %s' % err)
+            task.hold()
+            task.save()
+            tlogger.warn('Unknown error processing task: %s' % err)
             return
 
         if not jobs:
@@ -155,4 +151,9 @@ class TaskManager(daemon.Daemon):
 
         task.save()
         with transaction.atomic():
-            task.entry.save()
+            try:
+                task.entry.save()
+            except Exception, err:
+                task.hold()
+                task.save()
+                tlogger.warn('Unknown error processing task: %s' % err)

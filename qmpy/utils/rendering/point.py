@@ -30,10 +30,13 @@ class Point(Renderable):
         return len(self.coord)
 
     def draw_in_matplotlib(self, **kwargs):
+        if not kwargs.get('axes'):
+            axes = plt.gca()
+        else:
+            axes = kwargs['axes']
         options = dict(self.options)
         options.update(kwargs)
-        x, y = self.coord
-        plt.scatter(x, y, **options)
+        axes.scatter(*self.coord, **options)
         #if self.label:
         #    plt.text(x, y, self.label)
 
