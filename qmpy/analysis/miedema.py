@@ -192,7 +192,7 @@ class Miedema(object):
         return round(H_ord*0.01036427, 2)
 
     @staticmethod
-    def get_miedma_energy(composition):
+    def get(composition):
         med = Miedema(composition)
         return med.energy
 
