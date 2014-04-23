@@ -43,3 +43,4 @@ def keyword_view(request, keyword):
     return render_to_response('materials/keyword.html', 
             data, 
             RequestContext(request))
+

@@ -535,6 +535,7 @@ class Entry(models.Model):
         script = getattr(scripts, module)
         return script(self, *args, **kwargs)
 
+    @transaction.atomic
     def move(self, path):
         """
         Moves all calculation files to the specified path.
@@ -546,9 +547,13 @@ class Entry(models.Model):
         except Exception, err:
             logger.warn(err)
             return
+        old_path = self.path
         self.path = path
-        logger.info('Moved %s to %s', self, path)
         self.save()
+        for calc in self.calculation_set.all():
+            newpath = calc.path.replace(old_path, path)
+            vasp.Calculation.objects.filter(id=calc.id).update(path=newpath)
+        logger.info('Moved %s to %s', self, path)
 
     @property
     def running(self):

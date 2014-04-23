@@ -4,6 +4,8 @@ import networkx as nx
 from scipy.spatial import ConvexHull
 import logging
 
+from django.db import transaction
+
 import qmpy
 from qmpy.utils import *
 import phase
@@ -968,12 +970,16 @@ class PhaseSpace(object):
             stable = self.phase_dict[p.name]
             p.stability = p.energy - stable.energy
         else:
-            phases = [ pp for pp in self.phase_dict.values() if 
-                    p.name != pp.name ]
+            phases = list(self.phase_dict.values())
+            try:
+                phases.remove(p)
+            except ValueError:
+                pass
             energy, gclp_phases = self.gclp(p.unit_comp, phases=phases)
             p.stability = p.energy - energy
 
-    def compute_stabilities(self, phases=None, save=False, new_only=False):
+    @transaction.atomic
+    def compute_stabilities(self, phases=None, save=False, new_only=True):
         """
         Calculate the stability for every Phase.
 
@@ -991,13 +997,32 @@ class PhaseSpace(object):
         from qmpy.analysis.vasp.calculation import Calculation
         if phases is None:
             phases = self.phases
+
         for p in phases:
             if new_only:
                 if not p.stability is None:
                     continue
+            if not p in self.phase_dict.values():
+                continue
             self.compute_stability(p)
-            qs = qmpy.FormationEnergy.objects.filter(id=p.id)
             if save:
+                qs = qmpy.FormationEnergy.objects.filter(id=p.id)
+                qs.update(stability=p.stability)
+
+        for p in phases:
+            if new_only:
+                if not p.stability is None:
+                    continue
+            if p in self.phase_dict.values():
+                continue
+            if self.phase_dict[p.name].stability is None:
+                self.compute_stability(p)
+            else:
+                stab = max(0, self.phase_dict[p.name].stability)
+                diff = p.energy - self.phase_dict[p.name].energy
+                p.stability = stab + diff
+            if save:
+                qs = qmpy.FormationEnergy.objects.filter(id=p.id)
                 qs.update(stability=p.stability)
 
     def save_tie_lines(self):

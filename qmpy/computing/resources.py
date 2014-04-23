@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import time
 import random
 import subprocess
 import os
@@ -10,12 +11,21 @@ import logging
 
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+import pexpect, getpass
 
 import qmpy
 from qmpy.db.custom import DictField
 import queue as queue
 
 logger = logging.getLogger(__name__)
+
+def is_yes(string):
+    char = string.lower()[0]
+    if char == 'n':
+        return False
+    if char == 'y':
+        return True
+    return None
 
 class AllocationError(Exception):
     """Problem with the allocation"""
@@ -60,6 +70,48 @@ class User(AbstractUser):
             return cls.objects.get(username=name)
         except cls.DoesNotExist:
             return cls(username=name)
+
+    @staticmethod
+    def create():
+        username = raw_input("Username: ")
+        email = raw_input("E-mail address: ")
+        user, new = User.objects.get_or_create(username=username)
+        if not new:
+            print 'User by that name exists!'
+            print 'Please try a new name, or exit with Ctrl-x'
+            return User.create()
+        print 'Okay, user created!'
+        user.save()
+        user.create_accounts()
+        return user
+
+    def create_accounts(self):
+        msg = 'Would you like to create cluster accounts for this user?'
+        ans = is_yes(raw_input(msg+' [y/n]: '))
+        if ans is False:
+            return
+        elif ans is None:
+            print "I didn't understand that command."
+            return self.create_accounts()
+
+        msg = 'Does user %s have an account on %s? [y/n]: '
+        msg2 = 'What is %s\'s username on %s?: '
+        msg3 = 'On %s@%s where should calculations be run? (absolute path): '
+        known = self.account_set.values_list('host__name', flat=True)
+        for host in Host.objects.exclude(name__in=known):
+            ans = raw_input(msg % (self.username, host.name))
+            ans = is_yes(ans)
+            if ans is False:
+                continue
+            uname = raw_input(msg2 % (self.username, host.name))
+            acct, new = Account.objects.get_or_create(user=self, host=host)
+            if not new:
+                print 'Account exists!'
+                continue
+            path = raw_input(msg3 % (self.username, host.name))
+            acct.path = path
+            acct.username = uname.strip()
+            acct.save()
 
 class Host(models.Model):
     """
@@ -111,8 +163,8 @@ class Host(models.Model):
     def __str__(self):
         return self.name
 
-    @classmethod
-    def interactive_create(cls):
+    @staticmethod
+    def create():
         """
         Classmethod to create a Host model. Script will ask you questions about
         the host to add, and will return the created Host.
@@ -120,21 +172,21 @@ class Host(models.Model):
         """
         host = {}
         host['name'] = raw_input('Hostname:')
-        if cls.objects.filter(name=host['name']).exists():
+        if Host.objects.filter(name=host['name']).exists():
             print 'Host by that name already exists!'
             exit(-1)
         host['ip_address'] = raw_input('IP Address:')
-        if cls.objects.filter(ip_address=host['ip_address']).exists():
+        if Host.objects.filter(ip_address=host['ip_address']).exists():
             print 'Host at that address already exists!'
             exit(-1)
         host['ppn'] = raw_input('Processors per node:')
         host['nodes'] = raw_input('Max nodes to run on:')
-        host['sub_script'] = raw_inputs('Command to submit a script '+
+        host['sub_script'] = raw_inputs('Command to submit a script '
                 '(e.g. /usr/local/bin/qsub):')
-        host['check_queue'] = raw_input('Command for showq (e.g.'+
+        host['check_queue'] = raw_input('Command for showq (e.g.'
                 '/usr/local/maui/bin/showq):')
         host['sub_text'] = raw_input('Path to qfile template:')
-        h = cls(**host)
+        h = Host(**host)
         h.save()
 
     @classmethod
@@ -319,6 +371,57 @@ class Account(models.Model):
         except cls.DoesNotExist:
             return Account(host=host, user=user)
 
+    def create_passwordless_ssh(self, key='id_dsa', origin=None):
+        msg = 'password for {user}@{host}: '
+        if origin is None:
+            origin = '/home/{user}/.ssh'.format(user=getpass.getuser())
+
+        pas = getpass.getpass(msg.format(user=self.username, host=self.host.name))
+        msg = '/usr/bin/ssh {user}@{host} touch'
+        msg += ' /home/{user}/.ssh/authorized_keys'
+        p = pexpect.spawn(msg.format(
+                    origin=origin, key=key, 
+                    user=self.username, host=self.host.ip_address))
+        p.expect('assword:')
+        p.sendline(pas)
+        time.sleep(2)
+        p.close()
+
+        msg = '/usr/bin/scp {origin}/{key} {user}@{host}:/home/{user}/.ssh/'
+        p = pexpect.spawn(msg.format(
+                    origin=origin, key=key, 
+                    user=self.username, host=self.host.ip_address))
+        p.expect('assword:')
+        p.sendline(pas)
+        time.sleep(2)
+        p.close()
+
+        msg = '/usr/bin/ssh-copy-id -i {origin}/{key} {user}@{host}'
+        p = pexpect.spawn(msg.format(
+                    origin=origin, key=key, 
+                    user=self.username, host=self.host.ip_address))
+        p.expect('assword:')
+        p.sendline(pas)
+        time.sleep(2)
+        p.close()
+
+        msg = '/usr/bin/ssh {user}@{host}'
+        msg += ' chmod 600 /home/{user}/.ssh/authorized_keys'
+        p = pexpect.spawn(msg.format(
+                    origin=origin, key=key, 
+                    user=self.username, host=self.host.ip_address))
+        p.expect('assword:')
+        p.sendline(pas)
+        time.sleep(2)
+        p.close()
+
+        print 'Great! Lets test it real quick...'
+        out = self.execute('whoami')
+        if out == '%s\n' % self.username: 
+            print 'Awesome! It worked!'
+        else:
+            print 'Something appears to be wrong, talk to Scott...'
+
     @property
     def active(self):
         if self.state < 1:
@@ -465,9 +568,9 @@ class Allocation(models.Model):
         return self.name
     
     @classmethod
-    def create_interactive(cls):
+    def create():
         name = raw_input('Name your allocation:')
-        if cls.objects.filter(name=name).exists():
+        if Allocation.objects.filter(name=name).exists():
             print 'Allocation by that name already exists!'
             exit(-1)
         host = raw_input('Which cluster is this allocation on?')
@@ -475,7 +578,7 @@ class Allocation(models.Model):
             print "This host doesn't exist!"
             exit(-1)
         host = Host.objects.get(name=host)
-        alloc = cls(name=name, host=host)
+        alloc = Allocation(name=name, host=host)
         alloc.save()
         print 'Now we will assign users to this allocation'
         for acct in Account.objects.filter(host=host):
@@ -571,13 +674,13 @@ class Project(models.Model):
     def failed(self):
         return self.task_set.filter(state=-1)
 
-    @classmethod
-    def interactive_create(cls):
+    @staticmethod
+    def create():
         name = raw_input('Name your project: ')
-        if cls.objects.filter(name=name).exists():
+        if Project.objects.filter(name=name).exists():
             print 'Project by that name already exists!'
             exit(-1)
-        proj = cls(name=name)
+        proj = Project(name=name)
         proj.save()
         proj.priority = raw_input('Project priority (1-100): ')
         users = raw_input('List project users (e.g. sjk648 jsaal531 bwm291): ')

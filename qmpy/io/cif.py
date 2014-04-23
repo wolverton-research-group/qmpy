@@ -160,8 +160,11 @@ def _read_cif_block(cb):
     s.pressure = _get_value(cb.get('_cell_measurement_pressure', 0.0))
     if cb.get('_chemical_name_structure_type'):
         s.prototype = strx.Prototype.get(cb.get('_chemical_name_structure_type'))
-    s.reported_composition = strx.Composition.get(
-                   parse_comp(cb.get('_chemical_formula_sum')))
+    try:
+        s.reported_composition = strx.Composition.get(
+                       parse_comp(cb.get('_chemical_formula_sum')))
+    except:
+        pass
     s.input_format = 'cif'
     s.natoms = len(s)
     s.get_volume()

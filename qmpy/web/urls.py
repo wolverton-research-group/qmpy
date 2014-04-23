@@ -51,7 +51,10 @@ urlpatterns += patterns('qmpy.web.views',
     url(r'^computing/hosts$', 'hosts_view'),
     url(r'^computing/queue$', 'queue_view'),
 
-    url(r'^computing/new_host$', 'new_host_view'),
+    url(r'^computing/create/host$', 'new_host_view'),
+    url(r'^computing/create/project', 'new_project_view'),
+    url(r'^computing/create/user', 'new_user_view'),
+    url(r'^computing/create/', 'new_user_view'),
 
     url(r'^computing/project/(?P<state>.*)/(?P<project_id>.*)$', 'project_state_view'),
     url(r'^computing/project/(?P<project_id>.*)$', 'project_view'),

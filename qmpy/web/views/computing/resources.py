@@ -159,3 +159,4 @@ def project_state_view(request, state=0, project_id=None):
     return render_to_response('computing/project_state.html', 
             data, 
             RequestContext(request))
+
