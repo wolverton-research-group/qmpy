@@ -979,7 +979,7 @@ class PhaseSpace(object):
             p.stability = p.energy - energy
 
     @transaction.atomic
-    def compute_stabilities(self, phases=None, save=False, new_only=True):
+    def compute_stabilities(self, phases=None, save=False, reevaluate=True):
         """
         Calculate the stability for every Phase.
 
@@ -998,32 +998,25 @@ class PhaseSpace(object):
         if phases is None:
             phases = self.phases
 
-        for p in phases:
-            if new_only:
-                if not p.stability is None:
-                    continue
-            if not p in self.phase_dict.values():
-                continue
-            self.compute_stability(p)
-            if save:
-                qs = qmpy.FormationEnergy.objects.filter(id=p.id)
-                qs.update(stability=p.stability)
+        if reevaluate:
+            for p in self.phases:
+                p.stability = None
 
         for p in phases:
-            if new_only:
-                if not p.stability is None:
-                    continue
-            if p in self.phase_dict.values():
-                continue
-            if self.phase_dict[p.name].stability is None:
-                self.compute_stability(p)
-            else:
-                stab = max(0, self.phase_dict[p.name].stability)
-                diff = p.energy - self.phase_dict[p.name].energy
-                p.stability = stab + diff
-            if save:
-                qs = qmpy.FormationEnergy.objects.filter(id=p.id)
-                qs.update(stability=p.stability)
+            if p.stability is None:
+                if p in self.phase_dict.values():
+                    self.compute_stability(p)
+                else:
+                    p2 = self.phase_dict[p.name]
+                    if p2.stability is None:
+                        self.compute_stability(p2)
+                    base = max(0, p2.stability)
+                    diff = p.energy - p2.energy
+                    p.stability = base + diff
+
+                if save:
+                    qs = qmpy.FormationEnergy.objects.filter(id=p.id)
+                    qs.update(stability=p.stability)
 
     def save_tie_lines(self):
         """

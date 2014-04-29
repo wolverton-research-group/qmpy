@@ -113,7 +113,6 @@ def fit(name, calculations=None, experiments=None, fit_for=[]):
             element_mus[qmpy.Element.get(elt)] = float(mu)
 
         if abs(element_mus.get(qmpy.Element.get(elt), 0.0)) > 100:
-            print elt, element_mus[elt], mu
             element_mus[qmpy.Element.get(elt)] = float(mu)
 
     #element_mus = dict( (str(e), float(val)) for e, val in element_mus.items())
@@ -121,18 +120,15 @@ def fit(name, calculations=None, experiments=None, fit_for=[]):
 
     new_e_mus = {}
     for elt, val in element_mus.items():
-        print elt, val
         if val > 100:
             val = base_mus[str(elt)]
         mu = qmpy.ReferenceEnergy(element_id=elt, value=val)
         f.reference_energy_set.add(mu)
-        new_e_mus[str(elt)] = val
+        new_e_mus[str(elt)] = float(val)
 
     new_h_corrs = {}
     for hub, val in hubbard_mus.items():
         hm = qmpy.HubbardCorrection(hubbard=hub, value=val, element=hub.element)
         f.hubbard_correction_set.add(hm)
-        new_h_corrs[str(hub.key)] = val
-        print hub, val
-
+        new_h_corrs[str(hub.key)] = float(val)
     return new_e_mus, new_h_corrs

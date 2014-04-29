@@ -125,7 +125,7 @@ class Composition(models.Model):
         in_elts = Element.objects.filter(symbol__in=space)
         out_elts = Element.objects.exclude(symbol__in=space)
         comps = Composition.objects.filter(element_set__in=in_elts,
-                ntypes__lt=len(space))
+                ntypes__lte=len(space))
         comps = Composition.objects.exclude(element_set__in=out_elts)
         comps = comps.exclude(entry=None)
         if calculated:

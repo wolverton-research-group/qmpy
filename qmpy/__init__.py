@@ -87,6 +87,12 @@ except ImportError:
             'follow instructions for installing python API')
     FOUND_SPGLIB = False
 
+try:
+    import sklearn
+    FOUND_SKLEARN = True
+except ImportError:
+    FOUND_SKLEARN = False
+
 ### Kludge to get the django settings module into the path
 sys.path.insert(-1, INSTALL_PATH)
 if 'DJANGO_SETTINGS_MODULE' not in os.environ:
@@ -249,3 +255,7 @@ try:
         read_hubbards()
 except:
     pass
+
+
+for md in MetaData.objects.filter(type='global_warning'):
+    logger.warn(md.value)

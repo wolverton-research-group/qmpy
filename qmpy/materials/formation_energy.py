@@ -151,6 +151,22 @@ class FormationEnergy(models.Model):
         except FormationEnergy.DoesNotExist:
             return FormationEnergy(calculation=calculation, fit=fit)
 
+    @staticmethod
+    def search(bounds, fit='standard'):
+        space = set()
+        if isinstance(bounds, basestring):
+            bounds = bounds.split('-')
+        for b in bounds:
+            bound = parse_comp(b)
+            space |= set(bound.keys())
+        in_elts = elt.Element.objects.filter(symbol__in=space)
+        out_elts = elt.Element.objects.exclude(symbol__in=space)
+        forms = FormationEnergy.objects.filter(fit=fit)
+        forms = forms.exclude(composition__element_set__in=out_elts)
+        forms = forms.filter(composition__element_set__in=in_elts)
+        forms = forms.filter(composition__ntypes__lte=len(space))
+        return forms.distinct()
+
     def __str__(self):
         return '%s : %s' % (self.composition, self.delta_e)
 

@@ -1,4 +1,5 @@
 include qmpy/data/elements
+include qmpy/data/data_mining
 include qmpy/data/thermodata *
 include qmpy/io/files *
 recursive-include qmpy/analysis/vasp/files *
