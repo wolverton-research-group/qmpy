@@ -28,6 +28,7 @@ setup(
         "pyparsing<=1.9.9",
         "PyCifRW==3.6.2",
         "pexpect",
-        "PyYAML"
+        "PyYAML",
+        "scikit-learn"
     ],
 )
