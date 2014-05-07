@@ -12,6 +12,7 @@ before_install:
   - sudo apt-get update -qq
   - pip install numpy
   - pip install scipy
+  - pip install scikit-learn
 before_script:
   - wget http://downloads.sourceforge.net/project/spglib/spglib/spglib-1.6/spglib-1.6.0.tar.gz
   - tar -xvf spglib-1.6.0.tar.gz
@@ -24,5 +25,7 @@ before_script:
   - mysql -e 'create database qmdb_dev;'
   - cd qmpy/db
   - python manage.py syncdb --noinput
+  - cd ../..
 script:
+  - cd qmpy/db
   - python manage.py test qmpy
