@@ -189,3 +189,76 @@ several of the key attributes you may wish to access::
      'pstress': 0.0,
      'sigma': 0.2}
 
+
+Searching for models
+--------------------
+
+The documentation for Django for searching for models is ver complete, and
+should be taken as the ultimate reference for searching for models in qmpy, but
+a basic overview is provided here.
+
+Searching for entries based on stability
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Formation energies are stored as FormationEnergy instances, which are
+associated with an `:mod:~qmpy.Entry` and a `:mod:~qmpy.Calculation`. Knowing
+this, we can search for stable Entries using::
+
+    >>> stable = Entry.objects.filter(formationenergy__stability__lt=0)
+    >>> stable.count()
+    18150
+
+The same concept can be applied to searching for other quantities, as long as
+you can relate them to a FormationEnergy by "__" constructions::
+
+    >>> stable_comps = Composition.objects.filter(formationenergy__stability__lt=0)
+    >>> stable_comps.count()
+    18150
+    >>> s = Structure.objects.filter(calculated__formationenergy__stability__lt=0)
+    >>> s.count()
+    18150
+
+Adding other search criteria lets you explore a little more::
+
+    >>> stable = FormationEnergy.objects.filter(stability__lt=0)
+    >>> # Find the number of stable compounds containing O
+    >>> stable.filter(composition__element_set='O').count()
+    4017
+    >>> # or Fe. Is it surprising that this is smaller?
+    >>> stable.filter(composition__element_set='Fe').count()
+    653
+    >>> # Meta data is also a possiblity. How many stable compounds were found
+    >>> # in the course of calculations for a particular project?
+    >>> stable.filter(entry__project_set='prototypes').count()
+    3119
+
+Searching for entries based on composition
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You can find compositions in a few ways using filters and excludes. If you want
+a specific region of phase space (including related subspaces)::
+
+    >>> elts = [ 'Fe', 'Li', 'O' ]
+    >>> others = Element.objects.exclude(symbol__in=elts)
+    >>> comps = Composition.objects.exclude(element_set=others)
+
+This searchs finds every composition that doesn't have any elements that aren't
+in the region of phase space requested. For binary or ternary phase spaces it
+can be more efficient to search permutations of sub-spaces::
+
+    >>> comps = Composition.objects.filter(ntypes=3)
+    >>> for e in elts:
+    >>>     comps = comps.filter(element_set=e)
+    >>> for e in elts:
+    >>>     e_comps = Composition.objects.filter(element_set=e, ntypes=1)
+    >>>     comps |= e_comps
+    >>> for e1, e2 in itertools.combinations(elts, r=2):
+    >>>     bin_comps = Composition.objects.filter(element_set=e1)
+    >>>     bin_comps = bin_comps.filter(element_set=e2, ntypes=2)
+    >>>     comps |= bin_comps
+    >>> comps.distinct().count()
+
+However, for larger regions of phase space (4 or 5 or more) the number of
+subqueries of the second approach rapidly becomes more expensive than the
+single, more complicated query of the first.
+

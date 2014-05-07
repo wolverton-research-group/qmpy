@@ -763,6 +763,7 @@ class Calculation(models.Model):
         self.kpt_weights = weights
 
     def read_occupations(self):
+        self.get_outcar()
         if self.kpoints is None:
             self.read_kpoints()
         if self.settings is None:
