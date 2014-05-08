@@ -1250,18 +1250,12 @@ class Calculation(models.Model):
                 os.system('gzip -f %s' % self.path+'/'+file)
 
     def copy(self):
-        new = Calculation()
-        new.entry = self.entry
-        new.label = self.label
+        new = copy.deepcopy(self)
+        new.id = None
+        new.label = None
         new.input = self.input
         new.output = self.output
         new.dos = self.dos
-        new.path = self.path
-        new.potentials = self.potentials
-        new.hubbards = self.hubbards
-        new.settings = self.settings
-        new.attempt = self.attempt 
-        new.composition = self.composition
         return new
 
     def move(self, path):

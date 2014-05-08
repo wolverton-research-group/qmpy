@@ -15,6 +15,8 @@ import stat
 import sys
 import ConfigParser
 
+import django.core.exceptions as de
+
 INSTALL_PATH = os.path.abspath(os.path.dirname(__file__))
 sys.path = [os.path.join(INSTALL_PATH, 'qmpy', 'db')] + sys.path
 
@@ -241,6 +243,7 @@ def sync_resources():
             alloc.save()
             proj.allocations.add(alloc)
 
+# Try to prevent exception when importing before database is set up
 try:
     if not Spacegroup.objects.exists():
         read_spacegroups()
@@ -253,9 +256,8 @@ try:
 
     if not Hubbard.objects.exists():
         read_hubbards()
-except:
+
+    for md in MetaData.objects.filter(type='global_warning'):
+        logger.warn(md.value)
+except de.DoesNotExist:
     pass
-
-
-for md in MetaData.objects.filter(type='global_warning'):
-    logger.warn(md.value)

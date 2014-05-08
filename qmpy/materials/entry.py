@@ -94,17 +94,17 @@ class Entry(models.Model):
                 self.reference.save()
                 self.reference = self.reference
         super(Entry, self).save(*args, **kwargs)
-        if self._structures:
-            for k, v in self.structures.items():
-                v.label = k
-                v.entry = self
-                v.save()
+        #if self._structures:
+        for k, v in self.structures.items():
+            v.label = k
+            v.entry = self
+            v.save()
             #self.structure_set = self.structures.values()
-        if self._calculations:
-            for k, v in self.calculations.items():
-                v.label = k
-                v.entry = self
-                v.save()
+        #if self._calculations:
+        for k, v in self.calculations.items():
+            v.label = k
+            v.entry = self
+            v.save()
             #self.calculation_set = self.calculations.values()
         if self._elements:
             self.element_set = self.elements
