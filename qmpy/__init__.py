@@ -259,5 +259,5 @@ try:
 
     for md in MetaData.objects.filter(type='global_warning'):
         logger.warn(md.value)
-except de.ObjectDoesNotExist:
+except:
     pass
