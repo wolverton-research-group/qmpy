@@ -12,3 +12,4 @@ or:
 
     easy_install -U qmpy
 
+For more complete documentation, see: http://oqmd.org/static/docs/index.html
