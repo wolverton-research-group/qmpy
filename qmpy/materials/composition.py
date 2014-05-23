@@ -3,6 +3,7 @@
 from django.db import models
 
 from qmpy.materials.element import Element
+from qmpy.data import elements
 from qmpy.utils import *
 import qmpy.analysis.thermodynamics as thermo
 
@@ -162,17 +163,6 @@ class Composition(models.Model):
         self.element_set = elements
         self._elements = None
 
-    def formation_energy(self, reference='standard', icsd=True):
-        gs = self.ground_state
-        if gs is None:
-            return 
-        if icsd and 'icsd' not in gs.path:
-            return
-        if 'static' in gs.calculations:
-            return gs.calculations['static'].compute_formation(reference)
-        elif 'standard' in gs.calculations:
-            return gs.calculations['standard'].compute_formation(reference)
-
     @property
     def total_energy(self):
         calcs = self.calculation_set.filter(converged=True, 
@@ -188,7 +178,7 @@ class Composition(models.Model):
                             configuration__in=['standard', 'static'])
         if not calcs.exists():
             return
-        return min( c.compute_formation().delta_e for c in calcs )
+        return min( c.formation_energy() for c in calcs )
 
     @property
     def delta_e(self):

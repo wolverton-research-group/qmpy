@@ -198,4 +198,5 @@ class Reaction(object):
 
     @property
     def voltage(self):
+        print self.delta_var, self.electrons
         return self.delta_h/self.delta_var/self.electrons

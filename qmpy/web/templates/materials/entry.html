@@ -44,10 +44,8 @@
 	<li>Duplicate of:
 	<a href="/materials/entry/{{ entry.duplicate_of_id }}">Entry {{entry.duplicate_of_id}}</a>
   </li>{% elif entry.duplicates.all %}
-  <li>See also:
-  {% for e in entry.duplicates.all %} 
-  <a href="/materials/entry/{{ e.id }}">Entry {{e.id}}</a>
-  {% endfor %}
+  <li>See also: 
+  <a href="/materials/duplicates/{{ entry.id }}">duplicates list</a>
   {% endif %}
 
 	{% if entry.prototype %}
@@ -57,7 +55,7 @@
 
   <li> Structure: <a href="/materials/structure/{{entry.structure.id}}">
     {{entry.structure.id}}</a></li>
-  <li> Spacegroup: <a href="/analysis/symmetry/spacegroup/{{entry.structure.spacegroup}}">
+  <li> Spacegroup: <a href="/analysis/spacegroup/{{entry.structure.spacegroup}}">
     {{entry.structure.spacegroup.symbol}}</a></li>
   <li> # of atoms: {{entry.structure.natoms}}</li>
 

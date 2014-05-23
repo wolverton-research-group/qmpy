@@ -1,0 +1,384 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Tutorials &mdash; qmpy 0.4.9 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.4.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="qmpy 0.4.9 documentation" href="index.html" />
+    <link rel="next" title="Data Models" href="models.html" />
+    <link rel="prev" title="Installation" href="getting_started.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="models.html" title="Data Models"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="getting_started.html" title="Installation"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">qmpy 0.4.9 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-qmpy">
+<span id="tutorials"></span><h1>Tutorials<a class="headerlink" href="#module-qmpy" title="Permalink to this headline">¶</a></h1>
+<p>qmpy is a package containing many tools for computational materials science.</p>
+<p>The qmpy package comes bundled with two executable scripts, <cite>qmpy</cite> and <cite>oqmd</cite>.
+<cite>qmpy</cite> is a simple bash script that starts an interactive python
+environment and imports qmpy:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ qmpy
+&gt;&gt;&gt;
+</pre></div>
+</div>
+<p>To write your own python script that utilizes qmpy functionality, simply start
+with an import like:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">qmpy</span> <span class="kn">import</span> <span class="o">*</span>
+</pre></div>
+</div>
+<p>and all of the commands shown below should work.</p>
+<div class="section" id="database-entries">
+<h2>Database entries<a class="headerlink" href="#database-entries" title="Permalink to this headline">¶</a></h2>
+<p>Once the database is <a class="reference external" href="getting_started">installed</a>, you can query it very
+flexibly and easily. In this section we will explore the data structure of
+entries in the OQMD and provide several examples of how to make queries.
+For deeper understanding of how django models work, you should check out the
+(excellent) <a class="reference external" href="http://docs.djangoproject.com/en/1.6/">django documentation</a>.</p>
+<p>First, lets look at how to access an entry from the database. As an example,
+lets pull up an entry for an <a class="reference internal" href="models.html#qmpy.Element" title="qmpy.Element"><tt class="xref py py-mod docutils literal"><span class="pre">Element</span></tt></a>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">fe</span> <span class="o">=</span> <span class="n">Element</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">symbol</span><span class="o">=</span><span class="s">&#39;Fe&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fe</span>
+<span class="go">&lt;Element: Fe&gt;</span>
+</pre></div>
+</div>
+<p>Django models have a number of fields that can be accessed directly once the
+database entry has been loaded. For example, with an element you can:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">fe</span><span class="o">.</span><span class="n">symbol</span>
+<span class="go">u&#39;Fe&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fe</span><span class="o">.</span><span class="n">z</span>
+<span class="go">26L</span>
+</pre></div>
+</div>
+<p>For a complete list of the model attributes that are stored in the database,
+refer to the documentation for the model you are interested in, in this case
+<a class="reference internal" href="models.html#qmpy.Element" title="qmpy.Element"><tt class="xref py py-mod docutils literal"><span class="pre">Element</span></tt></a>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>When strings are returned, they are returned as unicode strings,
+(indicated by the &#8220;u&#8221; preceding the string) integers are
+returned as long integers (indicated by the trailing &#8220;L&#8221;). For most
+purposes this makes no difference, as these data types will generally
+behave exactly as expected, i.e.:</p>
+<div class="last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">fe</span><span class="o">.</span><span class="n">z</span> <span class="o">==</span> <span class="mi">26</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fe</span><span class="o">.</span><span class="n">symbol</span> <span class="o">==</span> <span class="s">&quot;Fe&quot;</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</div>
+<p>In addition to data attributes like these, django models have relationships to
+other models. In qmpy there are two flavors of relationships: one-to-many and
+many-to-many. An example of a one-to-many relationship would be the
+relationship between an <a class="reference internal" href="models.html#qmpy.Element" title="qmpy.Element"><tt class="xref py py-mod docutils literal"><span class="pre">Element</span></tt></a> and an <a class="reference internal" href="models.html#qmpy.Atom" title="qmpy.Atom"><tt class="xref py py-mod docutils literal"><span class="pre">Atom</span></tt></a>.
+There are many atoms which are a given element, but each atom is only
+one element. In the case of Fe:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">fe</span><span class="o">.</span><span class="n">atom_set</span>
+<span class="go">&lt;django.db.models.fields.related.RelatedManager object at 0x7f0997fa2690&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fe</span><span class="o">.</span><span class="n">atom_set</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+<span class="go">127585</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">atom</span> <span class="o">=</span> <span class="n">fe</span><span class="o">.</span><span class="n">atom_set</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">atom</span>
+<span class="go">&lt;Atom: Fe @ 0.000000 0.000000 0.000000&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">atom</span><span class="o">.</span><span class="n">element</span>
+<span class="go">&lt;Element: Fe&gt;</span>
+</pre></div>
+</div>
+<p>A <tt class="xref py py-class docutils literal"><span class="pre">RelatedManager</span></tt> is an object that deals with obtaining other django models
+that are related to the main object. We can use the objects.count() method to
+fidn the number of <a class="reference internal" href="models.html#qmpy.Atom" title="qmpy.Atom"><tt class="xref py py-mod docutils literal"><span class="pre">Atom</span></tt></a> objects that are Fe, and find ~125,000.
+To obtain one of these atoms, we use the objects.first() method, which
+simply returns the first <a class="reference internal" href="models.html#qmpy.Atom" title="qmpy.Atom"><tt class="xref py py-mod docutils literal"><span class="pre">Atom</span></tt></a> which is Fe. Much more functionality of Managers
+and RelatedManagers will be shown throughout this tutorial and in the examples,
+but for a proper understanding you should refer to the django docs.</p>
+<p>An example of a many-to-many relationship would be the relationship between an
+<a class="reference internal" href="models.html#qmpy.Element" title="qmpy.Element"><tt class="xref py py-mod docutils literal"><span class="pre">Element</span></tt></a> and a <a class="reference internal" href="models.html#qmpy.Composition" title="qmpy.Composition"><tt class="xref py py-mod docutils literal"><span class="pre">Composition</span></tt></a>. A composition (e.g. Fe2O3)
+can contain many elements (Fe and O), and an element can be a part of many
+compositions (Fe3O4 and FeO as well). This is the nature of a many-to-many
+relationship. In the case of Fe:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">fe</span><span class="o">.</span><span class="n">composition_set</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+<span class="go">10882</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">comp</span> <span class="o">=</span> <span class="n">fe</span><span class="o">.</span><span class="n">composition_set</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">ntypes</span><span class="o">=</span><span class="mi">2</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">comp</span>
+<span class="go">&lt;Composition: AcFe&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">comp</span><span class="o">.</span><span class="n">element_set</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+<span class="go">[&lt;Element: Ac&gt;, &lt;Element: Fe&gt;]</span>
+</pre></div>
+</div>
+<p>In this example we have taken our base object (the <a class="reference internal" href="models.html#qmpy.Element" title="qmpy.Element"><tt class="xref py py-mod docutils literal"><span class="pre">Element</span></tt></a>) and filtered its
+composition_set for <a class="reference internal" href="models.html#qmpy.Composition" title="qmpy.Composition"><tt class="xref py py-mod docutils literal"><span class="pre">Composition</span></tt></a> objects which meet the condition ntypes=2 (i.e.
+there are two elements in the composition), and taken the first such
+<a class="reference internal" href="models.html#qmpy.Composition" title="qmpy.Composition"><tt class="xref py py-class docutils literal"><span class="pre">Composition</span></tt></a> (index 0 in the <tt class="xref py py-class docutils literal"><span class="pre">QuerySet</span></tt> that is returned).</p>
+</div>
+<div class="section" id="creating-a-structure">
+<h2>Creating a structure<a class="headerlink" href="#creating-a-structure" title="Permalink to this headline">¶</a></h2>
+<p>There are several ways to create a structure, but we will start with reading in
+a POSCAR:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">INSTALL_PATH</span><span class="o">+</span><span class="s">&#39;/io/files/POSCAR_BCC&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Once you have the <a class="reference internal" href="models.html#qmpy.Structure" title="qmpy.Structure"><tt class="xref py py-mod docutils literal"><span class="pre">Structure</span></tt></a> object, the important features of a crystal
+structure can be accessed readily.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">cell</span>
+<span class="go">array([[ 3.,  0.,  0.],</span>
+<span class="go">       [ 0.,  3.,  0.],</span>
+<span class="go">       [ 0.,  0.,  3.]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">lat_params</span>
+<span class="go">[3.0, 3.0, 3.0, 90.0, 90.0, 90.0]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">atoms</span>
+<span class="go">[&lt;Atom: Cu @ 0.000000 0.000000 0.000000&gt;, &lt;Atom: Cu @ 0.500000 0.500000</span>
+<span class="go">0.500000&gt;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">composition</span>
+<span class="go">&lt;Composition: Cu&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">volume</span>
+<span class="go">27.0</span>
+</pre></div>
+</div>
+<p>You can also readily construct a <a class="reference internal" href="models.html#qmpy.Structure" title="qmpy.Structure"><tt class="xref py py-mod docutils literal"><span class="pre">Structure</span></tt></a> from scratch, from the lattice
+vectors and the atom positions.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s2</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">create</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span> <span class="p">[(</span><span class="s">&#39;Cu&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]),</span>
+<span class="go">                                    (&#39;Cu&#39;, [0.5,0.5,0.5])])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s2</span> <span class="o">==</span> <span class="n">s</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="first-principles-calculations">
+<h2>First Principles Calculations<a class="headerlink" href="#first-principles-calculations" title="Permalink to this headline">¶</a></h2>
+<p>At this time qmpy only supports automation of calculations using the Vienna Ab
+Initio Simulation Package (VASP). The reading and creation of these
+calculations are handled by the <a class="reference internal" href="models.html#qmpy.Calculation" title="qmpy.Calculation"><tt class="xref py py-mod docutils literal"><span class="pre">Calculation</span></tt></a> model.
+To read in an existing calculation:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">path</span> <span class="o">=</span> <span class="s">&#39;/analysis/vasp/files/normal/fine_relax/&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">calc</span> <span class="o">=</span> <span class="n">Calculation</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">INSTALL_PATH</span><span class="o">+</span><span class="n">path</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>qmpy will search the directory for an OUTCAR or OUTCAR.gz file. If it is able
+to find an OUTCAR, it will attempt to read the file. Next, we will demonstrate
+several of the key attributes you may wish to access:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">calc</span><span class="o">.</span><span class="n">energy</span> <span class="c"># the final total energy</span>
+<span class="go">-12.416926999999999</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">calc</span><span class="o">.</span><span class="n">energies</span> <span class="c"># the total energies of each step</span>
+<span class="go">array([-12.415236 -12.416596, -12.416927])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">calc</span><span class="o">.</span><span class="n">volume</span> <span class="c"># the output volume</span>
+<span class="go">77.787375068172508</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">calc</span><span class="o">.</span><span class="n">input</span>
+<span class="go">&lt;Structure: SrGe2&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">calc</span><span class="o">.</span><span class="n">output</span>
+<span class="go">&lt;Structure: SrGe2&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pprint</span><span class="p">(</span><span class="n">calc</span><span class="o">.</span><span class="n">settings</span><span class="p">)</span>
+<span class="go">{&#39;algo&#39;: &#39;fast&#39;,</span>
+<span class="go"> &#39;ediff&#39;: 0.0001,</span>
+<span class="go"> &#39;encut&#39;: 373.0,</span>
+<span class="go"> &#39;epsilon&#39;: 1.0,</span>
+<span class="go"> &#39;ibrion&#39;: 1,</span>
+<span class="go"> &#39;idipol&#39;: 0,</span>
+<span class="go"> &#39;isif&#39;: 3,</span>
+<span class="go"> &#39;ismear&#39;: 1,</span>
+<span class="go"> &#39;ispin&#39;: 1,</span>
+<span class="go"> &#39;istart&#39;: 0,</span>
+<span class="go"> &#39;lcharg&#39;: True,</span>
+<span class="go"> &#39;ldipol&#39;: False,</span>
+<span class="go"> &#39;lorbit&#39;: 0,</span>
+<span class="go"> &#39;lreal&#39;: False,</span>
+<span class="go"> &#39;lvtot&#39;: False,</span>
+<span class="go"> &#39;lwave&#39;: False,</span>
+<span class="go"> &#39;nbands&#39;: 24,</span>
+<span class="go"> &#39;nelm&#39;: 60,</span>
+<span class="go"> &#39;nelmin&#39;: 5,</span>
+<span class="go"> &#39;nsw&#39;: 40,</span>
+<span class="go"> &#39;potentials&#39;: [{&#39;name&#39;: &#39;Ge_d&#39;, &#39;paw&#39;: True, &#39;us&#39;: False, &#39;xc&#39;: &#39;PBE&#39;},</span>
+<span class="go">                {&#39;name&#39;: &#39;Sr_sv&#39;, &#39;paw&#39;: True, &#39;us&#39;: False, &#39;xc&#39;: &#39;PBE&#39;}],</span>
+<span class="go"> &#39;potim&#39;: 0.5,</span>
+<span class="go"> &#39;prec&#39;: &#39;med&#39;,</span>
+<span class="go"> &#39;pstress&#39;: 0.0,</span>
+<span class="go"> &#39;sigma&#39;: 0.2}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="searching-for-models">
+<h2>Searching for models<a class="headerlink" href="#searching-for-models" title="Permalink to this headline">¶</a></h2>
+<p>The documentation for Django for searching for models is ver complete, and
+should be taken as the ultimate reference for searching for models in qmpy, but
+a basic overview is provided here.</p>
+<div class="section" id="searching-for-entries-based-on-stability">
+<h3>Searching for entries based on stability<a class="headerlink" href="#searching-for-entries-based-on-stability" title="Permalink to this headline">¶</a></h3>
+<p>Formation energies are stored as FormationEnergy instances, which are
+associated with an <cite>:mod:~qmpy.Entry</cite> and a <cite>:mod:~qmpy.Calculation</cite>. Knowing
+this, we can search for stable Entries using:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stable</span> <span class="o">=</span> <span class="n">Entry</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">formationenergy__stability__lt</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stable</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+<span class="go">18150</span>
+</pre></div>
+</div>
+<p>The same concept can be applied to searching for other quantities, as long as
+you can relate them to a FormationEnergy by &#8220;__&#8221; constructions:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stable_comps</span> <span class="o">=</span> <span class="n">Composition</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">formationenergy__stability__lt</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stable_comps</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+<span class="go">18150</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">calculated__formationenergy__stability__lt</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+<span class="go">18150</span>
+</pre></div>
+</div>
+<p>Adding other search criteria lets you explore a little more:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stable</span> <span class="o">=</span> <span class="n">FormationEnergy</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">stability__lt</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># Find the number of stable compounds containing O</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stable</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">composition__element_set</span><span class="o">=</span><span class="s">&#39;O&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+<span class="go">4017</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># or Fe. Is it surprising that this is smaller?</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stable</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">composition__element_set</span><span class="o">=</span><span class="s">&#39;Fe&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+<span class="go">653</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># Meta data is also a possiblity. How many stable compounds were found</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># in the course of calculations for a particular project?</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stable</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">entry__project_set</span><span class="o">=</span><span class="s">&#39;prototypes&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+<span class="go">3119</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="searching-for-entries-based-on-composition">
+<h3>Searching for entries based on composition<a class="headerlink" href="#searching-for-entries-based-on-composition" title="Permalink to this headline">¶</a></h3>
+<p>You can find compositions in a few ways using filters and excludes. If you want
+a specific region of phase space (including related subspaces):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">elts</span> <span class="o">=</span> <span class="p">[</span> <span class="s">&#39;Fe&#39;</span><span class="p">,</span> <span class="s">&#39;Li&#39;</span><span class="p">,</span> <span class="s">&#39;O&#39;</span> <span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">others</span> <span class="o">=</span> <span class="n">Element</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">exclude</span><span class="p">(</span><span class="n">symbol__in</span><span class="o">=</span><span class="n">elts</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">comps</span> <span class="o">=</span> <span class="n">Composition</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">exclude</span><span class="p">(</span><span class="n">element_set</span><span class="o">=</span><span class="n">others</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This searchs finds every composition that doesn&#8217;t have any elements that aren&#8217;t
+in the region of phase space requested. For binary or ternary phase spaces it
+can be more efficient to search permutations of sub-spaces:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">comps</span> <span class="o">=</span> <span class="n">Composition</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">ntypes</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">elts</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">comps</span> <span class="o">=</span> <span class="n">comps</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">element_set</span><span class="o">=</span><span class="n">e</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">elts</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">e_comps</span> <span class="o">=</span> <span class="n">Composition</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">element_set</span><span class="o">=</span><span class="n">e</span><span class="p">,</span> <span class="n">ntypes</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">comps</span> <span class="o">|=</span> <span class="n">e_comps</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">e1</span><span class="p">,</span> <span class="n">e2</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="n">elts</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">bin_comps</span> <span class="o">=</span> <span class="n">Composition</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">element_set</span><span class="o">=</span><span class="n">e1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">bin_comps</span> <span class="o">=</span> <span class="n">bin_comps</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">element_set</span><span class="o">=</span><span class="n">e2</span><span class="p">,</span> <span class="n">ntypes</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">comps</span> <span class="o">|=</span> <span class="n">bin_comps</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">comps</span><span class="o">.</span><span class="n">distinct</span><span class="p">()</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>However, for larger regions of phase space (4 or 5 or more) the number of
+subqueries of the second approach rapidly becomes more expensive than the
+single, more complicated query of the first.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Tutorials</a><ul>
+<li><a class="reference internal" href="#database-entries">Database entries</a></li>
+<li><a class="reference internal" href="#creating-a-structure">Creating a structure</a></li>
+<li><a class="reference internal" href="#first-principles-calculations">First Principles Calculations</a></li>
+<li><a class="reference internal" href="#searching-for-models">Searching for models</a><ul>
+<li><a class="reference internal" href="#searching-for-entries-based-on-stability">Searching for entries based on stability</a></li>
+<li><a class="reference internal" href="#searching-for-entries-based-on-composition">Searching for entries based on composition</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="getting_started.html"
+                        title="previous chapter">Installation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="models.html"
+                        title="next chapter">Data Models</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/tutorials.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="models.html" title="Data Models"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="getting_started.html" title="Installation"
+             >previous</a> |</li>
+        <li><a href="index.html">qmpy 0.4.9 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Scott Kirklin.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>

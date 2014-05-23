@@ -83,7 +83,7 @@ def standard(entry, **kwargs):
     calc = Calculation.setup(inp, entry=entry,
         configuration='standard', path=entry.path+'/standard', **kwargs)
     if calc.converged:
-        calc.compute_formation()
+        calc.get_formation()
         entry.calculations['standard'] = calc
         entry.structures['standard'] = calc.output
     return calc
@@ -124,7 +124,7 @@ def static(entry, **kwargs):
 
     entry.calculations['static'] = calc
     if calc.converged:
-        calc.compute_formation()
+        calc.get_formation()
     else:
         calc.write()
 

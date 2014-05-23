@@ -1,0 +1,177 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Examples &mdash; qmpy 0.4.9 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.4.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="qmpy 0.4.9 documentation" href="index.html" />
+    <link rel="prev" title="Analysis tools" href="analysis.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="analysis.html" title="Analysis tools"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">qmpy 0.4.9 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="examples">
+<h1>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h1>
+<p>To be filled out in more detail</p>
+<div class="section" id="identification-of-fcc-decortations">
+<h2>Identification of FCC decortations<a class="headerlink" href="#identification-of-fcc-decortations" title="Permalink to this headline">¶</a></h2>
+<p>First, we will find all binary entries:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">binaries</span> <span class="o">=</span> <span class="n">Entry</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">ntypes</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fcc</span> <span class="o">=</span> <span class="n">Composition</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;Cu&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">ground_state</span><span class="o">.</span><span class="n">structure</span>
+</pre></div>
+</div>
+<p>Then we run through every structure, and see if replacing all atoms with Cu
+results in a structure that is equivalent (on volume scaling) with FCC Cu.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">fccs</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">binaries</span><span class="p">[:</span><span class="mi">100</span><span class="p">]:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">struct</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">structure</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="c">## Construct a dictionary of elt:replacement_elt pairs</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="c">## where every replacement is Cu</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">rdict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="s">&#39;Cu&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">entry</span><span class="o">.</span><span class="n">comp</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">test</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">substitute</span><span class="p">(</span><span class="n">rdict</span><span class="p">,</span> <span class="n">rescale</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                                    <span class="n">in_place</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="k">if</span> <span class="n">fcc</span> <span class="o">==</span> <span class="n">test</span><span class="p">:</span> <span class="c"># simple equality testing will work</span>
+<span class="gp">&gt;&gt;&gt; </span>        <span class="n">fccs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">If you actually try to run this on the entire database, understand that it
+will take a pretty long time! Each entry tested takes between 0.1 and 1
+second, so it would take most of 24 hours to run through all 80,000+ binary
+database entries.</p>
+</div>
+</div>
+<div class="section" id="deviation-from-vagard-s-law">
+<h2>Deviation from Vagard&#8217;s Law<a class="headerlink" href="#deviation-from-vagard-s-law" title="Permalink to this headline">¶</a></h2>
+<p>Use the element_groups dictionary to look get a list of all simple metals:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">elts</span> <span class="o">=</span> <span class="n">element_groups</span><span class="p">[</span><span class="s">&#39;simple-metals&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Then, for each pair of metals get all of the entries, and their volumes.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">vols</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">e1</span><span class="p">,</span> <span class="n">e2</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="n">elts</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">entries</span> <span class="o">=</span> <span class="n">Composition</span><span class="o">.</span><span class="n">get_list</span><span class="p">([</span><span class="n">e1</span><span class="p">,</span> <span class="n">e2</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">entries</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>        <span class="n">vol</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">volume_pa</span>
+<span class="gp">&gt;&gt;&gt; </span>        <span class="n">vols</span><span class="p">[</span><span class="n">entry</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">vols</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="p">[])</span> <span class="o">+</span> <span class="p">[</span><span class="n">vol</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Then, for every composition get the Vagard&#8217;s law volume.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">vagards</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">comp</span> <span class="ow">in</span> <span class="n">vols</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">comp</span> <span class="o">=</span> <span class="n">parse_comp</span><span class="p">(</span><span class="n">comp</span><span class="p">)</span> <span class="c"># returns a elt:amt dictionary</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">uc</span> <span class="o">=</span> <span class="n">unit_comp</span><span class="p">(</span><span class="n">comp</span><span class="p">)</span> <span class="c"># reduces to a total of 1 atom</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">vvol</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="k">for</span> <span class="n">elt</span><span class="p">,</span> <span class="n">amt</span> <span class="ow">in</span> <span class="n">uc</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<span class="gp">&gt;&gt;&gt; </span>        <span class="n">vvol</span> <span class="o">+=</span> <span class="n">elements</span><span class="p">[</span><span class="n">elt</span><span class="p">][</span><span class="s">&#39;volume&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">amt</span>
+</pre></div>
+</div>
+<p>Addendum:
+* Calculate an average error for each system
+* Make a scatter plot for a few binaries show in volume vs x
+* Look for cases where some are above and some are below
+* Get relaxed volume of all stable compounds
+* What about including the &#8220;nearly stable&#8221;</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Examples</a><ul>
+<li><a class="reference internal" href="#identification-of-fcc-decortations">Identification of FCC decortations</a></li>
+<li><a class="reference internal" href="#deviation-from-vagard-s-law">Deviation from Vagard&#8217;s Law</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="analysis.html"
+                        title="previous chapter">Analysis tools</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="analysis.html" title="Analysis tools"
+             >previous</a> |</li>
+        <li><a href="index.html">qmpy 0.4.9 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Scott Kirklin.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>

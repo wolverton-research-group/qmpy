@@ -1,0 +1,353 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>qmpy &mdash; qmpy 0.4.9 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.4.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="qmpy 0.4.9 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">qmpy 0.4.9 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for qmpy</h1><div class="highlight"><pre>
+<span class="c"># qmpy/__init__.py</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">qmpy is a package containing many tools for computational materials science. </span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">pyximport</span><span class="p">;</span> <span class="n">pyximport</span><span class="o">.</span><span class="n">install</span><span class="p">()</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">pass</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">logging.handlers</span>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">os.path</span>
+<span class="kn">import</span> <span class="nn">stat</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">ConfigParser</span>
+
+<span class="n">INSTALL_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">))</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">INSTALL_PATH</span><span class="p">,</span> <span class="s">&#39;qmpy&#39;</span><span class="p">,</span> <span class="s">&#39;db&#39;</span><span class="p">)]</span> <span class="o">+</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span>
+
+<span class="n">LOG_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">INSTALL_PATH</span><span class="p">,</span> <span class="s">&#39;logs&#39;</span><span class="p">)</span>
+
+<span class="n">config</span> <span class="o">=</span> <span class="n">ConfigParser</span><span class="o">.</span><span class="n">ConfigParser</span><span class="p">()</span>
+<span class="n">config</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">INSTALL_PATH</span><span class="p">,</span><span class="s">&#39;configuration&#39;</span><span class="p">,</span><span class="s">&#39;site.cfg&#39;</span><span class="p">))</span>
+
+<span class="n">VASP_POTENTIALS</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;VASP&#39;</span><span class="p">,</span> <span class="s">&#39;potential_path&#39;</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">LOG_PATH</span><span class="p">):</span>
+    <span class="n">oldmask</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">umask</span><span class="p">(</span><span class="mi">666</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">LOG_PATH</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">umask</span><span class="p">(</span><span class="n">oldmask</span><span class="p">)</span>
+
+<span class="c"># the default log level for normal loggers</span>
+<span class="n">logLevel</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logLevel</span><span class="p">)</span>
+
+<span class="n">FORMAT</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%(asctime)s</span><span class="s"> </span><span class="si">%(name)-12s</span><span class="s"> </span><span class="si">%(levelname)-8s</span><span class="s"> </span><span class="si">%(message)s</span><span class="s">&#39;</span>
+<span class="n">FORMAT_SHORT</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%(levelname)-8s</span><span class="s"> </span><span class="si">%(message)s</span><span class="s">&#39;</span>
+<span class="n">TIME_FORMAT</span> <span class="o">=</span> <span class="s">&#39;%Y-%m-</span><span class="si">%d</span><span class="s"> %H:%M:%S&#39;</span>
+<span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="n">FORMAT</span><span class="p">,</span> <span class="n">TIME_FORMAT</span><span class="p">)</span>
+<span class="n">short_formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="n">FORMAT_SHORT</span><span class="p">)</span>
+<span class="n">console</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">()</span>
+<span class="n">console</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">short_formatter</span><span class="p">)</span>
+
+<span class="c"># uncomment to set debugging output for all normal loggers</span>
+<span class="c">#console.setLevel(logging.DEBUG)</span>
+
+<span class="n">logfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="s">&#39;qmpy.log&#39;</span><span class="p">)</span>
+<span class="n">general</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">WatchedFileHandler</span><span class="p">(</span><span class="n">logfile</span><span class="p">)</span>
+<span class="n">general</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+
+<span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">general</span><span class="p">)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">console</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">qmpyBaseError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Baseclass for qmpy Exceptions&quot;&quot;&quot;</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">ase</span>
+    <span class="n">FOUND_ASE</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">FOUND_ASE</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&#39;Failed to import ASE&#39;</span><span class="p">)</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">pulp</span>
+    <span class="n">FOUND_PULP</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">FOUND_PULP</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&#39;Failed to import PuLP&#39;</span><span class="p">)</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">matplotlib</span>
+    <span class="n">FOUND_MPL</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">FOUND_MPL</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&#39;Failed to import matplotlib&#39;</span><span class="p">)</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">pyspglib</span> 
+    <span class="n">FOUND_SPGLIB</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;Failed to import pyspglib.&quot;</span>
+            <span class="s">&#39;Download at: http://sourceforge.net/projects/spglib/ and&#39;</span>
+            <span class="s">&#39;follow instructions for installing python API&#39;</span><span class="p">)</span>
+    <span class="n">FOUND_SPGLIB</span> <span class="o">=</span> <span class="bp">False</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">sklearn</span>
+    <span class="n">FOUND_SKLEARN</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">FOUND_SKLEARN</span> <span class="o">=</span> <span class="bp">False</span>
+
+<span class="c">### Kludge to get the django settings module into the path</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">INSTALL_PATH</span><span class="p">)</span>
+<span class="k">if</span> <span class="s">&#39;DJANGO_SETTINGS_MODULE&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&#39;DJANGO_SETTINGS_MODULE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;qmpy.db.settings&#39;</span>
+
+<span class="kn">from</span> <span class="nn">models</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">analysis</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">analysis.thermodynamics</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">analysis.symmetry</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">analysis.vasp</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">computing</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">data</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="kn">import</span> <span class="nn">yaml</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="k">def</span> <span class="nf">read_spacegroups</span><span class="p">(</span><span class="n">numbers</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">INSTALL_PATH</span><span class="o">+</span><span class="s">&#39;/data/spacegroups.yml&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="n">Spacegroup</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+    <span class="n">spacegroups</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">sgd</span> <span class="ow">in</span> <span class="n">spacegroups</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">numbers</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">sgd</span><span class="p">[</span><span class="s">&#39;number&#39;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">numbers</span><span class="p">:</span>
+                <span class="k">continue</span>
+        <span class="n">sg</span> <span class="o">=</span> <span class="n">Spacegroup</span><span class="p">(</span><span class="n">number</span><span class="o">=</span><span class="n">sgd</span><span class="p">[</span><span class="s">&#39;number&#39;</span><span class="p">],</span>
+                        <span class="n">hm</span><span class="o">=</span><span class="n">sgd</span><span class="p">[</span><span class="s">&#39;hm&#39;</span><span class="p">],</span>
+                        <span class="n">hall</span><span class="o">=</span><span class="n">sgd</span><span class="p">[</span><span class="s">&#39;hall&#39;</span><span class="p">],</span>
+                        <span class="n">schoenflies</span><span class="o">=</span><span class="n">sgd</span><span class="p">[</span><span class="s">&#39;schoenflies&#39;</span><span class="p">],</span>
+                        <span class="n">lattice_system</span><span class="o">=</span><span class="n">sgd</span><span class="p">[</span><span class="s">&#39;system&#39;</span><span class="p">])</span>
+        <span class="n">sg</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="n">cvs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">cv</span> <span class="ow">in</span> <span class="n">sgd</span><span class="p">[</span><span class="s">&#39;centering_vectors&#39;</span><span class="p">]:</span>
+            <span class="n">cvs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Translation</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cv</span><span class="p">))</span>
+        <span class="n">sg</span><span class="o">.</span><span class="n">centering_vectors</span> <span class="o">=</span> <span class="n">cvs</span>
+
+        <span class="n">ops</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">op</span> <span class="ow">in</span> <span class="n">sgd</span><span class="p">[</span><span class="s">&#39;sym_ops&#39;</span><span class="p">]:</span>
+            <span class="n">ops</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Operation</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">op</span><span class="p">)))</span>
+        <span class="n">sg</span><span class="o">.</span><span class="n">sym_ops</span> <span class="o">=</span> <span class="n">ops</span>
+        <span class="n">sg</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+        <span class="n">wycks</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">sgd</span><span class="p">[</span><span class="s">&#39;wyckoff_sites&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">wycks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">WyckoffSite</span><span class="p">(</span><span class="n">symbol</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> 
+                               <span class="n">x</span><span class="o">=</span><span class="n">site</span><span class="p">[</span><span class="s">&#39;coordinate&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span>
+                               <span class="n">y</span><span class="o">=</span><span class="n">site</span><span class="p">[</span><span class="s">&#39;coordinate&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span>
+                               <span class="n">z</span><span class="o">=</span><span class="n">site</span><span class="p">[</span><span class="s">&#39;coordinate&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">2</span><span class="p">],</span>
+                               <span class="n">multiplicity</span><span class="o">=</span><span class="n">site</span><span class="p">[</span><span class="s">&#39;multiplicity&#39;</span><span class="p">]))</span>
+        <span class="n">sg</span><span class="o">.</span><span class="n">site_set</span> <span class="o">=</span> <span class="n">wycks</span>
+
+<span class="k">def</span> <span class="nf">read_elements</span><span class="p">():</span>
+    <span class="n">elements</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">INSTALL_PATH</span><span class="o">+</span><span class="s">&#39;/data/elements/data.yml&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="n">Element</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+    <span class="n">elts</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">elt</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">elements</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="n">Element</span><span class="p">()</span>
+        <span class="n">e</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">elts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+    <span class="n">Element</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">bulk_create</span><span class="p">(</span><span class="n">elts</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">read_hubbards</span><span class="p">():</span>
+    <span class="n">hubs</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">INSTALL_PATH</span><span class="o">+</span><span class="s">&#39;/configuration/vasp_settings/hubbards.yml&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">group</span><span class="p">,</span> <span class="n">hubbard</span> <span class="ow">in</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">hubs</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">ident</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">hubbard</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">elt</span><span class="p">,</span> <span class="n">ligand</span><span class="p">,</span> <span class="n">ox</span> <span class="o">=</span> <span class="n">ident</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">)</span>
+            <span class="n">hub</span> <span class="o">=</span> <span class="n">Hubbard</span><span class="p">(</span>
+                    <span class="n">l</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;L&#39;</span><span class="p">],</span>
+                    <span class="n">u</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;U&#39;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">ox</span> <span class="o">!=</span> <span class="s">&#39;*&#39;</span><span class="p">:</span>
+                <span class="n">hub</span><span class="o">.</span><span class="n">ox</span> <span class="o">=</span> <span class="n">ox</span>
+            <span class="n">hub</span><span class="o">.</span><span class="n">ligand_id</span> <span class="o">=</span> <span class="n">ligand</span>
+            <span class="n">hub</span><span class="o">.</span><span class="n">element_id</span> <span class="o">=</span> <span class="n">elt</span>
+            <span class="n">hub</span><span class="o">.</span><span class="n">convention</span> <span class="o">=</span> <span class="n">group</span>
+            <span class="n">hub</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">read_potentials</span><span class="p">():</span>
+    <span class="n">loaded</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">VASP_POTENTIALS</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span><span class="p">)</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">VASP_POTENTIALS</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s">&#39;GW&#39;</span> <span class="ow">in</span> <span class="n">path</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="s">&#39;POTCAR&#39;</span> <span class="ow">in</span> <span class="n">files</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">loaded</span><span class="p">:</span>
+                <span class="n">loaded</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">pots</span> <span class="o">=</span> <span class="n">Potential</span><span class="o">.</span><span class="n">read_potcar</span><span class="p">(</span><span class="n">path</span><span class="o">+</span><span class="s">&#39;/POTCAR&#39;</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">pot</span> <span class="ow">in</span> <span class="n">pots</span><span class="p">:</span>
+                        <span class="n">pot</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                    <span class="k">print</span> <span class="s">&#39;Couldn</span><span class="se">\&#39;</span><span class="s">t load:&#39;</span><span class="p">,</span> <span class="n">path</span>
+
+<span class="k">def</span> <span class="nf">sync_resources</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">host</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">hosts</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">Host</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">host</span><span class="p">)</span>
+        <span class="n">h</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s">&#39;check_queue&#39;</span><span class="p">:</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;check_queue&#39;</span><span class="p">],</span>
+            <span class="s">&#39;ip_address&#39;</span><span class="p">:</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;ip_address&#39;</span><span class="p">],</span>
+            <span class="s">&#39;binaries&#39;</span><span class="p">:</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;binaries&#39;</span><span class="p">],</span>
+            <span class="s">&#39;ppn&#39;</span><span class="p">:</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;ppn&#39;</span><span class="p">],</span>
+            <span class="s">&#39;nodes&#39;</span><span class="p">:</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;nodes&#39;</span><span class="p">],</span>
+            <span class="s">&#39;walltime&#39;</span><span class="p">:</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;walltime&#39;</span><span class="p">],</span>
+            <span class="s">&#39;sub_script&#39;</span><span class="p">:</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;sub_script&#39;</span><span class="p">],</span>
+            <span class="s">&#39;sub_text&#39;</span><span class="p">:</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;sub_text&#39;</span><span class="p">]})</span>
+        <span class="n">h</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">username</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">users</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">User</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+            <span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">)</span>
+        <span class="n">user</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">host</span><span class="p">,</span> <span class="n">adata</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">host</span> <span class="o">=</span> <span class="n">Host</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">host</span><span class="p">)</span>
+            <span class="n">host</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="n">acc</span> <span class="o">=</span> <span class="n">Account</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">host</span><span class="p">)</span>
+            <span class="n">acc</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">adata</span><span class="p">)</span>
+            <span class="n">acc</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">allocation</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">allocations</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">host</span> <span class="o">=</span> <span class="n">Host</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;host&#39;</span><span class="p">])</span>
+        <span class="n">host</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="n">alloc</span> <span class="o">=</span> <span class="n">Allocation</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">allocation</span><span class="p">)</span>
+        <span class="n">alloc</span><span class="o">.</span><span class="n">host_id</span> <span class="o">=</span> <span class="n">host</span>
+        <span class="n">alloc</span><span class="o">.</span><span class="n">key</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;key&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">alloc</span><span class="o">.</span><span class="n">key</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">alloc</span><span class="o">.</span><span class="n">key</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="n">alloc</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">user</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;users&#39;</span><span class="p">]:</span>
+            <span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="n">user</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">user</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="n">alloc</span><span class="o">.</span><span class="n">users</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">project</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">projects</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">proj</span> <span class="o">=</span> <span class="n">Project</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">project</span><span class="p">)</span>
+        <span class="n">proj</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">user</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;users&#39;</span><span class="p">]:</span>
+            <span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="n">user</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">user</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="n">proj</span><span class="o">.</span><span class="n">users</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">allocation</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;allocations&#39;</span><span class="p">]:</span>
+            <span class="n">alloc</span> <span class="o">=</span> <span class="n">Allocation</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">allocation</span><span class="p">)</span>
+            <span class="n">alloc</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="n">proj</span><span class="o">.</span><span class="n">allocations</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">alloc</span><span class="p">)</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">Spacegroup</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">read_spacegroups</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">Element</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">read_elements</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">Potential</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">read_potentials</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">Hubbard</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">read_hubbards</span><span class="p">()</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+
+<span class="k">for</span> <span class="n">md</span> <span class="ow">in</span> <span class="n">MetaData</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s">&#39;global_warning&#39;</span><span class="p">):</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">qmpy 0.4.9 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Scott Kirklin.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>

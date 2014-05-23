@@ -1,0 +1,414 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>qmpy.materials.composition &mdash; qmpy 0.4.9 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.4.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="qmpy 0.4.9 documentation" href="../../../index.html" />
+    <link rel="up" title="qmpy" href="../../qmpy.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">qmpy 0.4.9 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../qmpy.html" accesskey="U">qmpy</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for qmpy.materials.composition</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c"># -*- coding: utf-8 -*-</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+
+<span class="kn">from</span> <span class="nn">qmpy.materials.element</span> <span class="kn">import</span> <span class="n">Element</span>
+<span class="kn">from</span> <span class="nn">qmpy.data.meta_data</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">qmpy.utils</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">qmpy.analysis.thermodynamics</span> <span class="kn">as</span> <span class="nn">thermo</span>
+
+<div class="viewcode-block" id="Composition"><a class="viewcode-back" href="../../../models.html#qmpy.materials.composition.Composition">[docs]</a><span class="k">class</span> <span class="nc">Composition</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base class for a composition.</span>
+
+<span class="sd">    Relationships:</span>
+<span class="sd">        | :mod:`~qmpy.Calculation` via calculation_set</span>
+<span class="sd">        | :mod:`~qmpy.Element` via element_set</span>
+<span class="sd">        | :mod:`~qmpy.Entry` via entry_set</span>
+<span class="sd">        | :mod:`~qmpy.ExptFormationEnergy` via exptformationenergy_set</span>
+<span class="sd">        | :mod:`~qmpy.FormationEnergy` via formationenergy_set</span>
+<span class="sd">        | :mod:`~qmpy.MetaData` via meta_data</span>
+<span class="sd">        | :mod:`~qmpy.Structure` via structure_set</span>
+<span class="sd">        | :mod:`~qmpy.Prototype` via prototype_set</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        | formula: Electronegativity sorted and normalized composition string.</span>
+<span class="sd">        |   e.g. Fe2O3, LiFeO2</span>
+<span class="sd">        | generic: Genericized composition string. e.g. A2B3, ABC2.</span>
+<span class="sd">        | mass: Mass per atom in AMUs</span>
+<span class="sd">        | meidema: Meidema model energy for the composition</span>
+<span class="sd">        | ntypes: Number of elements. </span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">formula</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">)</span>
+    <span class="n">generic</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">meta_data</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ManyToManyField</span><span class="p">(</span><span class="s">&#39;MetaData&#39;</span><span class="p">)</span>
+
+    <span class="n">element_set</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ManyToManyField</span><span class="p">(</span><span class="s">&#39;Element&#39;</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">ntypes</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="c">### other stuff</span>
+    <span class="n">mass</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="c">### thermodyanamic stuff</span>
+    <span class="n">meidema</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">structure</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="s">&#39;Structure&#39;</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+            <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+            <span class="n">related_name</span><span class="o">=</span><span class="s">&#39;+&#39;</span><span class="p">)</span>
+
+    <span class="n">_unique</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">_duplicates</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">app_label</span> <span class="o">=</span> <span class="s">&#39;qmpy&#39;</span>
+        <span class="n">db_table</span> <span class="o">=</span> <span class="s">&#39;compositions&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">compare</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">compare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">space</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">space</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">space</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unit_comp</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">-</span> <span class="n">other</span><span class="o">.</span><span class="n">unit_comp</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mf">1e-2</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Composition.get"><a class="viewcode-back" href="../../../models.html#qmpy.materials.composition.Composition.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">composition</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Classmethod for getting Composition objects - if the Composition</span>
+<span class="sd">        existsin the database, it is returned. If not, a new Composition is</span>
+<span class="sd">        created.</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">        &gt;&gt;&gt; Composition.get(&#39;Fe2O3&#39;)</span>
+<span class="sd">        &lt;Composition: Fe2O3&gt;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">composition</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+            <span class="n">composition</span> <span class="o">=</span> <span class="n">parse_comp</span><span class="p">(</span><span class="n">composition</span><span class="p">)</span>
+        <span class="n">comp</span> <span class="o">=</span> <span class="n">reduce_comp</span><span class="p">(</span><span class="n">composition</span><span class="p">)</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="s">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s">&#39;</span><span class="si">%s%g</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">comp</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">comp</span><span class="o">.</span><span class="n">keys</span><span class="p">())])</span>
+        <span class="n">comps</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">formula</span><span class="o">=</span><span class="n">f</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">comps</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">comps</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">comp</span> <span class="o">=</span> <span class="n">Composition</span><span class="p">(</span><span class="n">formula</span><span class="o">=</span><span class="n">f</span><span class="p">)</span>
+            <span class="n">comp</span><span class="o">.</span><span class="n">ntypes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">comp</span><span class="o">.</span><span class="n">comp</span><span class="p">)</span>
+            <span class="n">comp</span><span class="o">.</span><span class="n">generic</span> <span class="o">=</span> <span class="n">format_generic_comp</span><span class="p">(</span><span class="n">comp</span><span class="o">.</span><span class="n">comp</span><span class="p">)</span>
+            <span class="n">comp</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="n">comp</span><span class="o">.</span><span class="n">element_set</span> <span class="o">=</span> <span class="n">comp</span><span class="o">.</span><span class="n">comp</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">comp</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Composition.get_list"><a class="viewcode-back" href="../../../models.html#qmpy.materials.composition.Composition.get_list">[docs]</a>    <span class="k">def</span> <span class="nf">get_list</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">calculated</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">uncalculated</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Classmethod for finding all compositions within the space bounded by a</span>
+<span class="sd">        sequence of compositions. </span>
+
+<span class="sd">        Example:</span>
+<span class="sd">        &gt;&gt;&gt; Composition.get_list([&#39;Fe&#39;,&#39;O&#39;])</span>
+<span class="sd">        [&lt;Composition: Fe&gt;, &lt;Composition: O&gt;, &lt;Composition: Fe2O3&gt;,</span>
+<span class="sd">        &lt;Composition: Fe3O4&gt;, &lt;Composition: FeO&gt;, &lt;Composition: Fe107O125&gt;,</span>
+<span class="sd">        &lt;Composition: Fe37O38&gt;, &lt;Composition: Fe49O52&gt;, &lt;Composition: Fe16O17&gt;,</span>
+<span class="sd">        &lt;Composition: Fe9O10&gt;, &lt;Composition: Fe113O124&gt;, &lt;Composition:</span>
+<span class="sd">        Fe11O12&gt;, &lt;Composition: Fe0.929O&gt;, &lt;Composition: Fe41O44&gt;]</span>
+<span class="sd">        &gt;&gt;&gt; Composition.get_list(&#39;Fe-O&#39;, calculated=True)</span>
+<span class="sd">        [&lt;Composition: Fe&gt;, &lt;Composition: O&gt;, &lt;Composition: Fe2O3&gt;,</span>
+<span class="sd">        &lt;Composition: Fe3O4&gt;, &lt;Composition: FeO&gt;]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">space</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+            <span class="n">bounds</span> <span class="o">=</span> <span class="n">bounds</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;-&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bounds</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">Composition</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+        <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bounds</span><span class="p">:</span>
+            <span class="n">bound</span> <span class="o">=</span> <span class="n">parse_comp</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+            <span class="n">space</span> <span class="o">|=</span> <span class="nb">set</span><span class="p">(</span><span class="n">bound</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">in_elts</span> <span class="o">=</span> <span class="n">Element</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">symbol__in</span><span class="o">=</span><span class="n">space</span><span class="p">)</span>
+        <span class="n">out_elts</span> <span class="o">=</span> <span class="n">Element</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">exclude</span><span class="p">(</span><span class="n">symbol__in</span><span class="o">=</span><span class="n">space</span><span class="p">)</span>
+        <span class="n">comps</span> <span class="o">=</span> <span class="n">Composition</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">element_set__in</span><span class="o">=</span><span class="n">in_elts</span><span class="p">,</span>
+                <span class="n">ntypes__lt</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">space</span><span class="p">))</span>
+        <span class="n">comps</span> <span class="o">=</span> <span class="n">Composition</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">exclude</span><span class="p">(</span><span class="n">element_set__in</span><span class="o">=</span><span class="n">out_elts</span><span class="p">)</span>
+        <span class="n">comps</span> <span class="o">=</span> <span class="n">comps</span><span class="o">.</span><span class="n">exclude</span><span class="p">(</span><span class="n">entry</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">calculated</span><span class="p">:</span>
+            <span class="n">comps</span> <span class="o">=</span> <span class="n">comps</span><span class="o">.</span><span class="n">exclude</span><span class="p">(</span><span class="n">formationenergy</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">uncalculated</span><span class="p">:</span>
+            <span class="n">comps</span> <span class="o">=</span> <span class="n">comps</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">formationenergy</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">comps</span><span class="o">.</span><span class="n">distinct</span><span class="p">()</span>
+</div>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">entries</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">entries</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">entry_set</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">duplicate_of</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+        <span class="n">entries</span> <span class="o">=</span> <span class="n">entries</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s">&#39;calculation__energy_pa&#39;</span><span class="p">)</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">non</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">entries</span><span class="o">.</span><span class="n">distinct</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">ret</span><span class="p">:</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Composition.ground_state"><a class="viewcode-back" href="../../../models.html#qmpy.materials.composition.Composition.ground_state">[docs]</a>    <span class="k">def</span> <span class="nf">ground_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the most stable entry at the composition.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">sorted_distinct</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sorted_distinct</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c"># django caching</span></div>
+    <span class="n">_elements</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">elements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_elements</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_elements</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">element_set</span><span class="o">.</span><span class="n">all</span><span class="p">())</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_elements</span>
+
+    <span class="nd">@elements.setter</span>
+    <span class="k">def</span> <span class="nf">elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elements</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">element_set</span> <span class="o">=</span> <span class="n">elements</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_elements</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="c"># calculated properties</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">distinct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unique</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_distinct_entries</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unique</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">duplicates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_duplicates</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_distinct_entries</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_duplicates</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Composition.sorted_distinct"><a class="viewcode-back" href="../../../models.html#qmpy.materials.composition.Composition.sorted_distinct">[docs]</a>    <span class="k">def</span> <span class="nf">sorted_distinct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a list of entries, sorted by formation energy.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">distinct</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> 
+                <span class="mi">100</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">energy</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">x</span><span class="o">.</span><span class="n">energy</span> <span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">formation_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reference</span><span class="o">=</span><span class="s">&#39;standard&#39;</span><span class="p">,</span> <span class="n">icsd</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="n">gs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ground_state</span>
+        <span class="k">if</span> <span class="n">gs</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> 
+        <span class="k">if</span> <span class="n">icsd</span> <span class="ow">and</span> <span class="s">&#39;icsd&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">gs</span><span class="o">.</span><span class="n">path</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="s">&#39;static&#39;</span> <span class="ow">in</span> <span class="n">gs</span><span class="o">.</span><span class="n">calculations</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">gs</span><span class="o">.</span><span class="n">calculations</span><span class="p">[</span><span class="s">&#39;static&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">compute_formation</span><span class="p">(</span><span class="n">reference</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="s">&#39;standard&#39;</span> <span class="ow">in</span> <span class="n">gs</span><span class="o">.</span><span class="n">calculations</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">gs</span><span class="o">.</span><span class="n">calculations</span><span class="p">[</span><span class="s">&#39;standard&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">compute_formation</span><span class="p">(</span><span class="n">reference</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">calcs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculation_set</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">converged</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> 
+                            <span class="n">configuration__in</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;standard&#39;</span><span class="p">,</span> <span class="s">&#39;static&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">calcs</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">return</span>
+        <span class="k">return</span> <span class="nb">min</span><span class="p">(</span> <span class="n">c</span><span class="o">.</span><span class="n">compute_formation</span><span class="p">()</span><span class="o">.</span><span class="n">delta_e</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">calcs</span> <span class="p">)</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Composition.delta_e"><a class="viewcode-back" href="../../../models.html#qmpy.materials.composition.Composition.delta_e">[docs]</a>    <span class="k">def</span> <span class="nf">delta_e</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the lowest formation energy.&quot;&quot;&quot;</span>
+        <span class="n">formations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">formationenergy_set</span><span class="o">.</span><span class="n">exclude</span><span class="p">(</span><span class="n">delta_e</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">formations</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">return</span>
+        <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">formations</span><span class="o">.</span><span class="n">values_list</span><span class="p">(</span><span class="s">&#39;delta_e&#39;</span><span class="p">,</span> <span class="n">flat</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Composition.icsd_delta_e"><a class="viewcode-back" href="../../../models.html#qmpy.materials.composition.Composition.icsd_delta_e">[docs]</a>    <span class="k">def</span> <span class="nf">icsd_delta_e</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the lowest formation energy calculated from experimentally</span>
+<span class="sd">        measured structures - i.e. excluding prototypes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">calcs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculation_set</span><span class="o">.</span><span class="n">exclude</span><span class="p">(</span><span class="n">delta_e</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+        <span class="n">calcs</span> <span class="o">=</span> <span class="n">calcs</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">path__contains</span><span class="o">=</span><span class="s">&#39;icsd&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">calcs</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">return</span>
+        <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">calcs</span><span class="o">.</span><span class="n">values_list</span><span class="p">(</span><span class="s">&#39;delta_e&#39;</span><span class="p">,</span> <span class="n">flat</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Composition.ndistinct"><a class="viewcode-back" href="../../../models.html#qmpy.materials.composition.Composition.ndistinct">[docs]</a>    <span class="k">def</span> <span class="nf">ndistinct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the number of distinct entries.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">distinct</span><span class="p">)</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Composition.comp"><a class="viewcode-back" href="../../../models.html#qmpy.materials.composition.Composition.comp">[docs]</a>    <span class="k">def</span> <span class="nf">comp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return an element:amount composition dictionary.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">parse_comp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">formula</span><span class="p">)</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Composition.unit_comp"><a class="viewcode-back" href="../../../models.html#qmpy.materials.composition.Composition.unit_comp">[docs]</a>    <span class="k">def</span> <span class="nf">unit_comp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return an element:amoutn composition dictionary normalized to a unit</span>
+<span class="sd">        composition.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">unit_comp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comp</span><span class="p">)</span>
+</div>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">format_comp</span><span class="p">(</span><span class="n">reduce_comp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comp</span><span class="p">))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">latex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">format_latex</span><span class="p">(</span><span class="n">reduce_comp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comp</span><span class="p">))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">html</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">format_html</span><span class="p">(</span><span class="n">reduce_comp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comp</span><span class="p">))</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Composition.space"><a class="viewcode-back" href="../../../models.html#qmpy.materials.composition.Composition.space">[docs]</a>    <span class="k">def</span> <span class="nf">space</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the set of element symbols&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comp</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+</div>
+    <span class="k">def</span> <span class="nf">find_duplicates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">entry_set</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">values_list</span><span class="p">(</span><span class="s">&#39;id&#39;</span><span class="p">,</span> <span class="n">flat</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+            <span class="n">entry</span> <span class="o">=</span> <span class="n">Entry</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="nb">id</span><span class="p">)</span>
+            <span class="n">entry</span><span class="o">.</span><span class="n">check_for_duplicate</span><span class="p">(</span><span class="n">save</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="n">_duplicates</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">_unique</span> <span class="o">=</span> <span class="bp">None</span>
+<div class="viewcode-block" id="Composition.get_distinct_entries"><a class="viewcode-back" href="../../../models.html#qmpy.materials.composition.Composition.get_distinct_entries">[docs]</a>    <span class="k">def</span> <span class="nf">get_distinct_entries</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a dictionary of (spacegroup, natoms):Entry pairs.</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">        &gt;&gt;&gt; comp = Composition.get(&#39;Fe2O3&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; comp.get_distinct_entries()</span>
+<span class="sd">        {(96L, 56L): &lt;Entry: 81763 : Fe2O3&gt;, (167L, 30L): &lt;Entry: 43528 :</span>
+<span class="sd">        Fe2O3&gt;, (60L, 20L): &lt;Entry: 56783 : Fe2O3&gt;, (143L, 30L): &lt;Entry: 47007</span>
+<span class="sd">        : Fe2O3&gt;, (167L, 10L): &lt;Entry: 76705 : Fe2O3&gt;}</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">uniq</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">duplicates</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+        <span class="n">entries</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">entry_set</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">entries</span><span class="p">:</span>
+            <span class="n">sg</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">spacegroup</span><span class="o">.</span><span class="n">number</span>
+            <span class="n">natoms</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">natoms</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="n">sg</span><span class="p">,</span> <span class="n">natoms</span><span class="p">)</span>
+            <span class="n">duplicates</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">uniq</span><span class="p">:</span>
+                <span class="n">uniq</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">entry</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="n">entry</span><span class="o">.</span><span class="n">energy</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">uniq</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">energy</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">uniq</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">entry</span>
+                <span class="k">elif</span> <span class="n">uniq</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">energy</span> <span class="o">&gt;</span> <span class="n">entry</span><span class="o">.</span><span class="n">energy</span><span class="p">:</span>
+                    <span class="n">uniq</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">entry</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_duplicates</span> <span class="o">=</span> <span class="n">duplicates</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_unique</span> <span class="o">=</span> <span class="n">uniq</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unique</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Composition.experiment"><a class="viewcode-back" href="../../../models.html#qmpy.materials.composition.Composition.experiment">[docs]</a>    <span class="k">def</span> <span class="nf">experiment</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the lowest experimantally measured formation energy at the</span>
+<span class="sd">        compositoin.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">expts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">exptformationenergy_set</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">dft</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">expts</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">return</span>
+        <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">expts</span><span class="o">.</span><span class="n">values_list</span><span class="p">(</span><span class="s">&#39;delta_e&#39;</span><span class="p">,</span> <span class="n">flat</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span>
+</div>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">relative_stability_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Renderer</span><span class="p">()</span>
+        <span class="n">ps</span> <span class="o">=</span> <span class="n">thermo</span><span class="o">.</span><span class="n">PhaseSpace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ps</span><span class="o">.</span><span class="n">phase_diagram</span>
+
+    <span class="k">def</span> <span class="nf">get_mass</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">([</span><span class="n">elements</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="s">&#39;mass&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">unit_comp</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">get_similar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Composition</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">generic</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generic</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">qmpy 0.4.9 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../qmpy.html" >qmpy</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Scott Kirklin.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>

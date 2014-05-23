@@ -1,0 +1,68 @@
+============
+Installation
+============
+
+---------
+From repo
+---------
+
+Install qmpy with pip or easy install:
+
+    pip install qmpy
+
+    or 
+
+    easy_install -U qmpy
+
+-----------
+From source
+-----------
+
+Download the source at 
+
+Unfortunately, if you want to install qmpy from source, you will be responsible
+for ensuring that you have all of the following required packages installed. 
+
+-----------------
+Required Packages
+-----------------
+
+ - Django (https://www.djangoproject.com/)
+
+ - Numpy (http://www.numpy.org/)
+
+ - Scipy (http://www.scipy.org/)
+
+ - PyYAML (http://pyyaml.org/)
+
+ - python-MySQL (https://pypi.python.org/pypi/MySQL-python)
+
+ - pytest 
+
+ - python-memcached
+
+ - django-extensions
+
+--------------------
+Recommended Packages
+--------------------
+
+ - matplotlib (http://matplotlib.org/)
+
+ .. warning:: 
+        matplotlib is required for creating plots and figures using qmpy.
+
+ - pyflot (https://github.com/andrefsp/pyflot)
+
+ - networx (http://networkx.github.io/)
+
+ - PuLP (https://pythonhosted.org/PuLP/)
+
+ .. warning::
+        PuLP is required for performang grand canonical linear programming
+        in qmpy.
+
+ .. warning::
+        In order for pulp to work, you must have a working linear programming
+        package installed. PuLP provides a simple library for this, but it is 
+        up to you to make sure it is working.

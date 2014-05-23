@@ -44,3 +44,11 @@ def keyword_view(request, keyword):
             data, 
             RequestContext(request))
 
+def duplicate_view(request, entry_id):
+    entries = Entry.objects.filter(duplicate_of=entry_id)
+    data = {'entries': entries,
+            'entry': Entry.objects.get(pk=entry_id)}
+    return render_to_response('materials/duplicates.html', 
+            data, 
+            RequestContext(request))
+

@@ -166,7 +166,6 @@ class Task(models.Model):
                 Raise if for the specified project, allocation, account and/or host
                 there are no available cores.
         """
-        specs = [ project, allocation, account, host ]
         if host != None:
             if not project:
                 projects = self.project_set.filter(allocations__host=host, state=1)
@@ -184,7 +183,7 @@ class Task(models.Model):
         if account is None:
             if project is None:
                 account = allocation.get_account()
-            else:
+            elif not allocation is None:
                 account = allocation.get_account(users=list(project.users.all()))
 
         calc = self.entry.do(self.module, **self.kwargs)
@@ -274,12 +273,12 @@ class Job(models.Model):
         if entry is None:
             entry = task.entry
 
-        assert isinstance(allocation, Allocation)
-        assert isinstance(task, Task)
-        assert path is not None
+        #assert isinstance(allocation, Allocation)
+        #assert isinstance(task, Task)
+        #assert path is not None
 
-        if account is None:
-            account = allocation.get_account()
+        #if account is None:
+        #    account = allocation.get_account()
         
         job = Job(path=path, walltime=walltime, 
                 allocation=allocation,

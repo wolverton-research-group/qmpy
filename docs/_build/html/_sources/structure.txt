@@ -1,0 +1,5 @@
+===================
+The Structure class
+===================
+
+.. py:class:Structure

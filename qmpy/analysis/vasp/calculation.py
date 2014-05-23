@@ -1532,12 +1532,18 @@ class Calculation(models.Model):
             return
         return self.volume/len(self.output)
 
-    def compute_formation(self, reference='standard'):
-        if not self.converged:
+    def formation_energy(self, reference='standard'):
+        try:
+            return self.get_formation(reference=reference).delta_e
+        except AttributeError:
             return None
+
+    def get_formation(self, reference='standard'):
+        if not self.converged:
+            return
+        formation = fe.FormationEnergy.get(self, fit=reference)
         if len(self.input.comp) == 1:
             e = comp.Composition.get(self.input.comp).total_energy
-            formation = fe.FormationEnergy.get(self, fit=reference)
             formation.delta_e = self.energy_pa - e
             formation.composition = self.input.composition
             formation.entry = self.entry
@@ -1545,13 +1551,10 @@ class Calculation(models.Model):
             self.formation = formation
             return formation
         hub_mus = chem_pots[reference]['hubbards']
-        if self.hub_comp and reference == 'nothing':
-            return
         elt_mus = chem_pots[reference]['elements']
         adjust = 0
         adjust -= sum([ hub_mus.get(k.key, 0)*v for k,v in self.hub_comp.items() ])
         adjust -= sum([ elt_mus[k]*v for k,v in self.comp.items() ])
-        formation = fe.FormationEnergy.get(self, fit=reference)
         formation.delta_e = ( self.energy + adjust ) / self.natoms
         formation.composition = self.input.composition
         formation.entry = self.entry
@@ -1698,10 +1701,11 @@ class Calculation(models.Model):
         fixed_calc = calc.address_errors()
         if fixed_calc.errors:
             raise VaspError('Unable to fix errors: %s' % fixed_calc.errors)
+        calc.backup()
+        calc.save()
 
         fixed_calc.set_magmoms(calc.settings.get('magnetism', 'ferro'))
         fixed_calc.clear_results()
-        calc.backup()
         fixed_calc.clear_outputs()
         fixed_calc.set_chgcar(calc)
         fixed_calc.write()

@@ -2,6 +2,7 @@
 
 import networkx as nx
 from scipy.spatial import ConvexHull
+import matplotlib.pylab as plt
 import logging
 
 from django.db import transaction
@@ -904,7 +905,7 @@ class PhaseSpace(object):
 
         if pulp.GUROBI().available():
             prob.solve(pulp.GUROBI(msg=False))
-        if pulp.COIN_CMD().available():
+        elif pulp.COIN_CMD().available():
             prob.solve(pulp.COIN_CMD())
         else:
             prob.solve()
@@ -937,11 +938,11 @@ class PhaseSpace(object):
         prob += sum([ bvars[b] for b in bounds ]) == 1, \
                 'sum of bounds must be 1'
 
-        #if pulp.GUROBI().available():
-        #    prob.solve(pulp.GUROBI(msg=False))
-        if pulp.COIN_CMD().available():
+        if pulp.GUROBI().available():
+            prob.solve(pulp.GUROBI(msg=False))
+        elif pulp.COIN_CMD().available():
             prob.solve(pulp.COIN_CMD())
-        if pulp.COINMP_DLL().available():
+        elif pulp.COINMP_DLL().available():
             prob.solve(pulp.COINMP_DLL())
         else:
             prob.solve()
@@ -1498,11 +1499,11 @@ class PhaseSpace(object):
                     'identical %s composition on both sides' % celt
         prob += sum([ rvars[p] for p in phases ]) == 1
         
-        #if pulp.GUROBI().available():
-        #    prob.solve(pulp.GUROBI(msg=False))
-        if pulp.COIN_CMD().available():
+        if pulp.GUROBI().available():
+            prob.solve(pulp.GUROBI(msg=False))
+        elif pulp.COIN_CMD().available():
             prob.solve(pulp.COIN_CMD())
-        if pulp.COINMP_DLL().available():
+        elif pulp.COINMP_DLL().available():
             prob.solve(pulp.COINMP_DLL())
         else:
             prob.solve()
@@ -1511,7 +1512,7 @@ class PhaseSpace(object):
             if pvars[c].varValue > 1e-4 ])
         reacts = defaultdict(float,[ (c, rvars[c].varValue) for c in phases
             if rvars[c].varValue > 1e-4 ])
-        n_elt = value(prob.objective)
+        n_elt = pulp.value(prob.objective)
         return reacts, prods, n_elt
 
     def get_reactions(self, var, electrons=2.0):

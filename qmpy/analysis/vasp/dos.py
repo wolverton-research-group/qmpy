@@ -120,8 +120,7 @@ class DOS(models.Model):
     @property
     def plot(self):
         if self._plot is None:
-            line1 = Line(zip(self.energy, self.total_dos))
-            line1.options['lines'] = {'fill': True}
+            line1 = Line(zip(self.energy, self.total_dos), fill=True)
             line2 = Line([[0,0], [0, max(self.total_dos)*1.1]])
             canvas = Renderer(lines=[line1, line2])
             canvas.yaxis.max = max(self.total_dos)*1.1

@@ -1,0 +1,206 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Analysis tools &mdash; qmpy 0.4.9 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.4.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="qmpy 0.4.9 documentation" href="index.html" />
+    <link rel="next" title="Examples" href="examples.html" />
+    <link rel="prev" title="Data Models" href="models.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="examples.html" title="Examples"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="models.html" title="Data Models"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">qmpy 0.4.9 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="analysis-tools">
+<h1>Analysis tools<a class="headerlink" href="#analysis-tools" title="Permalink to this headline">¶</a></h1>
+<p>Basically all thermodynamic analysis in qmpy is done starting from a
+<a class="reference internal" href="models.html#qmpy.PhaseSpace" title="qmpy.PhaseSpace"><tt class="xref py py-mod docutils literal"><span class="pre">PhaseSpace</span></tt></a> instance. If you have the database install and working,
+these are very easy to construct:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ps</span> <span class="o">=</span> <span class="n">PhaseSpace</span><span class="p">(</span><span class="s">&#39;Li-Si&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ps</span>
+<span class="go">&lt;PhaseSpace bound by Li-Si&gt;</span>
+</pre></div>
+</div>
+<p>Since the PhaseSpace was created without any extra arguments, it was assumed
+that you wanted to pull thermodynamic data from the OQMD, but you can fine tune
+the data that is included very easily. More on that later.</p>
+<div class="section" id="convex-hull-construction">
+<h2>Convex Hull Construction<a class="headerlink" href="#convex-hull-construction" title="Permalink to this headline">¶</a></h2>
+<p>To obtain the convex hull for any phase space, simply access the <cite>hull</cite>
+attribute:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ps</span><span class="o">.</span><span class="n">hull</span>
+<span class="go">set([&lt;Equilibrium: Li13Si4-Li21Si5&gt;, &lt;Equilibrium: Li12Si7-Li7Si3&gt;,</span>
+<span class="go">&lt;Equilibrium: Li13Si4-Li7Si3&gt;, &lt;Equilibrium: LiSi-Li12Si7&gt;, &lt;Equilibrium:</span>
+<span class="go">Li21Si5-Li&gt;, &lt;Equilibrium: LiSi-Si&gt;])</span>
+</pre></div>
+</div>
+<p>The hull is a set of Equilibrium objects, which have very natural attributes:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">eq</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">ps</span><span class="o">.</span><span class="n">hull</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">eq</span><span class="o">.</span><span class="n">phases</span>
+<span class="go">[&lt;Phase Li13Si4 : -0.240&gt;, &lt;Phase Li21Si5 : -0.212&gt;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">eq</span><span class="o">.</span><span class="n">chem_pots</span>
+<span class="go">{u&#39;Si&#39;: -0.74005684434211016, u&#39;Li&#39;: -0.086299552894736051}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="phase-stability">
+<h2>Phase Stability<a class="headerlink" href="#phase-stability" title="Permalink to this headline">¶</a></h2>
+<p>Positive for unstable phases, negative for stable phases.</p>
+<p>Examples:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">ps</span><span class="o">.</span><span class="n">phase_dict</span><span class="p">[</span><span class="s">&#39;Li13Si4&#39;</span><span class="p">]</span> <span class="c"># for just one phase</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ps</span><span class="o">.</span><span class="n">compute_stability</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span><span class="o">.</span><span class="n">stability</span>
+<span class="go">-0.007333029175317474</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ps</span><span class="o">.</span><span class="n">compute_stabilities</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ps</span><span class="o">.</span><span class="n">phase_dict</span><span class="p">[</span><span class="s">&#39;Li2Si&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">stability</span>
+<span class="go">0.03116726059829092</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="grand-canonical-linear-programming">
+<h2>Grand Canonical Linear Programming<a class="headerlink" href="#grand-canonical-linear-programming" title="Permalink to this headline">¶</a></h2>
+<p>Examples:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">energy</span><span class="p">,</span> <span class="n">phases</span> <span class="o">=</span> <span class="n">ps</span><span class="o">.</span><span class="n">gclp</span><span class="p">(</span><span class="s">&#39;LiSi2&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">energy</span>
+<span class="go">-0.404968066250002</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">phases</span>
+<span class="go">{&lt;Phase LiSi : -0.202&gt;: 2.0, &lt;Phase Si : 0&gt;: 1.0}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">energy</span><span class="p">,</span> <span class="n">phases</span> <span class="o">=</span> <span class="n">ps</span><span class="o">.</span><span class="n">gclp</span><span class="p">(</span><span class="s">&#39;Si&#39;</span><span class="p">,</span> <span class="n">mus</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;Li&#39;</span><span class="p">:</span><span class="o">-</span><span class="mf">0.4</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">phases</span>
+<span class="go">{&lt;Phase LiSi : -0.202&gt;: 2.0}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="convex-hull-slices">
+<h2>Convex Hull Slices<a class="headerlink" href="#convex-hull-slices" title="Permalink to this headline">¶</a></h2>
+<p>Works by recursively using linear programming to find the lowest point
+contained within the a specified compositional region.</p>
+<p>Examples:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ps</span> <span class="o">=</span> <span class="n">PhaseSpace</span><span class="p">(</span><span class="s">&#39;Fe2O3-Li2O&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ps</span><span class="o">.</span><span class="n">hull</span>
+<span class="go">set([&lt;Equilibrium: LiFe5O8-LiFeO2&gt;, &lt;Equilibrium:</span>
+<span class="go">LiFeO2-Li5FeO4&gt;, &lt;Equilibrium: LiFe5O8-Fe2O3&gt;, &lt;Equilibrium:</span>
+<span class="go">Li5FeO4-Li2O&gt;])</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="reaction-enumeration">
+<h2>Reaction Enumeration<a class="headerlink" href="#reaction-enumeration" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="stability-conditions">
+<h2>Stability Conditions<a class="headerlink" href="#stability-conditions" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Analysis tools</a><ul>
+<li><a class="reference internal" href="#convex-hull-construction">Convex Hull Construction</a></li>
+<li><a class="reference internal" href="#phase-stability">Phase Stability</a></li>
+<li><a class="reference internal" href="#grand-canonical-linear-programming">Grand Canonical Linear Programming</a></li>
+<li><a class="reference internal" href="#convex-hull-slices">Convex Hull Slices</a></li>
+<li><a class="reference internal" href="#reaction-enumeration">Reaction Enumeration</a></li>
+<li><a class="reference internal" href="#stability-conditions">Stability Conditions</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="models.html"
+                        title="previous chapter">Data Models</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples.html"
+                        title="next chapter">Examples</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/analysis.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="examples.html" title="Examples"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="models.html" title="Data Models"
+             >previous</a> |</li>
+        <li><a href="index.html">qmpy 0.4.9 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Scott Kirklin.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>

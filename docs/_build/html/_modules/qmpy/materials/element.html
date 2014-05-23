@@ -1,0 +1,306 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>qmpy.materials.element &mdash; qmpy 0.4.9 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.4.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="qmpy 0.4.9 documentation" href="../../../index.html" />
+    <link rel="up" title="qmpy" href="../../qmpy.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">qmpy 0.4.9 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../qmpy.html" accesskey="U">qmpy</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for qmpy.materials.element</h1><div class="highlight"><pre>
+<span class="c"># qmpy/materials/element</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Django models representing elements and species.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+
+<span class="kn">from</span> <span class="nn">qmpy.db.custom</span> <span class="kn">import</span> <span class="n">DictField</span>
+<span class="kn">from</span> <span class="nn">qmpy.utils</span> <span class="kn">import</span> <span class="o">*</span>
+
+<div class="viewcode-block" id="Element"><a class="viewcode-back" href="../../../models.html#qmpy.materials.element.Element">[docs]</a><span class="k">class</span> <span class="nc">Element</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Core model for an element.</span>
+
+<span class="sd">    Relationships:</span>
+<span class="sd">      | :mod:`~qmpy.Atom` via atom_set</span>
+<span class="sd">      | :mod:`~qmpy.Species` via species_set</span>
+<span class="sd">      | :mod:`~qmpy.Structure` via structure_set</span>
+<span class="sd">      | :mod:`~qmpy.Entry` via entry_set</span>
+<span class="sd">      | :mod:`~qmpy.Composition` via composition_set</span>
+<span class="sd">      | :mod:`~qmpy.Calculation` via calculation_set</span>
+<span class="sd">      | :mod:`~qmpy.Potential` via potential_set</span>
+<span class="sd">      | :mod:`~qmpy.Hubbard` via hubbards</span>
+<span class="sd">      | :mod:`~qmpy.HubbardCorrection` via hubbardcorrection_set</span>
+<span class="sd">      | :mod:`~qmpy.ReferenceEnergy` via referenceenergy_set</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">      | **Identification**</span>
+<span class="sd">      | z: atomic number</span>
+<span class="sd">      | name: full atomic name</span>
+<span class="sd">      | symbol: atomic symbol</span>
+<span class="sd">      | group: group in the periodic table</span>
+<span class="sd">      | period: period in the periodic table</span>
+<span class="sd">      | </span>
+<span class="sd">      | **Physical properties**</span>
+<span class="sd">      | mass: Atomic mass, in AMU (float)</span>
+<span class="sd">      | density: Density at STP, in g/cm^3 (float)</span>
+<span class="sd">      | volume: Atomic volume at STP, in A^3/atom (float)</span>
+<span class="sd">      | atomic_radii: in A (float)</span>
+<span class="sd">      | van_der_waals radii: in A (float)</span>
+<span class="sd">      | covalent_radii: in A (float)</span>
+<span class="sd">      | scattering_factors: A dictionary of scattering factor coeffs.</span>
+<span class="sd">      | </span>
+<span class="sd">      | **Thermodynamic properties**</span>
+<span class="sd">      | melt: melting point in K</span>
+<span class="sd">      | boil: boiling point in K</span>
+<span class="sd">      | specific_heat: C_p in J/K</span>
+<span class="sd">      | </span>
+<span class="sd">      | **Electronic properties**</span>
+<span class="sd">      | electronegativity: Pauling electronegativity</span>
+<span class="sd">      | ion_energy: First ionization energy. (eV)</span>
+<span class="sd">      | s_elec: # of s electrons</span>
+<span class="sd">      | p_elec: # of p electrons</span>
+<span class="sd">      | d_elec: # of d electrons</span>
+<span class="sd">      | f_elec: # of f electrons</span>
+<span class="sd">      |</span>
+<span class="sd">      | **Additional information**</span>
+<span class="sd">      | production: Annual tons of element produced.</span>
+<span class="sd">      | abundance: Amount in earths crust (ppm)</span>
+<span class="sd">      | radioactive: Are all isotopes unstable?</span>
+<span class="sd">      | HHI_P: Herfindahl-Hirschman Index for production.</span>
+<span class="sd">      | HHI_R: Herfindahl-Hirschman Index for reserve</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">      HHI values from Gaultois, M. et al. Chem. Mater. 25, 2911-2920 (2013).</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c">### Identification</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">symbol</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="c">### Periodic table</span>
+    <span class="n">group</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+    <span class="n">period</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+
+    <span class="c">### Phyical characteristics</span>
+    <span class="n">mass</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">()</span>
+    <span class="n">density</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">()</span>
+    <span class="n">volume</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">()</span>
+    <span class="n">atomic_radii</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+    <span class="n">van_der_waals_radii</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+    <span class="n">covalent_radii</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+    <span class="n">scattering_factors</span> <span class="o">=</span> <span class="n">DictField</span><span class="p">()</span>
+
+    <span class="c">### Thermodynamics</span>
+    <span class="n">melt</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">()</span>
+    <span class="n">boil</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">()</span>
+    <span class="n">specific_heat</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">()</span>
+
+    <span class="c">### Electonic structure</span>
+    <span class="n">electronegativity</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">()</span>
+    <span class="n">first_ionization_energy</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">()</span>
+    <span class="n">s_elec</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+    <span class="n">p_elec</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+    <span class="n">d_elec</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+    <span class="n">f_elec</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+
+    <span class="c">### misc</span>
+    <span class="n">HHI_P</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">HHI_R</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">production</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">radioactive</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">app_label</span> <span class="o">=</span> <span class="s">&#39;qmpy&#39;</span>
+        <span class="n">db_table</span> <span class="o">=</span> <span class="s">&#39;elements&#39;</span>
+
+    <span class="c"># builtins</span>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">symbol</span>
+
+    <span class="c"># accessor</span>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Element.get"><a class="viewcode-back" href="../../../models.html#qmpy.materials.element.Element.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return an element object. Accepts symbols and atomic numbers, or a list</span>
+<span class="sd">        of symbols/atomic numbers.</span>
+<span class="sd">        </span>
+<span class="sd">        Examples::</span>
+
+<span class="sd">            &gt;&gt;&gt; Element.get(&#39;Fe&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; Element.get(26)</span>
+<span class="sd">            &gt;&gt;&gt; Element.get([&#39;Fe&#39;, &#39;O&#39;])</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">cls</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">value</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">[</span> <span class="n">cls</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span> <span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">z</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">symbol</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="c"># methods</span></div>
+    <span class="k">def</span> <span class="nf">species_distribution</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">counts</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">species_set</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+            <span class="n">counts</span><span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">ox</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">structure_set</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">counts</span>
+</div>
+<div class="viewcode-block" id="Species"><a class="viewcode-back" href="../../../models.html#qmpy.materials.element.Species">[docs]</a><span class="k">class</span> <span class="nc">Species</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base model for an atomic species. (Element + charge state).</span>
+
+<span class="sd">    Relationships:</span>
+<span class="sd">      | :mod:`~qmpy.Element` via element</span>
+<span class="sd">      | :mod:`~qmpy.Entry` via entry_set</span>
+<span class="sd">      | :mod:`~qmpy.Structure` via structure_set</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">      | name: Species name. e.g. Fe3+, O2-</span>
+<span class="sd">      | ox: Oxidation state (float)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">element</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">Element</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">ox</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">app_label</span> <span class="o">=</span> <span class="s">&#39;qmpy&#39;</span>
+        <span class="n">db_table</span> <span class="o">=</span> <span class="s">&#39;species&#39;</span>
+
+    <span class="c"># builtins</span>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="c"># accessor</span>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Species.get"><a class="viewcode-back" href="../../../models.html#qmpy.materials.element.Species.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets or creates the specified species.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            value: </span>
+<span class="sd">                Accepts multiple input types. Can be a string, e.g. Fe3+</span>
+<span class="sd">                or a tuple of (symbol, oxidation state) pairs, e.g. (Fe, 3).</span>
+
+<span class="sd">        Return:</span>
+<span class="sd">            A :mod:`~qmpy.Species` or list of :mod:`~qmpy.Species`.</span>
+
+<span class="sd">        Example::</span>
+
+<span class="sd">            &gt;&gt;&gt; Species.get(&#39;Fe3+&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; Species.get(&#39;Fe3&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; Species.get((&#39;Fe&#39;, 3))</span>
+<span class="sd">            &gt;&gt;&gt; Species.get([ &#39;Fe3+&#39;, &#39;O2-&#39;, &#39;Li1+&#39;])</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">cls</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">value</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+            <span class="n">spec</span><span class="p">,</span> <span class="n">new</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">new</span><span class="p">:</span>
+                <span class="n">elt</span><span class="p">,</span> <span class="n">ox</span> <span class="o">=</span> <span class="n">parse_species</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                <span class="n">spec</span><span class="o">.</span><span class="n">element_id</span> <span class="o">=</span> <span class="n">elt</span>
+                <span class="n">spec</span><span class="o">.</span><span class="n">ox</span> <span class="o">=</span> <span class="n">ox</span>
+                <span class="n">spec</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">spec</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">[</span> <span class="n">cls</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">list</span> <span class="p">]</span>
+</div>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">ox_format</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ox</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">elif</span> <span class="n">is_integer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ox</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ox</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ox</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+        </div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">qmpy 0.4.9 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../qmpy.html" >qmpy</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Scott Kirklin.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>

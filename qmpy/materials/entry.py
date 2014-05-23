@@ -311,6 +311,15 @@ class Entry(models.Model):
         else:
             return self.structures['input']
 
+    @property
+    def calculation(self):
+        if 'static' in self.calculations:
+            if self.calculations['static'].converged:
+                return self.calculations['static']
+        elif 'standard' in self.calculations:
+            if self.calculations['standard'].converged:
+                return self.calculations['standard']
+
     @input.setter
     def input(self, structure):
         self.structures['input'] = structure
@@ -428,20 +437,21 @@ class Entry(models.Model):
         if self._energy is None:
             if 'static' in self.calculations:
                 if self.calculations['static'].converged:
-                    de = self.calculations['static'].compute_formation()
-                    self._energy = de.delta_e
+                    de = self.calculations['static'].formation_energy()
+                    self._energy = de
             elif 'standard' in self.calculations:
                 if self.calculations['standard'].converged:
-                    de = self.calculations['standard'].compute_formation()
-                    self._energy = de.delta_e
+                    de = self.calculations['standard'].formation_energy()
+                    self._energy = de
         return self._energy
 
     @property
     def stable(self):
         forms = self.formationenergy_set.filter(fit='standard')
+        forms = forms.exclude(stability=None)
         if not forms.exists():
             return None
-        return any([ f.stability <= 0 for f in forms ])
+        return any([ f.stability < 0 for f in forms ])
         
 
     _history = None

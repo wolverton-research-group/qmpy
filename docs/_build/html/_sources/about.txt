@@ -1,0 +1,8 @@
+=====
+About
+=====
+
+qmpy is the backend responsible for creating and running the Open Quantum 
+Materials Database (http://oqmd.org). The OQMD is a project created in Chris
+Wolverton's group at Northwestern University (http://wolverton.northwestern.edu). 
+

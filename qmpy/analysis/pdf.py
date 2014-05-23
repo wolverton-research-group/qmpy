@@ -86,5 +86,5 @@ class PDF(object):
             line = Line(zip(xs, vals), label='%s-%s' % (e1, e2))
             renderer.add(line)
 
-        renderer.xaxis.label = 'interatomic distance [$\\AA$]'
+        renderer.xaxis.label = 'interatomic distance [&#8491;]'
         return renderer
