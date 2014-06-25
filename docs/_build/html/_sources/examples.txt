@@ -60,7 +60,7 @@ Then, for every composition get the Vagard's law volume.::
     >>>     for elt, amt in uc.items():
     >>>         vvol += elements[elt]['volume']*amt
 
-Addendum:
+More things you can do:
 * Calculate an average error for each system
 * Make a scatter plot for a few binaries show in volume vs x
 * Look for cases where some are above and some are below

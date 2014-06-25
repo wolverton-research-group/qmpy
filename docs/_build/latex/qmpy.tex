@@ -14,7 +14,7 @@
 
 
 \title{qmpy Documentation}
-\date{May 23, 2014}
+\date{June 25, 2014}
 \release{0.4.9}
 \author{Scott Kirklin}
 \newcommand{\sphinxlogo}{}
@@ -577,6 +577,196 @@ can be more efficient to search permutations of sub-spaces:
 However, for larger regions of phase space (4 or 5 or more) the number of
 subqueries of the second approach rapidly becomes more expensive than the
 single, more complicated query of the first.
+
+
+\chapter{Using qmpy to manage a high-throughput calculation project}
+\label{project:using-qmpy-to-manage-a-high-throughput-calculation-project}\label{project::doc}
+\code{qmpy} can manage almost every aspect of a high-throughput materials screening
+project. In this section we will walk through all of the necessary steps to
+get a new project off the ground in a new installation. This tutorial assumes
+that you have a functional installation of \code{qmpy}, as well as a working
+database (does not need to have a copy of the OQMD included, a blank slate
+database will work fine).
+
+In this tutorial we will undertake to explore a wide range of (CH3NH3)PbI3
+perovskites, which have recently recieved much attention as high-efficiency
+photovoltaic cells. We will run through the process of setting up compute
+resources, constructing simple lattice decorations of this structure, as well
+as some not-so-simple decorations, running the calculations, and finally
+evaluating the relative stability of the resulting energies.
+
+
+\section{Setting up computational resources}
+\label{project:setting-up-computational-resources}
+We will begin with configuring qmpy to find the right computational resources
+to be able to perform calculations using qmpy. First, you need to establish the
+computational resources that are available to it: a {\hyperref[models:qmpy.Account]{\code{Account}}}, which is a
+{\hyperref[models:qmpy.Host]{\code{Host}}} paired with a {\hyperref[models:qmpy.User]{\code{User}}}. A {\hyperref[models:qmpy.Account]{\code{Account}}} is then granted
+access to at least one {\hyperref[models:qmpy.Allocation]{\code{Allocation}}}.
+
+\begin{notice}{warning}{Warning:}
+In the current implementation, qmpy is only able to run calculations on
+clusters that utilize PBS/torque and Maui.
+\end{notice}
+
+Lets start by configuring a host. Lets assume that we are running qmpy from one
+cluster, but we want to do our calculations on another machine. Lets edit the
+resources/hosts.yml file (inside the qmpy installation):
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYGZsh{} hosts.yml
+bigcluster:
+  binaries: \PYGZob{}vasp\PYGZus{}53: /usr/local/bin/vasp\PYGZus{}53\PYGZcb{}
+  check\PYGZus{}queue: /usr/local/maui/bin/showq
+  hostname: big.cluster.edu
+  ip\PYGZus{}address: XXX.XX.XX.XXX
+  nodes: 100
+  ppn: 12
+  sub\PYGZus{}script: /usr/local/bin/qsub
+  sub\PYGZus{}text: bigcluster.q
+  walltime: 691200
+\end{Verbatim}
+
+In this configuration file, we are creating a list of dictionaries. Each outer
+loop entry creates a {\hyperref[models:qmpy.Host]{\code{Host}}}.
+
+Important attributes to be aware of:
+\begin{itemize}
+\item {} 
+binaries is a dictionary of binary name -\textgreater{} binary path pairs. By default,
+qmpy calculations try to run vasp\_53, and expects a path to a vasp 5.3.3
+binary, but should be reliable for most vasp 5.X versions.
+
+\item {} 
+sub\_script is the path on the cluster to pbs qsub command
+
+\item {} 
+check\_queue is the path on the cluster to maui's showq command
+
+\item {} 
+sub\_text is the name of a file in qmpy/configuration/qfiles. An example qfile
+template is shown below.
+
+\item {} 
+ppn = \# of processors / node
+
+\item {} 
+nodes = \# of nodes you want qmpy to be able to use (does not need to match
+the number of nodes on the cluster)
+
+\end{itemize}
+
+\begin{notice}{note}{Note:}
+Note that these files must be parseable YAML format files. See \emph{this guide
+\textless{}http://www.yaml.org/start.html\textgreater{} \_} for an introduction to the YAML format.
+\end{notice}
+
+The queue files that qmpy submits must be tailored both to the job being
+submitted and the cluster being submitted to. To that end, qmpy uses a simple
+template system, with the most basic template (that should work in many cases)
+is:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYGZsh{}!/bin/bash
+\PYGZsh{}MSUB \PYGZhy{}l nodes=\PYGZob{}nodes\PYGZcb{}:ppn=\PYGZob{}ppn\PYGZcb{}
+\PYGZsh{}MSUB \PYGZhy{}l walltime=\PYGZob{}walltime\PYGZcb{}
+\PYGZsh{}MSUB \PYGZhy{}N \PYGZob{}name\PYGZcb{}
+\PYGZsh{}MSUB \PYGZhy{}o jobout.txt
+\PYGZsh{}MSUB \PYGZhy{}e joberr.txt
+\PYGZsh{}MSUB \PYGZhy{}A \PYGZob{}key\PYGZcb{}
+
+cd \PYGZdl{}PBS\PYGZus{}O\PYGZus{}WORKDIR
+NPROCS={}`wc \PYGZhy{}l \PYGZlt{} \PYGZdl{}PBS\PYGZus{}NODEFILE{}`
+\PYGZsh{}running on \PYGZob{}host\PYGZcb{}
+
+\PYGZob{}header\PYGZcb{}
+
+\PYGZob{}mpi\PYGZcb{} \PYGZob{}binary\PYGZcb{} \PYGZob{}pipes\PYGZcb{}
+
+\PYGZob{}footer\PYGZcb{}
+\end{Verbatim}
+
+The ``\{variable\}'' construction is used to automatically replace strings based on
+the calculation requirements. Some variables (nodes, ppn, name, walltime, host)
+are fairly constant for the host. Others, like ``key'', specify which allocation
+to charge the hours to, which is defined by the {\hyperref[models:qmpy.Allocation]{\code{Allocation}}}
+associated with the calculation. Finally, the rest of the variables are set
+based on the requirements of the calculation. For general calculations, the
+header variable is used to unzip any zipped files in the folder (e.g., CHGCAR),
+the for parallel calculations the mpi variable contains the mpirun + argumnts
+command and for serial calculations it is left blank. The binary variable will
+be replaced with the path to the binary, as defined in the hosts.yml file. The
+pipes variable will pipe stdout and stderr, which by default is always to
+stdout.txt and stderr.txt. Finally, footer zips the CHGCAR, OUTCAR, PROCAR and
+ELFCAR, if they exist.
+
+and resources/hosts.yml:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYGZsh{} users.yml
+oqmdrunner:
+  bigcluster: \PYGZob{}run\PYGZus{}path: /home/oqmdrunner, username: oqmdrunner\PYGZcb{}
+
+oqmduser:
+  bigcluster: \PYGZob{}run\PYGZus{}path: /home/oqmduser/rundir, username: oqmduser\PYGZcb{}
+  smallcluster: \PYGZob{}run\PYGZus{}path: /home/oqmduser/rundir, username: oqmduser\PYGZcb{}
+\end{Verbatim}
+
+loop entry creates a {\hyperref[models:qmpy.User]{\code{User}}} with that name, and each cluster listed
+then creates an {\hyperref[models:qmpy.Account]{\code{Account}}} for that {\hyperref[models:qmpy.User]{\code{User}}}, with username
+(given by username) and configured to run calculations in run\_path. Here we are
+assuming that a second non-compute cluster, smallcluster, was also defined in
+hosts.yml.
+
+\begin{notice}{warning}{Warning:}
+Passwordless ssh must be configured to each account (either as a user:host
+pair, or host-based authentication) from the account you are running qmpy
+on. The {\hyperref[models:qmpy.Account]{\code{Account}}} class has a create\_passwordless\_ssh method
+that can set this up for you, however, this process can be unreliable, so if
+it fails you will need to sort those problems out for yourself.
+\end{notice}
+
+Next, we configure our allocations, using the allocations.yml file:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYGZsh{} allocations.yml
+bigcluster:
+  host: bigcluster
+  users: [oqmdrunner, oqmduser]
+  key: alloc1234
+\end{Verbatim}
+
+An allocation takes a host, a list of users and an optional key. The host and
+list of users are used to determine who is allowed to run calculations on the
+allocation, while the key is used to identify the allocation to moab, if that
+feature is implemented.
+
+Finally, we can create a {\hyperref[models:qmpy.Project]{\code{Project}}}, defined in projects.yml:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYGZsh{} projects.yml
+spinels:
+  allocations: [bigcluster]
+  priority: 0
+  users: [oqmdrunner]
+\end{Verbatim}
+
+We title the project ``spinels'', since that will be our example project, and
+define the lists of allocations that this project is authorized to use, and the
+users that are associated with the project. In order to apply these changes,
+run:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{k+kn}{from} \PYG{n+nn}{qmpy} \PYG{k+kn}{import} \PYG{o}{*}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{sync\PYGZus{}resources}\PYG{p}{(}\PYG{p}{)}
+\end{Verbatim}
+
+
+\section{Combinatorial site replacements}
+\label{project:combinatorial-site-replacements}
+If, for example, we say that we want to calculate i) a range of defects in a
+host matrix or ii) a wide range of compositions in a particular structure. It
+is possible to do this in the framework of qmpy, with minimal effort.
 
 
 \chapter{Data Models}
@@ -3723,6 +3913,29 @@ Equivalent to:
 
 \end{fulllineitems}
 
+\index{dump() (qmpy.PhaseData method)}
+
+\begin{fulllineitems}
+\phantomsection\label{models:qmpy.PhaseData.dump}\pysiglinewithargsret{\bfcode{dump}}{\emph{filename=None}, \emph{minimal=True}}{}
+Writes the contents of the phase data to a file or to stdout.
+\begin{description}
+\item[{Keyword Arguments:}] \leavevmode\begin{description}
+\item[{filename:}] \leavevmode
+If None, prints the file to stdout, otherwise writes the file
+to the specified filename. Default=None.
+
+\item[{minimal:}] \leavevmode
+Dump \_every\_ phase in the PhaseData object, or only those that
+can contribute to a phase diagram. If True, only the lowest
+energy phase at a given composition will be written.
+Default=True.
+
+\end{description}
+
+\end{description}
+
+\end{fulllineitems}
+
 \index{get\_phase\_data() (qmpy.PhaseData method)}
 
 \begin{fulllineitems}
@@ -3765,7 +3978,7 @@ Equivalent to:
 \index{load\_oqmd() (qmpy.PhaseData method)}
 
 \begin{fulllineitems}
-\phantomsection\label{models:qmpy.PhaseData.load_oqmd}\pysiglinewithargsret{\bfcode{load\_oqmd}}{\emph{space=None}, \emph{search=\{\}}, \emph{stable=False}, \emph{fit='standard'}, \emph{total=False}}{}
+\phantomsection\label{models:qmpy.PhaseData.load_oqmd}\pysiglinewithargsret{\bfcode{load\_oqmd}}{\emph{space=None}, \emph{search=\{\}}, \emph{exclude=\{\}}, \emph{stable=False}, \emph{fit='standard'}, \emph{total=False}}{}
 Load data from the OQMD.
 \begin{description}
 \item[{Keyword Arguments:}] \leavevmode\begin{description}
@@ -5484,7 +5697,7 @@ Then, for every composition get the Vagard's law volume.:
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }        \PYG{n}{vvol} \PYG{o}{+}\PYG{o}{=} \PYG{n}{elements}\PYG{p}{[}\PYG{n}{elt}\PYG{p}{]}\PYG{p}{[}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{volume}\PYG{l+s}{\PYGZsq{}}\PYG{p}{]}\PYG{o}{*}\PYG{n}{amt}
 \end{Verbatim}
 
-Addendum:
+More things you can do:
 * Calculate an average error for each system
 * Make a scatter plot for a few binaries show in volume vs x
 * Look for cases where some are above and some are below
@@ -5532,7 +5745,6 @@ The project is licensed under the MIT license.
 \begin{theindex}
 \def\bigletter#1{{\Large\sffamily#1}\nopagebreak\vspace{1mm}}
 \bigletter{q}
-\item {\texttt{qmpy}}, \pageref{tutorials:module-qmpy}
 \item {\texttt{qmpy.analysis.nearest\_neighbors}}, \pageref{models:module-qmpy.analysis.nearest_neighbors}
 \end{theindex}
 

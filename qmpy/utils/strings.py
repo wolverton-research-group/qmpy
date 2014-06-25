@@ -71,6 +71,20 @@ def parse_comp(value):
             comp[elt] = float(amt)
     return comp
 
+def parse_space(value):
+    if isinstance(value, basestring):
+        space = re.sub('[-,_]', ' ', value)
+        space = [ unit_comp(parse_comp(b)) for b in space.split()]
+    elif isinstance(value, (list,set)):
+        space = [ {elt:1} for elt in value ]
+    elif isinstance(value, dict):
+        space = [ {elt:1} for elt in value ]
+    elif not value:
+        space = None
+    else:
+        raise ValueError("Failed to parse space: %s" % value)
+    return space
+
 def parse_sitesym(sitesym, sep=','):
     rot = np.zeros((3, 3), dtype='int')
     trans = np.zeros(3)
@@ -171,8 +185,9 @@ def electronegativity(elt):
             return 0.0
         return data.elements[elt]['electronegativity']
 
-def format_comp(comp, template='{elt}{amt}', delimiter=''):
-    elts = sorted(comp.keys(), key=lambda x: (electronegativity(x), x))
+def format_comp(comp, template='{elt}{amt}', delimiter='',
+        key=lambda x: (electronegativity(x), x)):
+    elts = sorted(comp.keys(), key=key)
     coeffs = get_coeffs(comp)
     return delimiter.join(template.format(elt=k, amt=coeffs[k]) for k in elts)
 

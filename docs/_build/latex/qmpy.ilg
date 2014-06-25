@@ -1,0 +1,7 @@
+This is makeindex, version 2.15 [TeX Live 2009] (kpathsea + Thai support).
+Scanning style file ./python.ist......done (6 attributes redefined, 0 ignored).
+Scanning input file qmpy.idx....done (280 entries accepted, 0 rejected).
+Sorting entries.....done (2508 comparisons).
+Generating output file qmpy.ind....done (354 lines written, 0 warnings).
+Output written in qmpy.ind.
+Transcript written in qmpy.ilg.

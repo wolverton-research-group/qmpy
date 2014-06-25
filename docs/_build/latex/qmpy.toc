@@ -1,0 +1,68 @@
+\select@language {english}
+\contentsline {chapter}{\numberline {1}Installation}{3}{chapter.1}
+\contentsline {section}{\numberline {1.1}From repo}{3}{section.1.1}
+\contentsline {section}{\numberline {1.2}From GitHub repo}{3}{section.1.2}
+\contentsline {section}{\numberline {1.3}Required Packages}{3}{section.1.3}
+\contentsline {section}{\numberline {1.4}Recommended Packages}{4}{section.1.4}
+\contentsline {chapter}{\numberline {2}Setting up the database}{5}{chapter.2}
+\contentsline {chapter}{\numberline {3}Tutorials}{7}{chapter.3}
+\contentsline {section}{\numberline {3.1}Database entries}{7}{section.3.1}
+\contentsline {section}{\numberline {3.2}Creating a structure}{8}{section.3.2}
+\contentsline {section}{\numberline {3.3}First Principles Calculations}{9}{section.3.3}
+\contentsline {section}{\numberline {3.4}Searching for models}{10}{section.3.4}
+\contentsline {subsection}{\numberline {3.4.1}Searching for entries based on stability}{10}{subsection.3.4.1}
+\contentsline {subsection}{\numberline {3.4.2}Searching for entries based on composition}{10}{subsection.3.4.2}
+\contentsline {chapter}{\numberline {4}Using qmpy to manage a high-throughput calculation project}{13}{chapter.4}
+\contentsline {section}{\numberline {4.1}Setting up computational resources}{13}{section.4.1}
+\contentsline {section}{\numberline {4.2}Combinatorial site replacements}{15}{section.4.2}
+\contentsline {chapter}{\numberline {5}Data Models}{17}{chapter.5}
+\contentsline {section}{\numberline {5.1}Materials models}{17}{section.5.1}
+\contentsline {subsection}{\numberline {5.1.1}Structure}{17}{subsection.5.1.1}
+\contentsline {subsection}{\numberline {5.1.2}Atom}{26}{subsection.5.1.2}
+\contentsline {subsection}{\numberline {5.1.3}Site}{28}{subsection.5.1.3}
+\contentsline {subsection}{\numberline {5.1.4}Element}{30}{subsection.5.1.4}
+\contentsline {subsection}{\numberline {5.1.5}Composition}{32}{subsection.5.1.5}
+\contentsline {section}{\numberline {5.2}Calculation models}{33}{section.5.2}
+\contentsline {subsection}{\numberline {5.2.1}Calculation}{33}{subsection.5.2.1}
+\contentsline {subsection}{\numberline {5.2.2}Density of States}{36}{subsection.5.2.2}
+\contentsline {subsection}{\numberline {5.2.3}Potential}{37}{subsection.5.2.3}
+\contentsline {section}{\numberline {5.3}Thermodynamics models}{38}{section.5.3}
+\contentsline {subsection}{\numberline {5.3.1}Formation Energies}{38}{subsection.5.3.1}
+\contentsline {subsection}{\numberline {5.3.2}Reference energies}{38}{subsection.5.3.2}
+\contentsline {subsection}{\numberline {5.3.3}Phase Space}{39}{subsection.5.3.3}
+\contentsline {section}{\numberline {5.4}Database models}{47}{section.5.4}
+\contentsline {subsection}{\numberline {5.4.1}Entries}{47}{subsection.5.4.1}
+\contentsline {subsection}{\numberline {5.4.2}References}{50}{subsection.5.4.2}
+\contentsline {subsection}{\numberline {5.4.3}Authors}{50}{subsection.5.4.3}
+\contentsline {subsection}{\numberline {5.4.4}Journals}{50}{subsection.5.4.4}
+\contentsline {section}{\numberline {5.5}Symmetry models}{51}{section.5.5}
+\contentsline {subsection}{\numberline {5.5.1}Spacegroup}{51}{subsection.5.5.1}
+\contentsline {subsection}{\numberline {5.5.2}Wyckoff Site}{51}{subsection.5.5.2}
+\contentsline {subsection}{\numberline {5.5.3}Symmetry Operations}{52}{subsection.5.5.3}
+\contentsline {section}{\numberline {5.6}Resource models}{53}{section.5.6}
+\contentsline {subsection}{\numberline {5.6.1}Host}{53}{subsection.5.6.1}
+\contentsline {subsection}{\numberline {5.6.2}Account}{54}{subsection.5.6.2}
+\contentsline {subsection}{\numberline {5.6.3}User}{54}{subsection.5.6.3}
+\contentsline {subsection}{\numberline {5.6.4}Allocation}{54}{subsection.5.6.4}
+\contentsline {subsection}{\numberline {5.6.5}Project}{55}{subsection.5.6.5}
+\contentsline {section}{\numberline {5.7}Queue models}{55}{section.5.7}
+\contentsline {subsection}{\numberline {5.7.1}Task}{55}{subsection.5.7.1}
+\contentsline {subsection}{\numberline {5.7.2}Job}{56}{subsection.5.7.2}
+\contentsline {section}{\numberline {5.8}Analysis Tools}{57}{section.5.8}
+\contentsline {section}{\numberline {5.9}Renderer}{60}{section.5.9}
+\contentsline {chapter}{\numberline {6}Analysis tools}{61}{chapter.6}
+\contentsline {section}{\numberline {6.1}Convex Hull Construction}{61}{section.6.1}
+\contentsline {section}{\numberline {6.2}Phase Stability}{61}{section.6.2}
+\contentsline {section}{\numberline {6.3}Grand Canonical Linear Programming}{62}{section.6.3}
+\contentsline {section}{\numberline {6.4}Convex Hull Slices}{62}{section.6.4}
+\contentsline {section}{\numberline {6.5}Reaction Enumeration}{62}{section.6.5}
+\contentsline {section}{\numberline {6.6}Stability Conditions}{62}{section.6.6}
+\contentsline {chapter}{\numberline {7}Examples}{63}{chapter.7}
+\contentsline {section}{\numberline {7.1}Identification of FCC decortations}{63}{section.7.1}
+\contentsline {section}{\numberline {7.2}Deviation from Vagard's Law}{63}{section.7.2}
+\contentsline {chapter}{\numberline {8}Contribute}{65}{chapter.8}
+\contentsline {chapter}{\numberline {9}Support}{67}{chapter.9}
+\contentsline {chapter}{\numberline {10}License}{69}{chapter.10}
+\contentsline {chapter}{\numberline {11}Indices and tables}{71}{chapter.11}
+\contentsline {chapter}{Python Module Index}{73}{section*.281}
+\contentsline {chapter}{Index}{75}{section*.282}

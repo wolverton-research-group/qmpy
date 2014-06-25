@@ -2,7 +2,6 @@
 # miedema.py v1.6 12-13-2012 Jeff Doak jeff.w.doak@gmail.com
 # adapted by S. Kirklin 1/7/14
 import numpy as np
-import time
 import sys
 import yaml
 import logging

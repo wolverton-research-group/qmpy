@@ -23,6 +23,30 @@ else:
 class PhaseSpaceError(Exception):
     pass
 
+class Heap(dict):
+    def add(self, seq):
+        if len(seq) == 1:
+            self[seq[0]] = Heap()
+            return 
+        seq = sorted(seq)
+        e0 = seq[0]
+        if e0 in self:
+            self[e0].add(seq[1:])
+        else:
+            self[e0] = Heap()
+            self[e0].add(seq[1:])
+
+    @property
+    def sequences(self):
+        seqs = []
+        for k, v in self.items():
+            if not v:
+                seqs.append([k])
+            else:
+                for v2 in v.sequences:
+                    seqs.append([k] + v2)
+        return seqs
+
 class PhaseSpace(object):
     """
     A PhaseSpace object represents, naturally, a region of phase space. 
@@ -97,23 +121,10 @@ class PhaseSpace(object):
         return len(self.phases)
 
     def set_bounds(self, bounds):
+        bounds = parse_space(bounds)
         if bounds is None:
             self.bounds = None
-            return
-
-        if isinstance(bounds, basestring):
-            bounds = re.sub('[-,_]', ' ', bounds)
-            bounds = [ unit_comp(parse_comp(b)) for b in bounds.split()]
-        elif isinstance(bounds, (list,set)):
-            bounds = [ {elt:1} for elt in bounds ]
-        elif isinstance(bounds, dict):
-            bounds = [ {elt:1} for elt in bounds ]
-        else:
-            raise ValueError("Invalid bounds assignment: %s" % bounds)
-
-        if bounds is None:
-            self.bounds = None
-            return
+            return 
 
         elements = sorted(set.union(*[ set(b.keys()) for b in bounds ]))
         basis = []
@@ -174,6 +185,10 @@ class PhaseSpace(object):
             pass
         else:
             raise ValueError("Unknown load argument: %s" % target)
+
+    def get_subspace(self, space):
+        data = self.data.get_phase_data(space)
+        return PhaseSpace(space, data=data)
 
     _phases = None
     @property
@@ -326,7 +341,7 @@ class PhaseSpace(object):
 
         """
         if self.bounds is None:
-            return None
+            return set()
         return set.union(*[ set(b.keys()) for b in self.bounds ])
 
     @property
@@ -447,6 +462,14 @@ class PhaseSpace(object):
         self._spaces = list(map(list, spaces))
         return self._spaces
 
+    def find_stable(self):
+        stable = set()
+        for space in self.spaces:
+            subspace = self.get_subspace(space)
+            stable |= set(subspace.stable)
+        self._stable = stable
+        return stable
+
     _dual_spaces = None
     @property
     def dual_spaces(self):
@@ -455,36 +478,55 @@ class PhaseSpace(object):
         between two phases in phases is contained in at least one
         set, and no set is a subset of any other.
         """
-        if self._dual_spaces:
-            return self._dual_spaces
+        if self._dual_spaces is None:
+            #self._dual_spaces = self.get_dual_spaces()
+            self._dual_spaces = self.heap_structure_spaces()
+        return self._dual_spaces
 
+    def heap_structure_spaces(self):
         if len(self.spaces) == 1:
-            self._dual_spaces = self._spaces
-            return self._dual_spaces
+            return self.spaces
+        heap = Heap()
+        for i, (c1, c2) in enumerate(itertools.combinations(self.spaces, r=2)):
+            heap.add(set(c1 + c2))
+        return heap.sequences
+
+    def get_dual_spaces(self):
+        if len(self.spaces) == 1:
+            return self.spaces
 
         dual_spaces = []
         imax = len(self.spaces)**2 / 2
-        for i, c1 in enumerate(itertools.combinations(self.spaces, r=2)):
-            for j, c2 in enumerate(dual_spaces):
-                if c1 <= c2:
+        spaces = sorted(self.spaces, key=lambda x: -len(x))
+        for i, (c1, c2) in enumerate(itertools.combinations(spaces, r=2)):
+            c3 = frozenset(c1 + c2)
+            if c3 in sizes[n]:
+                break
+            for j, c4 in enumerate(dual_spaces):
+                if c3 <= c4:
                     break
-                elif c2 < c1:
-                    dual_spaces[j] = c1
-                    break
-            else:
-                dual_spaces.append(c1)
-
-        second_pass = []
-        imax = len(dual_spaces)
-        for i, c1 in enumerate(dual_spaces):
-            for c2 in list(second_pass):
-                if c1 <= c2:
+                elif c4 < c3:
+                    dual_spaces[j] = c3
                     break
             else:
-                second_pass.append(c1)
+                dual_spaces.append(c3)
 
-        self._dual_spaces = set(second_pass)
+        self._dual_spaces = dual_spaces
         return self._dual_spaces
+
+    def find_tie_lines(self):
+        phases = self.phase_dict.values()
+        indict = dict((k, v) for v, k in enumerate(phases))
+        adjacency = np.zeros((len(indict), len(indict)))
+        for space in self.dual_spaces:
+            subspace = self.get_subspace(space)
+            for p1, p2 in subspace.tie_lines:
+                i1, i2 = sorted([indict[p1], indict[p2]])
+                adjacency[i1, i2] = 1
+        tl = set( (phases[i], phases[j]) for i, j in 
+                zip(*np.nonzero(adjacency)) )
+        self._tie_lines = tl
+        return tl
 
     @property
     def stable(self):
@@ -562,8 +604,11 @@ class PhaseSpace(object):
         Iterator over maximal cliques in the phase space. To get a list of
         cliques, use list(PhaseSpace.cliques).
         """
-        if self._cliques:
-            return self._cliques
+        if self._cliques is None:
+            self.find_cliques()
+        return self._cliques
+
+    def find_cliques(self):
         self._cliques = nx.find_cliques(self.graph)
         return self._cliques
 
@@ -769,7 +814,6 @@ class PhaseSpace(object):
             tie_lines |= set([ frozenset([k1, k2]) for k1, k2 in
                     itertools.combinations(face, r=2)])
             hull.add(Equilibrium(face))
-            #hull.add(face)
 
         self._hull = hull 
         self._tie_lines = tie_lines 
