@@ -1,5 +1,7 @@
 \begin{theindex}
+\def\bigletter#1{{\Large\sffamily#1}\nopagebreak\vspace{1mm}}
 
+  \bigletter A
   \item Account (class in qmpy), \hyperpage{49}
   \item add\_atom() (qmpy.Site method), \hyperpage{24}
   \item add\_atom() (qmpy.Structure method), \hyperpage{14}
@@ -13,15 +15,15 @@
   \item atoms (qmpy.Structure attribute), \hyperpage{14}
   \item attempt\_flip() (qmpy.SpinLattice method), \hyperpage{54}
   \item Author (class in qmpy), \hyperpage{46}
-  \item Axis (class in qmpy.utils.rendering), \hyperpage{55}
+  \item Axis (class in qmpy), \hyperpage{52}
 
   \indexspace
-
+  \bigletter B
   \item bound\_elements (qmpy.PhaseSpace attribute), \hyperpage{35}
   \item bound\_space (qmpy.PhaseSpace attribute), \hyperpage{35}
 
   \indexspace
-
+  \bigletter C
   \item Calculation (class in qmpy), \hyperpage{29}
   \item calculations (qmpy.Entry attribute), \hyperpage{43}
   \item cart\_coord (qmpy.Atom attribute), \hyperpage{23}
@@ -46,12 +48,10 @@
   \item compare() (qmpy.Structure method), \hyperpage{14}
   \item complete() (qmpy.Task method), \hyperpage{51}
   \item Composition (class in qmpy), \hyperpage{28}
-  \item compute\_formation\_energies() (qmpy.PhaseSpace method), 
-		\hyperpage{36}
+  \item compute\_formation\_energies() (qmpy.PhaseSpace method), \hyperpage{36}
   \item compute\_stabilities() (qmpy.PhaseSpace method), \hyperpage{37}
   \item compute\_stability() (qmpy.PhaseSpace method), \hyperpage{37}
-  \item compute\_total\_lattice\_energy() (qmpy.SpinLattice method), 
-		\hyperpage{54}
+  \item compute\_total\_lattice\_energy() (qmpy.SpinLattice method), \hyperpage{54}
   \item coord (qmpy.Atom attribute), \hyperpage{23}
   \item coord (qmpy.Site attribute), \hyperpage{25}
   \item coord() (qmpy.PhaseSpace method), \hyperpage{37}
@@ -66,14 +66,14 @@
   \item create\_vacuum() (qmpy.Structure method), \hyperpage{15}
 
   \indexspace
-
+  \bigletter D
   \item delta\_e (qmpy.Composition attribute), \hyperpage{28}
   \item do() (qmpy.Entry method), \hyperpage{43}
   \item DOS (class in qmpy), \hyperpage{32}
   \item dual\_spaces (qmpy.PhaseSpace attribute), \hyperpage{37}
 
   \indexspace
-
+  \bigletter E
   \item Element (class in qmpy), \hyperpage{26}
   \item elements (qmpy.Entry attribute), \hyperpage{44}
   \item elements (qmpy.PhaseSpace attribute), \hyperpage{37}
@@ -88,16 +88,11 @@
   \item ExptFormationEnergy (class in qmpy), \hyperpage{34}
 
   \indexspace
-
-  \item find\_lattice\_points\_by\_transform() (qmpy.Structure method), 
-		\hyperpage{16}
-  \item find\_lattice\_points\_within\_distance() (qmpy.Structure method), 
-		\hyperpage{16}
+  \bigletter F
+  \item find\_lattice\_points\_by\_transform() (qmpy.Structure method), \hyperpage{16}
+  \item find\_lattice\_points\_within\_distance() (qmpy.Structure method), \hyperpage{16}
   \item find\_min\_coord() (qmpy.GridData method), \hyperpage{54}
-  \item find\_nearest\_neighbors() (in module qmpy.analysis.nearest\_neighbors), 
-		\hyperpage{55}
-  \item find\_nearest\_neighbors() (qmpy.Structure method), 
-		\hyperpage{16}
+  \item find\_nearest\_neighbors() (qmpy.Structure method), \hyperpage{16}
   \item find\_reaction\_mus() (qmpy.PhaseSpace method), \hyperpage{37}
   \item Fit (class in qmpy), \hyperpage{34}
   \item forces (qmpy.Atom attribute), \hyperpage{23}
@@ -106,7 +101,7 @@
   \item from\_atoms() (qmpy.Site class method), \hyperpage{25}
 
   \indexspace
-
+  \bigletter G
   \item gamma (qmpy.Miedema attribute), \hyperpage{54}
   \item gclp() (qmpy.PhaseSpace method), \hyperpage{37}
   \item get() (qmpy.Composition class method), \hyperpage{28}
@@ -121,7 +116,7 @@
   \item get\_list() (qmpy.Composition class method), \hyperpage{28}
   \item get\_minima() (qmpy.PhaseSpace method), \hyperpage{38}
   \item get\_outcar() (qmpy.Calculation method), \hyperpage{30}
-  \item get\_pair\_distances() (qmpy.PDF method), \hyperpage{52}
+  \item get\_pair\_distances() (qmpy.PDF method), \hyperpage{53}
   \item get\_peaks() (qmpy.XRD method), \hyperpage{53}
   \item get\_phase\_data() (qmpy.PhaseData method), \hyperpage{41}
   \item get\_phase\_diagram() (qmpy.PhaseSpace method), \hyperpage{38}
@@ -131,18 +126,16 @@
   \item get\_site() (qmpy.Spacegroup method), \hyperpage{47}
   \item get\_sites() (qmpy.Structure method), \hyperpage{16}
   \item get\_spin\_lattice() (qmpy.Structure method), \hyperpage{16}
-  \item get\_tie\_lines\_by\_gclp() (qmpy.PhaseSpace method), 
-		\hyperpage{38}
+  \item get\_tie\_lines\_by\_gclp() (qmpy.PhaseSpace method), \hyperpage{38}
   \item get\_volume() (qmpy.Structure method), \hyperpage{17}
   \item graph (qmpy.PhaseSpace attribute), \hyperpage{38}
   \item GridData (class in qmpy), \hyperpage{54}
   \item ground\_state (qmpy.Composition attribute), \hyperpage{29}
-  \item group\_atoms\_by\_symmetry() (qmpy.Structure method), 
-		\hyperpage{17}
+  \item group\_atoms\_by\_symmetry() (qmpy.Structure method), \hyperpage{17}
 
   \indexspace
-
-  \item H\_form\_ord() (qmpy.Miedema method), \hyperpage{53}
+  \bigletter H
+  \item H\_form\_ord() (qmpy.Miedema method), \hyperpage{54}
   \item hold\_objects (qmpy.Entry attribute), \hyperpage{44}
   \item holds (qmpy.Entry attribute), \hyperpage{44}
   \item Host (class in qmpy), \hyperpage{49}
@@ -152,7 +145,7 @@
   \item hull (qmpy.PhaseSpace attribute), \hyperpage{38}
 
   \indexspace
-
+  \bigletter I
   \item icsd\_delta\_e (qmpy.Composition attribute), \hyperpage{29}
   \item in\_bounds() (qmpy.PhaseSpace method), \hyperpage{38}
   \item in\_space() (qmpy.PhaseSpace method), \hyperpage{38}
@@ -166,26 +159,26 @@
   \item is\_on() (qmpy.Atom method), \hyperpage{23}
 
   \indexspace
-
+  \bigletter J
   \item Job (class in qmpy), \hyperpage{52}
   \item jobs (qmpy.Task attribute), \hyperpage{52}
   \item joggle\_atoms() (qmpy.Structure method), \hyperpage{17}
   \item Journal (class in qmpy), \hyperpage{46}
 
   \indexspace
-
+  \bigletter K
   \item keyword\_objects (qmpy.Entry attribute), \hyperpage{44}
   \item keyword\_objects (qmpy.Structure attribute), \hyperpage{17}
   \item keywords (qmpy.Entry attribute), \hyperpage{44}
 
   \indexspace
-
+  \bigletter L
   \item label (qmpy.Site attribute), \hyperpage{25}
   \item lat\_param\_dict (qmpy.Structure attribute), \hyperpage{17}
   \item lat\_param\_string() (qmpy.Structure method), \hyperpage{17}
   \item lat\_params (qmpy.Structure attribute), \hyperpage{17}
   \item latex (qmpy.Entry attribute), \hyperpage{44}
-  \item Line (class in qmpy.utils.rendering), \hyperpage{55}
+  \item Line (class in qmpy), \hyperpage{52}
   \item load() (qmpy.PhaseSpace method), \hyperpage{39}
   \item load\_library() (qmpy.PhaseData method), \hyperpage{41}
   \item load\_oqmd() (qmpy.PhaseData method), \hyperpage{42}
@@ -194,11 +187,10 @@
   \item lp\_factor() (qmpy.Peak method), \hyperpage{53}
 
   \indexspace
-
+  \bigletter M
   \item magmom (qmpy.Site attribute), \hyperpage{25}
   \item magmoms (qmpy.Structure attribute), \hyperpage{18}
-  \item make\_1d\_vs\_chempot() (qmpy.PhaseSpace method), 
-		\hyperpage{39}
+  \item make\_1d\_vs\_chempot() (qmpy.PhaseSpace method), \hyperpage{39}
   \item make\_as\_binary() (qmpy.PhaseSpace method), \hyperpage{39}
   \item make\_as\_graph() (qmpy.PhaseSpace method), \hyperpage{39}
   \item make\_as\_quaternary() (qmpy.PhaseSpace method), \hyperpage{39}
@@ -215,24 +207,23 @@
   \item move() (qmpy.Entry method), \hyperpage{44}
 
   \indexspace
-
+  \bigletter N
   \item name (qmpy.Entry attribute), \hyperpage{44}
   \item name (qmpy.Structure attribute), \hyperpage{19}
   \item ndistinct (qmpy.Composition attribute), \hyperpage{29}
-  \item nearest\_neighbor\_dict (qmpy.Structure attribute), 
-		\hyperpage{19}
+  \item nearest\_neighbor\_dict (qmpy.Structure attribute), \hyperpage{19}
 
   \indexspace
-
+  \bigletter O
   \item occupancy (qmpy.Site attribute), \hyperpage{25}
   \item Operation (class in qmpy), \hyperpage{47}
   \item ox (qmpy.Site attribute), \hyperpage{26}
 
   \indexspace
-
-  \item P (qmpy.Miedema attribute), \hyperpage{53}
+  \bigletter P
+  \item P (qmpy.Miedema attribute), \hyperpage{54}
   \item path() (qmpy.GridData method), \hyperpage{54}
-  \item PDF (class in qmpy), \hyperpage{52}
+  \item PDF (class in qmpy), \hyperpage{53}
   \item pdf\_compare() (qmpy.Structure method), \hyperpage{19}
   \item Peak (class in qmpy), \hyperpage{53}
   \item phase\_diagram (qmpy.PhaseSpace attribute), \hyperpage{40}
@@ -241,8 +232,8 @@
   \item PhaseSpace (class in qmpy), \hyperpage{35}
   \item pick\_a() (qmpy.Miedema method), \hyperpage{54}
   \item plot\_reactions() (qmpy.PhaseSpace method), \hyperpage{40}
-  \item Point (class in qmpy.utils.rendering), \hyperpage{55}
-  \item PointCollection (class in qmpy.utils.rendering), \hyperpage{55}
+  \item Point (class in qmpy), \hyperpage{52}
+  \item PointCollection (class in qmpy), \hyperpage{52}
   \item Potential (class in qmpy), \hyperpage{33}
   \item Project (class in qmpy), \hyperpage{50}
   \item projects (qmpy.Entry attribute), \hyperpage{44}
@@ -250,12 +241,11 @@
   \item Prototype (class in qmpy), \hyperpage{22}
 
   \indexspace
-
+  \bigletter Q
   \item qmpy (module), \hyperpage{7}, \hyperpage{13}
-  \item qmpy.analysis.nearest\_neighbors (module), \hyperpage{55}
 
   \indexspace
-
+  \bigletter R
   \item read() (qmpy.Calculation static method), \hyperpage{30}
   \item read\_charges() (qmpy.Calculation method), \hyperpage{30}
   \item read\_chgcar() (qmpy.Calculation method), \hyperpage{30}
@@ -263,8 +253,7 @@
   \item read\_elements() (qmpy.Calculation method), \hyperpage{30}
   \item read\_energies() (qmpy.Calculation method), \hyperpage{31}
   \item read\_file() (qmpy.PhaseData method), \hyperpage{42}
-  \item read\_lattice\_vectors() (qmpy.Calculation method), 
-		\hyperpage{31}
+  \item read\_lattice\_vectors() (qmpy.Calculation method), \hyperpage{31}
   \item read\_n\_ionic() (qmpy.Calculation method), \hyperpage{31}
   \item read\_natoms() (qmpy.Calculation method), \hyperpage{31}
   \item recenter() (qmpy.Structure method), \hyperpage{19}
@@ -274,16 +263,16 @@
   \item Reference (class in qmpy), \hyperpage{45}
   \item ReferenceEnergy (class in qmpy), \hyperpage{35}
   \item refine() (qmpy.Structure method), \hyperpage{19}
-  \item Renderer (class in qmpy.utils.rendering), \hyperpage{55}
+  \item Renderer (class in qmpy), \hyperpage{52}
   \item reset() (qmpy.Entry method), \hyperpage{44}
   \item Rotation (class in qmpy), \hyperpage{48}
   \item rotations (qmpy.Spacegroup attribute), \hyperpage{47}
-  \item RtoP (qmpy.Miedema attribute), \hyperpage{53}
-  \item run\_GCMC() (qmpy.SpinLattice method), \hyperpage{54}
-  \item run\_MC() (qmpy.SpinLattice method), \hyperpage{54}
+  \item RtoP (qmpy.Miedema attribute), \hyperpage{54}
+  \item run\_GCMC() (qmpy.SpinLattice method), \hyperpage{55}
+  \item run\_MC() (qmpy.SpinLattice method), \hyperpage{55}
 
   \indexspace
-
+  \bigletter S
   \item save() (qmpy.Entry method), \hyperpage{44}
   \item save\_tie\_lines() (qmpy.PhaseSpace method), \hyperpage{40}
   \item set\_chgcar() (qmpy.Calculation method), \hyperpage{31}
@@ -324,10 +313,10 @@
   \item symmetrize() (qmpy.Structure method), \hyperpage{21}
 
   \indexspace
-
+  \bigletter T
   \item t() (qmpy.Structure method), \hyperpage{21}
   \item Task (class in qmpy), \hyperpage{51}
-  \item Text (class in qmpy.utils.rendering), \hyperpage{55}
+  \item Text (class in qmpy), \hyperpage{52}
   \item thermal\_factor() (qmpy.Peak method), \hyperpage{53}
   \item tie\_lines (qmpy.PhaseSpace attribute), \hyperpage{41}
   \item total\_energy (qmpy.Entry attribute), \hyperpage{45}
@@ -337,7 +326,7 @@
   \item translations (qmpy.Spacegroup attribute), \hyperpage{47}
 
   \indexspace
-
+  \bigletter U
   \item unit\_comp (qmpy.Composition attribute), \hyperpage{29}
   \item unit\_comp (qmpy.Entry attribute), \hyperpage{45}
   \item unit\_comp (qmpy.Structure attribute), \hyperpage{22}
@@ -345,18 +334,18 @@
   \item User (class in qmpy), \hyperpage{50}
 
   \indexspace
-
+  \bigletter V
   \item visualize() (qmpy.Entry method), \hyperpage{45}
   \item volume (qmpy.Entry attribute), \hyperpage{45}
 
   \indexspace
-
+  \bigletter W
   \item warning\_objects (qmpy.Calculation attribute), \hyperpage{32}
   \item wyckoff\_sites (qmpy.Spacegroup attribute), \hyperpage{47}
   \item WyckoffSite (class in qmpy), \hyperpage{47}
 
   \indexspace
-
-  \item XRD (class in qmpy), \hyperpage{52}
+  \bigletter X
+  \item XRD (class in qmpy), \hyperpage{53}
 
 \end{theindex}

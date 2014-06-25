@@ -1,37 +1,39 @@
-\BOOKMARK [0][-]{chapter.1}{Installation}{}% 1
-\BOOKMARK [1][-]{section.1.1}{From repo}{chapter.1}% 2
-\BOOKMARK [1][-]{section.1.2}{From GitHub repo}{chapter.1}% 3
-\BOOKMARK [1][-]{section.1.3}{Required Packages}{chapter.1}% 4
-\BOOKMARK [1][-]{section.1.4}{Recommended Packages}{chapter.1}% 5
-\BOOKMARK [0][-]{chapter.2}{Setting up the database}{}% 6
-\BOOKMARK [0][-]{chapter.3}{Tutorials}{}% 7
-\BOOKMARK [1][-]{section.3.1}{Database entries}{chapter.3}% 8
-\BOOKMARK [1][-]{section.3.2}{Creating a structure}{chapter.3}% 9
-\BOOKMARK [1][-]{section.3.3}{First Principles Calculations}{chapter.3}% 10
-\BOOKMARK [1][-]{section.3.4}{Searching for models}{chapter.3}% 11
-\BOOKMARK [0][-]{chapter.4}{Data Models}{}% 12
-\BOOKMARK [1][-]{section.4.1}{Materials models}{chapter.4}% 13
-\BOOKMARK [1][-]{section.4.2}{Calculation models}{chapter.4}% 14
-\BOOKMARK [1][-]{section.4.3}{Thermodynamics models}{chapter.4}% 15
-\BOOKMARK [1][-]{section.4.4}{Database models}{chapter.4}% 16
-\BOOKMARK [1][-]{section.4.5}{Symmetry models}{chapter.4}% 17
-\BOOKMARK [1][-]{section.4.6}{Resource models}{chapter.4}% 18
-\BOOKMARK [1][-]{section.4.7}{Queue models}{chapter.4}% 19
-\BOOKMARK [1][-]{section.4.8}{Analysis Tools}{chapter.4}% 20
-\BOOKMARK [1][-]{section.4.9}{Renderer}{chapter.4}% 21
-\BOOKMARK [0][-]{chapter.5}{Analysis tools}{}% 22
-\BOOKMARK [1][-]{section.5.1}{Convex Hull Construction}{chapter.5}% 23
-\BOOKMARK [1][-]{section.5.2}{Phase Stability}{chapter.5}% 24
-\BOOKMARK [1][-]{section.5.3}{Grand Canonical Linear Programming}{chapter.5}% 25
-\BOOKMARK [1][-]{section.5.4}{Convex Hull Slices}{chapter.5}% 26
-\BOOKMARK [1][-]{section.5.5}{Reaction Enumeration}{chapter.5}% 27
-\BOOKMARK [1][-]{section.5.6}{Stability Conditions}{chapter.5}% 28
-\BOOKMARK [0][-]{chapter.6}{Examples}{}% 29
-\BOOKMARK [1][-]{section.6.1}{Identification of FCC decortations}{chapter.6}% 30
-\BOOKMARK [1][-]{section.6.2}{Deviation from Vagard's Law}{chapter.6}% 31
-\BOOKMARK [0][-]{chapter.7}{Contribute}{}% 32
-\BOOKMARK [0][-]{chapter.8}{Support}{}% 33
-\BOOKMARK [0][-]{chapter.9}{License}{}% 34
-\BOOKMARK [0][-]{chapter.10}{Indices and tables}{}% 35
-\BOOKMARK [0][-]{section*.280}{Python Module Index}{}% 36
-\BOOKMARK [0][-]{section*.281}{Index}{}% 37
+\BOOKMARK [0][-]{chapter.1}{Installation}{}
+\BOOKMARK [1][-]{section.1.1}{From repo}{chapter.1}
+\BOOKMARK [1][-]{section.1.2}{From GitHub repo}{chapter.1}
+\BOOKMARK [1][-]{section.1.3}{Required Packages}{chapter.1}
+\BOOKMARK [1][-]{section.1.4}{Recommended Packages}{chapter.1}
+\BOOKMARK [0][-]{chapter.2}{Setting up the database}{}
+\BOOKMARK [0][-]{chapter.3}{Tutorials}{}
+\BOOKMARK [1][-]{section.3.1}{Database entries}{chapter.3}
+\BOOKMARK [1][-]{section.3.2}{Creating a structure}{chapter.3}
+\BOOKMARK [1][-]{section.3.3}{First Principles Calculations}{chapter.3}
+\BOOKMARK [1][-]{section.3.4}{Searching for models}{chapter.3}
+\BOOKMARK [0][-]{chapter.4}{Data Models}{}
+\BOOKMARK [1][-]{section.4.1}{Materials models}{chapter.4}
+\BOOKMARK [1][-]{section.4.2}{Calculation models}{chapter.4}
+\BOOKMARK [1][-]{section.4.3}{Thermodynamics models}{chapter.4}
+\BOOKMARK [1][-]{section.4.4}{Database models}{chapter.4}
+\BOOKMARK [1][-]{section.4.5}{Symmetry models}{chapter.4}
+\BOOKMARK [1][-]{section.4.6}{Resource models}{chapter.4}
+\BOOKMARK [1][-]{section.4.7}{Queue models}{chapter.4}
+\BOOKMARK [1][-]{section.4.8}{Renderer}{chapter.4}
+\BOOKMARK [1][-]{section.4.9}{Analysis Tools}{chapter.4}
+\BOOKMARK [0][-]{chapter.5}{Analysis tools}{}
+\BOOKMARK [1][-]{section.5.1}{Convex Hull Construction}{chapter.5}
+\BOOKMARK [1][-]{section.5.2}{Phase Stability}{chapter.5}
+\BOOKMARK [1][-]{section.5.3}{Grand Canonical Linear Programming}{chapter.5}
+\BOOKMARK [1][-]{section.5.4}{Convex Hull Slices}{chapter.5}
+\BOOKMARK [1][-]{section.5.5}{Reaction Enumeration}{chapter.5}
+\BOOKMARK [1][-]{section.5.6}{Stability Conditions}{chapter.5}
+\BOOKMARK [0][-]{chapter.6}{Examples}{}
+\BOOKMARK [1][-]{section.6.1}{Identification of FCC decortations}{chapter.6}
+\BOOKMARK [1][-]{section.6.2}{Deviation from Vagard's Law}{chapter.6}
+\BOOKMARK [1][-]{section.6.3}{Compute all A-B bond lengths}{chapter.6}
+\BOOKMARK [1][-]{section.6.4}{Integrating with Sci-kit Learn}{chapter.6}
+\BOOKMARK [1][-]{section.6.5}{Mass site substitutions}{chapter.6}
+\BOOKMARK [0][-]{chapter.7}{Contribute}{}
+\BOOKMARK [0][-]{chapter.8}{Support}{}
+\BOOKMARK [0][-]{chapter.9}{License}{}
+\BOOKMARK [0][-]{section*.278}{Python Module Index}{}
+\BOOKMARK [0][-]{section*.279}{Index}{}

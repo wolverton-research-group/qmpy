@@ -45,8 +45,8 @@
 \contentsline {section}{\numberline {4.7}Queue models}{51}{section.4.7}
 \contentsline {subsection}{\numberline {4.7.1}Task}{51}{subsection.4.7.1}
 \contentsline {subsection}{\numberline {4.7.2}Job}{52}{subsection.4.7.2}
-\contentsline {section}{\numberline {4.8}Analysis Tools}{52}{section.4.8}
-\contentsline {section}{\numberline {4.9}Renderer}{55}{section.4.9}
+\contentsline {section}{\numberline {4.8}Renderer}{52}{section.4.8}
+\contentsline {section}{\numberline {4.9}Analysis Tools}{53}{section.4.9}
 \contentsline {chapter}{\numberline {5}Analysis tools}{57}{chapter.5}
 \contentsline {section}{\numberline {5.1}Convex Hull Construction}{57}{section.5.1}
 \contentsline {section}{\numberline {5.2}Phase Stability}{57}{section.5.2}
@@ -57,9 +57,11 @@
 \contentsline {chapter}{\numberline {6}Examples}{59}{chapter.6}
 \contentsline {section}{\numberline {6.1}Identification of FCC decortations}{59}{section.6.1}
 \contentsline {section}{\numberline {6.2}Deviation from Vagard's Law}{59}{section.6.2}
-\contentsline {chapter}{\numberline {7}Contribute}{61}{chapter.7}
-\contentsline {chapter}{\numberline {8}Support}{63}{chapter.8}
-\contentsline {chapter}{\numberline {9}License}{65}{chapter.9}
-\contentsline {chapter}{\numberline {10}Indices and tables}{67}{chapter.10}
-\contentsline {chapter}{Python Module Index}{69}{section*.280}
-\contentsline {chapter}{Index}{71}{section*.281}
+\contentsline {section}{\numberline {6.3}Compute all A-B bond lengths}{60}{section.6.3}
+\contentsline {section}{\numberline {6.4}Integrating with Sci-kit Learn}{60}{section.6.4}
+\contentsline {section}{\numberline {6.5}Mass site substitutions}{61}{section.6.5}
+\contentsline {chapter}{\numberline {7}Contribute}{63}{chapter.7}
+\contentsline {chapter}{\numberline {8}Support}{65}{chapter.8}
+\contentsline {chapter}{\numberline {9}License}{67}{chapter.9}
+\contentsline {chapter}{Python Module Index}{69}{section*.278}
+\contentsline {chapter}{Index}{71}{section*.279}

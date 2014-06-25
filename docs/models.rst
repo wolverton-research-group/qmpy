@@ -181,6 +181,29 @@ Job
 .. autoclass:: Job
   :members:
 
+
+Renderer
+========
+
+.. autoclass:: Renderer
+  :members:
+
+.. autoclass:: Text
+  :members:
+
+.. autoclass:: Line
+  :members:
+
+.. autoclass:: PointCollection
+  :members:
+
+.. autoclass:: Point
+  :members:
+
+.. autoclass:: Axis
+  :members:
+
+
 Analysis Tools
 ==============
 
@@ -202,26 +225,3 @@ Analysis Tools
 .. autoclass:: SpinLattice
   :members:
 
-.. automodule:: qmpy.analysis.nearest_neighbors
-  :members:
-
-Renderer
-========
-
-.. autoclass:: qmpy.utils.rendering.Renderer
-  :members:
-
-.. autoclass:: qmpy.utils.rendering.Text
-  :members:
-
-.. autoclass:: qmpy.utils.rendering.Line
-  :members:
-
-.. autoclass:: qmpy.utils.rendering.PointCollection
-  :members:
-
-.. autoclass:: qmpy.utils.rendering.Point
-  :members:
-
-.. autoclass:: qmpy.utils.rendering.Axis
-  :members:

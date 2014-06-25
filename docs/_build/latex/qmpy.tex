@@ -14,7 +14,7 @@
 
 
 \title{qmpy Documentation}
-\date{May 23, 2014}
+\date{June 02, 2014}
 \release{0.4.9}
 \author{Scott Kirklin}
 \newcommand{\sphinxlogo}{}
@@ -3454,7 +3454,7 @@ Examples:
 \begin{fulllineitems}
 \phantomsection\label{models:qmpy.PhaseSpace.make_as_binary}\pysiglinewithargsret{\bfcode{make\_as\_binary}}{\emph{**kwargs}}{}
 Construct a binary phase diagram (convex hull) and write it to a
-\code{Renderer}.
+{\hyperref[models:qmpy.Renderer]{\code{Renderer}}}.
 
 Examples:
 
@@ -3480,7 +3480,7 @@ Construct a graph-style visualization of the phase diagram.
 \begin{fulllineitems}
 \phantomsection\label{models:qmpy.PhaseSpace.make_as_quaternary}\pysiglinewithargsret{\bfcode{make\_as\_quaternary}}{\emph{**kwargs}}{}
 Construct a quaternary phase diagram and write it to a
-\code{Renderer}.
+{\hyperref[models:qmpy.Renderer]{\code{Renderer}}}.
 
 Examples:
 
@@ -3498,7 +3498,7 @@ Examples:
 \begin{fulllineitems}
 \phantomsection\label{models:qmpy.PhaseSpace.make_as_ternary}\pysiglinewithargsret{\bfcode{make\_as\_ternary}}{\emph{**kwargs}}{}
 Construct a ternary phase diagram and write it to a
-\code{Renderer}.
+{\hyperref[models:qmpy.Renderer]{\code{Renderer}}}.
 
 Examples:
 
@@ -4902,6 +4902,45 @@ completed
 
 
 
+\section{Renderer}
+\label{models:renderer}\index{Renderer (class in qmpy)}
+
+\begin{fulllineitems}
+\phantomsection\label{models:qmpy.Renderer}\pysiglinewithargsret{\strong{class }\code{qmpy.}\bfcode{Renderer}}{\emph{format='matplotlib'}, \emph{lines=}\optional{}, \emph{points=}\optional{}, \emph{point\_collections=}\optional{}, \emph{text=}\optional{}, \emph{**kwargs}}{}
+\end{fulllineitems}
+
+\index{Text (class in qmpy)}
+
+\begin{fulllineitems}
+\phantomsection\label{models:qmpy.Text}\pysiglinewithargsret{\strong{class }\code{qmpy.}\bfcode{Text}}{\emph{pt}, \emph{text}, \emph{**kwargs}}{}
+\end{fulllineitems}
+
+\index{Line (class in qmpy)}
+
+\begin{fulllineitems}
+\phantomsection\label{models:qmpy.Line}\pysiglinewithargsret{\strong{class }\code{qmpy.}\bfcode{Line}}{\emph{pts}, \emph{label=None}, \emph{fill=False}, \emph{**kwargs}}{}
+\end{fulllineitems}
+
+\index{PointCollection (class in qmpy)}
+
+\begin{fulllineitems}
+\phantomsection\label{models:qmpy.PointCollection}\pysiglinewithargsret{\strong{class }\code{qmpy.}\bfcode{PointCollection}}{\emph{points}, \emph{label=None}, \emph{fill=False}, \emph{**kwargs}}{}
+\end{fulllineitems}
+
+\index{Point (class in qmpy)}
+
+\begin{fulllineitems}
+\phantomsection\label{models:qmpy.Point}\pysiglinewithargsret{\strong{class }\code{qmpy.}\bfcode{Point}}{\emph{coord}, \emph{label=None}, \emph{**kwargs}}{}
+\end{fulllineitems}
+
+\index{Axis (class in qmpy)}
+
+\begin{fulllineitems}
+\phantomsection\label{models:qmpy.Axis}\pysiglinewithargsret{\strong{class }\code{qmpy.}\bfcode{Axis}}{\emph{name}, \emph{label='`}, \emph{units='`}, \emph{template='\{label\} {[}\{units\}{]}'}, \emph{**kwargs}}{}
+\end{fulllineitems}
+
+
+
 \section{Analysis Tools}
 \label{models:analysis-tools}\index{PDF (class in qmpy)}
 
@@ -5226,98 +5265,6 @@ Examples:
 
 \end{fulllineitems}
 
-\phantomsection\label{models:module-qmpy.analysis.nearest_neighbors}\index{qmpy.analysis.nearest\_neighbors (module)}\index{find\_nearest\_neighbors() (in module qmpy.analysis.nearest\_neighbors)}
-
-\begin{fulllineitems}
-\phantomsection\label{models:qmpy.analysis.nearest_neighbors.find_nearest_neighbors}\pysiglinewithargsret{\code{qmpy.analysis.nearest\_neighbors.}\bfcode{find\_nearest\_neighbors}}{\emph{structure}, \emph{method='closest'}, \emph{limit=5}, \emph{tol=0.2}}{}
-For each atom in the \emph{structure} assign the nearest neighbors.
-\begin{description}
-\item[{Keyword Arguments:}] \leavevmode\begin{description}
-\item[{method (`closest' or `voronoi'):}] \leavevmode\begin{description}
-\item[{closest: }] \leavevmode
-Atoms A and B are neighbors, if and only if there is no atom C 
-such that AC \textless{} AB and BC \textless{} AB. Once all pairs of this kind 
-have been assigned, the nearest neighbors are those within 
-\emph{tol} of the shortest distance.
-
-\item[{voronoi: }] \leavevmode
-Assign nearest neighbors based on voronoi construction.
-For each atom which generates a voronoi facet, \emph{tol} specifies
-the minimum area of the facet before the atom is considered a
-nearest neighbor.
-
-\end{description}
-
-defaults to `closest'
-
-\item[{limit:}] \leavevmode
-Range outside of the unit cell that will be searched for nearest
-neighbor atoms.
-
-\end{description}
-
-tol: Varied depending on the method being used.
-
-\item[{Returns:}] \leavevmode
-dict of Atom:list of Atom pairs. For each atom in the structure, its
-``neighbors'' attribute will be set to the list of its nearest neighbors.
-
-\end{description}
-
-\begin{notice}{note}{Note:}
-Recommended to use the ``closest'' method unless you are sure you
-what the ``voronoi'' method will do. The voronoi neighbors are
-useful for some purposes, but are often not what are normally
-considered nearest neighbors. For example in BCC the second
-nearsest neighbors contribute to facets in the an atoms voronoi
-cell. The tolerance specification for this method sets the
-minimum area of such a facet required to add the atom as a
-nearest neighbor. In the BCC case, this cutoff must be set to at
-least 2.3 A\textasciicircum{}2 to exclude the facets due to second nearest
-neighbors.
-\end{notice}
-
-\end{fulllineitems}
-
-
-
-\section{Renderer}
-\label{models:renderer}\index{Renderer (class in qmpy.utils.rendering)}
-
-\begin{fulllineitems}
-\phantomsection\label{models:qmpy.utils.rendering.Renderer}\pysiglinewithargsret{\strong{class }\code{qmpy.utils.rendering.}\bfcode{Renderer}}{\emph{format='matplotlib'}, \emph{lines=}\optional{}, \emph{points=}\optional{}, \emph{point\_collections=}\optional{}, \emph{text=}\optional{}, \emph{**kwargs}}{}
-\end{fulllineitems}
-
-\index{Text (class in qmpy.utils.rendering)}
-
-\begin{fulllineitems}
-\phantomsection\label{models:qmpy.utils.rendering.Text}\pysiglinewithargsret{\strong{class }\code{qmpy.utils.rendering.}\bfcode{Text}}{\emph{pt}, \emph{text}, \emph{**kwargs}}{}
-\end{fulllineitems}
-
-\index{Line (class in qmpy.utils.rendering)}
-
-\begin{fulllineitems}
-\phantomsection\label{models:qmpy.utils.rendering.Line}\pysiglinewithargsret{\strong{class }\code{qmpy.utils.rendering.}\bfcode{Line}}{\emph{pts}, \emph{label=None}, \emph{fill=False}, \emph{**kwargs}}{}
-\end{fulllineitems}
-
-\index{PointCollection (class in qmpy.utils.rendering)}
-
-\begin{fulllineitems}
-\phantomsection\label{models:qmpy.utils.rendering.PointCollection}\pysiglinewithargsret{\strong{class }\code{qmpy.utils.rendering.}\bfcode{PointCollection}}{\emph{points}, \emph{label=None}, \emph{fill=False}, \emph{**kwargs}}{}
-\end{fulllineitems}
-
-\index{Point (class in qmpy.utils.rendering)}
-
-\begin{fulllineitems}
-\phantomsection\label{models:qmpy.utils.rendering.Point}\pysiglinewithargsret{\strong{class }\code{qmpy.utils.rendering.}\bfcode{Point}}{\emph{coord}, \emph{label=None}, \emph{**kwargs}}{}
-\end{fulllineitems}
-
-\index{Axis (class in qmpy.utils.rendering)}
-
-\begin{fulllineitems}
-\phantomsection\label{models:qmpy.utils.rendering.Axis}\pysiglinewithargsret{\strong{class }\code{qmpy.utils.rendering.}\bfcode{Axis}}{\emph{name}, \emph{label='`}, \emph{units='`}, \emph{template='\{label\} {[}\{units\}{]}'}, \emph{**kwargs}}{}
-\end{fulllineitems}
-
 
 
 \chapter{Analysis tools}
@@ -5492,6 +5439,122 @@ Addendum:
 * What about including the ``nearly stable''
 
 
+\section{Compute all A-B bond lengths}
+\label{examples:compute-all-a-b-bond-lengths}
+This script loops over pairs of elements, gets the binary PhaseSpace, and then
+loops over structures on the convex hull.:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{k}{for} \PYG{n}{e1}\PYG{p}{,} \PYG{n}{e2} \PYG{o+ow}{in} \PYG{n}{itertools}\PYG{o}{.}\PYG{n}{combinations}\PYG{p}{(}\PYG{n}{elts}\PYG{p}{,} \PYG{n}{r}\PYG{o}{=}\PYG{l+m+mi}{2}\PYG{p}{)}\PYG{p}{:}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }    \PYG{c}{\PYGZsh{} do logic}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }    \PYG{k}{if} \PYG{n}{e1} \PYG{o}{==} \PYG{n}{e2}\PYG{p}{:}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }        \PYG{k}{break}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }    \PYG{n}{ps} \PYG{o}{=} \PYG{n}{PhaseSpace}\PYG{p}{(}\PYG{p}{[}\PYG{n}{e1}\PYG{p}{,}\PYG{n}{e2}\PYG{p}{]}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }    \PYG{n}{k} \PYG{o}{=} \PYG{n+nb}{frozenset}\PYG{p}{(}\PYG{p}{[}\PYG{n}{e1}\PYG{p}{,}\PYG{n}{e2}\PYG{p}{]}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }    \PYG{n}{bonds} \PYG{o}{=} \PYG{p}{[}\PYG{p}{]}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }    \PYG{k}{for} \PYG{n}{p} \PYG{o+ow}{in} \PYG{n}{ps}\PYG{o}{.}\PYG{n}{stable}\PYG{p}{:}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }        \PYG{n}{s} \PYG{o}{=} \PYG{n}{p}\PYG{o}{.}\PYG{n}{calculation}\PYG{o}{.}\PYG{n}{input}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }        \PYG{k}{if} \PYG{n}{s}\PYG{o}{.}\PYG{n}{ntypes} \PYG{o}{\PYGZlt{}} \PYG{l+m+mi}{2}\PYG{p}{:}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }            \PYG{k}{continue}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }        \PYG{n}{dists} \PYG{o}{=} \PYG{n}{get\PYGZus{}pair\PYGZus{}distances}\PYG{p}{(}\PYG{n}{s}\PYG{p}{,} \PYG{l+m+mi}{10}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }        \PYG{n}{bonds}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{n+nb}{min}\PYG{p}{(}\PYG{n}{dists}\PYG{p}{[}\PYG{n}{k}\PYG{p}{]}\PYG{p}{)}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }    \PYG{k}{print} \PYG{n}{e1}\PYG{p}{,} \PYG{n}{e2}\PYG{p}{,} \PYG{n}{np}\PYG{o}{.}\PYG{n}{average}\PYG{p}{(}\PYG{n}{bonds}\PYG{p}{)}\PYG{p}{,} \PYG{n}{np}\PYG{o}{.}\PYG{n}{std}\PYG{p}{(}\PYG{n}{bonds}\PYG{p}{)}
+\end{Verbatim}
+
+
+\section{Integrating with Sci-kit Learn}
+\label{examples:integrating-with-sci-kit-learn}
+First, the necessary imports:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{k+kn}{from} \PYG{n+nn}{sklearn.svm} \PYG{k+kn}{import} \PYG{n}{SVR}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{k+kn}{from} \PYG{n+nn}{sklearn.ensemble} \PYG{k+kn}{import} \PYG{n}{GradientBoostingRegressor}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{k+kn}{from} \PYG{n+nn}{sklearn} \PYG{k+kn}{import} \PYG{n}{cross\PYGZus{}validation}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{k+kn}{from} \PYG{n+nn}{sklearn.decomposition} \PYG{k+kn}{import} \PYG{n}{PCA}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{k+kn}{from} \PYG{n+nn}{sklearn} \PYG{k+kn}{import} \PYG{n}{linear\PYGZus{}model}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{k+kn}{from} \PYG{n+nn}{sklearn} \PYG{k+kn}{import} \PYG{n}{grid\PYGZus{}search}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{k+kn}{from} \PYG{n+nn}{qmpy} \PYG{k+kn}{import} \PYG{o}{*}
+\end{Verbatim}
+
+As an example problem, we will build a very simple model that predicts the
+volume of a compound at a given composition based only on the composition:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{elts} \PYG{o}{=} \PYG{n}{Element}\PYG{o}{.}\PYG{n}{objects}\PYG{o}{.}\PYG{n}{filter}\PYG{p}{(}\PYG{n}{symbol\PYGZus{}\PYGZus{}in}\PYG{o}{=}\PYG{n}{element\PYGZus{}groups}\PYG{p}{[}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{simple\PYGZhy{}metals}\PYG{l+s}{\PYGZsq{}}\PYG{p}{]}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{out\PYGZus{}elts} \PYG{o}{=} \PYG{n}{Element}\PYG{o}{.}\PYG{n}{objects}\PYG{o}{.}\PYG{n}{exclude}\PYG{p}{(}\PYG{n}{symbol\PYGZus{}\PYGZus{}in}\PYG{o}{=}\PYG{n}{element\PYGZus{}groups}\PYG{p}{[}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{simple\PYGZhy{}metals}\PYG{l+s}{\PYGZsq{}}\PYG{p}{]}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{models} \PYG{o}{=} \PYG{n}{Calculation}\PYG{o}{.}\PYG{n}{objects}\PYG{o}{.}\PYG{n}{filter}\PYG{p}{(}\PYG{n}{path\PYGZus{}\PYGZus{}contains}\PYG{o}{=}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{icsd}\PYG{l+s}{\PYGZsq{}}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{models} \PYG{o}{=} \PYG{n}{models}\PYG{o}{.}\PYG{n}{filter}\PYG{p}{(}\PYG{n}{converged}\PYG{o}{=}\PYG{n+nb+bp}{True}\PYG{p}{,} \PYG{n}{label\PYGZus{}\PYGZus{}in}\PYG{o}{=}\PYG{p}{[}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{static}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,} \PYG{l+s}{\PYGZsq{}}\PYG{l+s}{standard}\PYG{l+s}{\PYGZsq{}}\PYG{p}{]}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{models} \PYG{o}{=} \PYG{n}{models}\PYG{o}{.}\PYG{n}{exclude}\PYG{p}{(}\PYG{n}{composition\PYGZus{}\PYGZus{}element\PYGZus{}set}\PYG{o}{=}\PYG{n}{out\PYGZus{}elts}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{data} \PYG{o}{=} \PYG{n}{models}\PYG{o}{.}\PYG{n}{values\PYGZus{}list}\PYG{p}{(}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{composition\PYGZus{}id}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,} \PYG{l+s}{\PYGZsq{}}\PYG{l+s}{output\PYGZus{}\PYGZus{}volume\PYGZus{}pa}\PYG{l+s}{\PYGZsq{}}\PYG{p}{)}
+\end{Verbatim}
+
+Now we will build a fit set and test set:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{y} \PYG{o}{=} \PYG{p}{[}\PYG{p}{]}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{X} \PYG{o}{=} \PYG{p}{[}\PYG{p}{]}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{k}{for} \PYG{n}{c}\PYG{p}{,} \PYG{n}{v} \PYG{o+ow}{in} \PYG{n}{data}\PYG{p}{:}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }    \PYG{n}{y}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{n}{v}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }    \PYG{n}{X}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{n}{get\PYGZus{}basic\PYGZus{}composition\PYGZus{}descriptors}\PYG{p}{(}\PYG{n}{c}\PYG{p}{)}\PYG{o}{.}\PYG{n}{values}\PYG{p}{(}\PYG{p}{)}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{X} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{array}\PYG{p}{(}\PYG{n}{X}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{y} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{array}\PYG{p}{(}\PYG{n}{y}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x1}\PYG{p}{,} \PYG{n}{x2}\PYG{p}{,} \PYG{n}{y1}\PYG{p}{,} \PYG{n}{y2} \PYG{o}{=} \PYG{n}{cross\PYGZus{}validation}\PYG{o}{.}\PYG{n}{train\PYGZus{}test\PYGZus{}split}\PYG{p}{(}\PYG{n}{X}\PYG{p}{,} \PYG{n}{y}\PYG{p}{,} \PYG{n}{train\PYGZus{}size}\PYG{o}{=}\PYG{l+m+mf}{0.5}\PYG{p}{)}
+\end{Verbatim}
+
+Now to actually implement the model:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{clf} \PYG{o}{=} \PYG{n}{linear\PYGZus{}model}\PYG{o}{.}\PYG{n}{LinearRegression}\PYG{p}{(}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{clf}\PYG{o}{.}\PYG{n}{fit}\PYG{p}{(}\PYG{n}{x1}\PYG{p}{,} \PYG{n}{y1}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{clf}\PYG{o}{.}\PYG{n}{score}\PYG{p}{(}\PYG{n}{x2}\PYG{p}{,} \PYG{n}{y2}\PYG{p}{)}
+\end{Verbatim}
+
+
+\section{Mass site substitutions}
+\label{examples:mass-site-substitutions}
+Materials discovery projects often entail the creation of large pools of
+compounds based on a prototype structure. The following script provides an
+example of how this process can be completed.:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{k}{def} \PYG{n+nf}{mkdir}\PYG{p}{(}\PYG{n}{path}\PYG{p}{)}\PYG{p}{:} \PYG{c}{\PYGZsh{} This is to make creating folders more robust}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }    \PYG{k}{if} \PYG{o+ow}{not} \PYG{n}{os}\PYG{o}{.}\PYG{n}{path}\PYG{o}{.}\PYG{n}{exists}\PYG{p}{(}\PYG{n}{path}\PYG{p}{)}\PYG{p}{:}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }        \PYG{n}{os}\PYG{o}{.}\PYG{n}{mkdir}\PYG{p}{(}\PYG{n}{path}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{groups} \PYG{o}{=} \PYG{p}{[} \PYG{c}{\PYGZsh{} The substitution pairs. i.e. W \PYGZhy{}\PYGZgt{} Mo, Cr, Te ...}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }        \PYG{p}{\PYGZob{}}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }            \PYG{l+s}{\PYGZsq{}}\PYG{l+s}{W}\PYG{l+s}{\PYGZsq{}}\PYG{p}{:} \PYG{p}{[}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{W}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Mo}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Cr}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Te}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Se}\PYG{l+s}{\PYGZsq{}}\PYG{p}{]}\PYG{p}{,}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }            \PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Nd}\PYG{l+s}{\PYGZsq{}}\PYG{p}{:}\PYG{p}{[}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{La}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,} \PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Bi}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,} \PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Ce}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Nd}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Sm}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Gd}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Y}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Yb}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{In}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Sb}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }                  \PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Sc}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Nb}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Ta}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Mo}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Ti}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Fe}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{V}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Ga}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Cr}\PYG{l+s}{\PYGZsq{}}\PYG{p}{]}\PYG{p}{\PYGZcb{}}\PYG{p}{,}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }        \PYG{p}{\PYGZob{}}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }            \PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Nd}\PYG{l+s}{\PYGZsq{}}\PYG{p}{:} \PYG{p}{[}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Te}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Ce}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Pb}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Zr}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Hf}\PYG{l+s}{\PYGZsq{}}\PYG{p}{]}\PYG{p}{,}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }            \PYG{l+s}{\PYGZsq{}}\PYG{l+s}{W}\PYG{l+s}{\PYGZsq{}}\PYG{p}{:}\PYG{p}{[}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Nb}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Ta}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{W}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Mo}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{V}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Cr}\PYG{l+s}{\PYGZsq{}}\PYG{p}{]}\PYG{p}{\PYGZcb{}}\PYG{p}{,}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }        \PYG{p}{\PYGZob{}}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }            \PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Nd}\PYG{l+s}{\PYGZsq{}}\PYG{p}{:} \PYG{p}{[}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Bi}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Nb}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Ta}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{W}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Mo}\PYG{l+s}{\PYGZsq{}}\PYG{p}{]}\PYG{p}{,}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }            \PYG{l+s}{\PYGZsq{}}\PYG{l+s}{W}\PYG{l+s}{\PYGZsq{}}\PYG{p}{:}\PYG{p}{[}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Al}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{In}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Ga}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Y}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Sc}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Ti}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{V}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Cr}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Fe}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Mn}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Co}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Cu}\PYG{l+s}{\PYGZsq{}}\PYG{p}{]}\PYG{p}{\PYGZcb{}}\PYG{p}{,}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }        \PYG{p}{]}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{mkdir}\PYG{p}{(}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{garnet}\PYG{l+s}{\PYGZsq{}}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{a} \PYG{o}{=} \PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Li}\PYG{l+s}{\PYGZsq{}}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{s} \PYG{o}{=} \PYG{n}{io}\PYG{o}{.}\PYG{n}{poscar}\PYG{o}{.}\PYG{n}{read}\PYG{p}{(}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{garnet\PYGZhy{}Li3Nd3W2O12}\PYG{l+s}{\PYGZsq{}}\PYG{p}{)} \PYG{c}{\PYGZsh{} (structure file not supplied)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{k}{for} \PYG{n}{group} \PYG{o+ow}{in} \PYG{n}{groups}\PYG{p}{:}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }    \PYG{k}{for} \PYG{n}{b}\PYG{p}{,}\PYG{n}{c} \PYG{o+ow}{in} \PYG{n+nb}{sorted}\PYG{p}{(}\PYG{n}{itertools}\PYG{o}{.}\PYG{n}{product}\PYG{p}{(}\PYG{n}{group}\PYG{p}{[}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Nd}\PYG{l+s}{\PYGZsq{}}\PYG{p}{]}\PYG{p}{,} \PYG{n}{group}\PYG{p}{[}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{W}\PYG{l+s}{\PYGZsq{}}\PYG{p}{]}\PYG{p}{)}\PYG{p}{)}\PYG{p}{:}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }        \PYG{k}{print} \PYG{l+s}{\PYGZdq{}}\PYG{l+s}{Li3\PYGZob{}b\PYGZcb{}3\PYGZob{}c\PYGZcb{}2O12}\PYG{l+s}{\PYGZdq{}}\PYG{o}{.}\PYG{n}{format}\PYG{p}{(}\PYG{n}{b}\PYG{o}{=}\PYG{n}{b}\PYG{p}{,} \PYG{n}{c}\PYG{o}{=}\PYG{n}{c}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }        \PYG{n}{path} \PYG{o}{=} \PYG{l+s}{\PYGZsq{}}\PYG{l+s}{garnet/\PYGZob{}a\PYGZcb{}\PYGZus{}\PYGZob{}b\PYGZcb{}\PYGZus{}\PYGZob{}c\PYGZcb{}}\PYG{l+s}{\PYGZsq{}}\PYG{o}{.}\PYG{n}{format}\PYG{p}{(}\PYG{n}{a}\PYG{o}{=}\PYG{n}{a}\PYG{p}{,}\PYG{n}{b}\PYG{o}{=}\PYG{n}{b}\PYG{p}{,}\PYG{n}{c}\PYG{o}{=}\PYG{n}{c}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }        \PYG{n}{name} \PYG{o}{=} \PYG{l+s}{\PYGZsq{}}\PYG{l+s}{\PYGZob{}a\PYGZcb{}\PYGZus{}\PYGZob{}b\PYGZcb{}\PYGZus{}\PYGZob{}c\PYGZcb{}}\PYG{l+s}{\PYGZsq{}}\PYG{o}{.}\PYG{n}{format}\PYG{p}{(}\PYG{n}{a}\PYG{o}{=}\PYG{n}{a}\PYG{p}{,}\PYG{n}{b}\PYG{o}{=}\PYG{n}{b}\PYG{p}{,}\PYG{n}{c}\PYG{o}{=}\PYG{n}{c}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }        \PYG{n}{mkdir}\PYG{p}{(}\PYG{n}{path}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }        \PYG{n}{new} \PYG{o}{=} \PYG{n}{s}\PYG{o}{.}\PYG{n}{substitute}\PYG{p}{(}\PYG{p}{\PYGZob{}}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{Nd}\PYG{l+s}{\PYGZsq{}}\PYG{p}{:}\PYG{n}{b}\PYG{p}{,} \PYG{l+s}{\PYGZsq{}}\PYG{l+s}{W}\PYG{l+s}{\PYGZsq{}}\PYG{p}{:}\PYG{n}{c}\PYG{p}{\PYGZcb{}}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }        \PYG{n}{io}\PYG{o}{.}\PYG{n}{poscar}\PYG{o}{.}\PYG{n}{write}\PYG{p}{(}\PYG{n}{new}\PYG{p}{,} \PYG{n}{path}\PYG{o}{+}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{/POSCAR}\PYG{l+s}{\PYGZsq{}}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }        \PYG{k}{if} \PYG{n}{Entry}\PYG{o}{.}\PYG{n}{objects}\PYG{o}{.}\PYG{n}{filter}\PYG{p}{(}\PYG{n}{path}\PYG{o}{=}\PYG{n}{os}\PYG{o}{.}\PYG{n}{path}\PYG{o}{.}\PYG{n}{abspath}\PYG{p}{(}\PYG{n}{path}\PYG{p}{)}\PYG{p}{)}\PYG{o}{.}\PYG{n}{exists}\PYG{p}{(}\PYG{p}{)}\PYG{p}{:}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }            \PYG{k}{continue}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }        \PYG{n}{entry} \PYG{o}{=} \PYG{n}{Entry}\PYG{o}{.}\PYG{n}{create}\PYG{p}{(}\PYG{n}{path}\PYG{o}{+}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{/POSCAR}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }                             \PYG{n}{projects}\PYG{o}{=}\PYG{p}{[}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{garnets}\PYG{l+s}{\PYGZsq{}}\PYG{p}{]}\PYG{p}{,}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }                             \PYG{n}{keywords}\PYG{o}{=}\PYG{p}{[}\PYG{l+s}{\PYGZsq{}}\PYG{l+s}{garnet}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,} \PYG{l+s}{\PYGZsq{}}\PYG{l+s}{quaternary}\PYG{l+s}{\PYGZsq{}}\PYG{p}{]}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }        \PYG{n}{entry}\PYG{o}{.}\PYG{n}{save}\PYG{p}{(}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }        \PYG{n}{task} \PYG{o}{=} \PYG{n}{Task}\PYG{o}{.}\PYG{n}{create}\PYG{p}{(}\PYG{n}{entry}\PYG{p}{,} \PYG{l+s}{\PYGZsq{}}\PYG{l+s}{static}\PYG{l+s}{\PYGZsq{}}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }        \PYG{n}{task}\PYG{o}{.}\PYG{n}{save}\PYG{p}{(}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }       \PYG{k}{print} \PYG{n}{entry}
+\end{Verbatim}
+
+
 \chapter{Contribute}
 \label{index:contribute}\begin{itemize}
 \item {} 
@@ -5513,27 +5576,34 @@ We can be reached at \href{mailto:oqmd.contact@gmail.com}{oqmd.contact@gmail.com
 \label{index:license}
 The project is licensed under the MIT license.
 
+The MIT License (MIT)
 
-\chapter{Indices and tables}
-\label{index:indices-and-tables}\begin{itemize}
-\item {} 
-\emph{genindex}
+Copyright (c) 2014 skirklin
 
-\item {} 
-\emph{modindex}
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the ``Software''), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-\item {} 
-\emph{search}
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-\end{itemize}
+THE SOFTWARE IS PROVIDED ``AS IS'', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
 
 \renewcommand{\indexname}{Python Module Index}
 \begin{theindex}
 \def\bigletter#1{{\Large\sffamily#1}\nopagebreak\vspace{1mm}}
 \bigletter{q}
-\item {\texttt{qmpy}}, \pageref{tutorials:module-qmpy}
-\item {\texttt{qmpy.analysis.nearest\_neighbors}}, \pageref{models:module-qmpy.analysis.nearest_neighbors}
+\item {\texttt{qmpy}}, \pageref{models:module-qmpy}
 \end{theindex}
 
 \renewcommand{\indexname}{Index}

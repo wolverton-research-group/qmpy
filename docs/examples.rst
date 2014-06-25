@@ -128,3 +128,47 @@ Now to actually implement the model::
     >>> clf = linear_model.LinearRegression()
     >>> clf.fit(x1, y1)
     >>> clf.score(x2, y2)
+
+Mass site substitutions
+-----------------------
+
+Materials discovery projects often entail the creation of large pools of 
+compounds based on a prototype structure. The following script provides an
+example of how this process can be completed.::
+
+    >>> def mkdir(path): # This is to make creating folders more robust
+    >>>     if not os.path.exists(path):
+    >>>         os.mkdir(path)
+    >>> groups = [ # The substitution pairs. i.e. W -> Mo, Cr, Te ...
+    >>>         {
+    >>>             'W': ['W','Mo','Cr','Te','Se'],
+    >>>             'Nd':['La', 'Bi', 'Ce','Nd','Sm','Gd','Y','Yb','In','Sb',
+    >>>                   'Sc','Nb','Ta','Mo','Ti','Fe','V','Ga','Cr']},
+    >>>         {
+    >>>             'Nd': ['Te','Ce','Pb','Zr','Hf'],
+    >>>             'W':['Nb','Ta','W','Mo','V','Cr']},
+    >>>         {
+    >>>             'Nd': ['Bi','Nb','Ta','W','Mo'],
+    >>>             'W':['Al','In','Ga','Y','Sc','Ti','V','Cr','Fe','Mn','Co','Cu']},
+    >>>         ]
+    >>> mkdir('garnet')
+    >>> a = 'Li'
+    >>> s = io.poscar.read('garnet-Li3Nd3W2O12') # (structure file not supplied)
+    >>> for group in groups:
+    >>>     for b,c in sorted(itertools.product(group['Nd'], group['W'])):
+    >>>         print "Li3{b}3{c}2O12".format(b=b, c=c)
+    >>>         path = 'garnet/{a}_{b}_{c}'.format(a=a,b=b,c=c)
+    >>>         name = '{a}_{b}_{c}'.format(a=a,b=b,c=c)
+    >>>         mkdir(path)
+    >>>         new = s.substitute({'Nd':b, 'W':c})
+    >>>         io.poscar.write(new, path+'/POSCAR')
+    >>>         if Entry.objects.filter(path=os.path.abspath(path)).exists():
+    >>>             continue
+    >>>         entry = Entry.create(path+'/POSCAR',
+    >>>                              projects=['garnets'],
+    >>>                              keywords=['garnet', 'quaternary'])
+    >>>         entry.save()
+    >>>         task = Task.create(entry, 'static')
+    >>>         task.save()
+    >>>        print entry
+

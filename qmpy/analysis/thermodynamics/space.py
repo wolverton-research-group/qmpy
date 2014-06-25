@@ -1115,7 +1115,7 @@ class PhaseSpace(object):
             windows[window] = list(self.stable)
         return windows 
 
-    def get_phase_diagram(self):
+    def get_phase_diagram(self, **kwargs):
         """
         Creates a Renderer attribute with appropriate phase diagram components.
 
@@ -1128,22 +1128,22 @@ class PhaseSpace(object):
         """
         self.renderer = Renderer()
         if self.shape == (0,0):
-            self.make_as_unary()
+            self.make_as_unary(**kwargs)
         elif self.shape == (1,0):
-            self.make_as_binary()
+            self.make_as_binary(**kwargs)
         elif self.shape == (2,0):
-            self.make_as_ternary()
+            self.make_as_ternary(**kwargs)
         elif self.shape == (3,0):
-            self.make_as_quaternary()
+            self.make_as_quaternary(**kwargs)
         elif self.shape == (0,1):
-            self.make_1d_vs_chempot()
+            self.make_1d_vs_chempot(**kwargs)
         elif self.shape == (1,1):
-            self.make_vs_chempot()
+            self.make_vs_chempot(**kwargs)
         else:
             ps = PhaseSpace('-'.join(self.space), data=self.data,
                     load=None)
             ps.renderer = Renderer()
-            ps.make_as_graph()
+            ps.make_as_graph(**kwargs)
             self.renderer = ps.renderer
 
     def make_as_unary(self, **kwargs):

@@ -3850,51 +3850,10 @@ when all pairs are unlike.</p>
 
 </dd></dl>
 
-<span class="target" id="module-qmpy.analysis.nearest_neighbors"></span><dl class="function">
-<dt id="qmpy.analysis.nearest_neighbors.find_nearest_neighbors">
-<tt class="descclassname">qmpy.analysis.nearest_neighbors.</tt><tt class="descname">find_nearest_neighbors</tt><big>(</big><em>structure</em>, <em>method='closest'</em>, <em>limit=5</em>, <em>tol=0.2</em><big>)</big><a class="reference internal" href="_modules/qmpy/analysis/nearest_neighbors.html#find_nearest_neighbors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmpy.analysis.nearest_neighbors.find_nearest_neighbors" title="Permalink to this definition">¶</a></dt>
-<dd><p>For each atom in the <cite>structure</cite> assign the nearest neighbors.</p>
-<dl class="docutils">
-<dt>Keyword Arguments:</dt>
-<dd><dl class="first docutils">
-<dt>method (&#8216;closest&#8217; or &#8216;voronoi&#8217;):</dt>
-<dd><dl class="first docutils">
-<dt>closest: </dt>
-<dd>Atoms A and B are neighbors, if and only if there is no atom C 
-such that AC &lt; AB and BC &lt; AB. Once all pairs of this kind 
-have been assigned, the nearest neighbors are those within 
-<cite>tol</cite> of the shortest distance.</dd>
-<dt>voronoi: </dt>
-<dd>Assign nearest neighbors based on voronoi construction.
-For each atom which generates a voronoi facet, <cite>tol</cite> specifies
-the minimum area of the facet before the atom is considered a
-nearest neighbor.</dd>
-</dl>
-<p class="last">defaults to &#8216;closest&#8217;</p>
-</dd>
-<dt>limit:</dt>
-<dd>Range outside of the unit cell that will be searched for nearest
-neighbor atoms.</dd>
-</dl>
-<p class="last">tol: Varied depending on the method being used.</p>
-</dd>
-<dt>Returns:</dt>
-<dd>dict of Atom:list of Atom pairs. For each atom in the structure, its
-&#8220;neighbors&#8221; attribute will be set to the list of its nearest neighbors.</dd>
-</dl>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">Recommended to use the &#8220;closest&#8221; method unless you are sure you
-what the &#8220;voronoi&#8221; method will do. The voronoi neighbors are
-useful for some purposes, but are often not what are normally
-considered nearest neighbors. For example in BCC the second
-nearsest neighbors contribute to facets in the an atoms voronoi
-cell. The tolerance specification for this method sets the
-minimum area of such a facet required to add the atom as a
-nearest neighbor. In the BCC case, this cutoff must be set to at
-least 2.3 A^2 to exclude the facets due to second nearest
-neighbors.</p>
-</div>
+<dl class="attribute">
+<dt id="qmpy.analysis.nearest_neighbors">
+<tt class="descclassname">qmpy.analysis.</tt><tt class="descname">nearest_neighbors</tt><a class="headerlink" href="#qmpy.analysis.nearest_neighbors" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#qmpy.analysis.nearest_neighbors" title="qmpy.analysis.nearest_neighbors"><tt class="xref py py-class docutils literal"><span class="pre">qmpy.analysis.nearest_neighbors</span></tt></a></p>
 </dd></dl>
 
 </div>

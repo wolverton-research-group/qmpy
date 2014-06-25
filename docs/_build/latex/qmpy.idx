@@ -242,18 +242,24 @@
 \indexentry{jobs (qmpy.Task attribute)|hyperpage}{52}
 \indexentry{projects (qmpy.Task attribute)|hyperpage}{52}
 \indexentry{Job (class in qmpy)|hyperpage}{52}
-\indexentry{PDF (class in qmpy)|hyperpage}{52}
-\indexentry{get\_pair\_distances() (qmpy.PDF method)|hyperpage}{52}
-\indexentry{XRD (class in qmpy)|hyperpage}{52}
+\indexentry{Renderer (class in qmpy)|hyperpage}{52}
+\indexentry{Text (class in qmpy)|hyperpage}{52}
+\indexentry{Line (class in qmpy)|hyperpage}{52}
+\indexentry{PointCollection (class in qmpy)|hyperpage}{52}
+\indexentry{Point (class in qmpy)|hyperpage}{52}
+\indexentry{Axis (class in qmpy)|hyperpage}{52}
+\indexentry{PDF (class in qmpy)|hyperpage}{53}
+\indexentry{get\_pair\_distances() (qmpy.PDF method)|hyperpage}{53}
+\indexentry{XRD (class in qmpy)|hyperpage}{53}
 \indexentry{get\_intensities() (qmpy.XRD method)|hyperpage}{53}
 \indexentry{get\_peaks() (qmpy.XRD method)|hyperpage}{53}
 \indexentry{Peak (class in qmpy)|hyperpage}{53}
 \indexentry{lp\_factor() (qmpy.Peak method)|hyperpage}{53}
 \indexentry{thermal\_factor() (qmpy.Peak method)|hyperpage}{53}
 \indexentry{Miedema (class in qmpy)|hyperpage}{53}
-\indexentry{H\_form\_ord() (qmpy.Miedema method)|hyperpage}{53}
-\indexentry{P (qmpy.Miedema attribute)|hyperpage}{53}
-\indexentry{RtoP (qmpy.Miedema attribute)|hyperpage}{53}
+\indexentry{H\_form\_ord() (qmpy.Miedema method)|hyperpage}{54}
+\indexentry{P (qmpy.Miedema attribute)|hyperpage}{54}
+\indexentry{RtoP (qmpy.Miedema attribute)|hyperpage}{54}
 \indexentry{gamma (qmpy.Miedema attribute)|hyperpage}{54}
 \indexentry{pick\_a() (qmpy.Miedema method)|hyperpage}{54}
 \indexentry{GridData (class in qmpy)|hyperpage}{54}
@@ -267,13 +273,5 @@
 \indexentry{SpinLattice (class in qmpy)|hyperpage}{54}
 \indexentry{attempt\_flip() (qmpy.SpinLattice method)|hyperpage}{54}
 \indexentry{compute\_total\_lattice\_energy() (qmpy.SpinLattice method)|hyperpage}{54}
-\indexentry{run\_GCMC() (qmpy.SpinLattice method)|hyperpage}{54}
-\indexentry{run\_MC() (qmpy.SpinLattice method)|hyperpage}{54}
-\indexentry{qmpy.analysis.nearest\_neighbors (module)|hyperpage}{55}
-\indexentry{find\_nearest\_neighbors() (in module qmpy.analysis.nearest\_neighbors)|hyperpage}{55}
-\indexentry{Renderer (class in qmpy.utils.rendering)|hyperpage}{55}
-\indexentry{Text (class in qmpy.utils.rendering)|hyperpage}{55}
-\indexentry{Line (class in qmpy.utils.rendering)|hyperpage}{55}
-\indexentry{PointCollection (class in qmpy.utils.rendering)|hyperpage}{55}
-\indexentry{Point (class in qmpy.utils.rendering)|hyperpage}{55}
-\indexentry{Axis (class in qmpy.utils.rendering)|hyperpage}{55}
+\indexentry{run\_GCMC() (qmpy.SpinLattice method)|hyperpage}{55}
+\indexentry{run\_MC() (qmpy.SpinLattice method)|hyperpage}{55}

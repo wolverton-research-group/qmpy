@@ -202,7 +202,7 @@ Analysis Tools
 .. autoclass:: SpinLattice
   :members:
 
-.. automodule:: qmpy.analysis.nearest_neighbors
+.. autoclass:: qmpy.analysis.nearest_neighbors
   :members:
 
 Renderer
