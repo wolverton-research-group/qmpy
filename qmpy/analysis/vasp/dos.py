@@ -49,6 +49,8 @@ class DOS(models.Model):
     data = custom.NumpyArrayField(blank=True, null=True)
     file = models.CharField(max_length=128, blank=True, null=True)
 
+    _efermi = 0.0
+
     class Meta:
         db_table = 'dos'
         app_label = 'qmpy'
@@ -105,6 +107,16 @@ class DOS(models.Model):
         else:
             self.cbm = self.energy[i]
         return self.cbm
+
+    def metal_find_vbm(self, tol=1e-3):
+        i = (np.abs(self.energy)).argmin()
+        if self.energy[i] < 0:
+            i += 1
+        edos = self.total_dos
+        while edos[i] > tol:
+            i += 1
+        else:
+            return self.energy[i]
 
     def find_gap(self, tol=1e-3):
         i0 = (np.abs(self.energy)).argmin()

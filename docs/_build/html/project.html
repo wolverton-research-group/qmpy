@@ -1,0 +1,279 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Using qmpy to manage a high-throughput calculation project &mdash; qmpy 0.4.9 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.4.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="qmpy 0.4.9 documentation" href="index.html" />
+    <link rel="next" title="Data Models" href="models.html" />
+    <link rel="prev" title="Tutorials" href="tutorials.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="models.html" title="Data Models"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="tutorials.html" title="Tutorials"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">qmpy 0.4.9 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="using-qmpy-to-manage-a-high-throughput-calculation-project">
+<h1>Using qmpy to manage a high-throughput calculation project<a class="headerlink" href="#using-qmpy-to-manage-a-high-throughput-calculation-project" title="Permalink to this headline">¶</a></h1>
+<p><tt class="xref py py-mod docutils literal"><span class="pre">qmpy</span></tt> can manage almost every aspect of a high-throughput materials screening
+project. In this section we will walk through all of the necessary steps to
+get a new project off the ground in a new installation. This tutorial assumes
+that you have a functional installation of <tt class="xref py py-mod docutils literal"><span class="pre">qmpy</span></tt>, as well as a working
+database (does not need to have a copy of the OQMD included, a blank slate
+database will work fine).</p>
+<p>In this tutorial we will undertake to explore a wide range of (CH3NH3)PbI3
+perovskites, which have recently recieved much attention as high-efficiency
+photovoltaic cells. We will run through the process of setting up compute
+resources, constructing simple lattice decorations of this structure, as well
+as some not-so-simple decorations, running the calculations, and finally
+evaluating the relative stability of the resulting energies.</p>
+<div class="section" id="setting-up-computational-resources">
+<h2>Setting up computational resources<a class="headerlink" href="#setting-up-computational-resources" title="Permalink to this headline">¶</a></h2>
+<p>We will begin with configuring qmpy to find the right computational resources
+to be able to perform calculations using qmpy. First, you need to establish the
+computational resources that are available to it: a <a class="reference internal" href="models.html#qmpy.Account" title="qmpy.Account"><tt class="xref py py-mod docutils literal"><span class="pre">Account</span></tt></a>, which is a
+<a class="reference internal" href="models.html#qmpy.Host" title="qmpy.Host"><tt class="xref py py-mod docutils literal"><span class="pre">Host</span></tt></a> paired with a <a class="reference internal" href="models.html#qmpy.User" title="qmpy.User"><tt class="xref py py-mod docutils literal"><span class="pre">User</span></tt></a>. A <a class="reference internal" href="models.html#qmpy.Account" title="qmpy.Account"><tt class="xref py py-mod docutils literal"><span class="pre">Account</span></tt></a> is then granted
+access to at least one <a class="reference internal" href="models.html#qmpy.Allocation" title="qmpy.Allocation"><tt class="xref py py-mod docutils literal"><span class="pre">Allocation</span></tt></a>.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">In the current implementation, qmpy is only able to run calculations on
+clusters that utilize PBS/torque and Maui.</p>
+</div>
+<p>Lets start by configuring a host. Lets assume that we are running qmpy from one
+cluster, but we want to do our calculations on another machine. Lets edit the
+resources/hosts.yml file (inside the qmpy installation):</p>
+<div class="highlight-python"><div class="highlight"><pre># hosts.yml
+bigcluster:
+  binaries: {vasp_53: /usr/local/bin/vasp_53}
+  check_queue: /usr/local/maui/bin/showq
+  hostname: big.cluster.edu
+  ip_address: XXX.XX.XX.XXX
+  nodes: 100
+  ppn: 12
+  sub_script: /usr/local/bin/qsub
+  sub_text: bigcluster.q
+  walltime: 691200
+</pre></div>
+</div>
+<p>In this configuration file, we are creating a list of dictionaries. Each outer
+loop entry creates a <a class="reference internal" href="models.html#qmpy.Host" title="qmpy.Host"><tt class="xref py py-mod docutils literal"><span class="pre">Host</span></tt></a>.</p>
+<p>Important attributes to be aware of:</p>
+<ul class="simple">
+<li>binaries is a dictionary of binary name -&gt; binary path pairs. By default,
+qmpy calculations try to run vasp_53, and expects a path to a vasp 5.3.3
+binary, but should be reliable for most vasp 5.X versions.</li>
+<li>sub_script is the path on the cluster to pbs qsub command</li>
+<li>check_queue is the path on the cluster to maui&#8217;s showq command</li>
+<li>sub_text is the name of a file in qmpy/configuration/qfiles. An example qfile
+template is shown below.</li>
+<li>ppn = # of processors / node</li>
+<li>nodes = # of nodes you want qmpy to be able to use (does not need to match
+the number of nodes on the cluster)</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Note that these files must be parseable YAML format files. See <cite>this guide
+&lt;http://www.yaml.org/start.html&gt; _</cite> for an introduction to the YAML format.</p>
+</div>
+<p>The queue files that qmpy submits must be tailored both to the job being
+submitted and the cluster being submitted to. To that end, qmpy uses a simple
+template system, with the most basic template (that should work in many cases)
+is:</p>
+<div class="highlight-python"><div class="highlight"><pre>#!/bin/bash
+#MSUB -l nodes={nodes}:ppn={ppn}
+#MSUB -l walltime={walltime}
+#MSUB -N {name}
+#MSUB -o jobout.txt
+#MSUB -e joberr.txt
+#MSUB -A {key}
+
+cd $PBS_O_WORKDIR
+NPROCS=`wc -l &lt; $PBS_NODEFILE`
+#running on {host}
+
+{header}
+
+{mpi} {binary} {pipes}
+
+{footer}
+</pre></div>
+</div>
+<p>The &#8220;{variable}&#8221; construction is used to automatically replace strings based on
+the calculation requirements. Some variables (nodes, ppn, name, walltime, host)
+are fairly constant for the host. Others, like &#8220;key&#8221;, specify which allocation
+to charge the hours to, which is defined by the <a class="reference internal" href="models.html#qmpy.Allocation" title="qmpy.Allocation"><tt class="xref py py-mod docutils literal"><span class="pre">Allocation</span></tt></a>
+associated with the calculation. Finally, the rest of the variables are set
+based on the requirements of the calculation. For general calculations, the
+header variable is used to unzip any zipped files in the folder (e.g., CHGCAR),
+the for parallel calculations the mpi variable contains the mpirun + argumnts
+command and for serial calculations it is left blank. The binary variable will
+be replaced with the path to the binary, as defined in the hosts.yml file. The
+pipes variable will pipe stdout and stderr, which by default is always to
+stdout.txt and stderr.txt. Finally, footer zips the CHGCAR, OUTCAR, PROCAR and
+ELFCAR, if they exist.</p>
+<p>and resources/hosts.yml:</p>
+<div class="highlight-python"><div class="highlight"><pre># users.yml
+oqmdrunner:
+  bigcluster: {run_path: /home/oqmdrunner, username: oqmdrunner}
+
+oqmduser:
+  bigcluster: {run_path: /home/oqmduser/rundir, username: oqmduser}
+  smallcluster: {run_path: /home/oqmduser/rundir, username: oqmduser}
+</pre></div>
+</div>
+<p>loop entry creates a <a class="reference internal" href="models.html#qmpy.User" title="qmpy.User"><tt class="xref py py-mod docutils literal"><span class="pre">User</span></tt></a> with that name, and each cluster listed
+then creates an <a class="reference internal" href="models.html#qmpy.Account" title="qmpy.Account"><tt class="xref py py-mod docutils literal"><span class="pre">Account</span></tt></a> for that <a class="reference internal" href="models.html#qmpy.User" title="qmpy.User"><tt class="xref py py-mod docutils literal"><span class="pre">User</span></tt></a>, with username
+(given by username) and configured to run calculations in run_path. Here we are
+assuming that a second non-compute cluster, smallcluster, was also defined in
+hosts.yml.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Passwordless ssh must be configured to each account (either as a user:host
+pair, or host-based authentication) from the account you are running qmpy
+on. The <a class="reference internal" href="models.html#qmpy.Account" title="qmpy.Account"><tt class="xref py py-mod docutils literal"><span class="pre">Account</span></tt></a> class has a create_passwordless_ssh method
+that can set this up for you, however, this process can be unreliable, so if
+it fails you will need to sort those problems out for yourself.</p>
+</div>
+<p>Next, we configure our allocations, using the allocations.yml file:</p>
+<div class="highlight-python"><div class="highlight"><pre># allocations.yml
+bigcluster:
+  host: bigcluster
+  users: [oqmdrunner, oqmduser]
+  key: alloc1234
+</pre></div>
+</div>
+<p>An allocation takes a host, a list of users and an optional key. The host and
+list of users are used to determine who is allowed to run calculations on the
+allocation, while the key is used to identify the allocation to moab, if that
+feature is implemented.</p>
+<p>Finally, we can create a <a class="reference internal" href="models.html#qmpy.Project" title="qmpy.Project"><tt class="xref py py-mod docutils literal"><span class="pre">Project</span></tt></a>, defined in projects.yml:</p>
+<div class="highlight-python"><div class="highlight"><pre># projects.yml
+spinels:
+  allocations: [bigcluster]
+  priority: 0
+  users: [oqmdrunner]
+</pre></div>
+</div>
+<p>We title the project &#8220;spinels&#8221;, since that will be our example project, and
+define the lists of allocations that this project is authorized to use, and the
+users that are associated with the project. In order to apply these changes,
+run:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">qmpy</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sync_resources</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="combinatorial-site-replacements">
+<h2>Combinatorial site replacements<a class="headerlink" href="#combinatorial-site-replacements" title="Permalink to this headline">¶</a></h2>
+<p>If, for example, we say that we want to calculate i) a range of defects in a
+host matrix or ii) a wide range of compositions in a particular structure. It
+is possible to do this in the framework of qmpy, with minimal effort.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Using qmpy to manage a high-throughput calculation project</a><ul>
+<li><a class="reference internal" href="#setting-up-computational-resources">Setting up computational resources</a></li>
+<li><a class="reference internal" href="#combinatorial-site-replacements">Combinatorial site replacements</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="tutorials.html"
+                        title="previous chapter">Tutorials</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="models.html"
+                        title="next chapter">Data Models</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/project.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="models.html" title="Data Models"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="tutorials.html" title="Tutorials"
+             >previous</a> |</li>
+        <li><a href="index.html">qmpy 0.4.9 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Scott Kirklin.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

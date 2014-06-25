@@ -3,7 +3,6 @@
 import numpy as np
 from collections import defaultdict
 import os.path
-import time
 import qmpy
 import StringIO
 import fractions as frac
@@ -115,7 +114,44 @@ class PhaseData(object):
         logger.debug('Loading Phases from %s' % library)
         self.read_file(qmpy.INSTALL_PATH+'/data/thermodata/'+library)
 
-    def load_oqmd(self, space=None, search={}, stable=False, fit='standard', 
+    def dump(self, filename=None, minimal=True):
+        """
+        Writes the contents of the phase data to a file or to stdout.
+
+        Keyword Arguments:
+            filename:
+                If None, prints the file to stdout, otherwise writes the file
+                to the specified filename. Default=None.
+
+            minimal:
+                Dump _every_ phase in the PhaseData object, or only those that
+                can contribute to a phase diagram. If True, only the lowest
+                energy phase at a given composition will be written.
+                Default=True.
+
+        """
+        pr = False
+        if filename is None:
+            pr = True
+            print 'Composition Energy'
+        else:
+            f = open(os.path.abspath(filename), 'w')
+            f.write('Composition Energy\n')
+
+        if minimal:
+            phases = self.phase_dict.values()
+        else:
+            phases = self.phases
+
+        for p in phases:
+            l = '%s %s' % (format_comp(p.comp), p.energy)
+            if pr:
+                print l
+            else:
+                f.write(l+'\n')
+
+    def load_oqmd(self, space=None, search={}, exclude={}, 
+            stable=False, fit='standard', 
             total=False):
         """
         Load data from the OQMD.
@@ -151,10 +187,13 @@ class PhaseData(object):
             total = True
 
         if stable:
-            data = data.exclude(stability__lte=0)
+            data = data.filter(stability__lte=0)
 
         if search:
             data = data.filter(**search)
+
+        if exclude:
+            data = data.exclude(**search)
 
         if space:
             space_qs = Element.objects.exclude(symbol__in=space)
@@ -162,7 +201,8 @@ class PhaseData(object):
             data = data.exclude(composition__element_set__in=space_qs)
 
         data = data.distinct()
-        columns = [ 'id', 'composition_id', 'stability' ]
+        columns = [ 'id', 'composition_id', 'stability',
+                'calculation__input__spacegroup']
         if total:
             columns.append('calculation__energy_pa')
         else:
@@ -171,15 +211,13 @@ class PhaseData(object):
         values = data.values(*columns)
 
         for row in values:
-            #if not row['composition_id']:
-            #    continue
             if total:
                 energy = row['calculation__energy_pa']
             else:
                 energy = row['delta_e']
             phase = Phase(energy=energy, 
                       composition=parse_comp(row['composition_id']),
-                      #description=row['calculation__input__spacegroup'],
+                      description=row['calculation__input__spacegroup'],
                       stability=row['stability'],
                       per_atom=True,
                       total=total)
@@ -264,6 +302,8 @@ class PhaseData(object):
             >>> new_pd.phase_dict
 
         """
+        if not space:
+            return self
         dim = len(space)
         phases = set(self.phases)
         others = set(self.phases_by_elt.keys()) - set(space)

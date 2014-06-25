@@ -16,6 +16,7 @@ Wolverton's group at Northwestern University (http://wolverton.northwestern.edu)
 
    getting_started
    tutorials
+   project
    models
    analysis
    examples

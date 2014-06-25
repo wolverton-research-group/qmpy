@@ -198,7 +198,7 @@ should be taken as the ultimate reference for searching for models in qmpy, but
 a basic overview is provided here.
 
 Searching for entries based on stability
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Formation energies are stored as FormationEnergy instances, which are
 associated with an `:mod:~qmpy.Entry` and a `:mod:~qmpy.Calculation`. Knowing
@@ -233,7 +233,7 @@ Adding other search criteria lets you explore a little more::
     3119
 
 Searching for entries based on composition
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 You can find compositions in a few ways using filters and excludes. If you want
 a specific region of phase space (including related subspaces)::

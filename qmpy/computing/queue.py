@@ -379,6 +379,8 @@ class Job(models.Model):
             return True
 
     def submit(self):
+        if not self.account.host.active:
+            return
         self.created = datetime.now()
         self.qid = self.account.submit(path=self.path,
                 run_path=self.run_path,
@@ -387,8 +389,6 @@ class Job(models.Model):
         self.state = 1
 
     def collect(self):
-        if self.account.host.state == -1:
-            return
         self.task.state = 0
         self.task.save()
         self.state = 2

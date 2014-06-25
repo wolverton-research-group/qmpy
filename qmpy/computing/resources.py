@@ -268,6 +268,8 @@ class Host(models.Model):
 
     @property
     def running_now(self):
+        if not self.state == 1:
+            return {}
         if datetime.now() + timedelta(seconds=-60) > self.checked_time:
             self.check_running()
         return self.running
@@ -280,7 +282,7 @@ class Host(models.Model):
 
         """
         self.checked_time = datetime.now()
-        if self.state < 0:
+        if not self.state == 1:
             self.running = {}
             self.save()
             return

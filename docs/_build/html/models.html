@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="qmpy 0.4.9 documentation" href="index.html" />
     <link rel="next" title="Analysis tools" href="analysis.html" />
-    <link rel="prev" title="Tutorials" href="tutorials.html" /> 
+    <link rel="prev" title="Using qmpy to manage a high-throughput calculation project" href="project.html" /> 
   </head>
   <body>
     <div class="related">
@@ -41,7 +41,7 @@
           <a href="analysis.html" title="Analysis tools"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="tutorials.html" title="Tutorials"
+          <a href="project.html" title="Using qmpy to manage a high-throughput calculation project"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">qmpy 0.4.9 documentation</a> &raquo;</li> 
       </ul>
@@ -2609,6 +2609,26 @@ appropriately to enable quick access.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="qmpy.PhaseData.dump">
+<tt class="descname">dump</tt><big>(</big><em>filename=None</em>, <em>minimal=True</em><big>)</big><a class="headerlink" href="#qmpy.PhaseData.dump" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes the contents of the phase data to a file or to stdout.</p>
+<dl class="docutils">
+<dt>Keyword Arguments:</dt>
+<dd><dl class="first last docutils">
+<dt>filename:</dt>
+<dd>If None, prints the file to stdout, otherwise writes the file
+to the specified filename. Default=None.</dd>
+<dt>minimal:</dt>
+<dd>Dump _every_ phase in the PhaseData object, or only those that
+can contribute to a phase diagram. If True, only the lowest
+energy phase at a given composition will be written.
+Default=True.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
 <dt id="qmpy.PhaseData.get_phase_data">
 <tt class="descname">get_phase_data</tt><big>(</big><em>space</em><big>)</big><a class="headerlink" href="#qmpy.PhaseData.get_phase_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Using an existing PhaseData object return a PhaseData object which is
@@ -2640,7 +2660,7 @@ space.</p>
 
 <dl class="method">
 <dt id="qmpy.PhaseData.load_oqmd">
-<tt class="descname">load_oqmd</tt><big>(</big><em>space=None</em>, <em>search={}</em>, <em>stable=False</em>, <em>fit='standard'</em>, <em>total=False</em><big>)</big><a class="headerlink" href="#qmpy.PhaseData.load_oqmd" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">load_oqmd</tt><big>(</big><em>space=None</em>, <em>search={}</em>, <em>exclude={}</em>, <em>stable=False</em>, <em>fit='standard'</em>, <em>total=False</em><big>)</big><a class="headerlink" href="#qmpy.PhaseData.load_oqmd" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load data from the OQMD.</p>
 <dl class="docutils">
 <dt>Keyword Arguments:</dt>
@@ -3954,8 +3974,8 @@ when all pairs are unlike.</p>
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="tutorials.html"
-                        title="previous chapter">Tutorials</a></p>
+  <p class="topless"><a href="project.html"
+                        title="previous chapter">Using qmpy to manage a high-throughput calculation project</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="analysis.html"
                         title="next chapter">Analysis tools</a></p>
@@ -3994,7 +4014,7 @@ when all pairs are unlike.</p>
           <a href="analysis.html" title="Analysis tools"
              >next</a> |</li>
         <li class="right" >
-          <a href="tutorials.html" title="Tutorials"
+          <a href="project.html" title="Using qmpy to manage a high-throughput calculation project"
              >previous</a> |</li>
         <li><a href="index.html">qmpy 0.4.9 documentation</a> &raquo;</li> 
       </ul>
