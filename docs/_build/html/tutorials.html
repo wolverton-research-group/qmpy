@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="qmpy 0.4.9 documentation" href="index.html" />
-    <link rel="next" title="Using qmpy to manage a high-throughput calculation project" href="project.html" />
+    <link rel="next" title="Materials" href="materials.html" />
     <link rel="prev" title="Installation" href="getting_started.html" /> 
   </head>
   <body>
@@ -38,7 +38,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="project.html" title="Using qmpy to manage a high-throughput calculation project"
+          <a href="materials.html" title="Materials"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="getting_started.html" title="Installation"
@@ -76,7 +76,7 @@ entries in the OQMD and provide several examples of how to make queries.
 For deeper understanding of how django models work, you should check out the
 (excellent) <a class="reference external" href="http://docs.djangoproject.com/en/1.6/">django documentation</a>.</p>
 <p>First, lets look at how to access an entry from the database. As an example,
-lets pull up an entry for an <a class="reference internal" href="models.html#qmpy.Element" title="qmpy.Element"><tt class="xref py py-mod docutils literal"><span class="pre">Element</span></tt></a>:</p>
+lets pull up an entry for an <a class="reference internal" href="materials.html#qmpy.Element" title="qmpy.Element"><tt class="xref py py-mod docutils literal"><span class="pre">Element</span></tt></a>:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">fe</span> <span class="o">=</span> <span class="n">Element</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">symbol</span><span class="o">=</span><span class="s">&#39;Fe&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fe</span>
 <span class="go">&lt;Element: Fe&gt;</span>
@@ -92,7 +92,7 @@ database entry has been loaded. For example, with an element you can:</p>
 </div>
 <p>For a complete list of the model attributes that are stored in the database,
 refer to the documentation for the model you are interested in, in this case
-<a class="reference internal" href="models.html#qmpy.Element" title="qmpy.Element"><tt class="xref py py-mod docutils literal"><span class="pre">Element</span></tt></a>.</p>
+<a class="reference internal" href="materials.html#qmpy.Element" title="qmpy.Element"><tt class="xref py py-mod docutils literal"><span class="pre">Element</span></tt></a>.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p>When strings are returned, they are returned as unicode strings,
@@ -110,7 +110,7 @@ behave exactly as expected, i.e.:</p>
 <p>In addition to data attributes like these, django models have relationships to
 other models. In qmpy there are two flavors of relationships: one-to-many and
 many-to-many. An example of a one-to-many relationship would be the
-relationship between an <a class="reference internal" href="models.html#qmpy.Element" title="qmpy.Element"><tt class="xref py py-mod docutils literal"><span class="pre">Element</span></tt></a> and an <a class="reference internal" href="models.html#qmpy.Atom" title="qmpy.Atom"><tt class="xref py py-mod docutils literal"><span class="pre">Atom</span></tt></a>.
+relationship between an <a class="reference internal" href="materials.html#qmpy.Element" title="qmpy.Element"><tt class="xref py py-mod docutils literal"><span class="pre">Element</span></tt></a> and an <a class="reference internal" href="materials.html#qmpy.Atom" title="qmpy.Atom"><tt class="xref py py-mod docutils literal"><span class="pre">Atom</span></tt></a>.
 There are many atoms which are a given element, but each atom is only
 one element. In the case of Fe:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">fe</span><span class="o">.</span><span class="n">atom_set</span>
@@ -126,13 +126,13 @@ one element. In the case of Fe:</p>
 </div>
 <p>A <tt class="xref py py-class docutils literal"><span class="pre">RelatedManager</span></tt> is an object that deals with obtaining other django models
 that are related to the main object. We can use the objects.count() method to
-fidn the number of <a class="reference internal" href="models.html#qmpy.Atom" title="qmpy.Atom"><tt class="xref py py-mod docutils literal"><span class="pre">Atom</span></tt></a> objects that are Fe, and find ~125,000.
+fidn the number of <a class="reference internal" href="materials.html#qmpy.Atom" title="qmpy.Atom"><tt class="xref py py-mod docutils literal"><span class="pre">Atom</span></tt></a> objects that are Fe, and find ~125,000.
 To obtain one of these atoms, we use the objects.first() method, which
-simply returns the first <a class="reference internal" href="models.html#qmpy.Atom" title="qmpy.Atom"><tt class="xref py py-mod docutils literal"><span class="pre">Atom</span></tt></a> which is Fe. Much more functionality of Managers
+simply returns the first <a class="reference internal" href="materials.html#qmpy.Atom" title="qmpy.Atom"><tt class="xref py py-mod docutils literal"><span class="pre">Atom</span></tt></a> which is Fe. Much more functionality of Managers
 and RelatedManagers will be shown throughout this tutorial and in the examples,
 but for a proper understanding you should refer to the django docs.</p>
 <p>An example of a many-to-many relationship would be the relationship between an
-<a class="reference internal" href="models.html#qmpy.Element" title="qmpy.Element"><tt class="xref py py-mod docutils literal"><span class="pre">Element</span></tt></a> and a <a class="reference internal" href="models.html#qmpy.Composition" title="qmpy.Composition"><tt class="xref py py-mod docutils literal"><span class="pre">Composition</span></tt></a>. A composition (e.g. Fe2O3)
+<a class="reference internal" href="materials.html#qmpy.Element" title="qmpy.Element"><tt class="xref py py-mod docutils literal"><span class="pre">Element</span></tt></a> and a <a class="reference internal" href="materials.html#qmpy.Composition" title="qmpy.Composition"><tt class="xref py py-mod docutils literal"><span class="pre">Composition</span></tt></a>. A composition (e.g. Fe2O3)
 can contain many elements (Fe and O), and an element can be a part of many
 compositions (Fe3O4 and FeO as well). This is the nature of a many-to-many
 relationship. In the case of Fe:</p>
@@ -145,10 +145,10 @@ relationship. In the case of Fe:</p>
 <span class="go">[&lt;Element: Ac&gt;, &lt;Element: Fe&gt;]</span>
 </pre></div>
 </div>
-<p>In this example we have taken our base object (the <a class="reference internal" href="models.html#qmpy.Element" title="qmpy.Element"><tt class="xref py py-mod docutils literal"><span class="pre">Element</span></tt></a>) and filtered its
-composition_set for <a class="reference internal" href="models.html#qmpy.Composition" title="qmpy.Composition"><tt class="xref py py-mod docutils literal"><span class="pre">Composition</span></tt></a> objects which meet the condition ntypes=2 (i.e.
+<p>In this example we have taken our base object (the <a class="reference internal" href="materials.html#qmpy.Element" title="qmpy.Element"><tt class="xref py py-mod docutils literal"><span class="pre">Element</span></tt></a>) and filtered its
+composition_set for <a class="reference internal" href="materials.html#qmpy.Composition" title="qmpy.Composition"><tt class="xref py py-mod docutils literal"><span class="pre">Composition</span></tt></a> objects which meet the condition ntypes=2 (i.e.
 there are two elements in the composition), and taken the first such
-<a class="reference internal" href="models.html#qmpy.Composition" title="qmpy.Composition"><tt class="xref py py-class docutils literal"><span class="pre">Composition</span></tt></a> (index 0 in the <tt class="xref py py-class docutils literal"><span class="pre">QuerySet</span></tt> that is returned).</p>
+<a class="reference internal" href="materials.html#qmpy.Composition" title="qmpy.Composition"><tt class="xref py py-class docutils literal"><span class="pre">Composition</span></tt></a> (index 0 in the <tt class="xref py py-class docutils literal"><span class="pre">QuerySet</span></tt> that is returned).</p>
 </div>
 <div class="section" id="creating-a-structure">
 <h2>Creating a structure<a class="headerlink" href="#creating-a-structure" title="Permalink to this headline">¶</a></h2>
@@ -157,7 +157,7 @@ a POSCAR:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">INSTALL_PATH</span><span class="o">+</span><span class="s">&#39;/io/files/POSCAR_BCC&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Once you have the <a class="reference internal" href="models.html#qmpy.Structure" title="qmpy.Structure"><tt class="xref py py-mod docutils literal"><span class="pre">Structure</span></tt></a> object, the important features of a crystal
+<p>Once you have the <a class="reference internal" href="materials.html#qmpy.Structure" title="qmpy.Structure"><tt class="xref py py-mod docutils literal"><span class="pre">Structure</span></tt></a> object, the important features of a crystal
 structure can be accessed readily.:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">cell</span>
 <span class="go">array([[ 3.,  0.,  0.],</span>
@@ -174,7 +174,7 @@ structure can be accessed readily.:</p>
 <span class="go">27.0</span>
 </pre></div>
 </div>
-<p>You can also readily construct a <a class="reference internal" href="models.html#qmpy.Structure" title="qmpy.Structure"><tt class="xref py py-mod docutils literal"><span class="pre">Structure</span></tt></a> from scratch, from the lattice
+<p>You can also readily construct a <a class="reference internal" href="materials.html#qmpy.Structure" title="qmpy.Structure"><tt class="xref py py-mod docutils literal"><span class="pre">Structure</span></tt></a> from scratch, from the lattice
 vectors and the atom positions.:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s2</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">create</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span> <span class="p">[(</span><span class="s">&#39;Cu&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]),</span>
 <span class="go">                                    (&#39;Cu&#39;, [0.5,0.5,0.5])])</span>
@@ -187,7 +187,7 @@ vectors and the atom positions.:</p>
 <h2>First Principles Calculations<a class="headerlink" href="#first-principles-calculations" title="Permalink to this headline">¶</a></h2>
 <p>At this time qmpy only supports automation of calculations using the Vienna Ab
 Initio Simulation Package (VASP). The reading and creation of these
-calculations are handled by the <a class="reference internal" href="models.html#qmpy.Calculation" title="qmpy.Calculation"><tt class="xref py py-mod docutils literal"><span class="pre">Calculation</span></tt></a> model.
+calculations are handled by the <a class="reference internal" href="calculations.html#qmpy.Calculation" title="qmpy.Calculation"><tt class="xref py py-mod docutils literal"><span class="pre">Calculation</span></tt></a> model.
 To read in an existing calculation:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">path</span> <span class="o">=</span> <span class="s">&#39;/analysis/vasp/files/normal/fine_relax/&#39;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">calc</span> <span class="o">=</span> <span class="n">Calculation</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">INSTALL_PATH</span><span class="o">+</span><span class="n">path</span><span class="p">)</span>
@@ -307,6 +307,454 @@ subqueries of the second approach rapidly becomes more expensive than the
 single, more complicated query of the first.</p>
 </div>
 </div>
+<div class="section" id="using-qmpy-to-manage-a-high-throughput-calculation-project">
+<h2>Using qmpy to manage a high-throughput calculation project<a class="headerlink" href="#using-qmpy-to-manage-a-high-throughput-calculation-project" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="#module-qmpy" title="qmpy"><tt class="xref py py-mod docutils literal"><span class="pre">qmpy</span></tt></a> can manage almost every aspect of a high-throughput materials screening
+project. In this section we will walk through all of the necessary steps to
+get a new project off the ground in a new installation. This tutorial assumes
+that you have a functional installation of <a class="reference internal" href="#module-qmpy" title="qmpy"><tt class="xref py py-mod docutils literal"><span class="pre">qmpy</span></tt></a>, as well as a working
+database (does not need to have a copy of the OQMD included, a blank slate
+database will work fine).</p>
+<p>In this tutorial we will undertake to explore a wide range of (CH3NH3)PbI3
+perovskites, which have recently recieved much attention as high-efficiency
+photovoltaic cells. We will run through the process of setting up compute
+resources, constructing simple lattice decorations of this structure, as well
+as some not-so-simple decorations, running the calculations, and finally
+evaluating the relative stability of the resulting energies.</p>
+<div class="section" id="setting-up-computational-resources">
+<h3>Setting up computational resources<a class="headerlink" href="#setting-up-computational-resources" title="Permalink to this headline">¶</a></h3>
+<p>We will begin with configuring qmpy to find the right computational resources
+to be able to perform calculations using qmpy. First, you need to establish the
+computational resources that are available to it: a <a class="reference internal" href="resources.html#qmpy.Account" title="qmpy.Account"><tt class="xref py py-mod docutils literal"><span class="pre">Account</span></tt></a>, which is a
+<a class="reference internal" href="resources.html#qmpy.Host" title="qmpy.Host"><tt class="xref py py-mod docutils literal"><span class="pre">Host</span></tt></a> paired with a <a class="reference internal" href="resources.html#qmpy.User" title="qmpy.User"><tt class="xref py py-mod docutils literal"><span class="pre">User</span></tt></a>. A <a class="reference internal" href="resources.html#qmpy.Account" title="qmpy.Account"><tt class="xref py py-mod docutils literal"><span class="pre">Account</span></tt></a> is then granted
+access to at least one <a class="reference internal" href="resources.html#qmpy.Allocation" title="qmpy.Allocation"><tt class="xref py py-mod docutils literal"><span class="pre">Allocation</span></tt></a>.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">In the current implementation, qmpy is only able to run calculations on
+clusters that utilize PBS/torque and Maui.</p>
+</div>
+<p>Lets start by configuring a host. Lets assume that we are running qmpy from one
+cluster, but we want to do our calculations on another machine. Lets edit the
+resources/hosts.yml file (inside the qmpy installation):</p>
+<div class="highlight-python"><div class="highlight"><pre># hosts.yml
+bigcluster:
+  binaries: {vasp_53: /usr/local/bin/vasp_53}
+  check_queue: /usr/local/maui/bin/showq
+  hostname: big.cluster.edu
+  ip_address: XXX.XX.XX.XXX
+  nodes: 100
+  ppn: 12
+  sub_script: /usr/local/bin/qsub
+  sub_text: bigcluster.q
+  walltime: 691200
+</pre></div>
+</div>
+<p>In this configuration file, we are creating a list of dictionaries. Each outer
+loop entry creates a <a class="reference internal" href="resources.html#qmpy.Host" title="qmpy.Host"><tt class="xref py py-mod docutils literal"><span class="pre">Host</span></tt></a>.</p>
+<p>Important attributes to be aware of:</p>
+<ul class="simple">
+<li>binaries is a dictionary of binary name -&gt; binary path pairs. By default,
+qmpy calculations try to run vasp_53, and expects a path to a vasp 5.3.3
+binary, but should be reliable for most vasp 5.X versions.</li>
+<li>sub_script is the path on the cluster to pbs qsub command</li>
+<li>check_queue is the path on the cluster to maui&#8217;s showq command</li>
+<li>sub_text is the name of a file in qmpy/configuration/qfiles. An example qfile
+template is shown below.</li>
+<li>ppn = # of processors / node</li>
+<li>nodes = # of nodes you want qmpy to be able to use (does not need to match
+the number of nodes on the cluster)</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Note that these files must be parseable YAML format files. See <cite>this guide
+&lt;http://www.yaml.org/start.html&gt; _</cite> for an introduction to the YAML format.</p>
+</div>
+<p>The queue files that qmpy submits must be tailored both to the job being
+submitted and the cluster being submitted to. To that end, qmpy uses a simple
+template system, with the most basic template (that should work in many cases)
+is:</p>
+<div class="highlight-python"><div class="highlight"><pre>#!/bin/bash
+#MSUB -l nodes={nodes}:ppn={ppn}
+#MSUB -l walltime={walltime}
+#MSUB -N {name}
+#MSUB -o jobout.txt
+#MSUB -e joberr.txt
+#MSUB -A {key}
+
+cd $PBS_O_WORKDIR
+NPROCS=`wc -l &lt; $PBS_NODEFILE`
+#running on {host}
+
+{header}
+
+{mpi} {binary} {pipes}
+
+{footer}
+</pre></div>
+</div>
+<p>The &#8220;{variable}&#8221; construction is used to automatically replace strings based on
+the calculation requirements. Some variables (nodes, ppn, name, walltime, host)
+are fairly constant for the host. Others, like &#8220;key&#8221;, specify which allocation
+to charge the hours to, which is defined by the <a class="reference internal" href="resources.html#qmpy.Allocation" title="qmpy.Allocation"><tt class="xref py py-mod docutils literal"><span class="pre">Allocation</span></tt></a>
+associated with the calculation. Finally, the rest of the variables are set
+based on the requirements of the calculation. For general calculations, the
+header variable is used to unzip any zipped files in the folder (e.g., CHGCAR),
+the for parallel calculations the mpi variable contains the mpirun + argumnts
+command and for serial calculations it is left blank. The binary variable will
+be replaced with the path to the binary, as defined in the hosts.yml file. The
+pipes variable will pipe stdout and stderr, which by default is always to
+stdout.txt and stderr.txt. Finally, footer zips the CHGCAR, OUTCAR, PROCAR and
+ELFCAR, if they exist.</p>
+<p>and resources/hosts.yml:</p>
+<div class="highlight-python"><div class="highlight"><pre># users.yml
+oqmdrunner:
+  bigcluster: {run_path: /home/oqmdrunner, username: oqmdrunner}
+
+oqmduser:
+  bigcluster: {run_path: /home/oqmduser/rundir, username: oqmduser}
+  smallcluster: {run_path: /home/oqmduser/rundir, username: oqmduser}
+</pre></div>
+</div>
+<p>loop entry creates a <a class="reference internal" href="resources.html#qmpy.User" title="qmpy.User"><tt class="xref py py-mod docutils literal"><span class="pre">User</span></tt></a> with that name, and each cluster listed
+then creates an <a class="reference internal" href="resources.html#qmpy.Account" title="qmpy.Account"><tt class="xref py py-mod docutils literal"><span class="pre">Account</span></tt></a> for that <a class="reference internal" href="resources.html#qmpy.User" title="qmpy.User"><tt class="xref py py-mod docutils literal"><span class="pre">User</span></tt></a>, with username
+(given by username) and configured to run calculations in run_path. Here we are
+assuming that a second non-compute cluster, smallcluster, was also defined in
+hosts.yml.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Passwordless ssh must be configured to each account (either as a user:host
+pair, or host-based authentication) from the account you are running qmpy
+on. The <a class="reference internal" href="resources.html#qmpy.Account" title="qmpy.Account"><tt class="xref py py-mod docutils literal"><span class="pre">Account</span></tt></a> class has a create_passwordless_ssh method
+that can set this up for you, however, this process can be unreliable, so if
+it fails you will need to sort those problems out for yourself.</p>
+</div>
+<p>Next, we configure our allocations, using the allocations.yml file:</p>
+<div class="highlight-python"><div class="highlight"><pre># allocations.yml
+bigcluster:
+  host: bigcluster
+  users: [oqmdrunner, oqmduser]
+  key: alloc1234
+</pre></div>
+</div>
+<p>An allocation takes a host, a list of users and an optional key. The host and
+list of users are used to determine who is allowed to run calculations on the
+allocation, while the key is used to identify the allocation to moab, if that
+feature is implemented.</p>
+<p>Finally, we can create a <a class="reference internal" href="resources.html#qmpy.Project" title="qmpy.Project"><tt class="xref py py-mod docutils literal"><span class="pre">Project</span></tt></a>, defined in projects.yml:</p>
+<div class="highlight-python"><div class="highlight"><pre># projects.yml
+example:
+  allocations: [bigcluster]
+  priority: 0
+  users: [oqmdrunner]
+</pre></div>
+</div>
+<p>We title the project &#8220;example&#8221;, (since it is just an example) and then
+define the lists of allocations that this project is authorized to use, and the
+users that are associated with the project. In order to apply these changes,
+run:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">qmpy</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sync_resources</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="working-with-structures">
+<h3>Working with Structures<a class="headerlink" href="#working-with-structures" title="Permalink to this headline">¶</a></h3>
+<p>If, for example, we say that we want to calculate i) a range of defects in a
+host matrix or ii) a wide range of compositions in a particular structure. It
+is possible to do this in the framework of qmpy, with minimal effort. Sadly,
+our starting point, the CH3NH3PbI3 (since CH3NH3 is methylammonium, let us call
+the compound MaPbI3 from now on) is not fully resolved in XRD. The best
+structure I can find only has the Pb, C, N and I sites determined. So, lets
+take this structure (reproduced here from Constantinos C. Stoumpos; et. al.,
+Inorganic Chemistry 52 (2013) 9019-9038):</p>
+<div class="highlight-python"><div class="highlight"><pre>I C Pb N
+ 1.0
+8.849000 0.000000 0.000000
+0.000000 8.849000 0.000000
+0.000000 0.000000 12.642000
+C I N Pb
+4 12 4 4
+direct
+ 0.5000000000 0.0000000000 0.3520000000
+ 0.0000000000 0.5000000000 0.3520000000
+ 0.5000000000 0.0000000000 0.8520000000
+ 0.0000000000 0.5000000000 0.8520000000
+ 0.2858300000 0.2141700000 0.0046000000
+ 0.7858300000 0.2858300000 0.0046000000
+ 0.2141700000 0.7141700000 0.0046000000
+ 0.7141700000 0.7858300000 0.0046000000
+ 0.0000000000 0.0000000000 0.2472000000
+ 0.5000000000 0.5000000000 0.2472000000
+ 0.7141700000 0.2141700000 0.5046000000
+ 0.2141700000 0.2858300000 0.5046000000
+ 0.7858300000 0.7141700000 0.5046000000
+ 0.2858300000 0.7858300000 0.5046000000
+ 0.0000000000 0.0000000000 0.7472000000
+ 0.5000000000 0.5000000000 0.7472000000
+ 0.5000000000 0.0000000000 0.2420000000
+ 0.0000000000 0.5000000000 0.2420000000
+ 0.5000000000 0.0000000000 0.7420000000
+ 0.0000000000 0.5000000000 0.7420000000
+ 0.0000000000 0.0000000000 0.0000000000
+ 0.5000000000 0.5000000000 0.0000000000
+ 0.0000000000 0.0000000000 0.5000000000
+ 0.5000000000 0.5000000000 0.5000000000
+</pre></div>
+</div>
+<p>Now, to populate this structure with hydrogen atoms, lets write a small script
+to add atoms to the C and N sites. We can see from the POSCAR that the C-N
+pairs are always oriented along the z-direction, so we will add 3 hydrogen
+atoms &#8220;above&#8221; each C and &#8220;below&#8221; each N.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">n_h_bond</span> <span class="o">=</span> <span class="mf">1.01</span> <span class="c">#A</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c_h_bond</span> <span class="o">=</span> <span class="mf">1.09</span> <span class="c">#A</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s">&#39;POSCAR&#39;</span><span class="p">)</span> <span class="c"># just reading in original structure</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">s</span><span class="p">:</span>
+<span class="go">        if atom.element.symbol == &#39;C&#39;:</span>
+<span class="go">            x = np.sin(np.pi/4)*c_h_bond</span>
+<span class="go">            x2 = np.sin(np.pi/4)*x</span>
+<span class="go">            ref = atom.cart_coord</span>
+<span class="go">            s.add_atom(Atom.create(&#39;H&#39;, s.get_coord(ref+[x,   0.0, x2])))</span>
+<span class="go">            s.add_atom(Atom.create(&#39;H&#39;, s.get_coord(ref+[-x2, -x2, x2])))</span>
+<span class="go">            s.add_atom(Atom.create(&#39;H&#39;, s.get_coord(ref+[-x2,  x2, x2])))</span>
+<span class="go">        elif atom.element.symbol == &#39;N&#39;:</span>
+<span class="go">            x = np.sin(np.pi/4)*c_h_bond</span>
+<span class="go">            x2 = np.sin(np.pi/4)*x</span>
+<span class="go">            # Note the angles of the N&#39;s attached hydrogens are rotated</span>
+<span class="go">            # relative to the C&#39;s attached hydrogens.</span>
+<span class="go">            s.add_atom(Atom.create(&#39;H&#39;, s.get_coord(ref+[-x, 0.0, -x2])))</span>
+<span class="go">            s.add_atom(Atom.create(&#39;H&#39;, s.get_coord(ref+[x2,  x2, -x2])))</span>
+<span class="go">            s.add_atom(Atom.create(&#39;H&#39;, s.get_coord(ref+[x2, -x2, -x2])))</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">io</span><span class="o">.</span><span class="n">poscar</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="s">&#39;POSCAR_mod&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can verify that the created structure has the right bond lengths:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s">&#39;POSCAR_mod&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">atoms</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<span class="go">        d = s.get_distance(a1, a2)</span>
+<span class="go">        elts = set([ a1.element.symbol, a2.element.symbol ])</span>
+<span class="go">        if elts in [ set([&#39;H&#39;, &#39;N&#39;]), set([&#39;H&#39;, &#39;C&#39;]) ]:</span>
+<span class="go">            if d &lt; 1.5:</span>
+<span class="go">                print elts, d</span>
+<span class="go">set([u&#39;H&#39;, u&#39;C&#39;]) 1.08999999999</span>
+<span class="go">set([u&#39;H&#39;, u&#39;C&#39;]) 1.09000000017</span>
+<span class="go">set([u&#39;H&#39;, u&#39;C&#39;]) 1.09000000017</span>
+<span class="go">set([u&#39;H&#39;, u&#39;C&#39;]) 1.09000000017</span>
+<span class="go">set([u&#39;H&#39;, u&#39;C&#39;]) 1.08999999999</span>
+<span class="go">set([u&#39;H&#39;, u&#39;C&#39;]) 1.09000000017</span>
+<span class="go">set([u&#39;H&#39;, u&#39;C&#39;]) 1.08999999999</span>
+<span class="go">set([u&#39;H&#39;, u&#39;C&#39;]) 1.09000000017</span>
+<span class="go">set([u&#39;H&#39;, u&#39;C&#39;]) 1.09000000017</span>
+<span class="go">set([u&#39;H&#39;, u&#39;C&#39;]) 1.09000000017</span>
+<span class="go">set([u&#39;H&#39;, u&#39;C&#39;]) 1.08999999999</span>
+<span class="go">set([u&#39;H&#39;, u&#39;C&#39;]) 1.09000000017</span>
+<span class="go">set([u&#39;H&#39;, u&#39;N&#39;]) 1.00999999987</span>
+<span class="go">set([u&#39;H&#39;, u&#39;N&#39;]) 1.00999999961</span>
+<span class="go">set([u&#39;H&#39;, u&#39;N&#39;]) 1.00999999961</span>
+<span class="go">set([u&#39;H&#39;, u&#39;N&#39;]) 1.00999999987</span>
+<span class="go">set([u&#39;H&#39;, u&#39;N&#39;]) 1.00999999961</span>
+<span class="go">set([u&#39;H&#39;, u&#39;N&#39;]) 1.00999999961</span>
+<span class="go">set([u&#39;H&#39;, u&#39;N&#39;]) 1.00999999987</span>
+<span class="go">set([u&#39;H&#39;, u&#39;N&#39;]) 1.00999999961</span>
+<span class="go">set([u&#39;H&#39;, u&#39;N&#39;]) 1.00999999961</span>
+<span class="go">set([u&#39;H&#39;, u&#39;N&#39;]) 1.00999999987</span>
+<span class="go">set([u&#39;H&#39;, u&#39;N&#39;]) 1.00999999961</span>
+<span class="go">set([u&#39;H&#39;, u&#39;N&#39;]) 1.00999999961</span>
+</pre></div>
+</div>
+<p>As you can see, all N-H and C-H bond lengths are correct.</p>
+</div>
+<div class="section" id="combinatorial-site-replacements">
+<h3>Combinatorial site replacements<a class="headerlink" href="#combinatorial-site-replacements" title="Permalink to this headline">¶</a></h3>
+<p>Now that we have a good structure, lets start replacing atoms! First, we need
+to specify the substitutions we will make. Lets start with simply isovalent
+substitutions for Pb and I. In MePbI3, Methylammonium is a +1 ion, Pb is +2 and
+I is -1. We will specify replacements in the form of lists of substitutions.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">pb_sub</span> <span class="o">=</span> <span class="p">[</span> <span class="s">&#39;Pb&#39;</span><span class="p">,</span> <span class="s">&#39;Sn&#39;</span><span class="p">,</span>
+<span class="go">            &#39;Be&#39;, &#39;Mg&#39;, &#39;Ca&#39;, &#39;Sr&#39;, &#39;Ba&#39;,</span>
+<span class="go">            &#39;V&#39;, &#39;Mn&#39;, &#39;Ni&#39;, &#39;Co&#39;, &#39;Fe&#39;, &#39;Zn&#39;,</span>
+<span class="go">            &#39;Cd&#39;, &#39;Eu&#39; ,&#39;Ru&#39;, &#39;Pd&#39;, &#39;Pt&#39;, &#39;As&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">i_sub</span> <span class="o">=</span> <span class="p">[</span> <span class="s">&#39;I&#39;</span><span class="p">,</span> <span class="s">&#39;Br&#39;</span><span class="p">,</span> <span class="s">&#39;Cl&#39;</span><span class="p">,</span> <span class="s">&#39;F&#39;</span><span class="p">,</span> <span class="s">&#39;H&#39;</span><span class="p">,</span>
+<span class="go">            &#39;N&#39;, &#39;S&#39; ]</span>
+</pre></div>
+</div>
+<p>Next, we need to create a directory structure that is reasonable for
+understanding where the structures are. This is primarily to make it easier
+for people to find the calculations by hand; qmpy would be find with randomly
+generated strings for folder names. We organize the structures into nested
+directories of the form {anion}/{cation}. The substitutions are implemented by
+the <a class="reference internal" href="materials.html#qmpy.Structure.substitute" title="qmpy.Structure.substitute"><tt class="xref py py-func docutils literal"><span class="pre">substitute()</span></tt></a> method.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="c"># first we write a little helper function for making folders</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">mkdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+<span class="go">        if not os.path.exists(path):</span>
+<span class="go">            os.mkdir(path)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># now we loop through antion/cation pairs and for each we:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c">#   create the POSCAR</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c">#   create an Entry</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">project</span> <span class="o">=</span> <span class="n">Project</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;example&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">anion</span> <span class="ow">in</span> <span class="n">i_sub</span><span class="p">:</span>
+<span class="go">        mkdir(anion)</span>
+<span class="go">        for cation in pb_sub:</span>
+<span class="go">            new_dir = &#39;%s/%s&#39; % (anion, cation)</span>
+<span class="go">            mkdir(new_dir)</span>
+<span class="go">            new_struct = s.replace({&#39;Pb&#39;:cation,</span>
+<span class="go">                                    &#39;I&#39;:anion})</span>
+<span class="go">            io.poscar.write(s, new_dir+&#39;/POSCAR&#39;)</span>
+<span class="go">            entry = Entry.create(new_dir+&#39;/POSCAR&#39;, projects=[project])</span>
+<span class="go">            entry.save()</span>
+<span class="go">            task = Task.create(entry, &#39;static&#39;)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="running-the-calculations">
+<h3>Running the calculations<a class="headerlink" href="#running-the-calculations" title="Permalink to this headline">¶</a></h3>
+<p>In order to run calculations with qmpy, we utilize a JobManager and
+TaskManager. The role of the TaskManager is to look at the calculations that
+have been requested (in the form of Tasks), and will attempt to fill the
+available resources with those calculations. The calculations are stored as
+Jobs, which tracks where the calculation is being run, and where it came from.
+This is where the JobManager takes over, checking all running Jobs, and if it
+is found to be done, it is collected. These managers can be accessed through
+the oqmd script (qmpy/bin/oqmd) either as a daemon process or, more safely, in
+a screen.:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ oqmd jobserver -T run
+</pre></div>
+</div>
+<p>and:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ oqmd taskserver -T run
+</pre></div>
+</div>
+<p>As Tasks and Jobs are processed, both of these methods will continuously report
+job submissions, task completions, as well as errors encountered.</p>
+</div>
+</div>
+<div class="section" id="other-examples">
+<h2>Other examples<a class="headerlink" href="#other-examples" title="Permalink to this headline">¶</a></h2>
+<p>To be filled out in more detail</p>
+<div class="section" id="identification-of-fcc-decortations">
+<h3>Identification of FCC decortations<a class="headerlink" href="#identification-of-fcc-decortations" title="Permalink to this headline">¶</a></h3>
+<p>First, we will find all binary entries:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">binaries</span> <span class="o">=</span> <span class="n">Entry</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">ntypes</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fcc</span> <span class="o">=</span> <span class="n">Composition</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;Cu&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">ground_state</span><span class="o">.</span><span class="n">structure</span>
+</pre></div>
+</div>
+<p>Then we run through every structure, and see if replacing all atoms with Cu
+results in a structure that is equivalent (on volume scaling) with FCC Cu.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">fccs</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">binaries</span><span class="p">[:</span><span class="mi">100</span><span class="p">]:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">struct</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">structure</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="c">## Construct a dictionary of elt:replacement_elt pairs</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="c">## where every replacement is Cu</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">rdict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="s">&#39;Cu&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">entry</span><span class="o">.</span><span class="n">comp</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">test</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">substitute</span><span class="p">(</span><span class="n">rdict</span><span class="p">,</span> <span class="n">rescale</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                                    <span class="n">in_place</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="k">if</span> <span class="n">fcc</span> <span class="o">==</span> <span class="n">test</span><span class="p">:</span> <span class="c"># simple equality testing will work</span>
+<span class="gp">&gt;&gt;&gt; </span>        <span class="n">fccs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">If you actually try to run this on the entire database, understand that it
+will take a pretty long time! Each entry tested takes between 0.1 and 1
+second, so it would take most of 24 hours to run through all 80,000+ binary
+database entries.</p>
+</div>
+</div>
+<div class="section" id="deviation-from-vagard-s-law">
+<h3>Deviation from Vagard&#8217;s Law<a class="headerlink" href="#deviation-from-vagard-s-law" title="Permalink to this headline">¶</a></h3>
+<p>Use the element_groups dictionary to look get a list of all simple metals:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">elts</span> <span class="o">=</span> <span class="n">element_groups</span><span class="p">[</span><span class="s">&#39;simple-metals&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Then, for each pair of metals get all of the entries, and their volumes.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">vols</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">e1</span><span class="p">,</span> <span class="n">e2</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="n">elts</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">entries</span> <span class="o">=</span> <span class="n">Composition</span><span class="o">.</span><span class="n">get_list</span><span class="p">([</span><span class="n">e1</span><span class="p">,</span> <span class="n">e2</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">entries</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>        <span class="n">vol</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">volume_pa</span>
+<span class="gp">&gt;&gt;&gt; </span>        <span class="n">vols</span><span class="p">[</span><span class="n">entry</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">vols</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="p">[])</span> <span class="o">+</span> <span class="p">[</span><span class="n">vol</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Then, for every composition get the Vagard&#8217;s law volume.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">vagards</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">comp</span> <span class="ow">in</span> <span class="n">vols</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">comp</span> <span class="o">=</span> <span class="n">parse_comp</span><span class="p">(</span><span class="n">comp</span><span class="p">)</span> <span class="c"># returns a elt:amt dictionary</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">uc</span> <span class="o">=</span> <span class="n">unit_comp</span><span class="p">(</span><span class="n">comp</span><span class="p">)</span> <span class="c"># reduces to a total of 1 atom</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">vvol</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="k">for</span> <span class="n">elt</span><span class="p">,</span> <span class="n">amt</span> <span class="ow">in</span> <span class="n">uc</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<span class="gp">&gt;&gt;&gt; </span>        <span class="n">vvol</span> <span class="o">+=</span> <span class="n">elements</span><span class="p">[</span><span class="n">elt</span><span class="p">][</span><span class="s">&#39;volume&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">amt</span>
+</pre></div>
+</div>
+<p>More things you can do:
+* Calculate an average error for each system
+* Make a scatter plot for a few binaries show in volume vs x
+* Look for cases where some are above and some are below
+* Get relaxed volume of all stable compounds
+* What about including the &#8220;nearly stable&#8221;</p>
+</div>
+<div class="section" id="compute-all-a-b-bond-lengths">
+<h3>Compute all A-B bond lengths<a class="headerlink" href="#compute-all-a-b-bond-lengths" title="Permalink to this headline">¶</a></h3>
+<p>This script loops over pairs of elements, gets the binary PhaseSpace, and then
+loops over structures on the convex hull.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">e1</span><span class="p">,</span> <span class="n">e2</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="n">elts</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="c"># do logic</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="k">if</span> <span class="n">e1</span> <span class="o">==</span> <span class="n">e2</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>        <span class="k">break</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">ps</span> <span class="o">=</span> <span class="n">PhaseSpace</span><span class="p">([</span><span class="n">e1</span><span class="p">,</span><span class="n">e2</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">k</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">([</span><span class="n">e1</span><span class="p">,</span><span class="n">e2</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">bonds</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">ps</span><span class="o">.</span><span class="n">stable</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>        <span class="n">s</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">calculation</span><span class="o">.</span><span class="n">input</span>
+<span class="gp">&gt;&gt;&gt; </span>        <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">ntypes</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>            <span class="k">continue</span>
+<span class="gp">&gt;&gt;&gt; </span>        <span class="n">dists</span> <span class="o">=</span> <span class="n">get_pair_distances</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span>        <span class="n">bonds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">dists</span><span class="p">[</span><span class="n">k</span><span class="p">]))</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="k">print</span> <span class="n">e1</span><span class="p">,</span> <span class="n">e2</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">bonds</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">bonds</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="integrating-with-sci-kit-learn">
+<h3>Integrating with Sci-kit Learn<a class="headerlink" href="#integrating-with-sci-kit-learn" title="Permalink to this headline">¶</a></h3>
+<p>First, the necessary imports:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sklearn.svm</span> <span class="kn">import</span> <span class="n">SVR</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">GradientBoostingRegressor</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sklearn</span> <span class="kn">import</span> <span class="n">cross_validation</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sklearn.decomposition</span> <span class="kn">import</span> <span class="n">PCA</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sklearn</span> <span class="kn">import</span> <span class="n">linear_model</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sklearn</span> <span class="kn">import</span> <span class="n">grid_search</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">qmpy</span> <span class="kn">import</span> <span class="o">*</span>
+</pre></div>
+</div>
+<p>As an example problem, we will build a very simple model that predicts the
+volume of a compound at a given composition based only on the composition:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">elts</span> <span class="o">=</span> <span class="n">Element</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">symbol__in</span><span class="o">=</span><span class="n">element_groups</span><span class="p">[</span><span class="s">&#39;simple-metals&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">out_elts</span> <span class="o">=</span> <span class="n">Element</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">exclude</span><span class="p">(</span><span class="n">symbol__in</span><span class="o">=</span><span class="n">element_groups</span><span class="p">[</span><span class="s">&#39;simple-metals&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">models</span> <span class="o">=</span> <span class="n">Calculation</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">path__contains</span><span class="o">=</span><span class="s">&#39;icsd&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">models</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">converged</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">label__in</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;static&#39;</span><span class="p">,</span> <span class="s">&#39;standard&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">models</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">exclude</span><span class="p">(</span><span class="n">composition__element_set</span><span class="o">=</span><span class="n">out_elts</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">values_list</span><span class="p">(</span><span class="s">&#39;composition_id&#39;</span><span class="p">,</span> <span class="s">&#39;output__volume_pa&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now we will build a fit set and test set:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">X</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">get_basic_composition_descriptors</span><span class="p">(</span><span class="n">c</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">y2</span> <span class="o">=</span> <span class="n">cross_validation</span><span class="o">.</span><span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">train_size</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now to actually implement the model:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">clf</span> <span class="o">=</span> <span class="n">linear_model</span><span class="o">.</span><span class="n">LinearRegression</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">clf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">clf</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
 </div>
 
 
@@ -326,6 +774,20 @@ single, more complicated query of the first.</p>
 <li><a class="reference internal" href="#searching-for-entries-based-on-composition">Searching for entries based on composition</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#using-qmpy-to-manage-a-high-throughput-calculation-project">Using qmpy to manage a high-throughput calculation project</a><ul>
+<li><a class="reference internal" href="#setting-up-computational-resources">Setting up computational resources</a></li>
+<li><a class="reference internal" href="#working-with-structures">Working with Structures</a></li>
+<li><a class="reference internal" href="#combinatorial-site-replacements">Combinatorial site replacements</a></li>
+<li><a class="reference internal" href="#running-the-calculations">Running the calculations</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#other-examples">Other examples</a><ul>
+<li><a class="reference internal" href="#identification-of-fcc-decortations">Identification of FCC decortations</a></li>
+<li><a class="reference internal" href="#deviation-from-vagard-s-law">Deviation from Vagard&#8217;s Law</a></li>
+<li><a class="reference internal" href="#compute-all-a-b-bond-lengths">Compute all A-B bond lengths</a></li>
+<li><a class="reference internal" href="#integrating-with-sci-kit-learn">Integrating with Sci-kit Learn</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -334,8 +796,8 @@ single, more complicated query of the first.</p>
   <p class="topless"><a href="getting_started.html"
                         title="previous chapter">Installation</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="project.html"
-                        title="next chapter">Using qmpy to manage a high-throughput calculation project</a></p>
+  <p class="topless"><a href="materials.html"
+                        title="next chapter">Materials</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/tutorials.txt"
@@ -368,7 +830,7 @@ single, more complicated query of the first.</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="project.html" title="Using qmpy to manage a high-throughput calculation project"
+          <a href="materials.html" title="Materials"
              >next</a> |</li>
         <li class="right" >
           <a href="getting_started.html" title="Installation"
@@ -378,7 +840,7 @@ single, more complicated query of the first.</p>
     </div>
     <div class="footer">
         &copy; Copyright 2014, Scott Kirklin.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
     </div>
   </body>
 </html>

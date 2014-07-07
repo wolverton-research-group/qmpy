@@ -13,7 +13,8 @@ from qmpy.utils import *
 
 logger = logging.getLogger(__name__)
 
-def find_nearest_neighbors(structure, method='closest', limit=5, tol=2e-1):
+def find_nearest_neighbors(structure, method='closest', limit=5, tol=2e-1,
+        **kwargs):
     """
     For each atom in the `structure` assign the nearest neighbors.
 
@@ -82,7 +83,6 @@ def _heuristic(structure, limit=5, tol=2e-1):
 
     # Create a new cell large enough to find neighbors at least `limit` away.
     limits = [ int(np.ceil(limit/lat_params[i])) for i in range(3) ]
-    limits = np.array(limits) + 1
     new_struct = structure.transform(limits, in_place=False)
 
     # construct a distance matrix between the original structure and supercell
@@ -90,8 +90,8 @@ def _heuristic(structure, limit=5, tol=2e-1):
     distances = np.zeros((structure.natoms, structure.natoms*np.product(limits)))
     for i, j in itertools.product(range(structure.natoms),
                                   range(new_struct.natoms)):
-        dist = new_struct.get_distance(i,j)
-        if dist < 1e-6:
+        dist = new_struct.get_distance(i,j, limit=limit, wrap_self=True)
+        if dist < 1e-6 or dist is None:
             dist = min(structure.lat_params[:3])
         distances[i,j] = dist
 

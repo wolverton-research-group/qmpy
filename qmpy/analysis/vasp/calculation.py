@@ -1197,6 +1197,9 @@ class Calculation(models.Model):
         return calcs
 
     def address_errors(self):
+        """
+        Attempts to fix any encountered errors. 
+        """
         errors = self.errors
         if not errors or errors == ['found no errors']:
             logger.info('Found no errors')
@@ -1243,12 +1246,26 @@ class Calculation(models.Model):
                 raise VaspError("Unknown VASP error code: %s", err)
         return new_calc
 
-    def compress(self):
+    def compress(self, files=['OUTCAR', 'CHGCAR', 'CHG', 
+                                'PROCAR', 'LOCPOT', 'ELFCAR']):
+        """
+        gzip every file in `files`
+
+        Keyword arguments:
+            files: List of files to zip up.
+
+        Return: None
+        """
         for file in os.listdir(self.path):
             if file in ['OUTCAR', 'CHGCAR', 'CHG', 'PROCAR', 'LOCPOT', 'ELFCAR']:
                 os.system('gzip -f %s' % self.path+'/'+file)
 
     def copy(self):
+        """
+        Create a deep copy of the Calculation.
+
+        Return: None
+        """
         new = copy.deepcopy(self)
         new.id = None
         new.label = None
@@ -1266,10 +1283,23 @@ class Calculation(models.Model):
         if self.id:
             Calculation.objects.filter(id=self.id).update(path=path)
 
-    def backup(self):
-        new_dir = '%s_' % self.attempt
-        new_dir += '_'.join(self.errors)
-        new_dir = new_dir.replace(' ','')
+    def backup(self, path=None):
+        """
+        Create a copy of the calculation folder in a subdirectory of the
+        current Calculation.
+
+        Keyword arguments:
+            path: If None, the backup folder is generated based on the
+            Calculation.attempt and Calculation.errors.
+
+        Return: None
+        """
+        if path is None:
+            new_dir = '%s_' % self.attempt
+            new_dir += '_'.join(self.errors)
+            new_dir = new_dir.replace(' ','')
+        else:
+            new_dir = path
         logger.info('backing up %s to %s' % 
                 (self.path.replace(self.entry.path+'/', ''), new_dir))
         self.move(self.path+'/'+new_dir)

@@ -59,7 +59,6 @@ class JobManager(daemon.Daemon):
             ddb.reset_queries()
             jobs = queue.Job.objects.filter(state=1, account__host__state=1,
                     created__lt=datetime.now() - timedelta(seconds=-300))
-            jobs = jobs.exclude(account__host__name='hopper')
             for job in jobs:    
                 check_die()
                 if job.is_done():

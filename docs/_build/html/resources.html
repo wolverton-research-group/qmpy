@@ -1,0 +1,480 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Managing Computational Resources &mdash; qmpy 0.4.9 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.4.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="qmpy 0.4.9 documentation" href="index.html" />
+    <link rel="up" title="Data models" href="models.html" />
+    <link rel="next" title="Analysis tools" href="analysis.html" />
+    <link rel="prev" title="Calculations" href="calculations.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="analysis.html" title="Analysis tools"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="calculations.html" title="Calculations"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">qmpy 0.4.9 documentation</a> &raquo;</li>
+          <li><a href="models.html" accesskey="U">Data models</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-qmpy">
+<span id="managing-computational-resources"></span><h1>Managing Computational Resources<a class="headerlink" href="#module-qmpy" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="resources">
+<h2>Resources<a class="headerlink" href="#resources" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="hosts">
+<h3>Hosts<a class="headerlink" href="#hosts" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="qmpy.Host">
+<em class="property">class </em><tt class="descclassname">qmpy.</tt><tt class="descname">Host</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#qmpy.Host" title="Permalink to this definition">¶</a></dt>
+<dd><p>Host model - stores all host information for a cluster.</p>
+<dl class="docutils">
+<dt>Relationships:</dt>
+<dd><div class="first last line-block">
+<div class="line">account</div>
+<div class="line">allocation</div>
+</div>
+</dd>
+<dt>Attributes:</dt>
+<dd><div class="first last line-block">
+<div class="line">name: Primary key.</div>
+<div class="line">binaries: dict of label:path pairs for vasp binaries.</div>
+<div class="line">check_queue: Path to showq command</div>
+<div class="line">checked_time: datetime object for the last time the queue was </div>
+<div class="line-block">
+<div class="line">checked.</div>
+</div>
+<div class="line">hostname: Full host name. </div>
+<div class="line">ip_address: Full ip address.</div>
+<div class="line">nodes: Total number of nodes.</div>
+<div class="line">ppn: Number of processors per node.</div>
+<div class="line">running: dict of PBS_ID:state pairs.</div>
+<div class="line">sub_script: Path to qsub command</div>
+<div class="line">sub_text: Path to queue file template.</div>
+<div class="line">utilization: Number of active cores (based on showq).</div>
+<div class="line">walltime: Maximum walltime on the machine.</div>
+<div class="line">state: State code. 1=Up, 0=Full (auto-resets to 1 when jobs are</div>
+<div class="line-block">
+<div class="line">collected), -1=Down.</div>
+</div>
+</div>
+</dd>
+</dl>
+<dl class="method">
+<dt id="qmpy.Host.check_host">
+<tt class="descname">check_host</tt><big>(</big><big>)</big><a class="headerlink" href="#qmpy.Host.check_host" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pings the host to see if it is online. Returns False if it is
+offline.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmpy.Host.check_running">
+<tt class="descname">check_running</tt><big>(</big><big>)</big><a class="headerlink" href="#qmpy.Host.check_running" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uses the hosts data and one of the associated accounts to check the PBS
+queue on the Host. If it has been checked in the last 2 minutes, it
+will return the previously returned result.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="qmpy.Host.create">
+<em class="property">static </em><tt class="descname">create</tt><big>(</big><big>)</big><a class="headerlink" href="#qmpy.Host.create" title="Permalink to this definition">¶</a></dt>
+<dd><p>Classmethod to create a Host model. Script will ask you questions about
+the host to add, and will return the created Host.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="accounts">
+<h3>Accounts<a class="headerlink" href="#accounts" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="qmpy.Account">
+<em class="property">class </em><tt class="descclassname">qmpy.</tt><tt class="descname">Account</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#qmpy.Account" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class for a <cite>User</cite> account on a <cite>Host</cite>.</p>
+<dl class="docutils">
+<dt>Attributes:</dt>
+<dd><div class="first last line-block">
+<div class="line">host</div>
+<div class="line">id</div>
+<div class="line">job</div>
+<div class="line">run_path</div>
+<div class="line">state</div>
+<div class="line">user</div>
+<div class="line">username</div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="users">
+<h3>Users<a class="headerlink" href="#users" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="qmpy.User">
+<em class="property">class </em><tt class="descclassname">qmpy.</tt><tt class="descname">User</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#qmpy.User" title="Permalink to this definition">¶</a></dt>
+<dd><p>User model - stores an oqmd users information.</p>
+<dl class="docutils">
+<dt>Relationships:</dt>
+<dd><div class="first last line-block">
+<div class="line"><a class="reference internal" href="#qmpy.Account" title="qmpy.Account"><tt class="xref py py-mod docutils literal"><span class="pre">Account</span></tt></a> via account_set</div>
+<div class="line"><a class="reference internal" href="#qmpy.Allocation" title="qmpy.Allocation"><tt class="xref py py-mod docutils literal"><span class="pre">Allocation</span></tt></a> via allocation_set</div>
+<div class="line"><a class="reference internal" href="#qmpy.Project" title="qmpy.Project"><tt class="xref py py-mod docutils literal"><span class="pre">Project</span></tt></a> via project_set</div>
+</div>
+</dd>
+<dt>Attributes:</dt>
+<dd><div class="first last line-block">
+<div class="line">id</div>
+<div class="line">username</div>
+<div class="line">first_name</div>
+<div class="line">last_name</div>
+<div class="line">date_joined</div>
+<div class="line">is_active</div>
+<div class="line">is_staff</div>
+<div class="line">is_superuser</div>
+<div class="line">last_login</div>
+<div class="line">email</div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="allocation">
+<h3>Allocation<a class="headerlink" href="#allocation" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="qmpy.Allocation">
+<em class="property">class </em><tt class="descclassname">qmpy.</tt><tt class="descname">Allocation</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#qmpy.Allocation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class for an Allocation on a computing resources.</p>
+<dl class="docutils">
+<dt>Attributes:</dt>
+<dd><div class="first last line-block">
+<div class="line">host</div>
+<div class="line">job</div>
+<div class="line">key</div>
+<div class="line">name</div>
+<div class="line">project</div>
+<div class="line">state</div>
+<div class="line">users</div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="project">
+<h3>Project<a class="headerlink" href="#project" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="qmpy.Project">
+<em class="property">class </em><tt class="descclassname">qmpy.</tt><tt class="descname">Project</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#qmpy.Project" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class for a project within qmpy.</p>
+<dl class="docutils">
+<dt>Attributes:</dt>
+<dd><div class="first last line-block">
+<div class="line">allocations</div>
+<div class="line">entry</div>
+<div class="line">name</div>
+<div class="line">priority</div>
+<div class="line">state</div>
+<div class="line">task</div>
+<div class="line">users</div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="queue-models">
+<h2>Queue models<a class="headerlink" href="#queue-models" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="task">
+<h3>Task<a class="headerlink" href="#task" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="qmpy.Task">
+<em class="property">class </em><tt class="descclassname">qmpy.</tt><tt class="descname">Task</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#qmpy.Task" title="Permalink to this definition">¶</a></dt>
+<dd><p>Model for a :Task: to be done.</p>
+<p>A :Task: consists of a module, which is the name 
+of a computing script, and a set of keyword arguments, specified as a
+dictionary as the <cite>kwargs</cite> attribute of the task. In order for a Task for
+be completed, it must also be assigned one or more :Project:s.</p>
+<dl class="docutils">
+<dt>Relationships:</dt>
+<dd><div class="first last line-block">
+<div class="line"><tt class="xref py py-mod docutils literal"><span class="pre">Entry</span></tt> via entry</div>
+<div class="line"><a class="reference internal" href="#qmpy.Job" title="qmpy.Job"><tt class="xref py py-mod docutils literal"><span class="pre">Job</span></tt></a> via job_set</div>
+<div class="line"><a class="reference internal" href="#qmpy.Project" title="qmpy.Project"><tt class="xref py py-mod docutils literal"><span class="pre">Project</span></tt></a> via project_set</div>
+</div>
+</dd>
+<dt>Attributes:</dt>
+<dd><div class="first last line-block">
+<div class="line">id</div>
+<div class="line">created: datetime object for when the task was created.</div>
+<div class="line">finished: datetime object for when the task was completed.</div>
+<div class="line">module: The name of a function in <tt class="xref py py-mod docutils literal"><span class="pre">scripts</span></tt>  </div>
+<div class="line">kwargs: dict of keyword:value pairs to pass to the calculation</div>
+<div class="line-block">
+<div class="line">module.</div>
+</div>
+<div class="line">priority: Priority of the task. Lower values are more urgent. </div>
+<div class="line">state: State code, given by the table below.</div>
+</div>
+</dd>
+</dl>
+<p>Task codes:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="24%" />
+<col width="76%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Code</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>-2</td>
+<td>being held</td>
+</tr>
+<tr class="row-odd"><td>-1</td>
+<td>encountered error</td>
+</tr>
+<tr class="row-even"><td>0</td>
+<td>ready to run</td>
+</tr>
+<tr class="row-odd"><td>1</td>
+<td>jobs running</td>
+</tr>
+<tr class="row-even"><td>2</td>
+<td>completed</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="qmpy.Task.complete">
+<tt class="descname">complete</tt><big>(</big><big>)</big><a class="headerlink" href="#qmpy.Task.complete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the Task state to 2 and populates the finished field.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="qmpy.Task.errors">
+<tt class="descname">errors</tt><a class="headerlink" href="#qmpy.Task.errors" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of errors encountered by related calculations.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmpy.Task.get_jobs">
+<tt class="descname">get_jobs</tt><big>(</big><em>project=None</em>, <em>allocation=None</em>, <em>account=None</em>, <em>host=None</em><big>)</big><a class="headerlink" href="#qmpy.Task.get_jobs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check the calculation module specified by the <cite>Task</cite>, and returns
+a list of <a class="reference internal" href="#qmpy.Job" title="qmpy.Job"><tt class="xref py py-class docutils literal"><span class="pre">Job</span></tt></a> objects accordingly.</p>
+<p>Calls the task&#8217;s entry&#8217;s &#8220;do&#8221; method with the <cite>Task.module</cite> as the
+first argument, and passing <cite>Task.kwargs</cite> as keyword arguments.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>List of Job objects. When nothing is left to do for the
+task, returns empty.</dd>
+<dt>Raises:</dt>
+<dd><dl class="first last docutils">
+<dt>ResourceUnavailableError:</dt>
+<dd>Raise if for the specified project, allocation, account and/or host
+there are no available cores.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="qmpy.Task.jobs">
+<tt class="descname">jobs</tt><a class="headerlink" href="#qmpy.Task.jobs" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of jobs related to the task.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="qmpy.Task.projects">
+<tt class="descname">projects</tt><a class="headerlink" href="#qmpy.Task.projects" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of related projects.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="job">
+<h3>Job<a class="headerlink" href="#job" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="qmpy.Job">
+<em class="property">class </em><tt class="descclassname">qmpy.</tt><tt class="descname">Job</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#qmpy.Job" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class for job submitted to a compute cluster.</p>
+<dl class="docutils">
+<dt>Relationships:</dt>
+<dd><div class="first last line-block">
+<div class="line"><a class="reference internal" href="#qmpy.Task" title="qmpy.Task"><tt class="xref py py-mod docutils literal"><span class="pre">Task</span></tt></a> via task</div>
+<div class="line"><a class="reference internal" href="#qmpy.Account" title="qmpy.Account"><tt class="xref py py-mod docutils literal"><span class="pre">Account</span></tt></a> via account. The account the calculation is</div>
+<div class="line-block">
+<div class="line">performed on.</div>
+</div>
+<div class="line"><a class="reference internal" href="#qmpy.Allocation" title="qmpy.Allocation"><tt class="xref py py-mod docutils literal"><span class="pre">Allocation</span></tt></a> via allocation. The allocation on which the</div>
+<div class="line-block">
+<div class="line">calculation is being performed.</div>
+</div>
+<div class="line"><tt class="xref py py-mod docutils literal"><span class="pre">Entry</span></tt> via entry</div>
+</div>
+</dd>
+<dt>Attributes:</dt>
+<dd><div class="first last line-block">
+<div class="line">id</div>
+<div class="line">created: datetime object for when the task was created.</div>
+<div class="line">finished: datetime object for when the task was completed.</div>
+<div class="line">ncpus: # of processors assigned.</div>
+<div class="line">path: Origination path of the calculation.</div>
+<div class="line">run_path: Path of the calculation on the compute resource.</div>
+<div class="line">qid: PBS queue ID number.</div>
+<div class="line">walltime: Max walltime (in seconds).</div>
+<div class="line">state: State code, defined as in the table below.</div>
+</div>
+</dd>
+</dl>
+<p>Job codes</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="24%" />
+<col width="76%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Code</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>-1</td>
+<td>encountered error</td>
+</tr>
+<tr class="row-odd"><td>0</td>
+<td>ready to submit</td>
+</tr>
+<tr class="row-even"><td>1</td>
+<td>currently running</td>
+</tr>
+<tr class="row-odd"><td>2</td>
+<td>completed</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Managing Computational Resources</a><ul>
+<li><a class="reference internal" href="#resources">Resources</a><ul>
+<li><a class="reference internal" href="#hosts">Hosts</a></li>
+<li><a class="reference internal" href="#accounts">Accounts</a></li>
+<li><a class="reference internal" href="#users">Users</a></li>
+<li><a class="reference internal" href="#allocation">Allocation</a></li>
+<li><a class="reference internal" href="#project">Project</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#queue-models">Queue models</a><ul>
+<li><a class="reference internal" href="#task">Task</a></li>
+<li><a class="reference internal" href="#job">Job</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="calculations.html"
+                        title="previous chapter">Calculations</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="analysis.html"
+                        title="next chapter">Analysis tools</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/resources.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="analysis.html" title="Analysis tools"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="calculations.html" title="Calculations"
+             >previous</a> |</li>
+        <li><a href="index.html">qmpy 0.4.9 documentation</a> &raquo;</li>
+          <li><a href="models.html" >Data models</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Scott Kirklin.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>

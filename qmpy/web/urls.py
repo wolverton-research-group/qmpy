@@ -75,6 +75,7 @@ urlpatterns += patterns('qmpy.web.views',
     url(r'^analysis/operation/(?P<operation>.*)', 'op_view'),
     url(r'^analysis/visualize$', 'vis_data'),
     url(r'^analysis/visualize/custom$', 'jsmol'),
+    url(r'^analysis/discovery', 'disco_view'),
 
     ## documentation
     url(r'^documentation/$', 'docs_view'),

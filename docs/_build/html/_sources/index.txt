@@ -12,14 +12,11 @@ Materials Database (http://oqmd.org). The OQMD is a project created in Chris
 Wolverton's group at Northwestern University (http://wolverton.northwestern.edu). 
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    getting_started
    tutorials
-   project
    models
-   analysis
-   examples
 
 Contribute
 ==========

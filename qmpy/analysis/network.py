@@ -11,7 +11,7 @@ from qmpy.utils import *
 
 logger = logging.getLogger(__name__)
 
-__all__ = ['LatticePoint', 'SpinLattice']
+__all__ = ['LatticePoint', 'LatticeNetwork']
 
 class LatticePoint:
     def __init__(self, position, spin=None):
@@ -29,7 +29,7 @@ class LatticePoint:
         self.coord = atom.coord
         self.spin = atom.spin
 
-class SpinLattice:
+class LatticeNetwork:
     spin_states = 2
     temperature = 20
     steps = 100
@@ -69,7 +69,7 @@ class SpinLattice:
                 edges.append((nodes[i,j], nodes[i,(j-1)%n]))
                 edges.append((nodes[i,j], nodes[i,(j+1)%n]))
 
-        sl = SpinLattice(edges)
+        sl = LatticeNetwork(edges)
         sl.square_lattice = nodes
         return sl
 
@@ -174,7 +174,7 @@ class SpinLattice:
         Run Monte Carlo in the Grand Canonical Ensemble. 
 
         Examples:
-        >>> sl = SpinLattice.create_2d(10)
+        >>> sl = LatticeNetwork.create_2d(10)
         >>> sl.run_GCMC()
         >>> sl.run_GCMC(-1)
         >>> sl.run_GCMC(1)
@@ -194,7 +194,7 @@ class SpinLattice:
         
         Examples::
 
-            >>> sl = SpinLattice.create_2d(10)
+            >>> sl = LatticeNetwork.create_2d(10)
             >>> sl.run_MC()
             >>> sl.run_MC(0.1)
             >>> sl.run_MC(0.25)

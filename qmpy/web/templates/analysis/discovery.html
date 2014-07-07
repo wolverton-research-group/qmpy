@@ -1,0 +1,45 @@
+{% extends "base_site.html" %}
+{% load admin_static %}
+{% load i18n %}
+
+{% block content %}
+
+<h1> OQMD discoveries! New compounds! WOW </h1>
+
+
+<h2> Compounds which we believe to be MORE stable than the ICSD measured structure</h2>
+
+<table>
+  <head>
+    <th> Composition </th>
+    <th> Prototype (name) </th>
+    <th> &Delta;H<sub>f</sub> </th>
+  </head>
+  <body>
+    {% for comp in type1 %}
+    <tr class="clickableRow" href="/materials/composition/{{comp.0}}">
+      <td>{{ comp.0 }}</td>
+      <td>{{ comp.1 }}</td>
+      <td>{{ comp.2 | floatformat:-3}}</td>
+    </tr>
+    {% endfor %}
+  </body>
+</table>
+
+{% endblock %}
+
+{% block sidebar %}
+<div id="sidebar" class="box">
+  <h2 class="subhead"> Search for a an element only </h2>
+
+  <form action="" method="post">{% csrf_token %}
+    <input name='search' value="{{ search }}"/>
+    <input type='submit'/>
+  </form>
+  Examples:<br>
+  <ul>
+    <li>Al
+  </ul>
+
+</div>
+{% endblock %}

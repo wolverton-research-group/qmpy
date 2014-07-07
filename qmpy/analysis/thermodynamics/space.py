@@ -1016,10 +1016,10 @@ class PhaseSpace(object):
             p.stability = p.energy - stable.energy
         else:
             phases = list(self.phase_dict.values())
-            try:
-                phases.remove(p)
-            except ValueError:
-                pass
+            #try:
+            phases.remove(p)
+            #except ValueError:
+            #    pass
             energy, gclp_phases = self.gclp(p.unit_comp, phases=phases)
             p.stability = p.energy - energy
 

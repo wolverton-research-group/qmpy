@@ -54,9 +54,6 @@ class Entry(models.Model):
 
     Attributes:
         | id: Primary key (auto-incrementing int)
-        | natoms: Number of atoms in the primitive input cell
-        | ntypes: Number of elements in the input structure
-        | path: Path to input file, and location of subsequent calculations.
         | label: An identifying name for the structure. e.g. icsd-1001 or A3
 
     """
@@ -94,17 +91,17 @@ class Entry(models.Model):
                 self.reference.save()
                 self.reference = self.reference
         super(Entry, self).save(*args, **kwargs)
-        #if self._structures:
-        for k, v in self.structures.items():
-            v.label = k
-            v.entry = self
-            v.save()
+        if self._structures:
+            for k, v in self.structures.items():
+                v.label = k
+                v.entry = self
+                v.save()
             #self.structure_set = self.structures.values()
-        #if self._calculations:
-        for k, v in self.calculations.items():
-            v.label = k
-            v.entry = self
-            v.save()
+        if self._calculations:
+            for k, v in self.calculations.items():
+                v.label = k
+                v.entry = self
+                v.save()
             #self.calculation_set = self.calculations.values()
         if self._elements:
             self.element_set = self.elements
@@ -121,14 +118,14 @@ class Entry(models.Model):
         Attempts to create an Entry object from a provided input file.
 
         Processed in the following way:
-        
+
         #. If an Entry exists at the specified path, returns that Entry.
         #. Create an Entry, and assign all fundamental attributes. (natoms,
-           ntypes, input, path, elements, keywords, projects). 
-        #. If the input file is a CIF, and because CIF files have additional 
-           composition and reference information, if that file format is 
-           found, an additional test is performed to check that the reported 
-           composition matches the composition of the resulting structure. The 
+           ntypes, input, path, elements, keywords, projects).
+        #. If the input file is a CIF, and because CIF files have additional
+           composition and reference information, if that file format is
+           found, an additional test is performed to check that the reported
+           composition matches the composition of the resulting structure. The
            reference for the work is also created and assigned to the entry.
         #. Attempt to identify another entry that this is either exactly
            equivalent to, or a defect cell of.
@@ -154,7 +151,7 @@ class Entry(models.Model):
         entry.input = structure
         entry.ntypes = structure.ntypes
         entry.natoms = len(structure.sites)
-        entry.elements = entry.comp.keys() 
+        entry.elements = entry.comp.keys()
         entry.composition = Composition.get(structure.comp)
         for kw in keywords:
             entry.add_keyword(kw)
@@ -235,14 +232,6 @@ class Entry(models.Model):
     def projects(self, projects):
         self._projects = [ Project.get(p) for p in projects ]
 
-    @property
-    def structure(self):
-        if 'final' in self.structures:
-            return self.structures['final']
-        if 'standard' in self.structures:
-            return self.structures['standard']
-        return self.input
-
     _structures = None
     @property
     def structures(self):
@@ -272,7 +261,7 @@ class Entry(models.Model):
     _calculations = None
     @property
     def calculations(self):
-        """Dictionary of label:Calculation pairs.""" 
+        """Dictionary of label:Calculation pairs."""
         if self._calculations is None:
             if self.id is None:
                 self._calculations = {}
@@ -292,7 +281,7 @@ class Entry(models.Model):
         self._calculations = calcs
 
     @calculations.deleter
-    def calculations(self, calc): 
+    def calculations(self, calc):
         self._calculations[calc].delete()
         del self._calculations[calc]
 
@@ -304,21 +293,19 @@ class Entry(models.Model):
     def structure(self):
         if 'final' in self.structures:
             return self.structures['final']
+        elif 'relaxed' in self.structures:
+            return self.structures['relaxed']
         elif 'relaxation' in self.structures:
             return self.structures['relaxation']
+        elif 'standard' in self.structures:
+            return self.structures['standard']
         elif 'fine_relax' in self.structures:
             return self.structures['fine_relax']
         else:
-            return self.structures['input']
-
-    @property
-    def calculation(self):
-        if 'static' in self.calculations:
-            if self.calculations['static'].converged:
-                return self.calculations['static']
-        elif 'standard' in self.calculations:
-            if self.calculations['standard'].converged:
-                return self.calculations['standard']
+            try:
+                return self.structures['input']
+            except KeyError:
+                return None
 
     @input.setter
     def input(self, structure):
@@ -327,7 +314,6 @@ class Entry(models.Model):
     @property
     def tasks(self):
         return list(self.task_set.all())
-
     @property
     def jobs(self):
         return list(self.job_set.all())
@@ -346,7 +332,7 @@ class Entry(models.Model):
         """
         Composition dictionary, using species (element + oxidation state)
         instead of just the elements.
-        
+
         """
         if self.input is None:
             return {}
@@ -386,7 +372,7 @@ class Entry(models.Model):
         for e in self.duplicates.all():
             if not e.prototype is None:
                 protos.append(e.prototype.name)
-                
+
         protos = list(set(protos))
         if len(protos) == 1:
             return protos[0]
@@ -396,13 +382,13 @@ class Entry(models.Model):
     @property
     def space(self):
         """Return the set of elements in the input structure.
-        
+
         Examples::
 
             >>> e = Entry.create("fe2o3/POSCAR") # an input containing Fe2O3
             >>> e.space
             set(["Fe", "O"])
-        
+
         """
         return set([ e.symbol for e in self.elements])
 
@@ -435,14 +421,17 @@ class Entry(models.Model):
         final relaxed structure. Otherwise, returns None.
         """
         if self._energy is None:
-            if 'static' in self.calculations:
-                if self.calculations['static'].converged:
-                    de = self.calculations['static'].formation_energy()
-                    self._energy = de
-            elif 'standard' in self.calculations:
-                if self.calculations['standard'].converged:
-                    de = self.calculations['standard'].formation_energy()
-                    self._energy = de
+            fes = self.formationenergy_set.order_by('delta_e')
+            if fes.exists():
+                self._energy = fes[0].delta_e
+            #if 'static' in self.calculations:
+            #    if self.calculations['static'].converged:
+            #        de = self.calculations['static'].formation_energy()
+            #        self._energy = de
+            #elif 'standard' in self.calculations:
+            #    if self.calculations['standard'].converged:
+            #        de = self.calculations['standard'].formation_energy()
+            #        self._energy = de
         return self._energy
 
     @property
