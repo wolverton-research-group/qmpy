@@ -3,7 +3,7 @@ python:
   - "2.7"
 install: 
   - pip install --use-mirrors pyparsing
-  - pip install --use-mirrors matplotlib
+  - pip install matplotlib
   - "python setup.py install"
 virtualenv:
   system_site_packages: true
