@@ -257,7 +257,11 @@ try:
     if not Hubbard.objects.exists():
         read_hubbards()
 
-    for md in MetaData.objects.filter(type='global_warning'):
-        logger.warn(md.value)
+    if not User.objects.exists():
+        sync_resources()
+
+    if MetaData.objects.filter(type='global_warning').exists:
+        for md in MetaData.objects.filter(type='global_warning'):
+            logger.warn(md.value)
 except:
     pass

@@ -19,21 +19,25 @@ def disco_view(request):
                 RequestContext(request))
 
     # stable prototypes
-    form = Formation.objects.filter(fit='standard', 
+    form_all = Formation.objects.filter(fit='standard', 
             stability__lt=0.0,
             entry__meta_data__value='prototype')
-    form = form.exclude(stability=None)
+    form_all = form_all.exclude(stability=None)
     if search:
-        form = form.filter(composition__element_set=search)
+        form_all = form_all.filter(composition__element_set=search)
 
     # get rid of those with ICSD entries at the same composition
-    form1 = form.exclude(composition__entry__meta_data__value='icsd')
-    result1 = form.values_list('composition', 'entry__prototype__name', 'delta_e')
-    result1 = [[ format_comp(parse_comp(c)), proto, de ] for c, proto, de in result1 ]
+    form_not_icsd = form_all.exclude(composition__entry__meta_data__value='icsd').distinct()
+    res_not_icsd = form_not_icsd.values_list('composition', 'entry__prototype__name', 'delta_e')
+    res_not_icsd = [[ format_comp(parse_comp(c)), proto, de ] for c, proto, de
+            in res_not_icsd ]
 
     # find cases where there _is_ an ICSD entry at the same composition
-    form2 = form.filter(composition__entry__meta_data__value='icsd')
-    result2 = form2.values_list('composition', flat=True)
+    form_icsd = form_all.filter(composition__entry__meta_data__value='icsd').distinct()
+    res_icsd = form_icsd.values_list('composition', 'entry__prototype__name',
+    'delta_e')
+    res_icsd = [[ format_comp(parse_comp(c)), proto, de ] for c, proto, de in
+            res_icsd ]
 
 #    result3 = []
 #    for c in form.values_list('composition', flat=True):
@@ -45,8 +49,8 @@ def disco_view(request):
 #        if not icsd.exists():
 #            result3.append(c)
 
-    data = {'type1': result1,
-            'type2': result2}
+    data = {'not_icsd': res_not_icsd,
+            'icsd': res_icsd}
 #            'type3': result3}
     data.update(csrf(request))
 

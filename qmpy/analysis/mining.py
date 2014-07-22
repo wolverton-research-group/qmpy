@@ -72,14 +72,14 @@ def save_model(model, name=None):
     s = pickle.dumps(model)
     if name is None:
         return s
-    fpath = os.path.join(INSTALL_PATH, name+'.pkl')
+    fpath = os.path.join(INSTALL_PATH, 'data', 'data_mining', name+'.pkl')
     f = open(fpath)
     f.write(s)
     f.close()
 
 def load_model(name):
     name = name.replace('.pkl', '')
-    fpath = os.path.join(INSTALL_PATH, name+'.pkl')
+    fpath = os.path.join(INSTALL_PATH, 'data', 'data_mining', name+'.pkl')
     s = open(fpath, 'rb')
     return pickle.loads(s)
 

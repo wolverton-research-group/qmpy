@@ -43,6 +43,15 @@ class Reaction(object):
                 self.voltage)
 
     #### attributes
+    @property
+    def p_comp(self):
+        if self.p_natoms == 0:
+            return {}
+        comp = defaultdict(float)
+        for p, amt in self._products.items():
+            for elt, amt2 in p.comp.items():
+                comp[elt] += amt*amt2
+        return comp
 
     @property
     def p_var_comp(self):
@@ -53,15 +62,41 @@ class Reaction(object):
         return vamt/self.p_natoms
 
     @property
+    def p_var_amt(self):
+        if self.p_natoms == 0:
+            return 1.0
+        vamt = sum( p.amt(self._variable)['var']*amt for p, amt in
+                self._products.items())*sum(self.variable.values())
+        return vamt/self.p_natoms
+
+    @property
     def p_natoms(self):
         return sum( sum(p.unit_comp.values())*amt for p, amt in 
                 self._products.items())
+
+    @property
+    def r_comp(self):
+        if self.r_natoms == 0:
+            return {}
+        comp = defaultdict(float)
+        for r, amt in self._reactants.items():
+            for elt, amt2 in r.comp.items():
+                comp[elt] += amt*amt2
+        return comp
 
     @property
     def r_var_comp(self):
         if self.r_natoms == 0:
             return 1.0
         vamt = sum( p.fraction(self._variable)['var']*amt for p, amt in
+                self._reactants.items())*sum(self.variable.values())
+        return vamt/self.r_natoms
+
+    @property
+    def r_var_amt(self):
+        if self.r_natoms == 0:
+            return 1.0
+        vamt = sum( r.amt(self._variable)['var']*amt for r, amt in
                 self._reactants.items())*sum(self.variable.values())
         return vamt/self.r_natoms
 
@@ -198,5 +233,4 @@ class Reaction(object):
 
     @property
     def voltage(self):
-        print self.delta_var, self.electrons
         return self.delta_h/self.delta_var/self.electrons

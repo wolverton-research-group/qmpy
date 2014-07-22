@@ -77,6 +77,7 @@ class Atom(models.Model):
     wyckoff = models.ForeignKey(WyckoffSite, blank=True, null=True)
 
     dist = None
+    copy_of = None
     class Meta:
         app_label = 'qmpy'
         db_table = 'atoms'
@@ -88,15 +89,7 @@ class Atom(models.Model):
     def __eq__(self, other):
         if self.element_id != other.element_id:
             return False
-        try:
-            for i in range(3):
-                if abs(self.cart_coord[i] - other.card_coord[i]) > 5e-1:
-                    return False
-        except:
-            for i in range(3):
-                if abs(self.coord[i] - other.coord[i]) > 1e-3:
-                    return False
-        return True
+        return (self.x, self.y, self.z) == (other.x, other.y, other.z)
 
     def __cmp__(self, other):
         comp_arr = [[ self.x, other.x ],
@@ -127,15 +120,19 @@ class Atom(models.Model):
     def forces(self, values):
         self.fx, self.fy, self.fz = values
 
+    _coord = None
     @property
     def coord(self):
         """[x,y,z] coordinates."""
-        return np.array([self.x, self.y, self.z], dtype='float64')
+        if self._coord is None:
+            self._coord = np.array([self.x, self.y, self.z], dtype='float64')
+        return self._coord
 
     @coord.setter
     def coord(self, values):
         self.x, self.y, self.z = wrap(values)
         self._cart = None
+        self._coord = None
 
     _cart = None
     @property
@@ -231,6 +228,7 @@ class Atom(models.Model):
                 'coord', 'element_id']
         for key in keys:
             setattr(atom, key, getattr(self, key))
+        atom.base_atom = self
         return atom
 
     def get_site(self, tol=1e-1):
@@ -302,10 +300,12 @@ class Site(models.Model):
     y = models.FloatField()
     z = models.FloatField()
 
-
     class Meta:
         app_label = 'qmpy'
         db_table = 'sites'
+
+    def __eq__(self, other):
+        return (self.x, self.y, self.z) == (other.x, other.y, other.z)
 
     def __str__(self):
         coord_str = ''
@@ -330,17 +330,6 @@ class Site(models.Model):
             return 'Vac @ %s' % (coord_str)
         elif comp_str:
             return comp_str
-
-    def __eq__(self, other):
-        if not self.comp == other.comp:
-            return False
-        try:
-            if any(abs(self.cart_coord - other.cart_coord) > 1e-3):
-                return False
-        except:
-            if any(abs(self.coord - other.coord) > 1e-5):
-                return False
-        return True
 
     def __getitem__(self, i):
         return self.atoms[i]
@@ -515,8 +504,9 @@ class Site(models.Model):
     def copy(self):
         new = Site()
         new.coord = self.coord
-        for atom in self.atoms:
-            new.add_atom(atom.copy())
+        new.atoms = [ atom.copy() for atom in self.atoms ]
+        new.base_site = self
+        return new
 
     @property
     def comp(self):

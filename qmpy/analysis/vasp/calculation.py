@@ -1577,6 +1577,7 @@ class Calculation(models.Model):
             formation.composition = self.input.composition
             formation.entry = self.entry
             formation.calculation = self
+            formation.stability = None
             self.formation = formation
             return formation
         hub_mus = chem_pots[reference]['hubbards']
@@ -1588,6 +1589,7 @@ class Calculation(models.Model):
         formation.composition = self.input.composition
         formation.entry = self.entry
         formation.calculation = self
+        formation.stability = None
         self.formation = formation
         return formation
 

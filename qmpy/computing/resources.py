@@ -83,6 +83,7 @@ class User(AbstractUser):
         print 'Okay, user created!'
         user.save()
         user.create_accounts()
+        #user.assign_allocations()
         return user
 
     def create_accounts(self):
@@ -109,9 +110,10 @@ class User(AbstractUser):
                 print 'Account exists!'
                 continue
             path = raw_input(msg3 % (self.username, host.name))
-            acct.path = path
+            acct.run_path = path
             acct.username = uname.strip()
             acct.save()
+            acct.create_passwordless_ssh()
 
 class Host(models.Model):
     """
@@ -243,7 +245,7 @@ class Host(models.Model):
         tasks = tasks.filter(project_set=project)
         tasks = tasks.filter(project_set__allocations__host=self)
         tasks = tasks.filter(project_set__users__account__host=self)
-        return tasks.order_by('priority')
+        return tasks.order_by('id', 'priority')
 
     @property
     def qfile(self):
@@ -398,7 +400,8 @@ class Account(models.Model):
         time.sleep(2)
         p.close()
 
-        msg = '/usr/bin/ssh-copy-id -i {origin}/{key} {user}@{host}'
+        msg = '/usr/bin/ssh {user}@{host}'
+        msg += ' chmod 600 /home/{user}/.ssh/authorized_keys'
         p = pexpect.spawn(msg.format(
                     origin=origin, key=key, 
                     user=self.username, host=self.host.ip_address))
@@ -407,8 +410,7 @@ class Account(models.Model):
         time.sleep(2)
         p.close()
 
-        msg = '/usr/bin/ssh {user}@{host}'
-        msg += ' chmod 600 /home/{user}/.ssh/authorized_keys'
+        msg = '/usr/bin/ssh-copy-id -i {origin}/{key} {user}@{host}'
         p = pexpect.spawn(msg.format(
                     origin=origin, key=key, 
                     user=self.username, host=self.host.ip_address))
@@ -715,3 +717,5 @@ class Project(models.Model):
             return random.choice(available)
         else:
             return []
+
+#def write_configs():

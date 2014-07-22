@@ -83,6 +83,7 @@ class StructureTestCase(TestCase):
         self.bcc = io.read(INSTALL_PATH+'/io/files/POSCAR_BCC')
         self.fcc = io.read(INSTALL_PATH+'/io/files/POSCAR_FCC')
         self.nacl = io.read(INSTALL_PATH+'/io/files/POSCAR_NaCl')
+        self.cscl = io.read(INSTALL_PATH+'/io/files/POSCAR_CsCl')
         self.zns = io.read(INSTALL_PATH+'/io/files/POSCAR_ZnS')
 
     def test_name(self):
@@ -136,7 +137,20 @@ class StructureTestCase(TestCase):
             [ 0.13794435, 0.02758887, 0.75170016]))
         self.assertEqual(self.fcc, new)
 
-        # 
+
+    def test_substitute(self):
+        s2 = self.nacl.substitute({'Na': 'Cs'}, rescale=False)
+        s3 = self.nacl.sub({'Na': 'Cs'}, rescale=True,
+                                         rescale_method="relative")
+        s4 = self.nacl.replace({'Na': 'Cs'}, rescale=True,
+                                             rescale_method="absolute")
+        self.assertEqual(str(s2), 'CsCl')
+        self.assertEqual(str(s3), 'CsCl')
+        self.assertEqual(str(s4), 'CsCl')
+
+        self.assertFalse(self.cscl.compare(s2, volume=True))
+        self.assertTrue(self.cscl.compare(s3, volume=True))
+        self.assertTrue(self.cscl.compare(s4, volume=True))
 
     def test_compare(self):
         zns2 = self.zns.copy()
@@ -180,7 +194,7 @@ class EntryTestCase(TestCase):
         entry = Entry.create(self.dirs['partial.cif']+'/partial.cif')
         self.assertEqual(set(entry.holds), set(['partial occupancy', 
                                        'composition mismatch in cif']))
-        self.assertEqual(entry.keywords, ['solid solution'])
+        self.assertEqual(entry.keywords, [])
         entry.save()
 
         # perfect reference structure
@@ -199,5 +213,5 @@ class EntryTestCase(TestCase):
         # anti-site defects
         entry = Entry.create(self.dirs['partial_mix.cif']+'/partial_mix.cif')
         self.assertEqual(set(entry.holds), set(['partial occupancy']))
-        self.assertEqual(entry.keywords, ['solid solution'])
+        #self.assertEqual(entry.keywords, ['solid solution'])
         #self.assertEqual(entry.duplicate_of.id, perfect.id)

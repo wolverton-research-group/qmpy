@@ -195,7 +195,19 @@ Searching for models
 
 The documentation for Django for searching for models is ver complete, and
 should be taken as the ultimate reference for searching for models in qmpy, but
-a basic overview is provided here.
+a basic overview is provided here. Specific methods used in this section are
+the 'filter', 'exclude' and 'get' methods. 
+
+Searches using filter will, as the name suggests, filter for database entries
+that have the specified properties. Similarly, exclude will return entries that
+do NOT have the specified properties. Both of these methods will return a
+QuerySet containing any objects that meet the requirements of your search.
+Filter and exclude calls can be chained together to create relatively complex
+queries. Get is slightly different in that it returns ONLY ONE object, and
+returns the object itself, rather than a QuerySet of such objects.
+
+A much more complete documentation of all things query related can be found at
+the `django docs <https://docs.djangoproject.com/en/dev/topics/db/queries/>`_
 
 Searching for entries based on stability
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -261,6 +273,59 @@ can be more efficient to search permutations of sub-spaces::
 However, for larger regions of phase space (4 or 5 or more) the number of
 subqueries of the second approach rapidly becomes more expensive than the
 single, more complicated query of the first.
+
+Advanced searching
+------------------
+
+The previous section covered some pretty basic methods for searching for
+database entries. In this section we will look at some more advanced concepts,
+specifically: aggregation, Q() and F().
+
+Aggregation and Annotation
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Django also provides methods for adding searchable and retrievable fields to
+database entries within the SQL command. For example, suppose we want to search
+for :mod:`~qmpy.Entry` objects that have more than 5 structures associated with
+them. We can accomplish this using aggregation to add a temporary field to
+Entries that is the number of structures. This temporary field can then be
+filtered on and returned just like a normal field::
+    
+    >>> from django.db.models import Count, Average
+    >>> entries = Entry.objects.annotate(n_structures=Count('structure'))
+    >>> many_structs = entries.filter(n_structures__gt=5)
+    >>> data = many_structs.values('id', 'path', 'n_structures')
+    >>> print data[0]
+    {'id': 1562L,
+     'n_structures': 6,
+     'path': u'/home/oqmd/libraries/prototypes/elements/C19/Ne'}
+
+We can also do a variety of aggregation methods, also in SQL. Say we want to
+know the average number of elements (averaged over all compositions in the
+OQMD, or over ICSD structures)::
+    
+    >>> Composition.objects.aggregate(Avg('ntypes'))
+    {'ntypes__avg': 2.9965}
+    >>> Composition.objects.filter(entry__meta_data__value='icsd').\
+                aggregate(Avg('ntypes'))
+    {'ntypes__avg': 2.9811}
+
+Complex searches
+^^^^^^^^^^^^^^^^
+
+When using sequential filter and exclude commands, these commands are related
+by AND operators. In order to execute more complicated queries which use a
+series of AND and OR operators, we must use the Q() method.::
+    
+    >>> from django.db.models import Q
+    >>> query = Q(meta_data__value='prototype') | Q(meta_data__value='icsd')
+    >>> Entry.objects.filter(query)
+
+The Q() query method also supports negation, by calling ~Q()::
+    
+    >>> Composition.objects.filter(Q(ntypes=2) & 
+                                   ~Q(element_set='O'))
+
 
 Using qmpy to manage a high-throughput calculation project
 ----------------------------------------------------------
@@ -596,7 +661,8 @@ job submissions, task completions, as well as errors encountered.
 Other examples
 --------------
 
-To be filled out in more detail
+Now, we will run through a variety of problems, and demonstrate solutions which
+leverage different functionalities with qmpy.
 
 Identification of FCC decortations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -721,3 +787,53 @@ Now to actually implement the model::
     >>> clf = linear_model.LinearRegression()
     >>> clf.fit(x1, y1)
     >>> clf.score(x2, y2)
+
+More examples
+-------------
+
+For more examples check in qmpy/examples for a variety of scripts that
+demonstrate these and other tasks. 
+
++------------------------------+----------------------------------------------+
+| Script                       | Description                                  |
++==============================+==============================================+
+| sklearn/build_model.py       | Build a volume model using sklearn to        |
+|                              | predict structure volume based only on       |
+|                              | composition.                                 |
++------------------------------+----------------------------------------------+
+| structures/modify_CNPbI3.py  | Take an incomplete structure CNPbI3, that is |
+|                              | supposed to be (CH3NH3)PbI3, and add missing |
+|                              | H atoms.                                     |
++------------------------------+----------------------------------------------+
+| structures/make_protos.py    | Take a base structure and create a variety   |
+|                              | of decorations.                              |
++------------------------------+----------------------------------------------+
+| structures/find_layered.py   | Search through the database of structures    |
+|                              | for cases where the structure is not fully   |
+|                              | connected, i.e. layered structures.          |
++------------------------------+----------------------------------------------+
+| structures/bond_lengths.py   | Compute average A-B bond lengths for all A-B |
+|                              | pairs, using all stable structures.          |
++------------------------------+----------------------------------------------+
+| database/discovery_rate.py   | Using reference information from the ICSD    |
+|                              | and measures of structural uniqueness find   |
+|                              | the nominal year of `discovery' for all ICSD |
+|                              | structures.                                  |
++------------------------------+----------------------------------------------+
+| database/precipitates.py     | Screen for good precipitate strengtheners.   |
+|                              | Creates the results used in <insert ref>     |
++------------------------------+----------------------------------------------+
+| database/Li-M-O_screen.py    | Screen for (MO_x).(LiO_2) compounds for      |
+|                              | hybrid Li-ion/Li-O2 electrode materials.     |
+|                              | Reproduces the results used in <insert ref>. |
++------------------------------+----------------------------------------------+
+| database/oqmd_vs_expt.py     | Compare OQMD formation energies with         |
+|                              | experimental formation energies.             |
++------------------------------+----------------------------------------------+
+| analysis/chem_pots.py        | Plot of all modified chemical potentials.    |
++------------------------------+----------------------------------------------+
+| analysis/pot_fitting.py      | Fit chemical potentials.                     |
++------------------------------+----------------------------------------------+
+| analysis/get_formations.py   | Calculation formation energies based on new  |
+|                              | chemical potentials.                         |
++------------------------------+----------------------------------------------+

@@ -558,7 +558,7 @@ class PhaseSpace(object):
         if self._tie_lines is None:
             self.hull
             #self.compute_hull()
-        return self._tie_lines
+        return [ list(tl) for tl in self._tie_lines ]
 
     @property
     def tie_lines_list(self):
@@ -571,7 +571,7 @@ class PhaseSpace(object):
         """
         if self._hull is None:
             self.get_hull()
-        return self._hull
+        return list(self._hull)
 
     def get_hull(self):
         if any( len(b) > 1 for b in self.bounds ):
@@ -1059,9 +1059,9 @@ class PhaseSpace(object):
                     diff = p.energy - p2.energy
                     p.stability = base + diff
 
-                if save:
-                    qs = qmpy.FormationEnergy.objects.filter(id=p.id)
-                    qs.update(stability=p.stability)
+            if save:
+                qs = qmpy.FormationEnergy.objects.filter(id=p.id)
+                qs.update(stability=p.stability)
 
     def save_tie_lines(self):
         """
@@ -1559,7 +1559,7 @@ class PhaseSpace(object):
         n_elt = pulp.value(prob.objective)
         return reacts, prods, n_elt
 
-    def get_reactions(self, var, electrons=2.0):
+    def get_reactions(self, var, electrons=1.0):
         """
         Returns a list of Reactions.
 
@@ -1588,7 +1588,7 @@ class PhaseSpace(object):
                 delta_var=delta_var,
                 variable=var, electrons=electrons)
 
-    def plot_reactions(self, var, electrons=2.0, save=False):
+    def plot_reactions(self, var, electrons=1.0, save=False):
         """
         Plot the convex hull along the reaction path, as well as the voltage
         profile.
@@ -1602,39 +1602,43 @@ class PhaseSpace(object):
 
         #plot tie lines
         for p1, p2 in self.tie_lines:
-            c1 = self.coord(p1)
-            c2 = self.coord(p2)
-            if abs(c1[1]) < 1e-4 or abs(c2[1]) < 1e-4:
-                if abs(c1[1] - 1) < 1e-4 or abs(c2[1] - 1) < 1e-4:
+            c1 = p1.fraction(var)['var']
+            c2 = p2.fraction(var)['var']
+            if abs(c1) < 1e-4 or abs(c2) < 1e-4:
+                if abs(c1 - 1) < 1e-4 or abs(c2 - 1) < 1e-4:
                     if len(self.tie_lines) > 1:
                         continue
-            ax1.plot([c1[1],c2[1]], [self.phase_energy(p1),
-                                     self.phase_energy(p2)], 'k')
+            ax1.plot([c1,c2], [self.phase_energy(p1),
+                               self.phase_energy(p2)], 'k')
 
         #plot compounds
         for p in self.stable:
-            x = self.coord(p.unit_comp)[1]
+            x = p.fraction(var)['var']
             ax1.plot(x, self.phase_energy(p), 'bo')
             ax1.text(x, self.phase_energy(p), '$\\rm{%s}$' % p.latex,
-                    ha='left', va='top')
+                            ha='left', va='top')
         plt.ylabel('$\\rm{\Delta H}$ $\\rm{[eV/atom]}$')
         ymin, ymax = ax1.get_ylim()
         ax1.set_ylim(ymin - 0.1, ymax)
 
         ax2 = fig.add_subplot(212, sharex=ax1)
-        ax2.set_xlim([0,1])
         points = set()
         for reaction in self.get_reactions(var, electrons=electrons):
             if reaction.delta_var == 0:
                 continue
             voltage = reaction.delta_h/reaction.delta_var/electrons
-            points |= set([(reaction.r_var_comp, voltage), 
-                    (reaction.p_var_comp, voltage)])
+            x1 = reaction.r_var_comp
+            x2 = reaction.p_var_comp
+            points |= set([(x1, voltage), 
+                    (x2, voltage)])
 
         points = sorted( points, key=lambda x: x[0] )
         points = sorted( points, key=lambda x: -x[1] )
+
         base = sorted(self.stable, key=lambda x:
-                x.fraction(var)['var'])[0]
+                x.amt(var)['var'])[0]
+
+        max_x = max([ k[0] for k in points ])
 
         if len(points) > 1:
             for i in range(len(points) - 2):
@@ -1643,10 +1647,10 @@ class PhaseSpace(object):
 
             ax2.plot([points[-2][0], points[-2][0]], 
                     [points[-2][1], points[-1][1]], 'k')
-            ax2.plot([points[-2][0], 1], 
+            ax2.plot([points[-2][0], max_x], 
                     [points[-1][1], points[-1][1]], 'k')
         else:
-            ax2.plot([0, 1], [points[0][1], points[0][1]], 'k')
+            ax2.plot([0, max_x], [points[0][1], points[0][1]], 'k')
         
         plt.xlabel('$\\rm{x}$ $\\rm{in}$ $\\rm{(%s)_{x}(%s)_{1-x}}$' % ( 
            format_latex(var),

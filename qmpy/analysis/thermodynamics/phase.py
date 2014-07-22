@@ -588,6 +588,32 @@ class Phase(object):
         #global environment
         return self.energy
 
+    def amt(self, comp):
+        """
+        Returns a composition dictionary with the specified composition pulled
+        out as 'var'. 
+
+        Examples::
+
+            >>> phase = Phase(composition={'Fe':1, 'Li':5, 'O':8}, energy=-1)
+            >>> phase.amt('Li2O')
+            defaultdict(<type 'float'>, {'var': 2.5, 'Fe': 1, 'O': 5.5, 'Li': 0.0})
+
+        """
+        if isinstance(comp, Phase):
+            comp = comp.comp
+        elif isinstance(comp, basestring):
+            comp = parse_comp(comp)
+        residual = defaultdict(float, self.comp)
+        tot = sum(residual.values())
+        for c, amt in dict(comp).items():
+            pres = residual[c]/amt
+            for c2, amt2 in comp.items():
+                residual[c2] -= pres*amt2
+        residual['var'] = (tot - sum(residual.values()))
+        residual['var'] /= float(sum(comp.values()))
+        return residual
+
     def fraction(self, comp):
         """
         Returns a composition dictionary with the specified composition pulled
@@ -597,7 +623,8 @@ class Phase(object):
 
             >>> phase = Phase(composition={'Fe':1, 'Li':5, 'O':8}, energy=-1)
             >>> phase.fraction('Li2O')
-            defaultdict(<type 'float'>, {'var': 2.5, 'Fe': 1, 'O': 5.5, 'Li': 0.0})
+            defaultdict(<type 'float'>, {'var': 0.5357142857142858, 'Fe':
+                0.07142857142857142, 'O': 0.3928571428571428, 'Li': 0.0})
 
         """
         if isinstance(comp, Phase):

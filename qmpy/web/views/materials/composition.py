@@ -45,6 +45,7 @@ def composition_view(request, search=None):
     if composition:
         comp = Composition.get(composition)
         ps = PhaseSpace('-'.join(comp.comp.keys()))
+        ps.infer_formation_energies()
         data['pd'] = ps.phase_diagram.get_flot_script("phasediagram")
         data['search'] = composition
         data['composition'] = comp
@@ -52,6 +53,7 @@ def composition_view(request, search=None):
         data['results'] = comp.entries
         energy, gs = ps.gclp(comp.name)
         data['gs'] = Phase.from_phases(gs)
+        data['phases'] = gs
         data['compound'] = comp.ground_state
         data['singlephase'] = ( len(gs) == 1 )
         data['space'] = '-'.join(comp.comp.keys())
@@ -60,6 +62,7 @@ def composition_view(request, search=None):
                 RequestContext(request))
     elif space:
         ps = PhaseSpace(space)
+        ps.infer_formation_energies()
         data['search'] = space
         data['pd'] = ps.phase_diagram.get_flot_script("phasediagram")
         data['stable'] = [ p.calculation.entry for p in ps.stable ]

@@ -260,6 +260,26 @@ class Structure(models.Model, object):
         self.natoms = len(self._atoms)
         self.ntypes = len(self.comp)
 
+    _abc = None
+    @property
+    def atoms_by_coord(self):
+        if self._abc is None:
+            _abc = {}
+            for a in self.atoms:
+                _abc[tuple(a.cart_coord.tolist())] = a
+            self._abc = _abc
+        return self._abc
+
+    _sbc = None
+    @property
+    def sites_by_coord(self):
+        if self._sbc is None:
+            _sbc = {}
+            for s in self.sites:
+                _sbc[tuple(s.cart_coord.tolist())] = s
+            self._sbc = _sbc
+        return self._sbc
+
     _sites = None
     @property
     def sites(self):
@@ -274,12 +294,12 @@ class Structure(models.Model, object):
 
     @sites.setter
     def sites(self, sites):
-        atoms = []
+        self._atoms = []
         for s in sites:
-            s.structure = self
-            atoms += s.atoms
-        self.atoms = atoms
+            self.add_site(s)
         self._sites = sites
+        self.natoms = len(self.atoms)
+        self.ntypes = len(self.comp)
 
     @property
     def site_compositions(self):
@@ -339,6 +359,12 @@ class Structure(models.Model, object):
         self.cell = self.cell * scale**(1/3.)
         self.volume_pa = value/self.natoms
         self.volume = value
+
+    def set_volume_to_sum_of_elements(self):
+        volume = 0
+        for atom in self:
+            volume += atom.element.volume*atom.occupancy
+        self.set_volume(volume)
 
     @property
     def lat_param_dict(self):
@@ -497,6 +523,7 @@ class Structure(models.Model, object):
          * for each site: site.multiplicity -> int
 
         """
+        self.get_sites()
         dataset = get_symmetry_dataset(self, symprec=tol)
         self.spacegroup = Spacegroup.objects.get(pk=dataset['number'])
         for i, site in enumerate(self.sites):    
@@ -508,8 +535,8 @@ class Structure(models.Model, object):
         for i, e in enumerate(dataset['equivalent_atoms']):
             counts[e] += 1
             origins[self.sites[i]] = self.sites[e]
-            orbits[e] += self.sites[i]
-        self._origins = origins
+            orbits[e].append(self.sites[i])
+        self.origins = origins
         self.operations = zip(dataset['rotations'], dataset['translations'])
         rots = []
         for r in dataset['rotations']:
@@ -522,10 +549,13 @@ class Structure(models.Model, object):
                 trans.append(t)
         self.translations = trans
         self.orbits = orbits.values()
+        self.duplicates = dict((self.sites[e], v) for e, v in orbits.items())
         self._uniq_sites = []
         self._uniq_atoms = []
         for ind, mult in counts.items():
             site = self.sites[ind]
+            for site2 in self.duplicates[site]:
+                site2.multiplicity = mult
             site.index = ind
             site.multiplicity = mult
             self._uniq_sites.append(site)
@@ -831,9 +861,9 @@ class Structure(models.Model, object):
         vec -= np.round(vec)
         dist = np.dot(vec, self.cell)
 
-        dist -= round(dist.dot(x)/xx)*x
-        dist -= round(dist.dot(y)/yy)*y
-        dist -= round(dist.dot(z)/zz)*z
+        dist -= np.round(dist.dot(x)/xx)*x
+        dist -= np.round(dist.dot(y)/yy)*y
+        dist -= np.round(dist.dot(z)/zz)*z
 
         if limit:
             if any([ abs(d) > limit for d in dist]):
@@ -841,7 +871,7 @@ class Structure(models.Model, object):
 
         dist = la.norm(dist)
         if not wrap_self:
-            if abs(dist) < 1e-6:
+            if abs(dist) < 1e-4:
                 dist = min(self.lp[:3])
 
         if limit:
@@ -851,7 +881,6 @@ class Structure(models.Model, object):
         return dist
 
     def _get_vector(self, atom1, atom2):
-
         x, y, z = self.cell
         xx = self.metrical_matrix[0,0]
         yy = self.metrical_matrix[1,1]
@@ -865,6 +894,14 @@ class Structure(models.Model, object):
         dist -= round(dist.dot(y)/yy)*y
         dist -= round(dist.dot(z)/zz)*z
         return dist
+
+    def add_site(self, site):
+        site.structure = self
+        self.sites.append(site)
+        for a in site.atoms:
+            a.structure = self
+            self.atoms.append(a)
+        self.spacegroup = None
 
     def add_atom(self, atom, tol=0.01):
         """
@@ -1059,7 +1096,8 @@ class Structure(models.Model, object):
         recs = self.reciprocal_lattice
         rec_mags = [ norm(recs[0]), norm(recs[1]), norm(recs[2])]
         r0 = max(rec_mags)
-        refr = np.array([ np.round(r/r0, 4) for r in rec_mags ])
+        refr = np.array([ roundclose(r/r0, 1e-2) for r in rec_mags ])
+        refr = np.round(refr, 4)
         scale = 1.0
         kpts = np.ones(3)
 
@@ -1316,14 +1354,14 @@ class Structure(models.Model, object):
             struct = self.get_sublattice(elements)
             return struct.get_lattice_network()
         self.find_nearest_neighbors(**kwargs)
-        for a1 in self.atoms:
+        for s1 in self.sites:
             n0 = len(pairs)
-            for a2 in a1.neighbors:
+            for s2 in s1.neighbors:
                 #if a1 < a2:
                 #    continue
-                pairs.append((a1, a2))
+                pairs.append((s1, s2))
 
-        lattice = SpinLattice(pairs)
+        lattice = LatticeNetwork(pairs)
         lattice.structure = self
         return lattice
 
@@ -1530,6 +1568,12 @@ class Structure(models.Model, object):
 
         return [ transform.T.dot(vec) for vec in trans_vecs ]
 
+    def remove_atom(self, atom):
+        ind = self.sites.index(atom.site)
+        self.sites[ind].atoms.remove(atom)
+        if len(self.sites[ind]) == 0:
+            del self.sites[ind]
+        self.atoms.remove(atom)
 
     def transform(self, transform, in_place=True, tol=1e-5):
         """
@@ -1574,7 +1618,8 @@ class Structure(models.Model, object):
             self.coords = coords
             self.cell = new_cell
             return self
-        
+
+        # Test for simple IxJxK lattice multiplication        
         diag = True
         for i, j in itertools.combinations(range(3), r=2):
             if i == j:
@@ -1598,27 +1643,44 @@ class Structure(models.Model, object):
         inv = la.inv(transform.T)
         n_cells = abs(roundclose(la.det(transform)))
 
-        atoms = []
+        sites = []
+        self.lattice_points = points
+        self.sites_by_lattice_point = {}
+        self.atoms_by_lattice_point = {}
         for point in points:
-            for atom in self.atoms:
-                new = atom.copy()
-                coord = point + atom.coord
+            lp_sites = []
+            lp_atoms = []
+            for site in self.sites:
+                new = site.copy()
+                coord = point + site.coord
                 new.coord = inv.dot(coord)
-                atoms.append(new)
+                new.base_site = site
+                sites.append(new)
+
+                lp_atoms += new.atoms
+                lp_sites.append(new)
+            self.sites_by_lattice_point[tuple(point)] = lp_sites
+            self.atoms_by_lattice_point[tuple(point)] = lp_atoms
 
         self.cell = new_cell
-        self.atoms = atoms
+        self.sites = sites
         return self
 
     t = transform
 
-    def substitute(self, replace, rescale=True, in_place=False, **kwargs):
+    def substitute(self, replace, 
+                         rescale=True, rescale_method="relative",
+                         in_place=False, 
+                         **kwargs):
         """Replace atoms, as specified in a dict of pairs. 
 
         Keyword Arguments:
             rescale: 
                 rescale the volume of the final structure based on the per 
                 atom volume of the new composition.
+
+            rescale_method:
+                How to rescale the 
 
             in_place: 
                 change the species of the current Structure or return a new 
@@ -1643,8 +1705,10 @@ class Structure(models.Model, object):
                 volume -= atom.element.volume
                 atom.element = Element.get(replace[atom.element_id])
                 volume += atom.element.volume
-        if rescale:
+        if rescale and rescale_method == "relative":
             self.set_volume(volume)
+        elif rescale and rescale_method == "absolute":
+            self.set_volume_to_sum_of_elements()
         self.set_composition()
         return self
     sub = substitute

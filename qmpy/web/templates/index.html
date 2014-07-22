@@ -1,4 +1,5 @@
 {% extends "base_site.html" %}
+{% load admin_static %}
 
 {% block title %}
 OQMD
@@ -28,13 +29,23 @@ OQMD
 	<li><b> <a href="/download">Download</a></b> the entire database for your own use! </li>
 </ul>
 
+<h2>Tweet @TheOQMD to ask what is stable at a composition, or to get a simple phase diagram!</h2>
+<div style="float:left;">
+<img src="{% static "img/twitter_pd.png" %}" width=490 alt="Example of asking @TheOQMD about a phase diagram"> 
+</div>
+<div>
+<img src="{% static "img/twitter_composition.png" %}" width=490 alt="Example of asking @TheOQMD about a composition">
+</div>
+
+<div style="width:900px; float:left">
 <p> The OQMD was created in <a href="http://wolverton.northwestern.edu">Chris Wolverton's</a> group at Northwestern University.</p>
+</div>
 {% endblock %} 
 
 {% block sidebar %} 
 <div id="sidebar" class="box">
   <h1> Current status </h1>
-  Database contains <b>{{ entries.count }}</b> entries, of which <b>{{ done.count }}</b> have been calculated. In addition, calculations are constantly on-going, there are {{ running.count }} new structures currently being run!
+  Database contains DFT calculations for <b>{{ done.count }}</b> compounds. In addition, calculations are constantly on-going, there are {{ running.count }} new structures currently being run!
   <br>
   Recently completed compounds include: {% for calc in recent %} <a href="/materials/entry/{{calc.entry_id}}">{{calc.input.name}}</a> {% endfor %}
 </div>

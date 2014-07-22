@@ -12,10 +12,11 @@ for structure in structures:
     for i in range(3):
         sc = [ 1,1,1 ]
         sc[i] += 1
-        lattice = structure.get_spin_lattice(supercell=sc, tol=0.4)
+        lattice = structure.get_lattice_network(supercell=sc, tol=0.4)
         if not nx.is_connected(lattice.graph):
             result = 'LAYERED'
             break
     result += ' %s %s' % (structure.id, structure)
     print result
     open('layered.txt', 'a').write(result+'\n')
+

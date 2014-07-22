@@ -10,19 +10,20 @@ correcting errors in calculations.
 
 Calculation
 ^^^^^^^^^^^
-.. autoclass:: qmpy.Calculation
+
+.. autoclass:: Calculation
   :members:
 
 Density of States
 ^^^^^^^^^^^^^^^^^
 
-.. autoclass:: qmpy.DOS
+.. autoclass:: DOS
   :members:
 
 Potential
 ^^^^^^^^^
-.. autoclass:: qmpy.Potential
+.. autoclass:: Potential
   :members:
 
-.. autoclass:: qmpy.Hubbard
+.. autoclass:: Hubbard
   :members:

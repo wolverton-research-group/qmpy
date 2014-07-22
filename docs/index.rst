@@ -33,7 +33,7 @@ We can be reached at oqmd.contact@gmail.com.
 License
 =======
 
-The project is licensed under the MIT license.
+.. include:: ../LICENSE.txt
 
 
 Indices and tables

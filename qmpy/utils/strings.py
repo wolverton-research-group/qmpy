@@ -59,17 +59,17 @@ def parse_mu(value):
     return {elt: pot}
 
 def parse_comp(value):
-    comp = {}
+    comp = defaultdict(float)
     for elt, amt in re_formula.findall(value):
         if elt in ['D', 'T']:
             elt = 'H'
         if amt == '':
             comp[elt] = 1
         elif is_integer(amt):
-            comp[elt] = int(round(float(amt)))
+            comp[elt] += int(round(float(amt)))
         else:
-            comp[elt] = float(amt)
-    return comp
+            comp[elt] += float(amt)
+    return dict(comp)
 
 def parse_space(value):
     if isinstance(value, basestring):

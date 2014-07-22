@@ -68,6 +68,3 @@ Structural
 
 .. autoclass:: Peak
   :members:
-
-.. automodule:: qmpy.analysis.nearest_neighbors
-  :members:

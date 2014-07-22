@@ -3,33 +3,38 @@ Materials
 
 .. module:: qmpy
 
-Structure
-^^^^^^^^^
-.. autoclass:: qmpy.Structure
+Entry
+^^^^^
+.. autoclass:: Entry
   :members:
 
-.. autoclass:: qmpy.Prototype
+Structure
+^^^^^^^^^
+.. autoclass:: Structure
+  :members:
+
+.. autoclass:: Prototype
   :members:
 
 Atom
 ^^^^
-.. autoclass:: qmpy.Atom
+.. autoclass:: Atom
   :members:
 
 Site
 ^^^^
-.. autoclass:: qmpy.Site
+.. autoclass:: Site
   :members:
 
 Element
 ^^^^^^^
-.. autoclass:: qmpy.Element
+.. autoclass:: Element
   :members:
 
-.. autoclass:: qmpy.Species
+.. autoclass:: Species
   :members:
 
 Composition
 ^^^^^^^^^^^
-.. autoclass:: qmpy.Composition
+.. autoclass:: Composition
   :members:

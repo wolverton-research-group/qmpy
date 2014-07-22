@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
 import numpy as np
+cimport numpy as np
+DTYPE = np.float64
+ctypedef np.float64_t DTYPE_t
+
 import numpy.linalg as linalg
-from scipy.spatial import Voronoi
-import matplotlib.pylab as plt
-import itertools
 import logging
 
 import qmpy
@@ -96,8 +97,8 @@ def _heuristic(structure, limit=5, tol=2e-1):
             distances[i,j] = dist
 
     nns = {}
-    for i, site in enumerate(structure.sites):
-        site.neighbors = []
+    for i, a in enumerate(structure.sites):
+        a.neighbors = []
         dists = np.array(distances[i])
         dists /= min([d for d in dists ])
         # get neighbors within `tol` % of the shortest bond length
@@ -105,12 +106,8 @@ def _heuristic(structure, limit=5, tol=2e-1):
         inds = np.array([ ii for ii in inds if ii != i ])
         # map index back into the original cell
         inds %= structure.natoms
-        site.neighbors = [ structure.sites[j] for j in inds ]
-        nns[site] = site.neighbors
-        for atom in site:
-            atom.neighbors = []
-            for n in site.neighbors:
-                atom.neighbors += n.atoms
+        a.neighbors = [ structure.sites[j] for j in inds ]
+        nns[a] = a.neighbors
     #return nns
 
 def _voronoi(structure, limit=5, tol=1e-2):

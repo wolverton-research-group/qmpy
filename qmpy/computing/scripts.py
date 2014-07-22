@@ -83,9 +83,12 @@ def standard(entry, **kwargs):
     calc = Calculation.setup(inp, entry=entry,
         configuration='standard', path=entry.path+'/standard', **kwargs)
     if calc.converged:
-        calc.get_formation()
+        f = calc.get_formation()
+        f.save()
         entry.calculations['standard'] = calc
         entry.structures['standard'] = calc.output
+        ps = PhaseSpace(calc.input.comp.keys())
+        ps.compute_stabilities(save=True)
     return calc
 
 def relaxation(entry, **kwargs):
@@ -124,7 +127,10 @@ def static(entry, **kwargs):
 
     entry.calculations['static'] = calc
     if calc.converged:
-        calc.get_formation()
+        f = calc.get_formation()
+        f.save()
+        ps = PhaseSpace(calc.input.comp.keys())
+        ps.compute_stabilities(save=True)
     else:
         calc.write()
 

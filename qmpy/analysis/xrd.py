@@ -82,14 +82,14 @@ class Peak(object):
         imag = 0.0
 
         for bfactor, orbit in zip(bfactors, self.xrd.structure.orbits):
-            sf = self.atomic_scattering_factor(orbit[0].element_id)
             tf = self.thermal_factor(bfactor)
-
-            for atom in orbit:
-                dot = 2*np.pi*np.dot(self.hkl[0], atom.coord)
-                pre = sf * tf * atom.occupancy
-                real += pre*np.cos(dot) 
-                imag += pre*np.sin(dot)
+            for site in orbit:
+                for atom in site:
+                    sf = self.atomic_scattering_factor(atom.element_id)
+                    dot = 2*np.pi*np.dot(self.hkl[0], atom.coord)
+                    pre = sf * tf * atom.occupancy
+                    real += pre*np.cos(dot) 
+                    imag += pre*np.sin(dot)
 
         self.real = real
         self.imag = imag

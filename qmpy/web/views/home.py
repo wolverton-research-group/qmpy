@@ -9,7 +9,6 @@ def home_page(request):
     data = {'done':
             Entry.objects.filter(
                 formationenergy__fit='standard').distinct(),
-            'entries':Entry.objects.filter(duplicate_of=None),
             'running':Task.objects.filter(state=1),
             'recent':Calculation.objects.filter(label='static',
                 converged=True).order_by('-id')[:5],

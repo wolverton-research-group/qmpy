@@ -1,12 +1,14 @@
 from qmpy import *
 
-struct = io.read('PbI3.cif')
+# We take the structure for (CH3NH3)PbI3 that is missing the H sites
+struct = io.read('CNPbI3.cif')
 n_h_bond = 1.01 #A
 c_h_bond = 1.09 #A
 
 def coord(vec):
     return struct.inv.T.dot(vec)
 
+# and loop over atoms, adding H atoms to C and N atoms
 for atom in struct:
     if atom.element.symbol == 'C':
         x = np.sin(np.pi/4)*c_h_bond
