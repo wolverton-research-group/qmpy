@@ -8,6 +8,7 @@ from django.shortcuts import render_to_response
 from django.core.context_processors import csrf
 
 from qmpy import INSTALL_PATH
+from ..tools import get_globals
 from qmpy import *
 
 ndict = {1:'elements',
@@ -25,7 +26,8 @@ def construct_flot(phase_dict):
     return json.dumps(data)
 
 def composition_view(request, search=None):
-    data = {'search':''}
+    data = get_globals()
+    data['search'] = ''
     composition = ''
     space = []
     if request.method == 'POST':
@@ -55,7 +57,11 @@ def composition_view(request, search=None):
         data['gs'] = Phase.from_phases(gs)
         data['phases'] = gs
         data['compound'] = comp.ground_state
-        data['singlephase'] = ( len(gs) == 1 )
+        if len(gs) == 1:
+            data['singlephase'] = True 
+        else:
+            data['singlephase'] = False
+        #data['singlephase'] = ( len(gs) == 1 )
         data['space'] = '-'.join(comp.comp.keys())
         return render_to_response('materials/composition.html', 
                 data,

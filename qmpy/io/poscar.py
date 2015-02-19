@@ -179,9 +179,9 @@ def read(poscar, species=None):
         atom = st.Atom()
         atom.element_id = atom_types[i]
         if direct:
-            atom.coord = [ float(v) for v in poscar.readline().split() ]
+            atom.coord = [ float(v) for v in poscar.readline().split()[0:3] ]
         else:
-            cart = [ float(v) for v in poscar.readline().split() ]
+            cart = [ float(v) for v in poscar.readline().split()[0:3] ]
             atom.coord = np.dot(inv, cart)
         struct.add_atom(atom)
     struct.get_volume()

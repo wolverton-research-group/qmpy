@@ -91,23 +91,74 @@ def standard(entry, **kwargs):
         ps.compute_stabilities(save=True)
     return calc
 
-def relaxation(entry, **kwargs):
+def check_spin(entry):
     if entry.calculations.get('relaxation', Calculation()).converged:
-        return entry.calculations['relaxation']
+        e1 = entry.calculations['relaxation'].energy
+        entry.calculations['relaxation'].Co_lowspin = False
+        if entry.calculations.get('Co_lowspin', Calculation()).converged:
+            e2 = entry.calculations['Co_lowspin'].energy
+            entry.calculations['Co_lowspin'].Co_lowspin = True
+            if e1 < e2:
+                return entry.calculations['relaxation']
+            else:
+                return entry.calculations['Co_lowspin']
+    return None
 
-    input = entry.input
-    input.make_primitive()
-    calc = Calculation.setup(input,  entry=entry,
-                                     configuration='relaxation',
-                                     path=entry.path+'/relaxation',
-                                     **kwargs)
+def relaxation(entry, **kwargs):
+    if 'Co' in entry.comp:
+        spin = check_spin(entry)
+        if not spin is None:
+            return spin
+    else:
+        if entry.calculations.get('relaxation', Calculation()).converged:
+            return entry.calculations['relaxation']
 
-    entry.calculations['relaxation'] = calc
-    if calc.converged:
+    if not entry.calculations.get('relaxation', Calculation()).converged:
+        input = entry.input
+        input.make_primitive()
+        if 'relax_high_cutoff' in entry.keywords:
+            calc = Calculation.setup(input,  entry=entry,
+                                             configuration='relaxation',
+                                             path=entry.path+'/relaxation',
+                                             settings={'prec':'HIGH'},
+                                             **kwargs)
+        else:
+            calc = Calculation.setup(input,  entry=entry,
+                                             configuration='relaxation',
+                                             path=entry.path+'/relaxation',
+                                             **kwargs)
+
+        entry.calculations['relaxation'] = calc
+        entry.Co_lowspin = False
+        if not calc.converged:
+            calc.write()
+            return calc
+
+    if 'Co' in entry.comp:
+        if not entry.calculations.get('Co_lowspin', Calculation()).converged:
+            input = entry.input
+            input.make_primitive()
+            calc = Calculation.setup(input,  entry=entry,
+                                             configuration='relaxation',
+                                             path=entry.path+'/Co_lowspin',
+                                             **kwargs)
+            
+            for atom in calc.input:
+                if atom.element.symbol == 'Co':
+                    atom.spin = 0.01
+
+            entry.calculations['Co_lowspin'] = calc
+            entry.Co_lowspin = True
+            if not calc.converged:
+                calc.write()
+                return calc
+
+    if 'Co' in entry.comp:
+        calc = check_spin(entry)
+        assert ( not calc is None )
         entry.structures['relaxed'] = calc.output
     else:
-        calc.write()
-    
+        entry.structures['relaxed'] = calc.output
     return calc
 
 def static(entry, **kwargs):
@@ -115,6 +166,11 @@ def static(entry, **kwargs):
         return entry.calculations['static']
 
     calc = relaxation(entry, **kwargs)
+    if hasattr(calc, 'Co_lowspin'):
+        use_lowspin = ( calc.Co_lowspin is True )
+    else:
+        use_lowspin = False
+
     if not calc.converged:
         return calc
 
@@ -125,6 +181,11 @@ def static(entry, **kwargs):
                                     chgcar=entry.path+'/relaxation',
                                     **kwargs)
 
+    if use_lowspin:
+        for atom in calc.input:
+            if atom.element.symbol == 'Co':
+                atom.magmom = 0.01
+
     entry.calculations['static'] = calc
     if calc.converged:
         f = calc.get_formation()
@@ -133,7 +194,6 @@ def static(entry, **kwargs):
         ps.compute_stabilities(save=True)
     else:
         calc.write()
-
     return calc
 
 def wavefunction(entry, **kwargs):

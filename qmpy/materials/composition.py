@@ -1,6 +1,7 @@
 # qmpy/materials/composition.py
 
 from django.db import models
+from django.db.models import F
 
 from qmpy.materials.element import Element
 from qmpy.data import elements
@@ -137,7 +138,7 @@ class Composition(models.Model):
 
     @property
     def entries(self):
-        entries = self.entry_set.filter(duplicate_of=None)
+        entries = self.entry_set.filter(duplicate_of=F("id"))
         if not entries.exists():
             return []
         return sorted(entries, key=lambda x:
@@ -184,6 +185,7 @@ class Composition(models.Model):
     def delta_e(self):
         """Return the lowest formation energy."""
         formations = self.formationenergy_set.exclude(delta_e=None)
+        formations = formations.filter(fit='standard')
         if not formations.exists():
             return
         return min(formations.values_list('delta_e', flat=True))

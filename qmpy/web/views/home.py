@@ -3,19 +3,18 @@ import os.path
 from django.contrib.auth import authenticate
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-from qmpy.models import Entry, Task, Calculation, Formation
+from qmpy.models import Entry, Task, Calculation, Formation, MetaData
+from tools import get_globals
 
 def home_page(request):
-    data = {'done':
-            Entry.objects.filter(
-                formationenergy__fit='standard').distinct(),
-            'running':Task.objects.filter(state=1),
-            'recent':Calculation.objects.filter(label='static',
-                converged=True).order_by('-id')[:5],
-            'jobserver':os.path.exists('/tmp/jobserver.pid'),
-            'taskserver':os.path.exists('/tmp/taskserver.pid')}
+    data = get_globals()
+    data.update({
+        'done':Entry.objects.filter(
+            formationenergy__fit='standard').distinct(),
+        'running':Task.objects.filter(state=1),
+        'recent':Calculation.objects.filter(label='static',
+            converged=True).order_by('-id')[:5]})
     request.session.set_test_cookie()
-
     return render_to_response('index.html',
             data,
             RequestContext(request))

@@ -137,6 +137,8 @@ class DOS(models.Model):
             canvas = Renderer(lines=[line1, line2])
             canvas.yaxis.max = max(self.total_dos)*1.1
             canvas.yaxis.min = 0
+            canvas.xaxis.label = "Energy (eV)"
+            canvas.yaxis.label = "# states/ unit cell"
             self._plot = canvas
         return self._plot
 

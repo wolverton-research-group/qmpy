@@ -8,10 +8,12 @@ from django.core.context_processors import csrf
 
 from qmpy import INSTALL_PATH
 from qmpy.models import *
+from ..tools import get_globals
 
 def entry_view(request, entry_id):
     entry = Entry.objects.get(pk=entry_id)
     data = {'entry': entry}
+    data = get_globals(data)
     if request.method == 'POST':
         p = request.POST
 
@@ -39,15 +41,17 @@ def entry_view(request, entry_id):
 def keyword_view(request, keyword):
     key = MetaData.get('Keyword', keyword)
 
-    data = {'keyword': key}
+    data = get_globals()
+    data['keyword'] = key
     return render_to_response('materials/keyword.html', 
             data, 
             RequestContext(request))
 
 def duplicate_view(request, entry_id):
     entries = Entry.objects.filter(duplicate_of=entry_id)
-    data = {'entries': entries,
-            'entry': Entry.objects.get(pk=entry_id)}
+    data = get_globals()
+    data['entries'] = entries
+    data['entry'] = Entry.objects.get(pk=entry_id)
     return render_to_response('materials/duplicates.html', 
             data, 
             RequestContext(request))

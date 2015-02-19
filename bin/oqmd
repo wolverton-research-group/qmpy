@@ -124,15 +124,15 @@ Examples:
 #==============================================================================#
 
     if 'jobserver' in runner.task:
-        js = JobManager('/tmp/oqmd-jobsever.pid')
-        getattr(js, runner.task[0])()
+        js = JobManager('/tmp/oqmd-jobserver.pid')
+        getattr(js, runner.task[1])()
 
     #======================================================================#
     if 'taskserver' in runner.task:
-        ts = TaskManager('/tmp/oqmd-tasksever.pid')
-        method = getattr(ts, runner.task[0])
-        if len(runner.task) > 1:
-            kwargs = dict(arg.split('=') for arg in runner.task[1:])
+        ts = TaskManager('/tmp/oqmd-taskserver.pid')
+        method = getattr(ts, runner.task[1])
+        if len(runner.task) > 2:
+            kwargs = dict(arg.split('=') for arg in runner.task[2:])
         else:
             kwargs = {}
         method(**kwargs)

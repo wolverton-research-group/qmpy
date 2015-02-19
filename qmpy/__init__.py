@@ -263,5 +263,8 @@ try:
     if MetaData.objects.filter(type='global_warning').exists:
         for md in MetaData.objects.filter(type='global_warning'):
             logger.warn(md.value)
+    if MetaData.objects.filter(type='global_info').exists:
+        for md in MetaData.objects.filter(type='global_info'):
+            logger.info(md.value)
 except:
     pass

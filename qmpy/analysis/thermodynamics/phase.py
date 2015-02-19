@@ -319,11 +319,11 @@ class Phase(object):
 
     Examples::
 
-        >>> p = Phase('Fe2O3', -1.64, per_atom=True)
+        >>> p1 = Phase('Fe2O3', -1.64, per_atom=True)
         >>> p2 = Phase('Fe2O3', -8.2, per_atom=False)
         >>> p3 = Phase({'Fe':0.4, 'O':0.6}, -1.64)
         >>> p4 = Phase({'Fe':6, 'O':9}, -24.6, per_atom=False)
-        >>> p == p2
+        >>> p1 == p2
         True
         >>> p2 == p3
         True
@@ -402,7 +402,7 @@ class Phase(object):
     def __repr__(self):
         return '<Phase %s>' % self
 
-    def __eq__(self,other):
+    def __eq__(self, other):
         """
         Phases are defined to be equal if they have the same composition and an
         energy within 1e-6 eV/atom.

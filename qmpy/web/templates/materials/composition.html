@@ -65,7 +65,7 @@ theForm.onsubmit = function(e) {
   <h1>&Delta;H = {{gs.energy | floatformat:-3}} eV/atom </h1>
   {% if singlephase %}
   <h1> Stable phase: <a href="/materials/entry/{{compound.id}}">
-      {{ compound.name }}</a><h1>
+      {{ compound.name }}</a></h1>
   {% else %}
   <h1> No single stable phase, decomposes into:
     {% for p in phases %}

@@ -5,7 +5,6 @@ from symmetry import *
 from visualize import *
 from thermodynamics import *
 from calculation import *
-from discovery import *
 
 def analysis_view(request):
     return render_to_response('analysis/index.html', {})

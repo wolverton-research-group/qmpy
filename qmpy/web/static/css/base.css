@@ -288,10 +288,19 @@ html {
 	width: 100%;
 }
 
-#notice {
+#global-warning {
 	float: left;
 	width: 100%;
 	overflow: hidden;
+	font-size: 36px;
+	background: #D46A6A;
+}
+
+#global-info {
+	float: left;
+	width: 100%;
+	overflow: hidden;
+	font-size: 36px;
 }
 
 #content {
@@ -417,7 +426,7 @@ html {
 }
 
 .nav ul li:hover > ul li a {
-	color: #666; min-width:150px;
+	color: #606060; min-width:150px;
 }
 
 .nav ul li:hover > ul li a:hover{
@@ -427,14 +436,39 @@ html {
 .nav ul li{
 	position: relative;
 }
+
 .nav ul li ul {
 	position: absolute;
 	top:30px; 
 	left: 0px;
 }
 
+.nav ul li ul li {
+	position: relative;
+}
+
+.nav ul li ul li a{
+	display: block;
+	color: #606060;
+}
+
+.nav ul li ul li ul {
+	position: absolute;
+	top:0px;
+	left:100%;
+}
+
+.nav ul li ul li ul li {
+	color: #606060;
+}
+
+.nav ul li ul li ul li a{
+	display: block;
+}
+
 .auth {
 	float: right;
+	color: #606060
 
 }
 

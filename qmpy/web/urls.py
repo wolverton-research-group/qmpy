@@ -37,6 +37,9 @@ urlpatterns += patterns('qmpy.web.views',
     url(r'^materials/xrd/(?P<structure_id>.*).csv', 'export_xrd'),
     url(r'^materials/kpoints/(?P<mesh>.*)/(?P<structure_id>.*)/KPOINTS',
         'export_kpoints'),
+    url(r'^materials/discovery', 'disco_view'),
+    url(r'^materials/chempots', 'chem_pot_view'),
+    url(r'^materials/deposit', 'deposit_view'),
 
     ## References
     url(r'^reference/author/(?P<author_id>.*)$', 'author_view'),
@@ -70,12 +73,10 @@ urlpatterns += patterns('qmpy.web.views',
     url(r'^analysis/$', 'analysis_view'),
     url(r'^analysis/gclp/$', 'gclp_view'),
     url(r'^analysis/phase_diagram/$', 'phase_diagram_view'),
-    url(r'^analysis/chemical_potentials/$', 'chem_pot_view'),
     url(r'^analysis/spacegroup/(?P<spacegroup>.*)', 'sg_view'),
     url(r'^analysis/operation/(?P<operation>.*)', 'op_view'),
     url(r'^analysis/visualize$', 'vis_data'),
     url(r'^analysis/visualize/custom$', 'jsmol'),
-    url(r'^analysis/discovery', 'disco_view'),
 
     ## documentation
     url(r'^documentation/$', 'docs_view'),

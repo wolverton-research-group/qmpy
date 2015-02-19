@@ -535,9 +535,10 @@ class Calculation(models.Model):
         if not exists(self.path):
             return
         elif exists(self.path+'/OUTCAR'):
-            self.outcar = open(self.path+'/OUTCAR').read().split('\n')
+            self.outcar = open(self.path+'/OUTCAR').read().splitlines()
         elif exists(self.path+'/OUTCAR.gz'):
-            self.outcar = gzip.open(self.path + '/OUTCAR.gz', 'rb').read().split('\n')
+            outcar = gzip.open(self.path + '/OUTCAR.gz','rb').read()
+            self.outcar = outcar.splitlines()
         else:
             raise VaspError('No such file exists')
 
@@ -739,8 +740,10 @@ class Calculation(models.Model):
         for line in self.outcar:
             if 'FORCE on cell' in line:
                 check = True
-            if check and 'Total' in line:
-                stresses.append(map(ffloat, line.split()[1:]))
+            #if check and 'Total' in line:
+            #[[mv]]
+            if check and 'in kB' in line:
+                stresses.append(map(ffloat, line.split()[2:]))
                 check = False
         return np.array(stresses)
 
@@ -800,7 +803,8 @@ class Calculation(models.Model):
             magmoms = self.read_magmoms()
             charges = self.read_charges()
         except:
-            raise VaspError("Failed to read results")
+            self.add_error("failed to read")
+            return
 
         if len(self.energies) > 0:
             self.energy = self.energies[-1]
@@ -829,7 +833,8 @@ class Calculation(models.Model):
                 self.output = output
                 self.output.set_label(self.label)
             except:
-                raise VaspError("Improperly read results")
+                self.add_error("failed to read")
+                return
 
     def read_convergence(self):
         self.get_outcar()
@@ -1215,7 +1220,7 @@ class Calculation(models.Model):
             new_calc.add_error('attempts')
 
         for err in errors:
-            if err in ['duplicate','partial']:
+            if err in ['duplicate','partial', 'failed to read']:
                 continue
             elif err == 'convergence':
                 if not self.output is None:
@@ -1331,6 +1336,8 @@ class Calculation(models.Model):
         self.remove_error('invgrp')
         self.remove_error('pricel')
         self.remove_error('sgrcon')
+        self.remove_error('failed to read')
+        self.remove_error('convergence')
 
     def fix_brions(self):
         self.settings['potim'] *= 2
@@ -1342,6 +1349,8 @@ class Calculation(models.Model):
         self.remove_error('zpotrf')
         self.remove_error('fexcp')
         self.remove_error('fexcf')
+        self.remove_error('failed to read')
+        self.remove_error('convergence')
 
     def fix_bands(self):
         self.settings['nbands'] = int(np.ceil(self.settings['nbands']*1.5))
@@ -1399,8 +1408,6 @@ class Calculation(models.Model):
     def instructions(self):
         if self.converged:
             return {}
-        elif self.errors:
-            return {}
 
         instruction = {
                 'path':self.path,
@@ -1424,13 +1431,15 @@ class Calculation(models.Model):
         self.label = label
         if not self.entry is None:
             self.entry.calculations[label] = self
-        if self.id:
-            Calculation.objects.filter(id=self.id).update(label=label)
+        #if self.id:
+        #    Calculation.objects.filter(id=self.id).update(label=label)
 
     def set_hubbards(self, convention='wang'):
         hubs = HUBBARDS.get(convention, {})
         elts = set( k[0] for k in hubs.keys() )
         ligs = set( k[1] for k in hubs.keys() )
+
+        # How many ligand elements are in the struture?
         lig_int = ligs & set(self.input.comp.keys())
 
         if not lig_int:
@@ -1685,20 +1694,21 @@ class Calculation(models.Model):
 
         calc.input.make_primitive()
 
-        settings = {}
+        vasp_settings = {}
         if calc.input.natoms > 20:
-            settings['lreal'] = 'auto'
-        settings.update(VASP_SETTINGS[configuration])
-        settings.update(settings)
-        calc.set_potentials(calc.settings.get('potentials', 'vasp_rec'))
-        calc.set_hubbards(calc.settings.get('hubbards', 'wang'))
-        calc.set_magmoms(calc.settings.get('magnetism', 'ferro'))
+            vasp_settings['lreal'] = 'auto'
+        vasp_settings.update(VASP_SETTINGS[configuration])
+        vasp_settings.update(settings)
 
-        if 'scale_encut' in settings:
+        calc.set_potentials(vasp_settings.get('potentials', 'vasp_rec'))
+        calc.set_hubbards(vasp_settings.get('hubbards', 'wang'))
+        calc.set_magmoms(vasp_settings.get('magnetism', 'ferro'))
+
+        if 'scale_encut' in vasp_settings:
             enmax = max(pot.enmax for pot in calc.potentials)
-            calc.encut = int(settings.get('scale_encut')*enmax)
+            calc.encut = int(vasp_settings['scale_encut']*enmax)
 
-        calc.settings = settings
+        calc.settings = vasp_settings
         if calc.input.natoms >= 10:
             calc.settings.update({
                 'ncore': 4, 
@@ -1709,17 +1719,13 @@ class Calculation(models.Model):
         try:
             calc.get_outcar()
         except VaspError:
-            if not ( os.path.exists(calc.path+'/INCAR') and
-                    os.path.exists(calc.path+'/POTCAR') and 
-                    os.path.exists(calc.path+'/KPOINTS') and
-                    os.path.exists(calc.path+'/POSCAR')):
-                calc.write()
+            calc.write()
             return calc
 
         # Read all outputs
+        calc.read_stdout()
         calc.read_outcar()
         calc.read_doscar()
-        calc.read_stdout()
 
         # Did the calculation finish without errors?
         if calc.converged:

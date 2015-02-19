@@ -9,6 +9,22 @@
 <h2> An Open Quantum Materials Database</h2>
 {% endblock %}
 
+{% block global-warning %}
+{% if global_warnings %}
+{% for message in global_warnings %}
+Warning: {{ message.value }}<br>
+{% endfor %}
+{% endif %}
+{% endblock %}
+
+{% block global-info %}
+{% if global_info %}
+{% for message in global_info %}
+Notice: {{ message.value }}<br>
+{% endfor %}
+{% endif %}
+{% endblock %}
+
 {% block auth %}
 {% if user.is_authenticated %}
 Welcome, {{ user.username }}.<br>
@@ -23,11 +39,22 @@ Welcome, {{ user.username }}.<br>
 	<li><a href="/materials/">Materials</a>
   <ul>
     <li> <a href="/materials/composition">Search</a></li>
+    <li> <a href="/materials/discovery">Compound discovery</a> </li>
   </ul>
   <li><a href="/computing/">Computing</a>
   <ul>
-    <li> <a href="/computing/hosts">Hosts</a></li>
-    <li> <a href="/computing/projects">Projects</a></li>
+    <li> <a href="/computing/hosts">Hosts</a>
+      <ul>
+        {% for host in host_list %}
+        <li> <a href="/computing/host/{{host.name}}">
+          {{host.name}}</a></li>
+        {% endfor %} </ul></li>
+    <li> <a href="/computing/projects">Projects</a>
+      <ul>
+        {% for project in project_list %}
+        <li> <a href="/computing/project/{{project.name}}">
+          {{project.name}}</a></li>
+        {% endfor %} </ul></li>
     <li> <a href="/computing/queue">Queue</a></li>
   </ul>
 	<li><a href="/analysis/">Analysis</a>
@@ -35,7 +62,6 @@ Welcome, {{ user.username }}.<br>
     <li> <a href="/analysis/gclp/">GCLP</a> </li>
     <li> <a href="/analysis/phase_diagram/">Phase Diagrams</a> </li>
     <li> <a href="/analysis/visualize">Visualize</a></li>
-    <li> <a href="/analysis/discovery">Compound discovery</a> </li>
   </ul>
 
 	<li><a href="/documentation/overview">Documentation</a>

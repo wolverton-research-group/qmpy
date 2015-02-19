@@ -40,10 +40,17 @@
 	{% if entry.composition.experiment %}
 	<li>Experimental Heat of Formation (298K): {{ entry.composition.experiment | floatformat:3 }}</li>
 	{% endif %}
-	{% if entry.duplicate_of %}
+  {% if entry.duplicate_of %}
+  <!-- [[v]] -->
+  <!-- added an extra if here to check if the entry is a duplicate of only itself -->
+    {% if not entry.duplicate_of_id == entry.id %}
 	<li>Duplicate of:
-	<a href="/materials/entry/{{ entry.duplicate_of_id }}">Entry {{entry.duplicate_of_id}}</a>
-  </li>{% elif entry.duplicates.all %}
+  <a href="/materials/entry/{{ entry.duplicate_of_id }}">Entry {{entry.duplicate_of_id}}</a>
+    {% endif %}
+  {% endif %}
+  <!-- [[v]] -->
+  <!-- changed elif to if in the line below and ended the previous if on the line above-->
+  </li>{% if entry.duplicates.all %} 
   <li>See also: 
   <a href="/materials/duplicates/{{ entry.id }}">duplicates list</a>
   {% endif %}

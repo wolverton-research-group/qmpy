@@ -244,6 +244,7 @@ class Entry(models.Model):
                     structs[s.label] = s
                 self._structures = structs
         return self._structures
+    s = structures
 
     @structures.setter
     def structures(self, structs):
@@ -258,6 +259,7 @@ class Entry(models.Model):
         self._structures[struct].delete()
         del self._structures[struct]
 
+
     _calculations = None
     @property
     def calculations(self):
@@ -271,6 +273,7 @@ class Entry(models.Model):
                     calcs[c.label] = c
                 self._calculations = calcs
         return self._calculations
+    c = calculations
 
     @calculations.setter
     def calculations(self, calcs):
@@ -421,7 +424,7 @@ class Entry(models.Model):
         final relaxed structure. Otherwise, returns None.
         """
         if self._energy is None:
-            fes = self.formationenergy_set.order_by('delta_e')
+            fes = self.formationenergy_set.filter(fit='standard').order_by('delta_e')
             if fes.exists():
                 self._energy = fes[0].delta_e
             #if 'static' in self.calculations:

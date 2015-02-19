@@ -648,6 +648,8 @@ class PhaseSpace(object):
 
     def chempot_range(self, p, element=None):
         pot_bounds = {}
+        tcomp = dict(p.unit_comp)
+        e, c = self.gclp(tcomp, mus=None)
         for elt in p.comp.keys():
             tcomp = dict(p.unit_comp)
             tcomp[elt] -= 0.01
@@ -897,7 +899,7 @@ class PhaseSpace(object):
         Examples::
 
             >>> space = PhaseSpace('Fe-Li-O')
-            >>> phases, energy = space.gclp('FeLiO2')
+            >>> energy, phases = space.gclp('FeLiO2')
             >>> print phases
             >>> print energy
 
@@ -1338,7 +1340,7 @@ class PhaseSpace(object):
         xaxis.min, xaxis.max = (0, 1)
         yaxis = Axis('y', label='Delta H', units='eV/atom')
         self.renderer.xaxis = xaxis
-        self.renderer.yaxis= yaxis
+        self.renderer.yaxis = yaxis
 
         for p1, p2 in self.tie_lines:
             pt1 = Point([self.coord(p1)[0], self.phase_energy(p1)])
@@ -1634,6 +1636,8 @@ class PhaseSpace(object):
 
         points = sorted( points, key=lambda x: x[0] )
         points = sorted( points, key=lambda x: -x[1] )
+        #!v
+        #print points
 
         base = sorted(self.stable, key=lambda x:
                 x.amt(var)['var'])[0]

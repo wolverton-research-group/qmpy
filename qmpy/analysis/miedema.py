@@ -39,6 +39,7 @@ class Miedema(object):
             Energy per atom. (eV/atom)
             
         """
+        self.energy = None
         # validate composition
         if isinstance(composition, basestring):
             composition = parse_comp(composition)
@@ -192,6 +193,5 @@ class Miedema(object):
 
     @staticmethod
     def get(composition):
-        med = Miedema(composition)
-        return med.energy
+        return Miedema(composition).energy
 

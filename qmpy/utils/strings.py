@@ -289,7 +289,7 @@ def reduce_comp(values, method='auto'):
     if len(ints) == len(values) - 1:
         return make_return(second)
 
-    if sum(values) <= 1.001:
+    if sum(values) <= 1.005:
         third = reduce_by_any_means(values)
         if all( v < 1000 for v in third):
             return make_return(third)

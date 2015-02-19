@@ -14,6 +14,8 @@
 <div>
   <h1> Host Dashboard: </h1>
   {% for project in projects %}
+  <!-- [vi] -->
+  {% if not project.name == 'voorhees' %}
   {% if project.active %} 
   <div class="box" style='width:280px'>
   {% else %} 
@@ -50,6 +52,7 @@
     <h2> No tasks assigned. </h2>
     {% endif %}
   </div>
+  {% endif %}
   {% endfor %}
 </div>
 

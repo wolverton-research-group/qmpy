@@ -8,6 +8,7 @@ from django.core.context_processors import csrf
 
 import cStringIO
 from qmpy import *
+from ..tools import get_globals
 
 global custom_data
 custom_data = None
@@ -63,12 +64,12 @@ direct
         f = cStringIO.StringIO()
         f.write(custom_data)
         s = io.read(f)
-        s.symmetrize()
+        #s.symmetrize()
         data['structure'] = s
     data.update(csrf(request))
     custom_data = data['crystal_data']
     return render_to_response('analysis/view_data.html',
-            data,
+            get_globals(data),
             RequestContext(request))
 
 def jsmol(request):

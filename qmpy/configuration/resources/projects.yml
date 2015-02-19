@@ -1,33 +1,111 @@
-#name:
-#  allocations: [list, of, alloctions, for, project]
-#  priority: Base priority for the project. Lower numbers will be done soonest.
-#  users: [list, of, allowed, users]
-
-hydrogen:
-  allocations: [p20268]
+# project1:
+    #   allocations:
+    #       - allocation1
+    #       - allocation2
+    #   priority: Base priority for the project. Lower numbers will be done soonest.
+    #   users:
+    #       - user1
+    #       - user2
+    # project2: ...
+    
+Li2MO3:
+  allocations:
+  - byrd
+  - josquin
+  - p20273
+  - palestrina
+  - victoria
   priority: 0
-  users: [sjk648]
-icsd:
-  allocations: [byrd, josquin, p20273, palestrina, victoria]
-  priority: 0
-  users: [sjk648]
-jeff:
-  allocations: [byrd, e20438, hopper, josquin, p20254, palestrina]
+  users:
+  - sjk648
+ahmed:
+  allocations:
+  - byrd
+  - josquin
+  - palestrina
+  - victoria
   priority: 1
-  users: [jwd686]
+  users:
+  - sjk648
+elements:
+  allocations:
+  - byrd
+  - josquin
+  - palestrina
+  - victoria
+  priority: 0
+  users:
+  - sjk648
+garnets:
+  allocations:
+  - byrd
+  - josquin
+  - palestrina
+  - victoria
+  priority: 0
+  users:
+  - sjk648
+icsd:
+  allocations:
+  - byrd
+  - josquin
+  - p20268
+  - p20273
+  - palestrina
+  - victoria
+  priority: 0
+  users:
+  - sjk648
+james:
+  allocations:
+  - byrd
+  - josquin
+  - p20268
+  - p20273
+  - palestrina
+  - victoria
+  priority: 0
+  users:
+  - sjk648
 li-air:
-  allocations: [byrd, josquin, palestrina, victoria]
+  allocations:
+  - byrd
+  - josquin
+  - p20268
+  - p20273
+  - palestrina
+  - victoria
   priority: 0
-  users: [sjk648]
-perovskites:
-  allocations: [byrd, josquin, victoria]
-  priority: 100
-  users: [sjk648]
+  users:
+  - sjk648
 prototypes:
-  allocations: [byrd, josquin, palestrina, victoria]
-  priority: 100
-  users: [sjk648]
-questek:
-  allocations: [byrd, josquin, palestrina, victoria]
+  allocations:
+  - byrd
+  - josquin
+  - p20273
+  - palestrina
+  - victoria
   priority: 0
-  users: [sjk648]
+  users:
+  - sjk648
+tony:
+  allocations:
+  - byrd
+  - josquin
+  - p20117
+  - palestrina
+  - victoria
+  priority: 0
+  users:
+  - aae109
+voorhees:
+  allocations:
+  - b1004
+  - byrd
+  - josquin
+  - p20268
+  - palestrina
+  - victoria
+  priority: 0
+  users:
+  - vih173

@@ -24,7 +24,6 @@ class Axis(object):
         else:
             return self.label
 
-
     def apply_to_matplotlib(self, **kwargs):
         axes = kwargs.get('axes', plt.gca())
         if self.name == 'x':

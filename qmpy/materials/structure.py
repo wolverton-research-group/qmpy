@@ -346,8 +346,8 @@ class Structure(models.Model, object):
         self.label = label
         if not self.entry is None:
             self.entry.structures[label] = self
-        if self.id:
-            Structure.objects.filter(id=self.id).update(label=label)
+        #if self.id:
+        #    Structure.objects.filter(id=self.id).update(label=label)
 
     def set_volume(self, value):
         """
@@ -942,7 +942,8 @@ class Structure(models.Model, object):
         +---------+-------------------------------------+
         | "ferro" | atoms with partially filled d and   |
         |         | f shells are assigned a magnetic    |
-        |         | moment of 5 mu_b                    |
+        |         | moment of 5 mu_b and 7 mu_b         |
+        |         | respectively                        |
         +---------+-------------------------------------+
         | "anti"  | finds a highly ordererd arrangement |
         |         | arrangement of up and down spins.   |
