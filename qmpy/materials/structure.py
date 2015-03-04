@@ -1782,7 +1782,7 @@ class Structure(models.Model, object):
 
         if not in_place:
             new = self.copy()
-            trans = new.reduction(tol=tol, limit=limit)
+            trans = new.reduce(tol=tol, limit=limit)
             return new, trans
 
         # reduction parameters
