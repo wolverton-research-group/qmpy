@@ -1,0 +1,33 @@
+{% extends "base_site.html" %}
+{% load admin_static %}
+{% load i18n %}
+
+{% block content_title %}
+<h2> Deposit a Structure! </h2>
+{% endblock %}
+
+{% block content %}
+<p>
+Use the form below to upload one or more structures in the VASP POSCAR format. We'll 
+validate it, perform DFT calculations on it and add it our database.
+</p>
+<form action="" method="post">
+  Name:
+  <input type="text" name="name">
+  <br>
+  Email:
+  <input type="text" name="email">
+  <br>
+  Institution (University/Company):
+  <input type="text" name="institute">
+  <br>
+  Is this work already published?
+  <input type="radio" name="publication" value="yes" checked>Yes
+  <input type="radio" name="publication" value="no">No
+  <br>
+  Please enter the reference DOI:
+  <input type="text" name="doi">
+  <br>
+  POSCARs to deposit:
+  <input type="file" name="file">
+{% endblock %}
