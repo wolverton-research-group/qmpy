@@ -34,10 +34,18 @@ def disco_view(request):
             in res_not_icsd ]
 
     # find cases where there _is_ an ICSD entry at the same composition
+    res_icsd = []
     form_icsd = form_all.filter(composition__entry__meta_data__value='icsd').distinct()
-    res_icsd = form_icsd.values_list('composition', 'entry__prototype__name', 'delta_e')
-    res_icsd = [[ format_comp(parse_comp(c)), proto, de ] for c, proto, de in
-            res_icsd ]
+    for fe in form_icsd:
+        if fe.entry.id != fe.entry.duplicate_of.id:
+            continue
+        proto_name = fe.entry.prototype.name if fe.entry.prototype is not None else 'None'
+        res_icsd.append([ format_comp(fe.composition.comp), proto_name, fe.delta_e ])
+        
+
+    ####res_icsd = form_icsd.values_list('composition', 'entry__prototype__name', 'delta_e')
+    ####res_icsd = [[ format_comp(parse_comp(c)), proto, de ] for c, proto, de in
+    ####        res_icsd ]
 
 #    result3 = []
 #    for c in form.values_list('composition', flat=True):

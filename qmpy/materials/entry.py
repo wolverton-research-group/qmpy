@@ -113,7 +113,7 @@ class Entry(models.Model):
             self.meta_data = self.hold_objects + self.keyword_objects
 
     @staticmethod
-    def create(source, keywords=[], projects=[], **kwargs):
+    def create(source, keywords=[], projects=[], prototype=None, **kwargs):
         """
         Attempts to create an Entry object from a provided input file.
 
@@ -156,6 +156,7 @@ class Entry(models.Model):
         for kw in keywords:
             entry.add_keyword(kw)
         entry.projects = projects
+        entry.prototype = prototype
 
         # Step 3
         c1 = structure.composition

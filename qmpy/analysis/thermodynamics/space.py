@@ -1024,8 +1024,10 @@ class PhaseSpace(object):
             #    pass
             energy, gclp_phases = self.gclp(p.unit_comp, phases=phases)
             #vh
-            print p,  '------', gclp_phases
+            #print p,  '------', gclp_phases
             p.stability = p.energy - energy
+            #vh
+            return energy, gclp_phases
 
     @transaction.atomic
     def compute_stabilities(self, phases=None, save=False, reevaluate=True):
@@ -1089,7 +1091,7 @@ class PhaseSpace(object):
         ref = np.array(ref)
 
         for p in self.phases:
-            p.dE_pa = p.E_pa - sum(self.coord(p) * ref)
+            p.energy = p.energy - sum(self.coord(p) * ref)
 
     renderer = None
     @property

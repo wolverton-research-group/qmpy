@@ -8,6 +8,7 @@ import point
 import line
 import text
 import axis
+from qmpy.utils import *
 
 logger = logging.getLogger(__name__)
 
@@ -110,6 +111,128 @@ class Renderer(object):
         self.yaxis.apply_to_matplotlib(axes=axes)
         return axes
 
+
+    def _write_matplotlib_text(self, px, py, p, **kwargs):
+        stable = kwargs['stable']
+        if not stable:
+            fs = 20
+        else:
+            fs = 32
+    
+        if abs(px-0.5) < 0.005 and abs(py-0.866) < 0.005:
+            px -= 0.055; 
+            return 'ax.text(%s, %s, r"%s", fontsize=%s)\n' %(px, py, p, fs)
+        if abs(px-0.0) < 0.005 and abs(py-0.0) < 0.005:
+            px -= 0.055; py -= 0.025
+            return 'ax.text(%s, %s, r"%s", fontsize=%s)\n' %(px, py, p, fs)
+        if abs(px-1.0) < 0.005 and abs(py-0.0) < 0.005:
+            px += 0.025; py -= 0.025
+            return 'ax.text(%s, %s, r"%s", fontsize=%s)\n' %(px, py, p, fs)
+    
+        if py < 0.005:
+            py -= 0.070 if stable else 0.045
+            px -= 0.055 if stable else 0.025
+        else:
+            py -= 0.005
+            px += 0.020 if stable else 0.010
+    
+        return 'ax.text(%s, %s, r"%s", fontsize=%s)\n' %(px, py, p, fs)
+
+    def write_matplotlib_script(self, **kwargs):
+        prefixes = {0:'unary', 1:'binary', 2:'ternary', 3:'quaternary',
+                4:'graph'}
+        prefix = kwargs['prefix'] if 'prefix' in kwargs else prefixes[self.dim]
+        fo = open(prefix+'_hull_mpl.py', 'w')
+        
+        fo.write('# import statements go here\n')
+        fo.write('import matplotlib as mpl\n')
+        fo.write('import matplotlib.pyplot as plt\n')
+        fo.write('from matplotlib import rc\n')
+        fonts = ["New Century Schoolbook", "Times", "Palatino", "serif"]
+        fo.write('rc("font",**{"family":"serif","serif":%s})\n' %(fonts))
+        fo.write('rc("font",**{"weight":"bold"})\n')
+        fo.write('rc("text", usetex=True)\n')
+        fo.write('\n')
+
+        fo.write('# initialize the mpl figure, and add a big subplot\n')
+        fo.write('fig = plt.figure(figsize=(10,8.7))\n')
+        fo.write('ax = fig.add_subplot(111)\n')
+        fo.write('\n')
+        
+        fo.write('# plot all the tie lines in the hull\n')
+        for line in self.lines:
+            px = [ p.coord[0] for p in line.points ]
+            py = [ p.coord[1] for p in line.points ]
+            fo.write('ax.plot(%s, %s, c="#AAAAAA", lw=3.0)\n' %(px, py))
+        fo.write('\n')
+        
+        unstable = self.point_collections[0].points
+        fo.write('# plot all the unstable phases (red)\n')
+        phases = set()
+        for p in unstable: 
+            px = p.coord[0]; py = p.coord[1]
+            pname = p.label.split(':')[0]
+            if pname in phases:
+                continue
+            phases.add(pname)
+            pname = '%s' %(format_bold_latex(parse_comp(pname)))
+            penergy = float(p.label.split(':')[1].split()[0])
+            fo.write('ax.plot(%s, %s, c="crimson", marker="o", ms=10.0, mew=0.0)\n' %(px, py))
+            fo.write(self._write_matplotlib_text(px, py, pname, stable=False))
+        fo.write('\n')
+        
+        stable = self.point_collections[1].points
+        fo.write('# plot all the stable phases (forestgreen)\n')
+        for p in stable:
+            px = p.coord[0]; py = p.coord[1]
+            pname = p.label.split(':')[0]
+            pname = r'%s' %(format_bold_latex(parse_comp(pname)))
+            penergy = float(p.label.split(':')[1].split()[0])
+            fo.write('ax.plot(%s, %s, c="forestgreen", marker="o", ms=18.0, mew=0.0)\n' %(px, py))
+            fo.write(self._write_matplotlib_text(px, py, pname, stable=True))
+        fo.write('\n')
+        
+        fo.write('# change axis limits and make axes invisible\n')
+        fo.write('ax.set_xlim(-0.05, 1.05)\n')
+        fo.write('ax.set_ylim(-0.05, 0.90)\n')
+        fo.write('ax.set_axis_off()\n')
+        fo.write('\n')
+        
+        fo.write('# save the plot in a PDF\n')
+        fo.write('plt.savefig("%s_hull.pdf", bbox_inches="tight", dpi=300)\n' %(prefix))
+
+
+    def write_phase_coordinates(self, **kwargs):
+        prefixes = {0:'unary', 1:'binary', 2:'ternary', 3:'quaternary',
+                4:'graph'}
+        prefix = kwargs['prefix'] if 'prefix' in kwargs else prefixes[self.dim]
+        fo = open(prefix+'_coordinates.csv', 'w')
+        
+        ##for line in self.lines:
+        ##    px = [ p.coord[0] for p in line.points ]
+        ##    py = [ p.coord[1] for p in line.points ]
+        ##    fo.write('ax.plot(%s, %s, c="#AAAAAA", lw=3.0)\n' %(px, py))
+        ##fo.write('\n')
+        
+        unstable = self.point_collections[0].points
+        phases = set()
+        for p in unstable: 
+            px = p.coord[0]; py = p.coord[1]
+            pname = p.label.split(':')[0]
+            if pname in phases:
+                continue
+            phases.add(pname)
+            penergy = float(p.label.split(':')[1].split()[0])
+            fo.write("%s,%s,%s,%s\n" %(pname, px, py, penergy))
+        
+        stable = self.point_collections[1].points
+        for p in stable:
+            px = p.coord[0]; py = p.coord[1]
+            pname = p.label.split(':')[0]
+            penergy = float(p.label.split(':')[1].split()[0])
+            fo.write("%s,%s,%s,%s\n" %(pname, px, py, penergy))
+        
+
     def add(self, *objects):
         for obj in objects:
             if isinstance(obj, point.Point):
@@ -130,3 +253,4 @@ class Renderer(object):
             return self.plot_in_matplotlib(**kwargs)
         elif format == 'flot':
             return self.get_flot_script(**kwargs)
+    

@@ -193,7 +193,7 @@ class PhaseData(object):
             data = data.filter(**search)
 
         if exclude:
-            data = data.exclude(**search)
+            data = data.exclude(**exclude)
 
         if space:
             space_qs = Element.objects.exclude(symbol__in=space)
@@ -304,7 +304,7 @@ class PhaseData(object):
         """
         if not space:
             return self
-        dim = len(space)
+        ##dim = len(space)
         phases = set(self.phases)
         others = set(self.phases_by_elt.keys()) - set(space)
         for elt in others:

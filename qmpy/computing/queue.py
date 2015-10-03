@@ -106,7 +106,7 @@ class Task(models.Model):
         return True
 
     @staticmethod
-    def create(entry, module='standard', kwargs={},
+    def create(entry, module='static', kwargs={},
             priority=None, projects=None): 
         if projects is None:
             projects = entry.projects
@@ -304,6 +304,8 @@ class Job(models.Model):
             nodes = 1
             walltime = 3600*24*4
             if job.allocation.name == 'p20746':
+                walltime = 3600*24
+            if job.allocation.name == 'p20747':
                 walltime = 3600*24
         else:
             nodes = 1
