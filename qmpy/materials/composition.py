@@ -262,9 +262,10 @@ class Composition(models.Model):
 
     def find_unique(self):
         unique = []
-        for e in self.entry_set.all():
+        #vih
+        for e1 in self.entry_set.all():
             for i, e2 in enumerate(unique):
-                if e.structure == e2.structure:
+                if e1.structure == e2.structure:
                     ind = i
             else:
                 unique.append(e1)

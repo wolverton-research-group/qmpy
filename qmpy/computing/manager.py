@@ -58,7 +58,7 @@ class JobManager(daemon.Daemon):
         while True:
             ddb.reset_queries()
             jobs = queue.Job.objects.filter(state=1, account__host__state=1,
-                    created__lt=datetime.now() - timedelta(seconds=-2000000))
+                    created__lt=datetime.now() - timedelta(seconds=-200000000))
             for job in jobs:    
                 check_die()
                 if job.is_done():
@@ -98,7 +98,7 @@ class TaskManager(daemon.Daemon):
         tlogger.debug('starting host %s', host.name)
         while True:
             check_die()
-            if host.utilization >= host.nodes*host.ppn:
+            if host.utilization >= 1.5*host.nodes*host.ppn:
                 tlogger.debug('Host utilization reached 100%')
                 return
             tasks = host.get_tasks(project=project)

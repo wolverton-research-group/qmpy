@@ -22,8 +22,8 @@ logger = logging.getLogger(__name__)
 class POSCARError(Exception):
     pass
 
-def write(struct, filename=None, direct=True, distinct_by_ox=False, 
-                  vasp4=False, **kwargs):
+def write(struct, filename=None, comments=None, direct=True, 
+            distinct_by_ox=False, vasp4=False, **kwargs):
     """
     Write a :mod:`~qmpy.Structure` to a file or string.
 
@@ -84,7 +84,10 @@ def write(struct, filename=None, direct=True, distinct_by_ox=False,
         ordered_keys = sorted([ k for k in cdict.keys() ])
         counts = [ int(cdict[k]) for k in ordered_keys ]
 
-    poscar = ' '.join(set(a.element_id for a in struct.atoms)) + '\n 1.0\n'
+    if comments is not None:
+        poscar = '# %s \n 1.0\n' %(comments)
+    else:
+        poscar = ' '.join(set(a.element_id for a in struct.atoms)) + '\n 1.0\n'
     cell = '\n'.join([ ' '.join([ '%f' % v  for v in vec ]) for vec in
         struct.cell ])
     poscar += cell +'\n'
@@ -166,7 +169,7 @@ def read(poscar, species=None):
     for n,e in zip(counts, species):
         atom_types += [e]*n
 
-    style = poscar.readline()
+    style = poscar.readline().strip()
     direct = False
     if style[0] in ['D', 'd']:
         direct = True

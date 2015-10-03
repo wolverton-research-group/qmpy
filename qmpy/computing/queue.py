@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-
 from django.db import models
 import json
 import os.path
@@ -187,6 +186,11 @@ class Task(models.Model):
                 account = allocation.get_account(users=list(project.users.all()))
 
         calc = self.entry.do(self.module, **self.kwargs)
+        if allocation.name == 'b1004':
+            calc.instructions['serial'] = False
+            calc.instructions['binary'] = 'vasp_53'
+            calc.instructions['mpi'] = 'mpirun -machinefile $PBS_NODEFILE -np $NPROCS'
+
         jobs = []
         #for calc in calcs:
         if calc.instructions:
@@ -298,7 +302,9 @@ class Job(models.Model):
         if serial:
             ppn = 1
             nodes = 1
-            walltime = 3600*24
+            walltime = 3600*24*4
+            if job.allocation.name == 'p20746':
+                walltime = 3600*24
         else:
             nodes = 1
             ppn = job.account.host.ppn

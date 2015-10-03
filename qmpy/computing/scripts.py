@@ -7,6 +7,7 @@ import os
 import qmpy.utils as utils
 from qmpy.analysis.vasp import *
 from qmpy.analysis.thermodynamics.space import PhaseSpace
+from qmpy.computing.resources import *
 
 logger = logging.getLogger(__name__)
 
@@ -98,7 +99,7 @@ def check_spin(entry):
         if entry.calculations.get('Co_lowspin', Calculation()).converged:
             e2 = entry.calculations['Co_lowspin'].energy
             entry.calculations['Co_lowspin'].Co_lowspin = True
-            if e1 < e2:
+            if e1-e2 <= 0.005:
                 return entry.calculations['relaxation']
             else:
                 return entry.calculations['Co_lowspin']
@@ -116,17 +117,28 @@ def relaxation(entry, **kwargs):
     if not entry.calculations.get('relaxation', Calculation()).converged:
         input = entry.input
         input.make_primitive()
-        if 'relax_high_cutoff' in entry.keywords:
-            calc = Calculation.setup(input,  entry=entry,
-                                             configuration='relaxation',
-                                             path=entry.path+'/relaxation',
-                                             settings={'prec':'HIGH'},
-                                             **kwargs)
+
+        # because max likes to calculate fucking slowly
+        projects = entry.project_set.all()
+        if Project.get('max') in projects:
+            calc = Calculation.setup(input, entry=entry,
+                                            configuration='relaxation', 
+                                            path=entry.path+'/relaxation', 
+                                            settings={'algo':'Normal'},
+                                            **kwargs)
         else:
-            calc = Calculation.setup(input,  entry=entry,
-                                             configuration='relaxation',
-                                             path=entry.path+'/relaxation',
-                                             **kwargs)
+
+            if 'relax_high_cutoff' in entry.keywords:
+                calc = Calculation.setup(input,  entry=entry,
+                                                 configuration='relaxation',
+                                                 path=entry.path+'/relaxation',
+                                                 settings={'prec':'ACC'},
+                                                 **kwargs)
+            else:
+                calc = Calculation.setup(input,  entry=entry,
+                                                 configuration='relaxation',
+                                                 path=entry.path+'/relaxation',
+                                                 **kwargs)
 
         entry.calculations['relaxation'] = calc
         entry.Co_lowspin = False
@@ -162,6 +174,9 @@ def relaxation(entry, **kwargs):
     return calc
 
 def static(entry, **kwargs):
+    # include a block to check if the compound has cobalt
+    # redo the static run if it does
+    # relaxation - Co_lowspin <= 0.004
     if entry.calculations.get('static', Calculation()).converged:
         return entry.calculations['static']
 
@@ -175,10 +190,16 @@ def static(entry, **kwargs):
         return calc
 
     input = calc.output
+
+    if use_lowspin:
+        chgcar_path = entry.path+'/Co_lowspin'
+    else:
+        chgcar_path = entry.path+'/relaxation'
+
     calc = Calculation.setup(input, entry=entry,
                                     configuration='static', 
                                     path=entry.path+'/static', 
-                                    chgcar=entry.path+'/relaxation',
+                                    chgcar=chgcar_path,
                                     **kwargs)
 
     if use_lowspin:

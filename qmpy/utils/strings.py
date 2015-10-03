@@ -201,7 +201,7 @@ def format_html(comp):
     return format_comp(comp, template='{elt}<sub>{amt}</sub>')
 
 def format_latex(comp):
-    return format_comp(comp, template='{elt}_{{{amt}}}')
+    return format_comp(comp, template='{elt}$_{{{amt}}}$')
 
 def normalize_dict(dictionary):
     tot = float(sum(dictionary.values()))

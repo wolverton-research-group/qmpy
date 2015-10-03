@@ -12,12 +12,17 @@ Li2MO3:
   allocations:
   - byrd
   - josquin
-  - p20273
   - palestrina
   - victoria
+  priority: 1
+  users:
+  - vih173
+X4ABZ2:
+  allocations:
+  - p20746
   priority: 0
   users:
-  - sjk648
+  - jhc585
 ahmed:
   allocations:
   - byrd
@@ -25,8 +30,35 @@ ahmed:
   - palestrina
   - victoria
   priority: 1
+  users: []
+aq_Li:
+  allocations:
+  - byrd
+  - josquin
+  - palestrina
+  - victoria
+  priority: 0
   users:
-  - sjk648
+  - vih173
+  - dhs751
+defect_perovskites:
+  allocations:
+  - byrd
+  - josquin
+  - palestrina
+  - victoria
+  priority: 0
+  users:
+  - aae109
+dongshu:
+  allocations:
+  - byrd
+  - josquin
+  - palestrina
+  - victoria
+  priority: 0
+  users:
+  - dwh485
 elements:
   allocations:
   - byrd
@@ -34,8 +66,7 @@ elements:
   - palestrina
   - victoria
   priority: 0
-  users:
-  - sjk648
+  users: []
 garnets:
   allocations:
   - byrd
@@ -43,56 +74,58 @@ garnets:
   - palestrina
   - victoria
   priority: 0
-  users:
-  - sjk648
+  users: []
 icsd:
   allocations:
-  - byrd
-  - josquin
-  - p20268
-  - p20273
   - palestrina
   - victoria
-  priority: 0
-  users:
-  - sjk648
+  priority: 12
+  users: []
 james:
   allocations:
   - byrd
   - josquin
-  - p20268
-  - p20273
   - palestrina
   - victoria
   priority: 0
-  users:
-  - sjk648
+  users: []
 li-air:
   allocations:
   - byrd
   - josquin
-  - p20268
-  - p20273
   - palestrina
   - victoria
   priority: 0
-  users:
-  - sjk648
-prototypes:
+  users: []
+max:
   allocations:
   - byrd
   - josquin
-  - p20273
   - palestrina
   - victoria
   priority: 0
   users:
-  - sjk648
+  - mka721
+prototypes:
+  allocations:
+  - josquin
+  - palestrina
+  - victoria
+  priority: 0
+  users: []
+stresses:
+  allocations:
+  - byrd
+  - josquin
+  - palestrina
+  - victoria
+  priority: 0
+  users:
+  - vih173
 tony:
   allocations:
   - byrd
   - josquin
-  - p20117
   - palestrina
   - victoria
   priority: 0
@@ -100,12 +133,18 @@ tony:
   - aae109
 voorhees:
   allocations:
-  - b1004
   - byrd
   - josquin
-  - p20268
+  - palestrina
+  - victoria
+  priority: 0
+  users: []
+zhi:
+  allocations:
+  - byrd
+  - josquin
   - palestrina
   - victoria
   priority: 0
   users:
-  - vih173
+  - zlb066

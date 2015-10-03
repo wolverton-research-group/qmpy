@@ -138,6 +138,8 @@ class Calculation(models.Model):
     dos = models.ForeignKey('DOS', blank=True, null=True)
     band_gap = models.FloatField(blank=True, null=True)
     irreducible_kpoints = models.FloatField(blank=True, null=True)
+    #_lattice_vectors = models.FloatField(blank=True, null=True)
+
 
     #= progress/completion =#
     attempt = models.IntegerField(default=0, blank=True, null=True)
@@ -367,7 +369,8 @@ class Calculation(models.Model):
                 incar += ' %s\n' % vasp_format(key, s.pop(key))
 
         incar += '\n#= Write flags =#\n'
-        for key in ['lcharg', 'lwave', 'lelf', 'lhvar', 'lvtot']:
+        ##for key in ['lcharg', 'lwave', 'lelf', 'lhvar', 'lvtot']:
+        for key in ['lcharg', 'lwave', 'lhvar', 'lvtot']:
             if key in s:
                 incar += ' %s\n' % vasp_format(key, s.pop(key))
 
@@ -383,9 +386,9 @@ class Calculation(models.Model):
                 if k in s:
                     incar += ' %s\n' % vasp_format(k, s.pop(k))
 
-        incar += '\n#= Uncategorized/OQMD codes  =#\n'
-        for k, v in s.items():
-            incar += ' %s\n' % (vasp_format(k, v))
+        #incar += '\n#= Uncategorized/OQMD codes  =#\n'
+        #for k, v in s.items():
+        #    incar += ' %s\n' % (vasp_format(k, v))
         return incar
 
     @INCAR.setter
@@ -433,7 +436,7 @@ class Calculation(models.Model):
         if self.settings.get('gamma', True):
             kpoints = 'KPOINTS \n0 \nGamma\n'
         else:
-            kpoints = 'KPOINTS \n0 \nMonkhost-Pack\n'
+            kpoints = 'KPOINTS \n0 \nMonkhorst-Pack\n'
         kpoints += ' '.join( str(int(k)) for k in kpts ) + '\n'
         kpoints += '0 0 0'
         return kpoints
@@ -647,6 +650,7 @@ class Calculation(models.Model):
                 for n in range(3):
                     tlv.append(read_fortran_array(self.outcar[i+n+1], 6)[:3])
                 lattice_vectors.append(tlv)
+        #self._lattice_vectors = lattice_vectors
         return np.array(lattice_vectors)
 
     def read_charges(self):
@@ -800,9 +804,14 @@ class Calculation(models.Model):
             stresses = self.read_stresses()
             positions = self.read_positions()
             forces = self.read_forces()
-            magmoms = self.read_magmoms()
-            charges = self.read_charges()
+            try: 
+                magmoms = self.read_magmoms()
+                charges = self.read_charges()
+            except:
+                print "Magmoms and/or charges information not found."
         except:
+            print "Failed in reading results from OUTCAR:\
+            read_outcar_results():L793"
             self.add_error("failed to read")
             return
 
@@ -1102,7 +1111,9 @@ class Calculation(models.Model):
             f = open('%s/%s' % (self.path,filename),'r')
 
         d = f.readlines() 
-        lattice = np.array([map(float, r.split()) for r in d[2:5]])
+        #max: scaling added
+        scale = float(d[1].strip())
+        lattice = np.array([map(float, r.split()) for r in d[2:5]])*scale
         stoich = np.array(d[6].split(),int)
         count = sum(stoich)
         meshsize = np.array(d[9+int(count)].split(),int)
@@ -1402,7 +1413,7 @@ class Calculation(models.Model):
 
     @property
     def estimate(self):
-        return 48*8*3600
+        return 72*8*3600
 
     @property
     def instructions(self):
@@ -1422,7 +1433,7 @@ class Calculation(models.Model):
                     'rm -f WAVECAR CHG',
                     'date +%s'])}
 
-        if self.input.natoms < 10:
+        if self.input.natoms <= 4:
             instruction.update({'mpi':'','binary':'vasp_53_serial',
                 'serial':True})
         return instruction

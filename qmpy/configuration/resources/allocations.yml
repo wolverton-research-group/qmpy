@@ -10,64 +10,63 @@ b1004:
   host: quest
   key: b1004
   users:
-  - sjk648
-  - jes786
-  - jwd686
+  - aae109
   - vih173
+  - zlb066
+  - jhc585
+  - mka721
+  - dwh485
 byrd:
   host: byrd
   key: ''
   users:
-  - sjk648
-  - jwd686
+  - aae109
   - vih173
+  - zlb066
+  - jhc585
+  - mka721
+  - dwh485
 e20438:
   host: quest
   key: e20438
-  users:
-  - jwd686
+  users: []
 josquin:
   host: josquin
   key: ''
   users:
-  - sjk648
+  - aae109
   - vih173
-p20117:
+  - zlb066
+  - jhc585
+  - mka721
+  - dwh485
+p20477:
   host: quest
-  key: p20117
-  users: []
-p20254:
-  host: quest
-  key: p20254
+  key: p20477
   users:
-  - jwd686
-p20268:
+  - zlb066
+p20746:
   host: quest
-  key: p20268
+  key: p20746
   users:
-  - sjk648
-  - vih173
-p20273:
-  host: quest
-  key: p20273
-  users:
-  - sjk648
-p20274:
-  host: quest
-  key: p20274
-  users:
-  - sjk648
-  - jes786
+  - jhc585
 palestrina:
   host: palestrina
   key: ''
   users:
-  - sjk648
-  - jwd686
+  - aae109
   - vih173
+  - zlb066
+  - jhc585
+  - mka721
+  - dwh485
 victoria:
   host: victoria
   key: ''
   users:
-  - sjk648
+  - aae109
   - vih173
+  - zlb066
+  - jhc585
+  - mka721
+  - dwh485

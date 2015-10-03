@@ -958,7 +958,7 @@ class PhaseSpace(object):
 
         phase_comp = dict([ (p, phase_vars[p].varValue)
             for p in phases if phase_vars[p].varValue > 1e-5])
-
+        
         energy = sum( p.energy*amt for p, amt in phase_comp.items() )
         energy -= sum([ a*composition.get(e, 0) for e,a in mus.items()])
         return energy, phase_comp
@@ -1023,6 +1023,8 @@ class PhaseSpace(object):
             #except ValueError:
             #    pass
             energy, gclp_phases = self.gclp(p.unit_comp, phases=phases)
+            #vh
+            print p,  '------', gclp_phases
             p.stability = p.energy - energy
 
     @transaction.atomic

@@ -18,6 +18,7 @@ import pexpect, getpass
 import qmpy
 from qmpy.db.custom import DictField
 import queue as queue
+import threading
 
 logger = logging.getLogger(__name__)
 
@@ -215,7 +216,7 @@ class Host(models.Model):
     def active(self):
         if self.state < 1:
             return False
-        elif self.utilization > self.nodes*self.ppn:
+        elif self.utilization > 5*self.nodes*self.ppn:
             return False
         else:
             return True
@@ -256,6 +257,29 @@ class Host(models.Model):
     def get_binary(self, key):
         return self.binaries[key]
 
+    def _try_login(self, timeout=5.0):
+        def _login():
+            self._tmp_acct = Allocation.get('b1004').get_account()
+            self._tmp_ssh = 'ssh {user}@{host} "{cmd}"'.format(
+                    user=self._tmp_acct.user.username,
+                    host=self._tmp_acct.host.ip_address,
+                    cmd='whoami')
+            self._tmp_proc = subprocess.Popen(self._tmp_ssh, shell=True,
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            stdout, stderr = self._tmp_proc.communicate()
+            if stdout.strip() == self._tmp_acct.user.username:
+                print "quest is up"
+        
+        self._tmp_thread = threading.Thread(target=_login)
+        self._tmp_thread.start()
+
+        self._tmp_thread.join(timeout)
+        if self._tmp_thread.is_alive():
+            print "unable login on quest"
+            self._tmp_proc.terminate()
+            self._tmp_thread.join()
+        return self._tmp_proc.returncode
+
     def check_host(self):
         """Pings the host to see if it is online. Returns False if it is
         offline."""
@@ -263,9 +287,22 @@ class Host(models.Model):
                 shell=True,
                 stdout=open('/dev/null', 'w'),
                 stderr=subprocess.STDOUT)
+
         if ret == 0:
+            self.state = 1
+            self.save()
+            write_resources()
             return True
         else:
+            """Sometimes quest refuses to respond to ping requests. So, try
+            logging into it using an(y) account. Trying executing a command and
+            see if it is successful."""
+            if self.name == 'quest':
+                if self._try_login() == 0:
+                    self.state = 1
+                    self.save()
+                    write_resources()
+                    return True
             self.state = -2
             self.save()
             return False
@@ -574,7 +611,7 @@ class Allocation(models.Model):
         return self.name
     
     @classmethod
-    def create():
+    def create(self):
         name = raw_input('Name your allocation:')
         if Allocation.objects.filter(name=name).exists():
             print 'Allocation by that name already exists!'
@@ -589,7 +626,7 @@ class Allocation(models.Model):
         print 'Now we will assign users to this allocation'
         for acct in Account.objects.filter(host=host):
             inc = raw_input('Can %s use this allocation? y/n [y]:' % 
-                    acct.user.name )
+                    acct.user.username )
             if inc == 'y' or inc == '':
                 alloc.users.add(acct.user)
         print 'If this allocation requires a special password, enter',

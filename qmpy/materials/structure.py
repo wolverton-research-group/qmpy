@@ -356,7 +356,7 @@ class Structure(models.Model, object):
         """
         self.get_volume()
         scale = value/self.volume
-        self.cell = self.cell * scale**(1/3.)
+        self.cell = self.cell * (scale**(1/3.))
         self.volume_pa = value/self.natoms
         self.volume = value
 
