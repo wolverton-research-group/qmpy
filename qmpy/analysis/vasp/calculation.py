@@ -1712,7 +1712,7 @@ class Calculation(models.Model):
         vasp_settings.update(settings)
 
         calc.set_potentials(vasp_settings.get('potentials', 'vasp_rec'))
-        calc.set_hubbards(vasp_settings.get('hubbards', 'wang'))
+        calc.set_hubbards(vasp_settings.get('hubbards', hubbard))
         calc.set_magmoms(vasp_settings.get('magnetism', 'ferro'))
 
         if 'scale_encut' in vasp_settings:
