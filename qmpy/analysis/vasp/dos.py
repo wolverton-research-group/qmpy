@@ -142,6 +142,83 @@ class DOS(models.Model):
             self._plot = canvas
         return self._plot
 
+    def get_projected_dos(self, strc, element, orbital=None, debug=False):
+        """
+        Get the density of states for a certain element
+
+        Returns an NDOSx1 array with DOS for the chosen element
+            and orbital type
+
+        strc: qmpy.materials.Structure
+            Structure associated with this DOS
+        element: str
+            Symbol of the element
+        orbital: str or list or None
+            Which orbitals to retrieve. See site_dos for options.
+            Use None to integrate all orbitals
+            If you specify an orbital without phase factors or spins,
+                this operation will automatically sum all bands that 
+                match that criteria (ex: if you specify 'd+', this 
+                may sum the dxy+, dyz+, dz2+, ... orbitals. Another
+                example, if you put "+" it will get only the positive band
+        """
+
+        # Check for input errors
+        if strc.natoms != self._site_dos.shape[0]:
+            raise Exception('Structure has different atom count than DOS')
+        if not element in strc.composition.comp.keys():
+            raise Exception('Element not in structure')
+
+        # Get the list of atoms to sum over
+        atoms = [ i for i, atom in enumerate(strc.atoms) if atom.element.symbol == element ]
+
+        # Get the number of different bands
+        n = self._site_dos.shape[1]
+
+        # If only a string is passed for orbital, convert it to list
+        if isinstance(orbital, str):
+            orbital = [orbital]
+
+        # Get the list of orbitals
+        if n == 4:
+           all_orbs = set(['s', 'p', 'd'])
+        elif n == 7:
+           all_orbs = set(['s+', 's-', 'p+', 'p-', 'd-', 'd+'])
+        elif n == 10:
+           all_orbs = set(['s', 'px', 'py', 'pz', 'dxy', 'dyz', 'dz2', 'dxz', 'dx2'])
+        elif n == 19:
+           all_orbs = set(['s+', 'px+', 'py+', 'pz+', 'dxy+', 'dyz+', 'dz2+', 'dxz+', 'dx2+', 
+              's-', 'px-', 'py-', 'pz-', 'dxy-', 'dyz-', 'dz2-', 'dxz-', 'dx2-' ])
+        
+        # Get the ones that the user wants
+        if orbital is None:
+            orb_to_sum = all_orbs
+        else:
+            orb_to_sum = set()
+            for orb in orbital:
+                if len(orb) == 2 and ('-' in orb or '+' in orb):
+                    shl = orb[0]
+                    spn = orb[1]
+                    for o in all_orbs:
+                        if shl in o and spn in o:
+                            orb_to_sum.add(o)
+                else:
+                    for o in all_orbs:
+                        if orb in o: orb_to_sum.add(o)
+
+        # Print out info, if debug mode
+        if debug:
+            print "Summing orbitals: ", " ".join(orb_to_sum)
+            print "For atoms: ", " ".join([ str(x) for x in atoms])
+
+        # Do the sum
+        output = np.zeros(self.data.shape[1])
+        for atom in atoms:
+            for orb in orb_to_sum:
+                output += self.site_dos(atom, orb)
+        return output
+        
+
     def site_dos(self, atom, orbital):
         """Return an NDOSx1 array with dos for the chosen atom and orbital.
 
