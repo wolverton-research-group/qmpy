@@ -24,7 +24,7 @@ setup(
         "python-memcached",
         "python-ase",
         "django-extensions",
-        "elementtree",
+        "lxml",
         "pyparsing<=1.9.9",
         "PyCifRW==3.6.2.1",
         "pexpect",

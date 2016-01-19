@@ -12,10 +12,7 @@ import subprocess
 from collections import defaultdict
 from os.path import exists, isfile, isdir
 
-try:
-    from lxml import etree
-except ImportError:
-    import elementtree.ElementTree as etree
+from lxml import etree
 
 from django.db import models
 from django.db import transaction
