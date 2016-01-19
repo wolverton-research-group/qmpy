@@ -2,18 +2,17 @@ language: python
 sudo: 'required'
 python:
   - "2.7"
+before_install:
+  - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
+  - chmod +x miniconda.sh
+  - ./miniconda.sh -b
+  - export PATH=/home/travis/miniconda/bin:$PATH
+  - conda update --yes conda
 install: 
-  - pip install --use-mirrors pyparsing
-  - pip install matplotlib
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy matplotlib scikit-learn
   - "python setup.py install"
 virtualenv:
   system_site_packages: true
-before_install:
-  - sudo apt-get install -qq libatlas-dev libatlas-base-dev liblapack-dev gfortran
-  - sudo apt-get update -qq
-  - pip install numpy
-  - pip install scipy
-  - pip install scikit-learn
 before_script:
   - wget http://downloads.sourceforge.net/project/spglib/spglib/spglib-1.6/spglib-1.6.0.tar.gz
   - tar -xvf spglib-1.6.0.tar.gz
