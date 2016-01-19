@@ -243,6 +243,13 @@ def sync_resources():
             alloc.save()
             proj.allocations.add(alloc)
 
+# Load models (Django >= 1.7)
+try:
+    import django
+    django.setup()
+except:
+    pass
+
 # Try to prevent exception when importing before database is set up
 try:
     if not Spacegroup.objects.exists():
