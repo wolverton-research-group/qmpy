@@ -1,5 +1,5 @@
 language: python
-sudo: 'required'
+sudo: False
 python:
   - "2.7"
 before_install:
