@@ -137,7 +137,7 @@ def check_spin(entry, xc_func='PBE'):
         e1 = entry.calculations[high_name].energy
 
         # Mark that this calculation is high-spin
-        entry.calculations[high_spin].Co_lowspin = False
+        entry.calculations[high_name].Co_lowspin = False
 
         # Check if the low-spin has converged
         if entry.calculations.get(low_name, Calculation()).converged:
@@ -178,7 +178,7 @@ def relaxation(entry, xc_func='PBE', **kwargs):
 
     # Get the name of this configuration
     cnfg_name = 'relaxation'
-    if not xc_func.lower() is 'pbe':
+    if not xc_func.lower() == 'pbe':
         cnfg_name = cnfg_name + '_' + xc_func.lower()
 
     # Use this to define the calculation path
@@ -186,7 +186,7 @@ def relaxation(entry, xc_func='PBE', **kwargs):
 
     # Check whether to use high or low spin for Co compounds
     if 'Co' in entry.comp:
-        spin = check_spin(entry)
+        spin = check_spin(entry, xc_func=xc_func)
         if not spin is None:
             return spin
     else:
@@ -254,7 +254,7 @@ def relaxation(entry, xc_func='PBE', **kwargs):
                 if atom.element.symbol == 'Co':
                     atom.spin = 0.01
 
-            entry.calculations['Co_lowspin'] = calc
+            entry.calculations[low_name] = calc
             entry.Co_lowspin = True
             if not calc.converged:
                 calc.write()
@@ -263,7 +263,7 @@ def relaxation(entry, xc_func='PBE', **kwargs):
     # Special case: Save structure to "relaxed" if this is a PBE calculation
     if xc_func.lower() == 'pbe':
         if 'Co' in entry.comp:
-            calc = check_spin(entry)
+            calc = check_spin(entry, xc_func=xc_func)
             assert ( not calc is None )
             entry.structures['relaxed'] = calc.output
         else:
@@ -333,7 +333,7 @@ def static(entry, xc_func='PBE', **kwargs):
     input = calc.output
 
     # Get path to CHGCAR
-    chngcar_path = calc.path
+    chgcar_path = calc.path
 
     # Set up calculation
     calc = Calculation.setup(input, entry=entry,
