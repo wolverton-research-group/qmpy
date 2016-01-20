@@ -186,7 +186,7 @@ class Host(models.Model):
             exit(-1)
         host['ppn'] = raw_input('Processors per node:')
         host['nodes'] = raw_input('Max nodes to run on:')
-        host['sub_script'] = raw_inputs('Command to submit a script '
+        host['sub_script'] = raw_input('Command to submit a script '
                 '(e.g. /usr/local/bin/qsub):')
         host['check_queue'] = raw_input('Command for showq (e.g.'
                 '/usr/local/maui/bin/showq):')
