@@ -12,6 +12,9 @@ from qmpy.computing.resources import *
 logger = logging.getLogger(__name__)
 
 def initialize(entry, **kwargs):
+    '''
+    DEPRECATED: Run a relaxation with very low settings
+    '''
     entry.input.set_magnetism('ferro')
     calc = Calculation.setup(entry.input, entry=entry,
             configuration='initialize', path=entry.path+'/initialize', 
@@ -28,6 +31,9 @@ def initialize(entry, **kwargs):
     return calc
 
 def coarse_relax(entry, **kwargs):
+    '''
+    DEPRECATED: Run a relaxation with low cutoff energy
+    '''
     if entry.calculations.get('coarse_relax', Calculation()).converged:
         return entry.calculations['coarse_relax']
 
@@ -50,6 +56,9 @@ def coarse_relax(entry, **kwargs):
     return calc
 
 def fine_relax(entry, **kwargs):
+    '''
+    DEPRECATED: Run a slightly more expensive relaxation calculation
+    '''
     if entry.calculations.get('fine_relax', Calculation()).converged:
         return entry.calculations['fine_relax']
 
@@ -69,6 +78,9 @@ def fine_relax(entry, **kwargs):
     return calc
 
 def standard(entry, **kwargs):
+    ''''
+    DEPRECATED: Run a final, static calculation at standard cutoff energy
+    '''
     if entry.calculations.get('standard', Calculation()).converged:
         return entry.calculations['standard']
 
@@ -92,29 +104,98 @@ def standard(entry, **kwargs):
         ps.compute_stabilities(save=True)
     return calc
 
-def check_spin(entry):
-    if entry.calculations.get('relaxation', Calculation()).converged:
-        e1 = entry.calculations['relaxation'].energy
-        entry.calculations['relaxation'].Co_lowspin = False
-        if entry.calculations.get('Co_lowspin', Calculation()).converged:
-            e2 = entry.calculations['Co_lowspin'].energy
-            entry.calculations['Co_lowspin'].Co_lowspin = True
+def check_spin(entry, xc_func='PBE'):
+    '''
+    Special case for Co-containing materials. Run calculation 
+    at with Co in low and high spin state
+
+    Arguments:
+        entry
+            Entry, Entry to be run
+        xc_func
+            string, Desired XC functional
+    Output:
+        Calculation, Relaxation with high spin if low spin
+        energy calculation is more than 5 meV/atom lower in energy
+        None if calculations are not complete
+    '''
+
+    # Get name of high-spin calculation
+    high_name = 'relaxation'
+    if xc_func.lower() != 'pbe':
+        high_name += "_%s"%(xc_func.lower())
+
+    # Get name of low-spin calculation
+    low_name = 'Co_lowspin'
+    if xc_func.lower() != 'pbe':
+        low_name += "_%s"%(xc_func.lower())
+    
+    # Check if the high-spin has converged
+    if entry.calculations.get(high_name, Calculation()).converged:
+
+        # If so, get the high-spin energy
+        e1 = entry.calculations[high_name].energy
+
+        # Mark that this calculation is high-spin
+        entry.calculations[high_spin].Co_lowspin = False
+
+        # Check if the low-spin has converged
+        if entry.calculations.get(low_name, Calculation()).converged:
+
+            # If so, check whether it is lower by more than 5 meV/atom
+            e2 = entry.calculations[low_name].energy
+
+            # Mark that this calculation is low spin
+            entry.calculations[low_name].Co_lowspin = True
             if e1-e2 <= 0.005:
-                return entry.calculations['relaxation']
+                return entry.calculations[high_name]
             else:
-                return entry.calculations['Co_lowspin']
+                return entry.calculations[low_name]
+
+    # If both calculations are not complete
     return None
 
-def relaxation(entry, **kwargs):
+
+def relaxation(entry, xc_func='PBE', **kwargs):
+    '''
+    Start a calculation to relax atom positions and lattice parameters
+
+    Arguments:
+        entry:
+            Entry, structure to be relaxed
+    
+    Keyword Arguments:
+        xc_func:
+            String, name of XC function to use (Default='PBE'). Is used to
+            determine the name of the configuration settings file to use
+        kwargs:
+            Settings passed to calculation object
+
+    Output:
+        Calculation:
+            results of calculation object
+    '''
+
+    # Get the name of this configuration
+    cnfg_name = 'relaxation'
+    if not xc_func.lower() is 'pbe':
+        cnfg_name = cnfg_name + '_' + xc_func.lower()
+
+    # Use this to define the calculation path
+    path = entry.path + '/' + cnfg_name
+
+    # Check whether to use high or low spin for Co compounds
     if 'Co' in entry.comp:
         spin = check_spin(entry)
         if not spin is None:
             return spin
     else:
-        if entry.calculations.get('relaxation', Calculation()).converged:
-            return entry.calculations['relaxation']
+        # If relaxation calculation is converged, return that calculation
+        if entry.calculations.get(cnfg_name, Calculation()).converged:
+            return entry.calculations[cnfg_name]
 
-    if not entry.calculations.get('relaxation', Calculation()).converged:
+    # Check if the calculation is converged / started
+    if not entry.calculations.get(cnfg_name, Calculation()).converged:
         input = entry.input
         input.make_primitive()
 
@@ -122,39 +203,53 @@ def relaxation(entry, **kwargs):
         projects = entry.project_set.all()
         if Project.get('max') in projects:
             calc = Calculation.setup(input, entry=entry,
-                                            configuration='relaxation', 
-                                            path=entry.path+'/relaxation', 
+                                            configuration=cnfg_name, 
+                                            path=path, 
                                             settings={'algo':'Normal'},
                                             **kwargs)
         else:
 
             if 'relax_high_cutoff' in entry.keywords:
                 calc = Calculation.setup(input,  entry=entry,
-                                                 configuration='relaxation',
-                                                 path=entry.path+'/relaxation',
+                                                 configuration=cnfg_name,
+                                                 path=path,
                                                  settings={'prec':'ACC'},
                                                  **kwargs)
             else:
                 calc = Calculation.setup(input,  entry=entry,
-                                                 configuration='relaxation',
-                                                 path=entry.path+'/relaxation',
+                                                 configuration=cnfg_name,
+                                                 path=path,
                                                  **kwargs)
 
-        entry.calculations['relaxation'] = calc
+        entry.calculations[cnfg_name] = calc
         entry.Co_lowspin = False
+
+        # If converged, write results to disk and return calculation
         if not calc.converged:
             calc.write()
             return calc
 
+    # Special case: Co, which requires high and low spin calculations
     if 'Co' in entry.comp:
-        if not entry.calculations.get('Co_lowspin', Calculation()).converged:
+        # Get name of low spin calculation
+        low_name = 'Co_lowspin'
+        if xc_func.lower() != 'pbe':
+            low_name += "_%s"%(xc_func.lower())
+
+        # Update / start the low spin calculation
+        if not entry.calculations.get(low_name, Calculation()).converged:
+
+            # Get the low_spin calculation directory
+            lowspin_dir = os.path.join(entry.path, low_name)
+
             input = entry.input
             input.make_primitive()
             calc = Calculation.setup(input,  entry=entry,
-                                             configuration='relaxation',
-                                             path=entry.path+'/Co_lowspin',
+                                             configuration=cnfg_name,
+                                             path=lowspin_dir,
                                              **kwargs)
-            
+           
+            # Return atoms to the low-spin configuration
             for atom in calc.input:
                 if atom.element.symbol == 'Co':
                     atom.spin = 0.01
@@ -165,22 +260,67 @@ def relaxation(entry, **kwargs):
                 calc.write()
                 return calc
 
-    if 'Co' in entry.comp:
-        calc = check_spin(entry)
-        assert ( not calc is None )
-        entry.structures['relaxed'] = calc.output
-    else:
-        entry.structures['relaxed'] = calc.output
+    # Special case: Save structure to "relaxed" if this is a PBE calculation
+    if xc_func.lower() == 'pbe':
+        if 'Co' in entry.comp:
+            calc = check_spin(entry)
+            assert ( not calc is None )
+            entry.structures['relaxed'] = calc.output
+        else:
+            entry.structures['relaxed'] = calc.output
     return calc
 
-def static(entry, **kwargs):
-    # include a block to check if the compound has cobalt
-    # redo the static run if it does
-    # relaxation - Co_lowspin <= 0.004
-    if entry.calculations.get('static', Calculation()).converged:
-        return entry.calculations['static']
+def relaxation_lda(entry, **kwargs):
+    '''
+    Start a LDA relaxation calculation
 
-    calc = relaxation(entry, **kwargs)
+    Arguments:
+        entry: 
+            Entry to be run
+
+    Output:
+        Calculation object containing result (if converged)
+    '''
+
+    return relaxation_lda(entry, xc_func='LDA', **kwargs)
+        
+
+def static(entry, xc_func='PBE', **kwargs):
+    '''
+    Start a final, accurate static calculation 
+    
+    Arguments:
+        entry:
+            Entry, structure to be relaxed
+    
+    Keyword Arguments:
+        xc_func:
+            String, name of XC function to use (Default='PBE'). Is used to
+            determine the name of the configuration settings file to use
+        kwargs:
+            Settings passed to calculation object
+
+    Output:
+        Calculation:
+            results of calculation object
+    '''
+
+    # Get name of static run
+    cnfg_name = 'static'
+    if xc_func.lower() != 'pbe':
+        cnfg_name += "_%s"%(xc_func.lower())
+
+    # Get the calculation directory
+    calc_dir = os.path.join(entry.path, cnfg_name)
+
+    # Check if this calculation has converged
+    if entry.calculations.get(cnfg_name, Calculation()).converged:
+        return entry.calculations[cnfg_name]
+
+    # Get the relaxation calculation
+    calc = relaxation(entry, xc_func=xc_func, **kwargs)
+
+    # Special Case: Check whether relaxation is low-spin
     if hasattr(calc, 'Co_lowspin'):
         use_lowspin = ( calc.Co_lowspin is True )
     else:
@@ -189,33 +329,51 @@ def static(entry, **kwargs):
     if not calc.converged:
         return calc
 
+    # Input structure == output structure from relaxation
     input = calc.output
 
-    if use_lowspin:
-        chgcar_path = entry.path+'/Co_lowspin'
-    else:
-        chgcar_path = entry.path+'/relaxation'
+    # Get path to CHGCAR
+    chngcar_path = calc.path
 
+    # Set up calculation
     calc = Calculation.setup(input, entry=entry,
-                                    configuration='static', 
-                                    path=entry.path+'/static', 
+                                    configuration=cnfg_name, 
+                                    path=calc_dir, 
                                     chgcar=chgcar_path,
                                     **kwargs)
 
+    # Special Case: Set Co to low-spin configuration
     if use_lowspin:
         for atom in calc.input:
             if atom.element.symbol == 'Co':
                 atom.magmom = 0.01
 
-    entry.calculations['static'] = calc
-    if calc.converged:
-        f = calc.get_formation()
+    # Store calculation in Entry list
+    entry.calculations[cnfg_name] = calc
+
+    # Save calculation [ LW 20Jan16: Only for PBE for now ]
+    if calc.converged and xc_func.lower() == 'pbe':
+        f = calc.get_formation() # LW 16 Jan 2016: Need to rewrite this to have
+        # separate hulls for LDA / PBE / ...
         f.save()
         ps = PhaseSpace(calc.input.comp.keys())
         ps.compute_stabilities(save=True)
     else:
         calc.write()
     return calc
+
+def static_lda(entry, **kwargs):
+    '''
+    Run a static calculation with LDA XC functionals
+
+    Input:
+        entry - Entry, OQMD entry to be computed
+    
+    Output:
+        Calculation, result 
+    '''
+
+    return static(entry, xc_func='LDA', **kwargs)
 
 def wavefunction(entry, **kwargs):
     if entry.calculations.get('wavefunction', Calculation()).converged:
