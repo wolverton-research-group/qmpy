@@ -8,6 +8,7 @@ import qmpy.utils as utils
 from qmpy.analysis.vasp import *
 from qmpy.analysis.thermodynamics.space import PhaseSpace
 from qmpy.computing.resources import *
+from copy import deepcopy
 
 logger = logging.getLogger(__name__)
 
@@ -196,7 +197,13 @@ def relaxation(entry, xc_func='PBE', **kwargs):
 
     # Check if the calculation is converged / started
     if not entry.calculations.get(cnfg_name, Calculation()).converged:
-        input = entry.input
+        input = deepcopy(entry.input)
+
+        # Copy object by removing ties to database
+        input.id = None
+        input.atoms = entry.input.atom_set.all()
+        for atom in input.atoms:
+            atom.id = None
         input.make_primitive()
 
         # because max likes to calculate fucking slowly
@@ -242,8 +249,22 @@ def relaxation(entry, xc_func='PBE', **kwargs):
             # Get the low_spin calculation directory
             lowspin_dir = os.path.join(entry.path, low_name)
 
-            input = entry.input
+            # Get input structure
+            input = deepcopy(entry.input)
+
+            # Copy object by removing ties to database
+            input.id = None
+            input.atoms = entry.input.atom_set.all()
+            for atom in input.atoms:
+                atom.id = None
             input.make_primitive()
+
+            # Copy object by removing ties to database
+            input.id = None
+            for atom in input.atoms:
+                atom.id = None
+            input.make_primitive()
+
             calc = Calculation.setup(input,  entry=entry,
                                              configuration=cnfg_name,
                                              path=lowspin_dir,
@@ -252,7 +273,7 @@ def relaxation(entry, xc_func='PBE', **kwargs):
             # Return atoms to the low-spin configuration
             for atom in calc.input:
                 if atom.element.symbol == 'Co':
-                    atom.spin = 0.01
+                    atom.magmom = 0.01
 
             entry.calculations[low_name] = calc
             entry.Co_lowspin = True
