@@ -719,6 +719,10 @@ class Project(models.Model):
 
     @staticmethod
     def create():
+        '''
+        Create a new project. Prompts user on std-in
+        for name, users, and allocations of this project.
+        '''
         name = raw_input('Name your project: ')
         if Project.objects.filter(name=name).exists():
             print 'Project by that name already exists!'
@@ -728,10 +732,10 @@ class Project(models.Model):
         proj.priority = raw_input('Project priority (1-100): ')
         users = raw_input('List project users (e.g. sjk648 jsaal531 bwm291): ')
         for u in users.split():
-            if not User.objects.filter(name=u).exists():
+            if not User.objects.filter(username=u).exists():
                 print 'User named', u, 'doesn\'t exist!'
             else:
-                proj.users.add(User.objects.get(name=u))
+                proj.users.add(User.objects.get(username=u))
 
         alloc = raw_input('List project allocations (e.g. byrd victoria b1004): ')
         for a in alloc.split():
