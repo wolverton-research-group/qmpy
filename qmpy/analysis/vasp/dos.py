@@ -142,6 +142,7 @@ class DOS(models.Model):
             self._plot = canvas
         return self._plot
 
+
     def get_projected_dos(self, strc, element, orbital=None, debug=False):
         """
         Get the density of states for a certain element
@@ -184,12 +185,14 @@ class DOS(models.Model):
            all_orbs = set(['s', 'p', 'd'])
         elif n == 7:
            all_orbs = set(['s+', 's-', 'p+', 'p-', 'd-', 'd+'])
-        elif n == 10:
+        elif n == 10 or n == 37: # 37 == non-collinear
            all_orbs = set(['s', 'px', 'py', 'pz', 'dxy', 'dyz', 'dz2', 'dxz', 'dx2'])
         elif n == 19:
            all_orbs = set(['s+', 'px+', 'py+', 'pz+', 'dxy+', 'dyz+', 'dz2+', 'dxz+', 'dx2+', 
               's-', 'px-', 'py-', 'pz-', 'dxy-', 'dyz-', 'dz2-', 'dxz-', 'dx2-' ])
-        
+        else: 
+            raise Exception('Unrecognized number of columns in DOS: %d'%n)
+
         # Get the ones that the user wants
         if orbital is None:
             orb_to_sum = all_orbs
@@ -248,10 +251,13 @@ class DOS(models.Model):
             norb = {'s+':1, 's-up':1, 's-':2, 's-down':2,
                     'p+':3, 'p-up':3, 'p-':4, 'p-down':4,
                     'd+':5, 'd-up':5, 'd-':6, 'd-down':6}
-        elif n == 10:
+        elif n == 10 or n == 37:
             norb = {'s':1, 'py':2, 'pz':3, 'px':4,
                     'dxy':5, 'dyz':6, 'dz2':7, 'dxz':8,
                     'dx2':9}
+            if n == 37: # Non-collinear
+                for k in norb.keys(): # Add 3 new columns between each entry
+                    norb[k] = (norb[k] - 1) * 3 + norb[k] 
         elif n == 19:
             norb = {'s+':1, 's-up':1, 's-':2, 's-down':2,
                     'py+':3, 'py-up':3, 'py-':4, 'py-down':4,
