@@ -1027,6 +1027,7 @@ class Calculation(models.Model):
 
     def read_stdout(self, filename='stdout.txt'):
         if not os.path.exists('%s/%s' % (self.path, filename)):
+            print 'stdout file %s not found.' %(filename)
             return []
         stdout = open('%s/%s' % (self.path, filename)).read()
         errors = []
@@ -1397,6 +1398,9 @@ class Calculation(models.Model):
     #### calculation management
 
     def write(self):
+        '''
+        Write calculation to disk
+        '''
         os.system('mkdir %s 2> /dev/null' % self.path)
         poscar = open(self.path+'/POSCAR','w')
         potcar = open(self.path+'/POTCAR','w')
@@ -1701,9 +1705,12 @@ class Calculation(models.Model):
 
         # What settings to use?
         if configuration not in VASP_SETTINGS:
-            raise ValueError('That configuration does not exist!')
+            raise ValueError('%s configuration does not exist!'%configuration)
 
+        # Convert input to primitive cell, symmetrize it
         calc.input.make_primitive()
+#        calc.input.refine()
+        calc.input.symmetrize()
 
         vasp_settings = {}
         if calc.input.natoms > 20:
@@ -1740,6 +1747,7 @@ class Calculation(models.Model):
 
         # Did the calculation finish without errors?
         if calc.converged:
+            calc.calculate_stability()
             return calc
         elif not calc.errors:
             calc.write()
