@@ -186,10 +186,21 @@ class Task(models.Model):
                 account = allocation.get_account(users=list(project.users.all()))
 
         calc = self.entry.do(self.module, **self.kwargs)
-        if allocation.name == 'b1004':
-            calc.instructions['serial'] = False
-            calc.instructions['binary'] = 'vasp_53'
-            calc.instructions['mpi'] = 'mpirun -machinefile $PBS_NODEFILE -np $NPROCS'
+
+        # Special case: Adjustments for certain clusters
+        if not allocation is None:
+            if allocation.name == 'b1004':
+                # Can only run parallel VASP on b1004 allocation
+                calc.instructions['serial'] = False
+                calc.instructions['binary'] = 'vasp_53'
+                calc.instructions['mpi'] = 'mpirun -machinefile $PBS_NODEFILE -np $NPROCS'
+
+            if allocation.name == 'babbage':
+                # Check if calculation is parallel
+                if 'serial' in calc.instructions and not calc.instructions['serial']:
+    
+                    # Different MPI call on Babbage
+                    calc.instructions['mpi'] = 'mpirun -np $NPROCS -machinefile $PBS_NODEFILE -tmpdir /scratch'
 
         jobs = []
         #for calc in calcs:
