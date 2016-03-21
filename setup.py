@@ -13,7 +13,7 @@ setup(
     include_package_data=True,
     long_description=open('README.md').read(),
     install_requires=[
-        "Django >= 1.5",
+        "Django == 1.6.11",
         "PuLP",
         "numpy >= 1.6.4",
         "scipy >= 0.12.0",
@@ -24,9 +24,9 @@ setup(
         "python-memcached",
         "python-ase",
         "django-extensions",
-        "elementtree",
+        "lxml",
         "pyparsing<=1.9.9",
-        "PyCifRW==3.6.2",
+        "PyCifRW==3.6.2.1",
         "pexpect",
         "PyYAML",
         "scikit-learn"

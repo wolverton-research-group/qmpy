@@ -12,7 +12,7 @@ class PhaseTestCase(TestCase):
                                           'Li': 0.16666666666666666})
         self.assertEqual(test.nom_comp, {'Fe': 2, 'O': 3, 'Li':1})
         self.assertEqual(test.comp, {'Fe': 4, 'O': 6, 'Li': 2})
-        self.assertEqual(test.latex, 'Li_{}Fe_{2}O_{3}')
+        self.assertEqual(test.latex, 'Li$_{}$Fe$_{2}$O$_{3}$')
 
 class PhaseSpaceTestCase(TestCase):
     def test_create(self):
