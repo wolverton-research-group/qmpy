@@ -127,7 +127,11 @@ def read(poscar, species=None):
         >>> io.poscar.read(INSTALL_PATH+'/io/files/POSCAR_FCC')
 
     """
+
+    # Initialize the structure output
     struct = st.Structure()
+
+    # Read in the title block, and system sell
     poscar = open(poscar,'r')
     title = poscar.readline().strip()
     scale = float(poscar.readline().strip())
@@ -143,6 +147,9 @@ def read(poscar, species=None):
         struct.cell = cell
         struct.volume = -1*s
 
+    # Determine whether POSCAR is in VASP 5 format
+    #   VASP 5 has the elements listed after the 
+    #   the cell parameters
     vasp5 = False
     _species = poscar.readline().strip().split()
     try:
@@ -150,6 +157,9 @@ def read(poscar, species=None):
     except:
         vasp5 = True
         counts = [ int(v) for v in poscar.readline().split() ]
+
+    # If the format is not VASP 5, the elements should
+    #  have been listed in the title
     if not vasp5:
         counts = map(int, _species)
         if not species:
@@ -162,15 +172,23 @@ def read(poscar, species=None):
             _species = species
     species = _species
 
+    # Prepare a list of numbers of atom types
     atom_types = []
     for n,e in zip(counts, species):
         atom_types += [e]*n
 
-    style = poscar.readline()
+    # Determine whether coordinates are in direct or cartesian
     direct = False
+    style = poscar.readline()
+
+    if style[0].lower() == 's':
+        # The POSCAR contains selective dynamics info
+        style = poscar.readline()
+
     if style[0] in ['D', 'd']:
         direct = True
 
+    # Read in the atom coordinates
     struct.natoms = sum(counts)
     struct.ntypes = len(counts)
     atoms = []
