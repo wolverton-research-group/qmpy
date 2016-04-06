@@ -197,14 +197,7 @@ def relaxation(entry, xc_func='PBE', **kwargs):
 
     # Check if the calculation is converged / started
     if not entry.calculations.get(cnfg_name, Calculation()).converged:
-        input = deepcopy(entry.input)
-
-        # Copy object by removing ties to database
-        input.id = None
-        input.atoms = entry.input.atom_set.all()
-        for atom in input.atoms:
-            atom.id = None
-        input.make_primitive()
+        input = entry.input.copy()
 
         # because max likes to calculate fucking slowly
         projects = entry.project_set.all()
@@ -250,20 +243,7 @@ def relaxation(entry, xc_func='PBE', **kwargs):
             lowspin_dir = os.path.join(entry.path, low_name)
 
             # Get input structure
-            input = deepcopy(entry.input)
-
-            # Copy object by removing ties to database
-            input.id = None
-            input.atoms = entry.input.atom_set.all()
-            for atom in input.atoms:
-                atom.id = None
-            input.make_primitive()
-
-            # Copy object by removing ties to database
-            input.id = None
-            for atom in input.atoms:
-                atom.id = None
-            input.make_primitive()
+            input = entry.input.copy()
 
             calc = Calculation.setup(input,  entry=entry,
                                              configuration=cnfg_name,
