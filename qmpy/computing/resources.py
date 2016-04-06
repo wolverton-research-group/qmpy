@@ -234,6 +234,13 @@ class Host(models.Model):
         return util
 
     def get_project(self):
+        """
+        Out of the active projects able to run on this host,
+          select one at random
+
+        Output:
+            Project, Active project able to run on this host
+        """
         proj = Project.objects.filter(allocations__host=self, state=1)
         proj = proj.filter(task__state=0)
         if proj.exists():
@@ -353,6 +360,19 @@ class Host(models.Model):
             return self.running
         else:
             return {}
+
+    def activate(self):
+        """
+        Allow jobs to be run on this system. Remember to save() to enact change
+        """
+        self.state = 1
+    
+    def deactivate(self):
+        """
+        Prevent new jobs from being started on this system. 
+        Remember to save() changes
+        """
+        self.state = -1
 
     @property
     def utilization_by_project(self):
