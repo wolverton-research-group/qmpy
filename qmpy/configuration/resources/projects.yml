@@ -8,10 +8,18 @@
     #       - user2
     # project2: ...
     
-Li2MO3:
+HT_TE:
   allocations:
   - byrd
-  - josquin
+  - palestrina
+  - victoria
+  priority: 0
+  users:
+  - vky561
+Li2MO3:
+  allocations:
+  - b1004
+  - byrd
   - palestrina
   - victoria
   priority: 1
@@ -19,7 +27,11 @@ Li2MO3:
   - vih173
 X4ABZ2:
   allocations:
+  - byrd
+  - josquin
   - p20746
+  - p20747
+  - victoria
   priority: 0
   users:
   - jhc585
@@ -33,6 +45,7 @@ ahmed:
   users: []
 aq_Li:
   allocations:
+  - b1004
   - byrd
   - josquin
   - palestrina
@@ -54,7 +67,6 @@ dongshu:
   allocations:
   - byrd
   - josquin
-  - palestrina
   - victoria
   priority: 0
   users:
@@ -77,10 +89,12 @@ garnets:
   users: []
 icsd:
   allocations:
-  - palestrina
+  - byrd
+  - josquin
   - victoria
   priority: 12
-  users: []
+  users:
+  - vih173
 james:
   allocations:
   - byrd
@@ -105,14 +119,17 @@ max:
   - victoria
   priority: 0
   users:
+  - vih173
   - mka721
 prototypes:
   allocations:
+  - byrd
   - josquin
   - palestrina
   - victoria
   priority: 0
-  users: []
+  users:
+  - vih173
 stresses:
   allocations:
   - byrd
@@ -124,6 +141,7 @@ stresses:
   - vih173
 tony:
   allocations:
+  - b1004
   - byrd
   - josquin
   - palestrina
@@ -139,6 +157,16 @@ voorhees:
   - victoria
   priority: 0
   users: []
+xc_compare:
+  allocations:
+  - babbage
+  - byrd
+  - josquin
+  - palestrina
+  - victoria
+  priority: 0
+  users:
+  - ltw578
 zhi:
   allocations:
   - byrd

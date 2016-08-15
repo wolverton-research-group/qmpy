@@ -134,7 +134,10 @@ class TaskManager(daemon.Daemon):
                     (task.id, task.entry.id))
 
         for job in jobs:
+            nattempts = 1
             while not job.state == 1:
+                if nattempts == 5:
+                    break
                 check_die()
                 try:
                     job.submit()
@@ -142,8 +145,10 @@ class TaskManager(daemon.Daemon):
                         time.sleep(5)
                 except Exception:
                     tlogger.warn('Submission error, waiting 30 seconds'
-                                    '(Host %s)' % host.name)
+                            ' (Host %s), Task: %s, Entry: %s' % (host.name,
+                                task.id, task.entry.id))
                     check_die(30)
+                    nattempts += 1
             job.save()
             host.utilization += job.ncpus
             tlogger.info('Submitted: %s (Entry %s)' % (task.id, task.entry.id))

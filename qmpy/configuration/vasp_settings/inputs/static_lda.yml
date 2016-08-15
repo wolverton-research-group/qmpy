@@ -1,6 +1,6 @@
 encut: 650
-prec: med
-algo: fast
+prec: acc
+algo: normal
 nelmin: 5
 istart: 1
 icharg: 1
@@ -15,5 +15,6 @@ lelf: True
 lhvar: True
 kppra: 8000
 gamma: True
+nedos: 1001
 potentials: vasp_rec_lda
 hubbards: wang

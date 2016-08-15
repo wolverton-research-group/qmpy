@@ -47,9 +47,6 @@ dwh485:
   palestrina:
     run_path: /home/dwh485/autorun
     username: dwh485
-  quest:
-    run_path: /home/dwh485/autorun
-    username: dwh485
   victoria:
     run_path: /home/dwh485/autorun/
     username: dwh485
@@ -69,6 +66,19 @@ jhc585:
   victoria:
     run_path: /home/jhc585/oqmd_run
     username: jhc585
+ltw578:
+  byrd:
+    run_path: /home/ltw578/auto_run
+    username: ltw578
+  josquin:
+    run_path: /home/ltw578/auto_run
+    username: ltw578
+  palestrina:
+    run_path: /home/ltw578/auto_run
+    username: ltw578
+  victoria:
+    run_path: /home/ltw578/auto_run
+    username: ltw578
 mka721:
   byrd:
     run_path: /home/mka721/autorun
@@ -101,6 +111,22 @@ vih173:
   victoria:
     run_path: /home/vih173/Work/oqmd
     username: vih173
+vky561:
+  byrd:
+    run_path: oqmd_autorun
+    username: vky561
+  josquin:
+    run_path: oqmd_autorun
+    username: vky561
+  palestrina:
+    run_path: /home/vky561/oqmd_autorun
+    username: vky561
+  quest:
+    run_path: /home/vky561/oqmd_autorun
+    username: vky561
+  victoria:
+    run_path: /home/vky561/oqmd_autorun
+    username: vky561
 zlb066:
   byrd:
     run_path: /home/zlb066/oqmd/

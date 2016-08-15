@@ -928,6 +928,8 @@ class PhaseSpace(object):
             if not set(p.comp.keys()) <= space:
                 continue
             in_phases.append(p)
+        ##[vh]
+        ##print "in_phases: ", in_phases
 
         return self._gclp(composition=composition,
                 mus=_mus, phases=in_phases)
@@ -948,7 +950,8 @@ class PhaseSpace(object):
                 p.unit_comp.get(elt,0)*phase_vars[p]
                 for p in phases ]) == float(constraint),\
                         'Conservation of '+elt
-
+        ##[vh]
+        ##print prob
         if pulp.GUROBI().available():
             prob.solve(pulp.GUROBI(msg=False))
         elif pulp.COIN_CMD().available():
@@ -1023,6 +1026,7 @@ class PhaseSpace(object):
             #except ValueError:
             #    pass
             energy, gclp_phases = self.gclp(p.unit_comp, phases=phases)
+            ##print p, energy, gclp_phases
             #vh
             #print p,  '------', gclp_phases
             p.stability = p.energy - energy
@@ -1409,7 +1413,9 @@ class PhaseSpace(object):
                 continue
             if self.phase_dict[p.name] in self.stable:
                 continue
-            pt = Point(coord_to_gtri(self.coord(p)), label=p.label)
+            ##pt = Point(coord_to_gtri(self.coord(p)), label=p.label)
+            options = {'hull_distance': p.stability}
+            pt = Point(coord_to_gtri(self.coord(p)), label=p.label, **options)
             points.append(pt)
         self.renderer.point_collections.append(PointCollection(points,
             fill=True, color='red'))

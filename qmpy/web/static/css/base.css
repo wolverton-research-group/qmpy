@@ -3,6 +3,9 @@
 */
 
 /* GLOBAL DEFAULTS */
+body {
+	font-family:"Helvetica Neue", "Helvetica", Arial, Sans-Serif;
+}
 
 p, ol, ul, dl {
     margin: .2em 0 .8em 0;
@@ -128,7 +131,7 @@ hr {
 /* TABLES */
 
 table {
-	font-family:"Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
+	font-family:"Helvetica Neue", "Helvetica", Arial, "Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
 	font-size:12px;
 	width:auto;
 	border-collapse:collapse;
@@ -182,7 +185,7 @@ input, textarea, select, .form-row p {
     margin: 2px 0;
     padding: 2px 3px;
     vertical-align: middle;
-    font-family: "Lucida Grande", Verdana, Arial, sans-serif;
+    font-family: "Helvetica Neue", "Helvetica", Arial, "Lucida Grande", Verdana, sans-serif;
     font-weight: normal;
     font-size: 11px;
 }

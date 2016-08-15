@@ -1,6 +1,6 @@
 encut: 650
 prec: acc
-algo: fast
+algo: normal
 nelmin: 5
 istart: 1
 icharg: 1
@@ -9,8 +9,10 @@ sigma: 0.2
 nsw: 60
 isif: 3
 ibrion: 2
+ediff: 1e-5
+ediffg: -1e-2
 lorbit: 11
-kppra: 6000
+kppra: 8000
 gamma: True
 lwave: False
 lcharg: True

@@ -71,7 +71,13 @@ def composition_view(request, search=None):
         ps.infer_formation_energies()
         data['search'] = space
         data['pd'] = ps.phase_diagram.get_flot_script("phasediagram")
-        data['stable'] = [ p.calculation.entry for p in ps.stable ]
+        ##data['stable'] = []
+        ##for p in ps.stable:
+        ##    if p.formation is None:
+        ##        continue
+        ##    data['stable'].append(p.formation.energy)
+        ## Fe-Ti-Sb: what's the problem?
+        data['stable'] = [ p.formation.entry for p in ps.stable ]
         comps = Composition.get_list(space)
         results = defaultdict(list)
         for c in comps:

@@ -19,7 +19,7 @@ class LatticePoint:
         self.spin = spin
 
     def __str__(self):
-        return '(%s)' % (''.join([ '%g' % c for c in self.coord ]))
+        return '(%s)' % (' '.join([ '%0.3f' % c for c in self.coord ]))
 
     def __repr__(self):
         return '<LatticePoint %s>' % (self.__str__())
@@ -35,7 +35,8 @@ class LatticeNetwork:
     steps = 100
 
     def __init__(self, pairs):
-        self.graph = nx.MultiGraph()
+        ##self.graph = nx.MultiGraph()
+        self.graph = nx.Graph()
         self.graph.add_edges_from(pairs)
         self.lattice_points = self.graph.nodes()
         self.pairs = self.graph.edges()

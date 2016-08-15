@@ -928,7 +928,7 @@ class Structure(models.Model, object):
             self.composition = Composition.get(self.comp)
         return self.composition
 
-    def set_magnetism(self, type, scheme='primitive'):
+    def set_magnetism(self, order, elements=None, scheme='primitive'):
         """
         Assigns magnetic moments to all atoms in accordance with the specified
         magnetism scheme.
@@ -953,12 +953,12 @@ class Structure(models.Model, object):
         +---------+-------------------------------------+
 
         """
-        if type == 'none':
+        if order == 'none':
             for atom in self.atoms:
                 atom.magmom = 0
                 if atom.id is not None:
                     atom.save()
-        if type == 'ferro':
+        if order == 'ferro':
             for atom in self.atoms:
                 if atom.element.d_elec > 0 and atom.element.d_elec < 10:
                     atom.magmom = 5
@@ -968,8 +968,11 @@ class Structure(models.Model, object):
                     atom.magmom = 0
                 if atom.id is not None:
                     atom.save()
-        elif type == 'anti-ferro':
-            raise NotImplementedError
+        elif order == 'anti-ferro':
+            if not elements:
+                raise NotImplementedError
+            ln = self.get_lattice_network(elements)
+
         self.spacegroup = None
 
     @property
@@ -1332,7 +1335,7 @@ class Structure(models.Model, object):
                 their magnetic structure.
 
         Returns:
-            A SpinLattice, which is a container for a lattice graph, which
+            A LatticeNetwork, which is a container for a lattice graph, which
             contains nodes which are atoms and edges which indicate nearest
             neighbors.
 
@@ -1350,17 +1353,21 @@ class Structure(models.Model, object):
         if supercell:
             new = self.transform(supercell, in_place=False)
             return new.get_lattice_network(elements=elements, **kwargs)
-        pairs = []
+        pairs = set()
         if elements:
             struct = self.get_sublattice(elements)
             return struct.get_lattice_network()
         self.find_nearest_neighbors(**kwargs)
         for s1 in self.sites:
             n0 = len(pairs)
+            lp1 = LatticePoint(s1.coord)
             for s2 in s1.neighbors:
                 #if a1 < a2:
                 #    continue
-                pairs.append((s1, s2))
+                lp2 = LatticePoint(s2.coord)
+                #pairs.append((s1, s2))
+                pairs.add(frozenset([lp1, lp2]))
+        pairs = list(pairs)
 
         lattice = LatticeNetwork(pairs)
         lattice.structure = self

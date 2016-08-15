@@ -164,3 +164,4 @@ def fit(name, calculations=None, experiments=None, fit_for=[]):
         f.hubbard_correction_set.add(hm)
         new_h_corrs[str(hub.key)] = float(val)
     return new_e_mus, new_h_corrs
+

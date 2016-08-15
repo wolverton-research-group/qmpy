@@ -111,7 +111,7 @@ def _heuristic(structure, limit=5, tol=2e-1):
             atom.neighbors = []
             for n in site.neighbors:
                 atom.neighbors += n.atoms
-    #return nns
+    return nns
 
 def _voronoi(structure, limit=5, tol=1e-2):
     lps = structure.lat_params

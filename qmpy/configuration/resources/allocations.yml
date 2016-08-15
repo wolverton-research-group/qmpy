@@ -16,6 +16,10 @@ b1004:
   - jhc585
   - mka721
   - dwh485
+babbage:
+  host: babbage
+  key: ''
+  users: []
 byrd:
   host: byrd
   key: ''
@@ -48,6 +52,11 @@ p20477:
 p20746:
   host: quest
   key: p20746
+  users:
+  - jhc585
+p20747:
+  host: quest
+  key: p20747
   users:
   - jhc585
 palestrina:

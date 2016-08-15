@@ -138,7 +138,7 @@ class DOS(models.Model):
             canvas.yaxis.max = max(self.total_dos)*1.1
             canvas.yaxis.min = 0
             canvas.xaxis.label = "Energy (eV)"
-            canvas.yaxis.label = "# states/eV/unit cell"
+            canvas.yaxis.label = "# of States/eV/unit cell" #[mohan]
             self._plot = canvas
         return self._plot
 

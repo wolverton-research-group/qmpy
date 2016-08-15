@@ -201,6 +201,9 @@ class Task(models.Model):
     
                     # Different MPI call on Babbage
                     calc.instructions['mpi'] = 'mpirun -np $NPROCS -machinefile $PBS_NODEFILE -tmpdir /scratch'
+            if allocation.name == 'd20829':
+                # Sheel doesn't have access to b1004 binaries
+                calc.instructions['binary'] = '~/vasp_53'
 
         jobs = []
         #for calc in calcs:

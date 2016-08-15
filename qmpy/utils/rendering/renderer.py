@@ -142,6 +142,7 @@ class Renderer(object):
         prefixes = {0:'unary', 1:'binary', 2:'ternary', 3:'quaternary',
                 4:'graph'}
         prefix = kwargs['prefix'] if 'prefix' in kwargs else prefixes[self.dim]
+        hd = kwargs['hull_distance'] if 'hull_distance' in kwargs else False
         fo = open(prefix+'_hull_mpl.py', 'w')
         
         fo.write('# import statements go here\n')
@@ -175,7 +176,10 @@ class Renderer(object):
             if pname in phases:
                 continue
             phases.add(pname)
-            pname = '%s' %(format_bold_latex(parse_comp(pname)))
+            pname = r'%s' %(format_bold_latex(parse_comp(pname)))
+            if hd:
+                pstab = p.options['hull_distance']
+                pname = '%s (%0.3f)' %(pname, pstab)
             penergy = float(p.label.split(':')[1].split()[0])
             fo.write('ax.plot(%s, %s, c="crimson", marker="o", ms=10.0, mew=0.0)\n' %(px, py))
             fo.write(self._write_matplotlib_text(px, py, pname, stable=False))
