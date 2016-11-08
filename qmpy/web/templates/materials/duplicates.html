@@ -1,0 +1,68 @@
+{% extends "base_site.html" %}
+{% load admin_static %}
+
+{% block extrastyle %}
+<link rel="stylesheet" type="text/css" href="{% static "css/flot.css" %}"/>
+{% endblock %}
+
+{% block extrascript %}
+<script type="text/javascript" src={% static "js/jsmol/JSmol.min.js" %}></script>
+{% endblock %}
+
+{% block content_title %}
+<h1> Duplicates of <a href="/materials/entry/{{ entry.id }}">Entry {{ entry.id}}</a> </h1>
+{% endblock %}
+
+{% block sidebar %}
+<div id="sidebar" class="box">
+  <h1> Visualization </h1>
+  Structure: <a href="/materials/structure/{{entry.structure.id}}">
+    {{ entry.structure.name }}</a>
+
+  <div id="jmol">
+    <script>
+      var Info = {
+        j2sPath: "{% static 'js/jsmol/j2s' %}",
+        {% if primitive %}
+        src: "/materials/export/primitive/cif/{{entry.structure.id}}",
+        {% else %}
+        src: "/materials/export/conventional/cif/{{entry.structure.id}}",
+        {% endif %}
+        use: "HTML5",
+        width: 300,
+        height: 300
+      };
+      Jmol.getApplet("myJmol", Info);
+    </script>
+  </div>
+
+  <form action="" method="post">{% csrf_token %}
+    <input type="radio" name="primitive" value="1" onclick="this.form.submit();"
+    {% if primitive %}checked{% endif %}> Primitive Cell 
+    <input type="radio" name="primitive" value="0" onclick="this.form.submit();"
+    {% if not primitive %}checked{% endif %}> Conventional Cell
+  </form>
+</div>
+
+{% endblock %}
+
+{% block content %}
+<h2> {{entries.count}} duplicate entries: </h2>
+<table>
+	<thead>
+		<tr>
+			<th>ID</th>
+			<th>Label</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for entry in entries %}
+		<tr class=clickableRow href="/materials/entry/{{ entry.id }}">
+      <td>{{entry.id}}</th>
+			<td>{{entry.label}}</th>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
+
+{% endblock %}
