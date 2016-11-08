@@ -5,11 +5,12 @@ INSTALL_PATH = os.path.split(INSTALL_PATH)[0]
 INSTALL_PATH = os.path.split(INSTALL_PATH)[0]
 
 DEBUG = False
-#DEBUG = True
+##DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-        ('Scott Kirklin','scott.kirklin@gmail.com')
+        #('Scott Kirklin','scott.kirklin@gmail.com'),
+        ('Vinay Hegde','hegdevinayi@gmail.com')
 )
 
 MANAGERS = ADMINS
@@ -17,15 +18,16 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql', 
-        'NAME': 'qmdb', 
-        'USER': 'sjk648',                      
-        'PASSWORD': '',                  
-        'HOST': '',                      
-        'PORT': ''                       
+        'NAME': 'qmdb_dev', 
+        'USER': 'oqmd',                      
+        'PASSWORD': 'oqmdpass@123!',                  
+        'HOST': '127.0.0.1',                      
+        'PORT': '5715'                       
     }
 }
 
-ALLOWED_HOSTS = ['www.oqmd.org', 'oqmd.org', 'larue.northwestern.edu']
+ALLOWED_HOSTS = ['www.oqmd.org', 'oqmd.org', 'http://oqmd.org', 'http://www.oqmd.org']
+##ALLOWED_HOSTS = ['josquin.northwestern.edu', 'josquin.northwestern.edu/oqmd.org']
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -63,7 +65,7 @@ MEDIA_URL = '/media/'
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = '/var/www/internal.oqmd.org/static/'
+STATIC_ROOT = '/var/www/html/oqmd.org/static/'
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"

@@ -1,10 +1,22 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+
+import os, os.path
 
 from math import *
 from strings import *
 from rendering import *
 from daemon import Daemon
+
+def mkdir(path):
+    """
+    Makes the specified folder, including required folders "below"
+    """
+    if not path:
+        return
+    bpath = os.path.split(path)[0]
+    mkdir(bpath)
+    if not os.path.exists(path):
+        os.mkdir(path)
 
 def assign_type(string):
     res = string

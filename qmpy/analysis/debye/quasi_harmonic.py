@@ -57,23 +57,23 @@ Td=hbar*vel_avg/kb*(6.*pi**2.*N/V)**(1/3.)
 ### Debye temp directly from elastic constants
 # sound_vel constructs the characteristic (secular) equation, from which the primary sound velocities are derived
 def sound_vel(theta,phi):
-#convert spherical coords to cartesian with r=1, then calculate direction cosines
-x=sin(theta)*cos(phi)
-y=sin(theta)*sin(phi)
-z=cos(theta)
-wave=array([x,y,z]) # wave propagation vector
-#direction cosines
-l=wave[0]/sqrt(wave[0]**2.+wave[1]**2.+wave[2]**2.)
-m=wave[1]/sqrt(wave[0]**2.+wave[1]**2.+wave[2]**2.)
-n=wave[2]/sqrt(wave[0]**2.+wave[1]**2.+wave[2]**2.)
-G11=l**2.*elast[0,0]+m**2.*elast[5,5]+n**2.*elast[4,4]+2*m*n*elast[4,5]+2*n*l*elast[0,4]+2*l*m*elast[0,5]
-G22=l**2.*elast[5,5]+m**2.*elast[1,1]+n**2.*elast[3,3]+2*m*n*elast[1,3]+2*n*l*elast[3,5]+2*l*m*elast[1,5]
-G33=l**2.*elast[4,4]+m**2.*elast[3,3]+n**2.*elast[2,2]+2*m*n*elast[2,3]+2*n*l*elast[2,4]+2*l*m*elast[3,4]
-G12=l**2.*elast[0,5]+m**2.*elast[1,5]+n**2.*elast[3,4]+m*n*(elast[3,5]+elast[1,4])+n*l*(elast[0,3]+elast[4,5])+l*m*(elast[0,1]+elast[5,5])
-G13=l**2.*elast[0,4]+m**2.*elast[3,5]+n**2.*elast[2,4]+m*n*(elast[3,4]+elast[2,5])+n*l*(elast[0,2]+elast[4,4])+l*m*(elast[0,3]+elast[4,5])
-G23=l**2.*elast[4,5]+m**2.*elast[1,3]+n**2.*elast[2,3]+m*n*(elast[3,3]+elast[1,2])+n*l*(elast[2,5]+elast[3,4])+l*m*(elast[1,4]+elast[3,5])
-sec=array([[G11,G12,G13],[G12,G22,G23],[G13,G23,G33]])
-return sqrt(eig(sec)[0]*1e9/density) #the eigenvalues are density*sound velocity^2
+    #convert spherical coords to cartesian with r=1, then calculate direction cosines
+    x=sin(theta)*cos(phi)
+    y=sin(theta)*sin(phi)
+    z=cos(theta)
+    wave=array([x,y,z]) # wave propagation vector
+    #direction cosines
+    l=wave[0]/sqrt(wave[0]**2.+wave[1]**2.+wave[2]**2.)
+    m=wave[1]/sqrt(wave[0]**2.+wave[1]**2.+wave[2]**2.)
+    n=wave[2]/sqrt(wave[0]**2.+wave[1]**2.+wave[2]**2.)
+    G11=l**2.*elast[0,0]+m**2.*elast[5,5]+n**2.*elast[4,4]+2*m*n*elast[4,5]+2*n*l*elast[0,4]+2*l*m*elast[0,5]
+    G22=l**2.*elast[5,5]+m**2.*elast[1,1]+n**2.*elast[3,3]+2*m*n*elast[1,3]+2*n*l*elast[3,5]+2*l*m*elast[1,5]
+    G33=l**2.*elast[4,4]+m**2.*elast[3,3]+n**2.*elast[2,2]+2*m*n*elast[2,3]+2*n*l*elast[2,4]+2*l*m*elast[3,4]
+    G12=l**2.*elast[0,5]+m**2.*elast[1,5]+n**2.*elast[3,4]+m*n*(elast[3,5]+elast[1,4])+n*l*(elast[0,3]+elast[4,5])+l*m*(elast[0,1]+elast[5,5])
+    G13=l**2.*elast[0,4]+m**2.*elast[3,5]+n**2.*elast[2,4]+m*n*(elast[3,4]+elast[2,5])+n*l*(elast[0,2]+elast[4,4])+l*m*(elast[0,3]+elast[4,5])
+    G23=l**2.*elast[4,5]+m**2.*elast[1,3]+n**2.*elast[2,3]+m*n*(elast[3,3]+elast[1,2])+n*l*(elast[2,5]+elast[3,4])+l*m*(elast[1,4]+elast[3,5])
+    sec=array([[G11,G12,G13],[G12,G22,G23],[G13,G23,G33]])
+    return sqrt(eig(sec)[0]*1e9/density) #the eigenvalues are density*sound velocity^2
 
 from scipy import integrate
 int_sv=integrate.dblquad(lambda t, p: (sound_vel(t,p)[0]**-3.+sound_vel(t,p)[1]**-3.+sound_vel(t,p)[2]**-3.), 0.,pi, lambda p: 0., lambda p: 2.*pi)[0]
@@ -81,7 +81,7 @@ avg_sv=(int_sv/(4.*pi))**(-1/3.)
 Td=(hbar*2.*pi)/kb*(9./(4.*pi)*N/V)**(1/3.)*avg_sv
 
 def point_sv(t,x):
-return (sound_vel(t,x)[0]**-3.+sound_vel(t,x)[1]**-3.+sound_vel(t,x)[2]**-3.)
+    return (sound_vel(t,x)[0]**-3.+sound_vel(t,x)[1]**-3.+sound_vel(t,x)[2]**-3.)
 
 
 

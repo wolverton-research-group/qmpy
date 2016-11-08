@@ -1,4 +1,5 @@
 {% extends "base_site.html" %}
+{% load admin_static %}
 
 {% block title %}
 OQMD
@@ -11,31 +12,36 @@ OQMD
 {% block extrahead %}
 {% endblock %}
 
-{% block notice %}
-{% endblock %}
-
 {% block content %}
-
-<p> The OQMD is a database DFT calculated thermodynamic and structural properties. We are providing this online interface for convenient, small scale access; however for more powerful utilization we recommend downloading the entire database and the API for interfacing with it, detailed in the link below.</p>
+<p> The OQMD is a database of DFT-calculated thermodynamic and structural properties. This online interface is for convenient, small-scale access; for a more powerful utilization of the data, we recommend downloading the entire database and the API for interfacing with it, from the link below.</p>
 
 <h2> You can...</h2>
-
 <ul>
 	<li><b><a href="/materials/">Search</a></b> for materials by composition, </li>
-	<li><b><a href="/analysis/phase_diagram">Create</a></b> phase diagrams using database thermochemical data,</li>
-	<li><b><a href="/analysis/gclp">Determine</a></b> ground state compositions, </li>
+	<li><b><a href="/analysis/phase_diagram">Create</a></b> phase diagrams using the thermochemical data in OQMD,</li>
+	<li><b><a href="/analysis/gclp">Determine</a></b> ground state compounds at any composition, </li>
 	<li><b><a href="/analysis/visualize">Visualize</a></b> crystal structures, or </li>
-	<li><b> <a href="/download">Download</a></b> the entire database for your own use! </li>
+	<li><b> <a href="/download">Download</a></b> the entire database (and the API) for your own use! </li>
 </ul>
 
 <h2>Tweet @TheOQMD to ask what is stable at a composition, or to get a simple phase diagram!</h2>
+<div style="float:left;">
+<img src="{% static "img/twitter_pd.png" %}" width=490 alt="Example of asking @TheOQMD about a phase diagram"> 
+</div>
+<div>
+<img src="{% static "img/twitter_composition.png" %}" width=490 alt="Example of asking @TheOQMD about a composition">
+</div>
 
-<p> The OQMD was created in <a href="http://wolverton.northwestern.edu">Chris Wolverton's</a> group at Northwestern University.</p>
+<div style="width:900px; float:left">
+<p> The OQMD was created in <a href="http://wolverton.northwestern.edu">Chris Wolverton's group</a> at Northwestern University.</p>
+</div>
 {% endblock %} 
 
 {% block sidebar %} 
 <div id="sidebar" class="box">
-  <h1> Current status </h1>
-  Database contains <b>{{ entries.count }}</b> entries, of which <b>{{ done.count }}</b> have been calculated. 
+<h1> Current status </h1>
+<b>OQMD v1.1 has been released!</b> Download it <a href="/download/">here</a>.<br>
+The database now contains <b>{{ entries.count }}</b> entries. In addition, calculations of new structures are constantly ongoing!
+Recently added compounds include: {% for calc in recent %} <a href="/materials/entry/{{calc.entry_id}}">{{calc.input.name}}</a> {% endfor %}
 </div>
 {% endblock %}

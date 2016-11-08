@@ -54,9 +54,6 @@ class Entry(models.Model):
 
     Attributes:
         | id: Primary key (auto-incrementing int)
-        | natoms: Number of atoms in the primitive input cell
-        | ntypes: Number of elements in the input structure
-        | path: Path to input file, and location of subsequent calculations.
         | label: An identifying name for the structure. e.g. icsd-1001 or A3
 
     """
@@ -116,19 +113,19 @@ class Entry(models.Model):
             self.meta_data = self.hold_objects + self.keyword_objects
 
     @staticmethod
-    def create(source, keywords=[], projects=[], **kwargs):
+    def create(source, keywords=[], projects=[], prototype=None, **kwargs):
         """
         Attempts to create an Entry object from a provided input file.
 
         Processed in the following way:
-        
+
         #. If an Entry exists at the specified path, returns that Entry.
         #. Create an Entry, and assign all fundamental attributes. (natoms,
-           ntypes, input, path, elements, keywords, projects). 
-        #. If the input file is a CIF, and because CIF files have additional 
-           composition and reference information, if that file format is 
-           found, an additional test is performed to check that the reported 
-           composition matches the composition of the resulting structure. The 
+           ntypes, input, path, elements, keywords, projects).
+        #. If the input file is a CIF, and because CIF files have additional
+           composition and reference information, if that file format is
+           found, an additional test is performed to check that the reported
+           composition matches the composition of the resulting structure. The
            reference for the work is also created and assigned to the entry.
         #. Attempt to identify another entry that this is either exactly
            equivalent to, or a defect cell of.
@@ -154,11 +151,12 @@ class Entry(models.Model):
         entry.input = structure
         entry.ntypes = structure.ntypes
         entry.natoms = len(structure.sites)
-        entry.elements = entry.comp.keys() 
+        entry.elements = entry.comp.keys()
         entry.composition = Composition.get(structure.comp)
         for kw in keywords:
             entry.add_keyword(kw)
         entry.projects = projects
+        entry.prototype = prototype
 
         # Step 3
         c1 = structure.composition
@@ -192,7 +190,7 @@ class Entry(models.Model):
             return Entry.search_by_structure(structure, tol=tol)
 
     @staticmethod
-    def search_by_structure(structure, tol=1e-1):
+    def search_by_structure(structure, tol=1e-2):
         c = Composition.get(structure.comp)
         for e in c.entries:
             if e.structure.compare(structure, tol=tol):
@@ -247,6 +245,7 @@ class Entry(models.Model):
                     structs[s.label] = s
                 self._structures = structs
         return self._structures
+    s = structures
 
     @structures.setter
     def structures(self, structs):
@@ -261,10 +260,11 @@ class Entry(models.Model):
         self._structures[struct].delete()
         del self._structures[struct]
 
+
     _calculations = None
     @property
     def calculations(self):
-        """Dictionary of label:Calculation pairs.""" 
+        """Dictionary of label:Calculation pairs."""
         if self._calculations is None:
             if self.id is None:
                 self._calculations = {}
@@ -274,6 +274,7 @@ class Entry(models.Model):
                     calcs[c.label] = c
                 self._calculations = calcs
         return self._calculations
+    c = calculations
 
     @calculations.setter
     def calculations(self, calcs):
@@ -284,7 +285,7 @@ class Entry(models.Model):
         self._calculations = calcs
 
     @calculations.deleter
-    def calculations(self, calc): 
+    def calculations(self, calc):
         self._calculations[calc].delete()
         del self._calculations[calc]
 
@@ -317,7 +318,6 @@ class Entry(models.Model):
     @property
     def tasks(self):
         return list(self.task_set.all())
-
     @property
     def jobs(self):
         return list(self.job_set.all())
@@ -336,7 +336,7 @@ class Entry(models.Model):
         """
         Composition dictionary, using species (element + oxidation state)
         instead of just the elements.
-        
+
         """
         if self.input is None:
             return {}
@@ -376,7 +376,7 @@ class Entry(models.Model):
         for e in self.duplicates.all():
             if not e.prototype is None:
                 protos.append(e.prototype.name)
-                
+
         protos = list(set(protos))
         if len(protos) == 1:
             return protos[0]
@@ -386,13 +386,13 @@ class Entry(models.Model):
     @property
     def space(self):
         """Return the set of elements in the input structure.
-        
+
         Examples::
 
             >>> e = Entry.create("fe2o3/POSCAR") # an input containing Fe2O3
             >>> e.space
             set(["Fe", "O"])
-        
+
         """
         return set([ e.symbol for e in self.elements])
 
@@ -425,22 +425,26 @@ class Entry(models.Model):
         final relaxed structure. Otherwise, returns None.
         """
         if self._energy is None:
-            if 'static' in self.calculations:
-                if self.calculations['static'].converged:
-                    de = self.calculations['static'].compute_formation()
-                    self._energy = de.delta_e
-            elif 'standard' in self.calculations:
-                if self.calculations['standard'].converged:
-                    de = self.calculations['standard'].compute_formation()
-                    self._energy = de.delta_e
+            fes = self.formationenergy_set.filter(fit='standard').order_by('delta_e')
+            if fes.exists():
+                self._energy = fes[0].delta_e
+            #if 'static' in self.calculations:
+            #    if self.calculations['static'].converged:
+            #        de = self.calculations['static'].formation_energy()
+            #        self._energy = de
+            #elif 'standard' in self.calculations:
+            #    if self.calculations['standard'].converged:
+            #        de = self.calculations['standard'].formation_energy()
+            #        self._energy = de
         return self._energy
 
     @property
     def stable(self):
         forms = self.formationenergy_set.filter(fit='standard')
+        forms = forms.exclude(stability=None)
         if not forms.exists():
             return None
-        return any([ f.stability <= 0 for f in forms ])
+        return any([ f.stability < 0 for f in forms ])
         
 
     _history = None
@@ -534,6 +538,7 @@ class Entry(models.Model):
         script = getattr(scripts, module)
         return script(self, *args, **kwargs)
 
+    @transaction.atomic
     def move(self, path):
         """
         Moves all calculation files to the specified path.
@@ -545,9 +550,20 @@ class Entry(models.Model):
         except Exception, err:
             logger.warn(err)
             return
-        self.path = path
-        logger.info('Moved %s to %s', self, path)
+        old_path = self.path
+        old_base = os.path.basename(os.path.abspath(old_path.strip('/')))
+        en_newpath = os.path.join(path, old_base)
+        Entry.objects.filter(id=self.id).update(path=en_newpath)
         self.save()
+        #labels = [ c.label.strip('_[0-9]') for c in self.calculation_set.all() ]
+        for calc in self.calculation_set.all():
+            calc_base = os.path.basename(calc.path.strip('/'))
+            if calc_base != calc.label.strip('_[0-9]'):
+                calc_base = os.path.join(calc.label.strip('_[0-9]'), calc_base)
+            newpath = os.path.join(self.path, calc_base)
+            #newpath = calc.path.replace(old_path, path)
+            vasp.Calculation.objects.filter(id=calc.id).update(path=newpath)
+        logger.info('Moved %s to %s', self, path)
 
     @property
     def running(self):

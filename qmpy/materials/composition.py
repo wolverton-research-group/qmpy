@@ -1,8 +1,10 @@
 # qmpy/materials/composition.py
 
 from django.db import models
+from django.db.models import F
 
 from qmpy.materials.element import Element
+from qmpy.data import elements
 from qmpy.utils import *
 import qmpy.analysis.thermodynamics as thermo
 
@@ -125,7 +127,7 @@ class Composition(models.Model):
         in_elts = Element.objects.filter(symbol__in=space)
         out_elts = Element.objects.exclude(symbol__in=space)
         comps = Composition.objects.filter(element_set__in=in_elts,
-                ntypes__lt=len(space))
+                ntypes__lte=len(space))
         comps = Composition.objects.exclude(element_set__in=out_elts)
         comps = comps.exclude(entry=None)
         if calculated:
@@ -136,7 +138,7 @@ class Composition(models.Model):
 
     @property
     def entries(self):
-        entries = self.entry_set.filter(duplicate_of=None)
+        entries = self.entry_set.filter(duplicate_of=F("id"))
         if not entries.exists():
             return []
         return sorted(entries, key=lambda x:
@@ -162,17 +164,6 @@ class Composition(models.Model):
         self.element_set = elements
         self._elements = None
 
-    def formation_energy(self, reference='standard', icsd=True):
-        gs = self.ground_state
-        if gs is None:
-            return 
-        if icsd and 'icsd' not in gs.path:
-            return
-        if 'static' in gs.calculations:
-            return gs.calculations['static'].compute_formation(reference)
-        elif 'standard' in gs.calculations:
-            return gs.calculations['standard'].compute_formation(reference)
-
     @property
     def total_energy(self):
         calcs = self.calculation_set.filter(converged=True, 
@@ -188,12 +179,13 @@ class Composition(models.Model):
                             configuration__in=['standard', 'static'])
         if not calcs.exists():
             return
-        return min( c.compute_formation().delta_e for c in calcs )
+        return min( c.formation_energy() for c in calcs )
 
     @property
     def delta_e(self):
         """Return the lowest formation energy."""
         formations = self.formationenergy_set.exclude(delta_e=None)
+        formations = formations.filter(fit='standard')
         if not formations.exists():
             return
         return min(formations.values_list('delta_e', flat=True))
@@ -270,9 +262,9 @@ class Composition(models.Model):
 
     def find_unique(self):
         unique = []
-        for e in self.entry_set.all():
+        for e1 in self.entry_set.all():
             for i, e2 in enumerate(unique):
-                if e.structure == e2.structure:
+                if e1.structure == e2.structure:
                     ind = i
             else:
                 unique.append(e1)

@@ -6,7 +6,7 @@ from django.contrib import admin
 from qmpy.db import settings
 
 # Uncomment the next two lines to enable the admin:
-admin.autodiscover()
+##admin.autodiscover()
 
 urlpatterns = patterns('',
     url(r'^$', 'qmpy.web.views.home_page'),
@@ -23,6 +23,7 @@ urlpatterns += patterns('qmpy.web.views',
     url(r'^materials/structure/(?P<structure_id>.*)$', 'structure_view'),
     url(r'^materials/composition/(?P<search>.*)$', 'composition_view'),
     url(r'^materials/entry/(?P<entry_id>.*)$', 'entry_view'),
+    url(r'^materials/duplicates/(?P<entry_id>.*)$', 'duplicate_view'),
     url(r'^materials/prototype/(?P<name>.*)$', 'prototype_view'),
     url(r'^materials/prototypes$', 'prototypes_view'),
     url(r'^materials/keyword/(?P<keyword>.*)$', 'keyword_view'),
@@ -36,6 +37,8 @@ urlpatterns += patterns('qmpy.web.views',
     url(r'^materials/xrd/(?P<structure_id>.*).csv', 'export_xrd'),
     url(r'^materials/kpoints/(?P<mesh>.*)/(?P<structure_id>.*)/KPOINTS',
         'export_kpoints'),
+    url(r'^materials/discovery', 'disco_view'),
+    url(r'^materials/chempots', 'chem_pot_view'),
 
     ## References
     url(r'^reference/author/(?P<author_id>.*)$', 'author_view'),

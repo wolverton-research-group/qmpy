@@ -6,7 +6,23 @@
 
 {% block branding %}
 <h1> OQMD:</h1>
-<h2> An Open Quantum Materials Database</h2>
+<h2> The Open Quantum Materials Database</h2>
+{% endblock %}
+
+{% block global-warning %}
+{% if global_warnings %}
+{% for message in global_warnings %}
+Warning: {{ message.value }}<br>
+{% endfor %}
+{% endif %}
+{% endblock %}
+
+{% block global-info %}
+{% if global_info %}
+{% for message in global_info %}
+<b>Newsflash:</b> {{ message.value }} <small>(Download it <a href="http://oqmd.org/download/">here</a>.)</small><br>
+{% endfor %}
+{% endif %}
 {% endblock %}
 
 {% block auth %}
@@ -48,7 +64,7 @@ Welcome, {{ user.username }}.<br>
 {% block footer %}
 <hr>
 <div style="width:200px;float:left">
-	Contact us by <a href="mailto:openqmd@gmail.com">e-mail</a></div>
+	Contact us by <a href="mailto:oqmd.questions@gmail.com">e-mail</a></div>
 <div style="width:400px;float:right;text-align:right">
 	If you are using any results from this website, please reference this work as shown <a href="/documentation/publications">here</a></div>
 {% endblock %}

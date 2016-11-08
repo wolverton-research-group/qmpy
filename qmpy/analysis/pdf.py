@@ -19,7 +19,7 @@ class PDF(object):
         limit: maximum distance
     """
 
-    def __init__(self, structure, limit=6):
+    def __init__(self, structure, limit=10):
         elements = structure.comp.keys()
         pairs = itertools.combinations_with_replacement(elements, r=2)
         self.pairs = [ self.get_pair(pair) for pair in pairs ]
@@ -69,22 +69,25 @@ class PDF(object):
 
     def plot(self, smearing=0.1):
         renderer = Renderer()
-        xs = np.mgrid[0:self.limit:1000j]
+        N = len(self.structure)
+        V = self.structure.get_volume()
+        xs = np.mgrid[0.5:self.limit:1000j]
         dr = xs[1] - xs[0]
+        norms = [ ( (x+dr/2)**3 - (x-dr/2)**3) for x in xs ]
         for pair in self.pairs:
             e1, e2 = pair
-
             vals = np.zeros(xs.shape)
+            nanb = self.structure.comp[e1]*self.structure.comp[e2]
             prefactor = 1.0/(smearing*np.sqrt(2*np.pi))
-            norms = [ ( (x+dr/2)**3 - (x-dr/2)**3) for x in xs ]
+            #prefactor = V**2 * (N-1)/N
             for w, d in zip(self.weights[pair], self.distances[pair]):
                 if not d:
                     continue
                 vals += np.exp(-(d-xs)**2/(2*smearing**2))*w
-            vals = vals/norms
+            vals = prefactor*vals/norms
             vals = [ v if v > 1e-4 else 0.0 for v in vals ]
             line = Line(zip(xs, vals), label='%s-%s' % (e1, e2))
             renderer.add(line)
 
-        renderer.xaxis.label = 'interatomic distance [$\\AA$]'
+        renderer.xaxis.label = 'interatomic distance [&#8491;]'
         return renderer

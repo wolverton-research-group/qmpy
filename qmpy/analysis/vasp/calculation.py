@@ -3,7 +3,6 @@
 import os
 import copy
 import json
-import time
 import gzip
 import numpy as np
 import numpy.linalg
@@ -13,10 +12,7 @@ import subprocess
 from collections import defaultdict
 from os.path import exists, isfile, isdir
 
-try:
-    from lxml import etree
-except ImportError:
-    import elementtree.ElementTree as etree
+from lxml import etree
 
 from django.db import models
 from django.db import transaction
@@ -139,6 +135,8 @@ class Calculation(models.Model):
     dos = models.ForeignKey('DOS', blank=True, null=True)
     band_gap = models.FloatField(blank=True, null=True)
     irreducible_kpoints = models.FloatField(blank=True, null=True)
+    #_lattice_vectors = models.FloatField(blank=True, null=True)
+
 
     #= progress/completion =#
     attempt = models.IntegerField(default=0, blank=True, null=True)
@@ -368,7 +366,8 @@ class Calculation(models.Model):
                 incar += ' %s\n' % vasp_format(key, s.pop(key))
 
         incar += '\n#= Write flags =#\n'
-        for key in ['lcharg', 'lwave', 'lelf', 'lhvar', 'lvtot']:
+        ##for key in ['lcharg', 'lwave', 'lelf', 'lhvar', 'lvtot']:
+        for key in ['lcharg', 'lwave', 'lhvar', 'lvtot']:
             if key in s:
                 incar += ' %s\n' % vasp_format(key, s.pop(key))
 
@@ -384,9 +383,9 @@ class Calculation(models.Model):
                 if k in s:
                     incar += ' %s\n' % vasp_format(k, s.pop(k))
 
-        incar += '\n#= Uncategorized/OQMD codes  =#\n'
-        for k, v in s.items():
-            incar += ' %s\n' % (vasp_format(k, v))
+        #incar += '\n#= Uncategorized/OQMD codes  =#\n'
+        #for k, v in s.items():
+        #    incar += ' %s\n' % (vasp_format(k, v))
         return incar
 
     @INCAR.setter
@@ -434,7 +433,7 @@ class Calculation(models.Model):
         if self.settings.get('gamma', True):
             kpoints = 'KPOINTS \n0 \nGamma\n'
         else:
-            kpoints = 'KPOINTS \n0 \nMonkhost-Pack\n'
+            kpoints = 'KPOINTS \n0 \nMonkhorst-Pack\n'
         kpoints += ' '.join( str(int(k)) for k in kpts ) + '\n'
         kpoints += '0 0 0'
         return kpoints
@@ -536,9 +535,10 @@ class Calculation(models.Model):
         if not exists(self.path):
             return
         elif exists(self.path+'/OUTCAR'):
-            self.outcar = open(self.path+'/OUTCAR').read().split('\n')
+            self.outcar = open(self.path+'/OUTCAR').read().splitlines()
         elif exists(self.path+'/OUTCAR.gz'):
-            self.outcar = gzip.open(self.path + '/OUTCAR.gz', 'rb').read().split('\n')
+            outcar = gzip.open(self.path + '/OUTCAR.gz','rb').read()
+            self.outcar = outcar.splitlines()
         else:
             raise VaspError('No such file exists')
 
@@ -647,6 +647,7 @@ class Calculation(models.Model):
                 for n in range(3):
                     tlv.append(read_fortran_array(self.outcar[i+n+1], 6)[:3])
                 lattice_vectors.append(tlv)
+        #self._lattice_vectors = lattice_vectors
         return np.array(lattice_vectors)
 
     def read_charges(self):
@@ -740,8 +741,10 @@ class Calculation(models.Model):
         for line in self.outcar:
             if 'FORCE on cell' in line:
                 check = True
-            if check and 'Total' in line:
-                stresses.append(map(ffloat, line.split()[1:]))
+            #if check and 'Total' in line:
+            #[[mv]]
+            if check and 'in kB' in line:
+                stresses.append(map(ffloat, line.split()[2:]))
                 check = False
         return np.array(stresses)
 
@@ -763,6 +766,7 @@ class Calculation(models.Model):
         self.kpt_weights = weights
 
     def read_occupations(self):
+        self.get_outcar()
         if self.kpoints is None:
             self.read_kpoints()
         if self.settings is None:
@@ -797,10 +801,16 @@ class Calculation(models.Model):
             stresses = self.read_stresses()
             positions = self.read_positions()
             forces = self.read_forces()
-            magmoms = self.read_magmoms()
-            charges = self.read_charges()
+            try: 
+                magmoms = self.read_magmoms()
+                charges = self.read_charges()
+            except:
+                print "Magmoms and/or charges information not found."
         except:
-            raise VaspError("Failed to read results")
+            print "Failed in reading results from OUTCAR:\
+            read_outcar_results():L793"
+            self.add_error("failed to read")
+            return
 
         if len(self.energies) > 0:
             self.energy = self.energies[-1]
@@ -829,7 +839,8 @@ class Calculation(models.Model):
                 self.output = output
                 self.output.set_label(self.label)
             except:
-                raise VaspError("Improperly read results")
+                self.add_error("failed to read")
+                return
 
     def read_convergence(self):
         self.get_outcar()
@@ -1013,6 +1024,7 @@ class Calculation(models.Model):
 
     def read_stdout(self, filename='stdout.txt'):
         if not os.path.exists('%s/%s' % (self.path, filename)):
+            print 'stdout file %s not found.' %(filename)
             return []
         stdout = open('%s/%s' % (self.path, filename)).read()
         errors = []
@@ -1097,7 +1109,9 @@ class Calculation(models.Model):
             f = open('%s/%s' % (self.path,filename),'r')
 
         d = f.readlines() 
-        lattice = np.array([map(float, r.split()) for r in d[2:5]])
+        #max: scaling added
+        scale = float(d[1].strip())
+        lattice = np.array([map(float, r.split()) for r in d[2:5]])*scale
         stoich = np.array(d[6].split(),int)
         count = sum(stoich)
         meshsize = np.array(d[9+int(count)].split(),int)
@@ -1197,6 +1211,9 @@ class Calculation(models.Model):
         return calcs
 
     def address_errors(self):
+        """
+        Attempts to fix any encountered errors. 
+        """
         errors = self.errors
         if not errors or errors == ['found no errors']:
             logger.info('Found no errors')
@@ -1212,7 +1229,7 @@ class Calculation(models.Model):
             new_calc.add_error('attempts')
 
         for err in errors:
-            if err in ['duplicate','partial']:
+            if err in ['duplicate','partial', 'failed to read']:
                 continue
             elif err == 'convergence':
                 if not self.output is None:
@@ -1243,24 +1260,32 @@ class Calculation(models.Model):
                 raise VaspError("Unknown VASP error code: %s", err)
         return new_calc
 
-    def compress(self):
+    def compress(self, files=['OUTCAR', 'CHGCAR', 'CHG', 
+                                'PROCAR', 'LOCPOT', 'ELFCAR']):
+        """
+        gzip every file in `files`
+
+        Keyword arguments:
+            files: List of files to zip up.
+
+        Return: None
+        """
         for file in os.listdir(self.path):
             if file in ['OUTCAR', 'CHGCAR', 'CHG', 'PROCAR', 'LOCPOT', 'ELFCAR']:
                 os.system('gzip -f %s' % self.path+'/'+file)
 
     def copy(self):
-        new = Calculation()
-        new.entry = self.entry
-        new.label = self.label
+        """
+        Create a deep copy of the Calculation.
+
+        Return: None
+        """
+        new = copy.deepcopy(self)
+        new.id = None
+        new.label = None
         new.input = self.input
         new.output = self.output
         new.dos = self.dos
-        new.path = self.path
-        new.potentials = self.potentials
-        new.hubbards = self.hubbards
-        new.settings = self.settings
-        new.attempt = self.attempt 
-        new.composition = self.composition
         return new
 
     def move(self, path):
@@ -1272,10 +1297,23 @@ class Calculation(models.Model):
         if self.id:
             Calculation.objects.filter(id=self.id).update(path=path)
 
-    def backup(self):
-        new_dir = '%s_' % self.attempt
-        new_dir += '_'.join(self.errors)
-        new_dir = new_dir.replace(' ','')
+    def backup(self, path=None):
+        """
+        Create a copy of the calculation folder in a subdirectory of the
+        current Calculation.
+
+        Keyword arguments:
+            path: If None, the backup folder is generated based on the
+            Calculation.attempt and Calculation.errors.
+
+        Return: None
+        """
+        if path is None:
+            new_dir = '%s_' % self.attempt
+            new_dir += '_'.join(self.errors)
+            new_dir = new_dir.replace(' ','')
+        else:
+            new_dir = path
         logger.info('backing up %s to %s' % 
                 (self.path.replace(self.entry.path+'/', ''), new_dir))
         self.move(self.path+'/'+new_dir)
@@ -1307,6 +1345,8 @@ class Calculation(models.Model):
         self.remove_error('invgrp')
         self.remove_error('pricel')
         self.remove_error('sgrcon')
+        self.remove_error('failed to read')
+        self.remove_error('convergence')
 
     def fix_brions(self):
         self.settings['potim'] *= 2
@@ -1318,6 +1358,8 @@ class Calculation(models.Model):
         self.remove_error('zpotrf')
         self.remove_error('fexcp')
         self.remove_error('fexcf')
+        self.remove_error('failed to read')
+        self.remove_error('convergence')
 
     def fix_bands(self):
         self.settings['nbands'] = int(np.ceil(self.settings['nbands']*1.5))
@@ -1353,6 +1395,9 @@ class Calculation(models.Model):
     #### calculation management
 
     def write(self):
+        '''
+        Write calculation to disk
+        '''
         os.system('mkdir %s 2> /dev/null' % self.path)
         poscar = open(self.path+'/POSCAR','w')
         potcar = open(self.path+'/POTCAR','w')
@@ -1369,13 +1414,11 @@ class Calculation(models.Model):
 
     @property
     def estimate(self):
-        return 48*8*3600
+        return 72*8*3600
 
     @property
     def instructions(self):
         if self.converged:
-            return {}
-        elif self.errors:
             return {}
 
         instruction = {
@@ -1391,7 +1434,7 @@ class Calculation(models.Model):
                     'rm -f WAVECAR CHG',
                     'date +%s'])}
 
-        if self.input.natoms < 10:
+        if self.input.natoms <= 4:
             instruction.update({'mpi':'','binary':'vasp_53_serial',
                 'serial':True})
         return instruction
@@ -1400,13 +1443,15 @@ class Calculation(models.Model):
         self.label = label
         if not self.entry is None:
             self.entry.calculations[label] = self
-        if self.id:
-            Calculation.objects.filter(id=self.id).update(label=label)
+        #if self.id:
+        #    Calculation.objects.filter(id=self.id).update(label=label)
 
     def set_hubbards(self, convention='wang'):
         hubs = HUBBARDS.get(convention, {})
         elts = set( k[0] for k in hubs.keys() )
         ligs = set( k[1] for k in hubs.keys() )
+
+        # How many ligand elements are in the struture?
         lig_int = ligs & set(self.input.comp.keys())
 
         if not lig_int:
@@ -1537,30 +1582,35 @@ class Calculation(models.Model):
             return
         return self.volume/len(self.output)
 
-    def compute_formation(self, reference='standard'):
-        if not self.converged:
+    def formation_energy(self, reference='standard'):
+        try:
+            return self.get_formation(reference=reference).delta_e
+        except AttributeError:
             return None
+
+    def get_formation(self, reference='standard'):
+        if not self.converged:
+            return
+        formation = fe.FormationEnergy.get(self, fit=reference)
         if len(self.input.comp) == 1:
             e = comp.Composition.get(self.input.comp).total_energy
-            formation = fe.FormationEnergy.get(self, fit=reference)
             formation.delta_e = self.energy_pa - e
             formation.composition = self.input.composition
             formation.entry = self.entry
             formation.calculation = self
+            formation.stability = None
             self.formation = formation
             return formation
         hub_mus = chem_pots[reference]['hubbards']
-        if self.hub_comp and reference == 'nothing':
-            return
         elt_mus = chem_pots[reference]['elements']
         adjust = 0
         adjust -= sum([ hub_mus.get(k.key, 0)*v for k,v in self.hub_comp.items() ])
         adjust -= sum([ elt_mus[k]*v for k,v in self.comp.items() ])
-        formation = fe.FormationEnergy.get(self, fit=reference)
         formation.delta_e = ( self.energy + adjust ) / self.natoms
         formation.composition = self.input.composition
         formation.entry = self.entry
         formation.calculation = self
+        formation.stability = None
         self.formation = formation
         return formation
 
@@ -1652,24 +1702,28 @@ class Calculation(models.Model):
 
         # What settings to use?
         if configuration not in VASP_SETTINGS:
-            raise ValueError('That configuration does not exist!')
+            raise ValueError('%s configuration does not exist!'%configuration)
 
+        # Convert input to primitive cell, symmetrize it
         calc.input.make_primitive()
+#        calc.input.refine()
+        calc.input.symmetrize()
 
-        settings = {}
+        vasp_settings = {}
         if calc.input.natoms > 20:
-            settings['lreal'] = 'auto'
-        settings.update(VASP_SETTINGS[configuration])
-        settings.update(settings)
-        calc.set_potentials(calc.settings.get('potentials', 'vasp_rec'))
-        calc.set_hubbards(calc.settings.get('hubbards', 'wang'))
-        calc.set_magmoms(calc.settings.get('magnetism', 'ferro'))
+            vasp_settings['lreal'] = 'auto'
+        vasp_settings.update(VASP_SETTINGS[configuration])
+        vasp_settings.update(settings)
 
-        if 'scale_encut' in settings:
+        calc.set_potentials(vasp_settings.get('potentials', 'vasp_rec'))
+        calc.set_hubbards(vasp_settings.get('hubbards', hubbard))
+        calc.set_magmoms(vasp_settings.get('magnetism', 'ferro'))
+
+        if 'scale_encut' in vasp_settings:
             enmax = max(pot.enmax for pot in calc.potentials)
-            calc.encut = int(settings.get('scale_encut')*enmax)
+            calc.encut = int(vasp_settings['scale_encut']*enmax)
 
-        calc.settings = settings
+        calc.settings = vasp_settings
         if calc.input.natoms >= 10:
             calc.settings.update({
                 'ncore': 4, 
@@ -1680,20 +1734,17 @@ class Calculation(models.Model):
         try:
             calc.get_outcar()
         except VaspError:
-            if not ( os.path.exists(calc.path+'/INCAR') and
-                    os.path.exists(calc.path+'/POTCAR') and 
-                    os.path.exists(calc.path+'/KPOINTS') and
-                    os.path.exists(calc.path+'/POSCAR')):
-                calc.write()
+            calc.write()
             return calc
 
         # Read all outputs
+        calc.read_stdout()
         calc.read_outcar()
         calc.read_doscar()
-        calc.read_stdout()
 
         # Did the calculation finish without errors?
         if calc.converged:
+            calc.calculate_stability()
             return calc
         elif not calc.errors:
             calc.write()
@@ -1703,10 +1754,11 @@ class Calculation(models.Model):
         fixed_calc = calc.address_errors()
         if fixed_calc.errors:
             raise VaspError('Unable to fix errors: %s' % fixed_calc.errors)
+        calc.backup()
+        calc.save()
 
         fixed_calc.set_magmoms(calc.settings.get('magnetism', 'ferro'))
         fixed_calc.clear_results()
-        calc.backup()
         fixed_calc.clear_outputs()
         fixed_calc.set_chgcar(calc)
         fixed_calc.write()

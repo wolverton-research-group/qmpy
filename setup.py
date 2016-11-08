@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='qmpy',
-    version='0.4.9a',
+    version='1.1',
     author='S. Kirklin',
     author_email='scott.kirklin@gmail.com',
     packages=find_packages(),
@@ -13,20 +13,22 @@ setup(
     include_package_data=True,
     long_description=open('README.md').read(),
     install_requires=[
-        "Django >= 1.5",
+        "Django == 1.6.11",
         "PuLP",
-        "numpy >= 1.6.4",
+        "numpy == 1.8.1",
         "scipy >= 0.12.0",
         "MySQL-python",
         "matplotlib",
         "networkx",
         "pytest",
         "python-memcached",
-        "python-ase",
+        "ase",
         "django-extensions",
-        "elementtree",
+        "lxml",
         "pyparsing<=1.9.9",
-        "PyCifRW==3.6.2",
-        "PyYAML"
+        "PyCifRW==3.6.2.1",
+        "pexpect",
+        "PyYAML",
+        "scikit-learn"
     ],
 )

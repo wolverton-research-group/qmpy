@@ -64,12 +64,26 @@ def parse_comp(value):
         if elt in ['D', 'T']:
             elt = 'H'
         if amt == '':
-            comp[elt] += 1
+            comp[elt] = 1
         elif is_integer(amt):
             comp[elt] += int(round(float(amt)))
         else:
             comp[elt] += float(amt)
-    return comp
+    return dict(comp)
+
+def parse_space(value):
+    if isinstance(value, basestring):
+        space = re.sub('[-,_]', ' ', value)
+        space = [ unit_comp(parse_comp(b)) for b in space.split()]
+    elif isinstance(value, (list,set)):
+        space = [ {elt:1} for elt in value ]
+    elif isinstance(value, dict):
+        space = [ {elt:1} for elt in value ]
+    elif not value:
+        space = None
+    else:
+        raise ValueError("Failed to parse space: %s" % value)
+    return space
 
 def parse_sitesym(sitesym, sep=','):
     rot = np.zeros((3, 3), dtype='int')
@@ -171,8 +185,9 @@ def electronegativity(elt):
             return 0.0
         return data.elements[elt]['electronegativity']
 
-def format_comp(comp, template='{elt}{amt}', delimiter=''):
-    elts = sorted(comp.keys(), key=lambda x: (electronegativity(x), x))
+def format_comp(comp, template='{elt}{amt}', delimiter='',
+        key=lambda x: (electronegativity(x), x)):
+    elts = sorted(comp.keys(), key=key)
     coeffs = get_coeffs(comp)
     return delimiter.join(template.format(elt=k, amt=coeffs[k]) for k in elts)
 
@@ -186,7 +201,10 @@ def format_html(comp):
     return format_comp(comp, template='{elt}<sub>{amt}</sub>')
 
 def format_latex(comp):
-    return format_comp(comp, template='{elt}_{{{amt}}}')
+    return format_comp(comp, template='{elt}$_{{{amt}}}$')
+
+def format_bold_latex(comp):
+    return format_comp(comp, template='{elt}$_{{\mathbf{{{amt}}}}}$')
 
 def normalize_dict(dictionary):
     tot = float(sum(dictionary.values()))
@@ -274,7 +292,7 @@ def reduce_comp(values, method='auto'):
     if len(ints) == len(values) - 1:
         return make_return(second)
 
-    if sum(values) <= 1.001:
+    if sum(values) <= 1.005:
         third = reduce_by_any_means(values)
         if all( v < 1000 for v in third):
             return make_return(third)

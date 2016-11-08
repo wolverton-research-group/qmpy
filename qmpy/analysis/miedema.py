@@ -2,7 +2,6 @@
 # miedema.py v1.6 12-13-2012 Jeff Doak jeff.w.doak@gmail.com
 # adapted by S. Kirklin 1/7/14
 import numpy as np
-import time
 import sys
 import yaml
 import logging
@@ -12,8 +11,10 @@ from qmpy.utils import *
 
 logger = logging.getLogger(__name__)
 
+__all__ = ['Miedema']
 # data rows: 
 # Element_name Phi Rho Vol Z Valence TM? RtoP Htrans
+params = yaml.load(open(qmpy.INSTALL_PATH+'/data/miedema.yml').read())
 
 class Miedema(object):
 
@@ -38,6 +39,7 @@ class Miedema(object):
             Energy per atom. (eV/atom)
             
         """
+        self.energy = None
         # validate composition
         if isinstance(composition, basestring):
             composition = parse_comp(composition)
@@ -51,7 +53,6 @@ class Miedema(object):
         if len(composition) != 2:
             return None
 
-        params = yaml.load(open(qmpy.INSTALL_PATH+'/data/miedema.yml').read())
         if not all( params[k] for k in composition ):
             self.energy = None
             return
@@ -189,4 +190,8 @@ class Miedema(object):
         H_ord = (self.gamma*(1-self.x)*self.x*vol_A*vol_B*(1+8*(c_S_A*c_S_B)**2)/
                 ((1-self.x)*vol_A+self.x*vol_B) + D_htrans)
         return round(H_ord*0.01036427, 2)
+
+    @staticmethod
+    def get(composition):
+        return Miedema(composition).energy
 

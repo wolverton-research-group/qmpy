@@ -77,6 +77,7 @@ class Atom(models.Model):
     wyckoff = models.ForeignKey(WyckoffSite, blank=True, null=True)
 
     dist = None
+    copy_of = None
     class Meta:
         app_label = 'qmpy'
         db_table = 'atoms'
@@ -88,13 +89,7 @@ class Atom(models.Model):
     def __eq__(self, other):
         if self.element_id != other.element_id:
             return False
-        try:
-            if any(abs(self.cart_coord - other.cart_coord) > 5e-1):
-                return False
-        except:
-            if any(abs(self.coord - other.coord) > 1e-3):
-                return False
-        return True
+        return (self.x, self.y, self.z) == (other.x, other.y, other.z)
 
     def __cmp__(self, other):
         comp_arr = [[ self.x, other.x ],
@@ -125,15 +120,19 @@ class Atom(models.Model):
     def forces(self, values):
         self.fx, self.fy, self.fz = values
 
+    _coord = None
     @property
     def coord(self):
         """[x,y,z] coordinates."""
-        return np.array([self.x, self.y, self.z], dtype='float64')
+        if self._coord is None:
+            self._coord = np.array([self.x, self.y, self.z], dtype='float64')
+        return self._coord
 
     @coord.setter
     def coord(self, values):
         self.x, self.y, self.z = wrap(values)
         self._cart = None
+        self._coord = None
 
     _cart = None
     @property
@@ -229,6 +228,7 @@ class Atom(models.Model):
                 'coord', 'element_id']
         for key in keys:
             setattr(atom, key, getattr(self, key))
+        atom.base_atom = self
         return atom
 
     def get_site(self, tol=1e-1):
@@ -248,6 +248,14 @@ class Atom(models.Model):
         self.site = s
         return s
 
+    _dist = None
+    @property
+    def dist(self):
+        if self._dist is None:
+            vec = np.dot(wrap(self.coord), self.structure.cell)
+            self._dist = norm(vec)
+        return self._dist
+
     def is_on(self, site, tol=1e-3):
         """
         Tests whether or not the ``Atom`` is on the specified ``Site``.
@@ -261,7 +269,13 @@ class Atom(models.Model):
             True
 
         """
-        dist = self.structure.get_distance(self.coord, site.coord)
+        if self.dist - site.dist < tol:
+            dist = self.structure.get_distance(self.coord, site.coord, 
+                    limit=tol, wrap_self=True)
+            if dist is None:
+                return False
+        else:
+            return False
         return dist < tol
 
 class Site(models.Model):
@@ -286,10 +300,12 @@ class Site(models.Model):
     y = models.FloatField()
     z = models.FloatField()
 
-
     class Meta:
         app_label = 'qmpy'
         db_table = 'sites'
+
+    def __eq__(self, other):
+        return (self.x, self.y, self.z) == (other.x, other.y, other.z)
 
     def __str__(self):
         coord_str = ''
@@ -315,22 +331,19 @@ class Site(models.Model):
         elif comp_str:
             return comp_str
 
-    def __eq__(self, other):
-        if not self.comp == other.comp:
-            return False
-        try:
-            if any(abs(self.cart_coord - other.cart_coord) > 1e-3):
-                return False
-        except:
-            if any(abs(self.coord - other.coord) > 1e-5):
-                return False
-        return True
-
     def __getitem__(self, i):
         return self.atoms[i]
 
     def __len__(self):
         return len(self.atoms)
+
+    _dist = None
+    @property
+    def dist(self):
+        if self._dist is None:
+            vec = np.dot(wrap(self.coord), self.structure.cell)
+            self._dist = norm(vec)
+        return self._dist
 
     @transaction.atomic
     def save(self,*args, **kwargs):
@@ -491,8 +504,9 @@ class Site(models.Model):
     def copy(self):
         new = Site()
         new.coord = self.coord
-        for atom in self.atoms:
-            new.add_atom(atom.copy())
+        new.atoms = [ atom.copy() for atom in self.atoms ]
+        new.base_site = self
+        return new
 
     @property
     def comp(self):
@@ -546,7 +560,7 @@ class Site(models.Model):
             comp[a.species] += a.occupancy
         return dict(comp)
 
-    def add_atom(self, atom, tol=1e-2):
+    def add_atom(self, atom, tol=None):
         """
         Adds Atom to `Site.atoms`. 
 
@@ -575,11 +589,12 @@ class Site(models.Model):
 
         """
         if not self.coord is None:
-            if self.structure.get_distance(self, atom) > tol:
-                raise SiteError("%s is too far from %s to add" % (atom, self))
-            else:
-                if not atom in self.atoms:
-                    self.atoms.append(atom)
+            if not tol is None:
+                if self.structure.get_distance(self, atom, limit=2*tol) > tol:
+                    raise SiteError("%s is too far from %s to add" % (atom, self))
+                else:
+                    if not atom in self.atoms:
+                        self.atoms.append(atom)
         else:
             self.coord = atom.coord
             self.atoms = [atom]

@@ -5,6 +5,7 @@ from django.core.context_processors import csrf
 
 from qmpy import INSTALL_PATH
 from qmpy.models import *
+from ..tools import get_globals
 
 def get_marked_list(qs1, qs2):
     items = list(qs2)
@@ -34,7 +35,7 @@ def host_view(request, host_id):
         host.save()
     data = {'host':host}
     return render_to_response('computing/host.html', 
-            data, 
+            get_globals(data), 
             RequestContext(request))
 
 def allocation_view(request, allocation_id):
@@ -58,7 +59,7 @@ def allocation_view(request, allocation_id):
             'users': users,
             'projects': projects}
     return render_to_response('computing/allocation.html', 
-            data, 
+            get_globals(data), 
             RequestContext(request))
 
 def project_view(request, project_id):
@@ -97,13 +98,13 @@ def project_view(request, project_id):
             'plot': construct_flot(chart),
             'upcoming': upcoming}
     return render_to_response('computing/project.html', 
-            data, 
+            get_globals(data), 
             RequestContext(request))
 
 def user_view(request, user_id):
     data = {'user': User.objects.get(username=user_id)}
     return render_to_response('computing/user.html', 
-            data, 
+            get_globals(data), 
             RequestContext(request))
 
 def projects_view(request):
@@ -116,17 +117,17 @@ def projects_view(request):
         p.flot = construct_flot(chart)
     data = {'projects':projects}
     return render_to_response('computing/projects.html', 
-            data, 
+            get_globals(data), 
             RequestContext(request))
 
 def hosts_view(request):
     data = {'hosts': Host.objects.all()}
     return render_to_response('computing/hosts.html', 
-            data, 
+            get_globals(data), 
             RequestContext(request))
 
 def project_state_view(request, state=0, project_id=None):
-    data = {}
+    data = get_globals()
     project = Project.get(project_id)
     if isinstance(state, basestring):
         if state.lower() == 'held':
@@ -159,3 +160,4 @@ def project_state_view(request, state=0, project_id=None):
     return render_to_response('computing/project_state.html', 
             data, 
             RequestContext(request))
+

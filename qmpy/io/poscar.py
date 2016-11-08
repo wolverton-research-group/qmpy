@@ -22,8 +22,8 @@ logger = logging.getLogger(__name__)
 class POSCARError(Exception):
     pass
 
-def write(struct, filename=None, direct=True, distinct_by_ox=False, 
-                  vasp4=False, **kwargs):
+def write(struct, filename=None, comments=None, direct=True, 
+            distinct_by_ox=False, vasp4=False, **kwargs):
     """
     Write a :mod:`~qmpy.Structure` to a file or string.
 
@@ -84,7 +84,10 @@ def write(struct, filename=None, direct=True, distinct_by_ox=False,
         ordered_keys = sorted([ k for k in cdict.keys() ])
         counts = [ int(cdict[k]) for k in ordered_keys ]
 
-    poscar = ' '.join(set(a.element_id for a in struct.atoms)) + '\n 1.0\n'
+    if comments is not None:
+        poscar = '# %s \n 1.0\n' %(comments)
+    else:
+        poscar = ' '.join(set(a.element_id for a in struct.atoms)) + '\n 1.0\n'
     cell = '\n'.join([ ' '.join([ '%f' % v  for v in vec ]) for vec in
         struct.cell ])
     poscar += cell +'\n'
@@ -127,7 +130,11 @@ def read(poscar, species=None):
         >>> io.poscar.read(INSTALL_PATH+'/io/files/POSCAR_FCC')
 
     """
+
+    # Initialize the structure output
     struct = st.Structure()
+
+    # Read in the title block, and system sell
     poscar = open(poscar,'r')
     title = poscar.readline().strip()
     scale = float(poscar.readline().strip())
@@ -143,6 +150,9 @@ def read(poscar, species=None):
         struct.cell = cell
         struct.volume = -1*s
 
+    # Determine whether POSCAR is in VASP 5 format
+    #   VASP 5 has the elements listed after the 
+    #   the cell parameters
     vasp5 = False
     _species = poscar.readline().strip().split()
     try:
@@ -150,6 +160,9 @@ def read(poscar, species=None):
     except:
         vasp5 = True
         counts = [ int(v) for v in poscar.readline().split() ]
+
+    # If the format is not VASP 5, the elements should
+    #  have been listed in the title
     if not vasp5:
         counts = map(int, _species)
         if not species:
@@ -162,15 +175,23 @@ def read(poscar, species=None):
             _species = species
     species = _species
 
+    # Prepare a list of numbers of atom types
     atom_types = []
     for n,e in zip(counts, species):
         atom_types += [e]*n
 
-    style = poscar.readline()
+    # Determine whether coordinates are in direct or cartesian
     direct = False
+    style = poscar.readline()
+
+    if style[0].lower() == 's':
+        # The POSCAR contains selective dynamics info
+        style = poscar.readline()
+
     if style[0] in ['D', 'd']:
         direct = True
 
+    # Read in the atom coordinates
     struct.natoms = sum(counts)
     struct.ntypes = len(counts)
     atoms = []
@@ -179,9 +200,9 @@ def read(poscar, species=None):
         atom = st.Atom()
         atom.element_id = atom_types[i]
         if direct:
-            atom.coord = [ float(v) for v in poscar.readline().split() ]
+            atom.coord = [ float(v) for v in poscar.readline().split()[0:3] ]
         else:
-            cart = [ float(v) for v in poscar.readline().split() ]
+            cart = [ float(v) for v in poscar.readline().split()[0:3] ]
             atom.coord = np.dot(inv, cart)
         struct.add_atom(atom)
     struct.get_volume()

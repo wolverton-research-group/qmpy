@@ -8,6 +8,7 @@ from django.shortcuts import render_to_response
 from django.core.context_processors import csrf
 
 from qmpy import INSTALL_PATH
+from ..tools import get_globals
 from qmpy import *
 
 ndict = {1:'elements',
@@ -25,7 +26,8 @@ def construct_flot(phase_dict):
     return json.dumps(data)
 
 def composition_view(request, search=None):
-    data = {'search':''}
+    data = get_globals()
+    data['search'] = ''
     composition = ''
     space = []
     if request.method == 'POST':
@@ -45,6 +47,7 @@ def composition_view(request, search=None):
     if composition:
         comp = Composition.get(composition)
         ps = PhaseSpace('-'.join(comp.comp.keys()))
+        ps.infer_formation_energies()
         data['pd'] = ps.phase_diagram.get_flot_script("phasediagram")
         data['search'] = composition
         data['composition'] = comp
@@ -52,17 +55,22 @@ def composition_view(request, search=None):
         data['results'] = comp.entries
         energy, gs = ps.gclp(comp.name)
         data['gs'] = Phase.from_phases(gs)
+        data['phases'] = gs
         data['compound'] = comp.ground_state
-        data['singlephase'] = ( len(gs) == 1 )
+        if len(gs) == 1:
+            data['singlephase'] = True 
+        else:
+            data['singlephase'] = False
         data['space'] = '-'.join(comp.comp.keys())
         return render_to_response('materials/composition.html', 
                 data,
                 RequestContext(request))
     elif space:
         ps = PhaseSpace(space)
+        ps.infer_formation_energies()
         data['search'] = space
         data['pd'] = ps.phase_diagram.get_flot_script("phasediagram")
-        data['stable'] = [ p.calculation.entry for p in ps.stable ]
+        data['stable'] = [ p.formation.entry for p in ps.stable ]
         comps = Composition.get_list(space)
         results = defaultdict(list)
         for c in comps:

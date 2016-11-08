@@ -59,31 +59,60 @@ class Potential(models.Model):
 
     @classmethod
     def read_potcar(cls, potfile):
+        '''
+        Import pseudopotential(s) from VASP POTCAR. 
+
+        Make sure to save each of them after importing
+        in order to store in them in the OQMD
+
+        Arguments:
+            potfile - string, Path to POTCAR file
+
+        Output:
+            List of Potential objects
+        '''
+
+        # Read entire POTCAR file
         pots = open(potfile).read()
+
+        # Split into the component POTCARs
         pots = pots.strip().split('End of Dataset')
+
+        # Parse each file
         potobjs = []
         for pot in pots:
             if not pot:
                 continue
+
+            # Get key information from POTCAR
             potcar = {}
             for line in pot.split('\n'):
+
+                # Get element name
                 if 'TITEL' in line:
                     potcar['name'] = line.split()[3]
                     telt = potcar['name'].split('_')[0]
                     date = potcar['name'].split('_')[-1]
-                    potcar['element'] = elt.Element.objects.get(symbol=telt)
+                    try:
+                        potcar['element'] = elt.Element.objects.get(symbol=telt)
+                    except:
+                        print "Unknown element in potcar", telt
+                        raise
                     if 'GW' in line:
                         potcar['gw'] = True
                     if 'PAW' in line:
                         potcar['paw'] = True
                     if 'US' in line:
                         potcar['us'] = True
+
                 if 'ENMAX' in line:
                     data = line.split()
                     potcar['enmax'] = float(data[2].rstrip(';'))
                     potcar['enmin'] = float(data[5])
+
                 if 'VRHFIN' in line:
                     potcar['electrons'] = line.split(':')[1]
+
                 if 'LEXCH' in line:
                     key = line.split()[-1]
                     if key == '91':

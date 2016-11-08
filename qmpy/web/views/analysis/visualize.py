@@ -68,7 +68,8 @@ direct
     data.update(csrf(request))
     custom_data = data['crystal_data']
     return render_to_response('analysis/view_data.html',
-            data,
+            get_globals(data),
+            ##data,
             RequestContext(request))
 
 def jsmol(request):

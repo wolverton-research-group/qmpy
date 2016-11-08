@@ -93,10 +93,30 @@ def _get_oxidation_state_data(cb):
         return {}
 
 def _get_sym_ops(cb):
+    '''
+    Load symmetry operations out of the cif file.
+
+    Defaults to using the symmetry operations specified
+    in the cif file (e.g., using "_space_group_symop_operation_xyz").
+    Otherwise, will read the space group information
+
+    Input:
+        cb - CifFile, Cif being parsed
+    Output:
+        [rotation matrix, translation matrix] - A 2-member
+        list containing the rotation and translation matrices
+    '''
     if '_symmetry_equiv_pos_as_xyz' in cb.keys():
         rots, trans = [], []
         for op in cb.GetLoop('_symmetry_equiv_pos_as_xyz'):
             r, t = parse_sitesym(op._symmetry_equiv_pos_as_xyz)
+            rots.append(r)
+            trans.append(t)
+        return [rots, trans]
+    if '_space_group_symop_operation_xyz' in cb.keys():
+        rots, trans = [], []
+        for op in cb.GetLoop('_space_group_symop_operation_xyz'):
+            r, t = parse_sitesym(op._space_group_symop_operation_xyz)
             rots.append(r)
             trans.append(t)
         return [rots, trans]
@@ -119,6 +139,14 @@ def _get_sym_ops(cb):
     if '_symmetry_space_group_name_Hall' in cb.keys():
         try:
             sg = cb.get('_symmetry_space_group_name_Hall')
+            sg = sym.Spacegroup.objects.get(hall=sg.strip())
+            return [sg.rotations, sg.translations]
+        except Exception, err:
+            print err
+            pass
+    if '_space_group_name_Hall' in cb.keys():
+        try:
+            sg = cb.get('_space_group_name_Hall')
             sg = sym.Spacegroup.objects.get(hall=sg.strip())
             return [sg.rotations, sg.translations]
         except Exception, err:
@@ -160,8 +188,11 @@ def _read_cif_block(cb):
     s.pressure = _get_value(cb.get('_cell_measurement_pressure', 0.0))
     if cb.get('_chemical_name_structure_type'):
         s.prototype = strx.Prototype.get(cb.get('_chemical_name_structure_type'))
-    s.reported_composition = strx.Composition.get(
-                   parse_comp(cb.get('_chemical_formula_sum')))
+    try:
+        s.reported_composition = strx.Composition.get(
+                       parse_comp(cb.get('_chemical_formula_sum')))
+    except:
+        pass
     s.input_format = 'cif'
     s.natoms = len(s)
     s.get_volume()

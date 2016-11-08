@@ -253,11 +253,32 @@ class Structure(models.Model, object):
 
     @atoms.setter
     def atoms(self, atoms):
-        self._atoms = []
+        self._atoms =  []# list(atoms)
+        self._sites = []
         for a in atoms:
             self.add_atom(a)
         self.natoms = len(self._atoms)
         self.ntypes = len(self.comp)
+
+    _abc = None
+    @property
+    def atoms_by_coord(self):
+        if self._abc is None:
+            _abc = {}
+            for a in self.atoms:
+                _abc[tuple(a.cart_coord.tolist())] = a
+            self._abc = _abc
+        return self._abc
+
+    _sbc = None
+    @property
+    def sites_by_coord(self):
+        if self._sbc is None:
+            _sbc = {}
+            for s in self.sites:
+                _sbc[tuple(s.cart_coord.tolist())] = s
+            self._sbc = _sbc
+        return self._sbc
 
     _sites = None
     @property
@@ -273,12 +294,12 @@ class Structure(models.Model, object):
 
     @sites.setter
     def sites(self, sites):
-        atoms = []
+        self._atoms = []
         for s in sites:
-            s.structure = self
-            atoms += s.atoms
-        self.atoms = atoms
+            self.add_site(s)
         self._sites = sites
+        self.natoms = len(self.atoms)
+        self.ntypes = len(self.comp)
 
     @property
     def site_compositions(self):
@@ -325,8 +346,8 @@ class Structure(models.Model, object):
         self.label = label
         if not self.entry is None:
             self.entry.structures[label] = self
-        if self.id:
-            Structure.objects.filter(id=self.id).update(label=label)
+        #if self.id:
+        #    Structure.objects.filter(id=self.id).update(label=label)
 
     def set_volume(self, value):
         """
@@ -335,9 +356,15 @@ class Structure(models.Model, object):
         """
         self.get_volume()
         scale = value/self.volume
-        self.cell = self.cell * scale**(1/3.)
+        self.cell = self.cell * (scale**(1/3.))
         self.volume_pa = value/self.natoms
         self.volume = value
+
+    def set_volume_to_sum_of_elements(self):
+        volume = 0
+        for atom in self:
+            volume += atom.element.volume*atom.occupancy
+        self.set_volume(volume)
 
     @property
     def lat_param_dict(self):
@@ -408,14 +435,16 @@ class Structure(models.Model, object):
         return lpstr
 
     lp = lat_params
-
+    _cell = None
     @property
     def cell(self):
         """Lattice vectors, 3x3 numpy.ndarray."""
-        return np.array([
-                [self.x1, self.x2, self.x3],
-                [self.y1, self.y2, self.y3],
-                [self.z1, self.z2, self.z3]])
+        if self._cell is None:
+            self._cell = np.array([
+                            [self.x1, self.x2, self.x3],
+                            [self.y1, self.y2, self.y3],
+                            [self.z1, self.z2, self.z3]])
+        return self._cell
 
     @cell.setter
     def cell(self, cell):
@@ -429,6 +458,7 @@ class Structure(models.Model, object):
             a._cart = None
         for s in self.sites:
             s._cart = None
+        self._cell = None
 
     _metrical_matrix = None
     @property
@@ -493,6 +523,7 @@ class Structure(models.Model, object):
          * for each site: site.multiplicity -> int
 
         """
+        self.get_sites()
         dataset = get_symmetry_dataset(self, symprec=tol)
         self.spacegroup = Spacegroup.objects.get(pk=dataset['number'])
         for i, site in enumerate(self.sites):    
@@ -500,9 +531,12 @@ class Structure(models.Model, object):
             site.structure = self
         counts = defaultdict(int)
         orbits = defaultdict(list)
-        for e in dataset['equivalent_atoms']:
+        origins = {}
+        for i, e in enumerate(dataset['equivalent_atoms']):
             counts[e] += 1
-            orbits[e] += self.sites[e]
+            origins[self.sites[i]] = self.sites[e]
+            orbits[e].append(self.sites[i])
+        self.origins = origins
         self.operations = zip(dataset['rotations'], dataset['translations'])
         rots = []
         for r in dataset['rotations']:
@@ -515,10 +549,13 @@ class Structure(models.Model, object):
                 trans.append(t)
         self.translations = trans
         self.orbits = orbits.values()
+        self.duplicates = dict((self.sites[e], v) for e, v in orbits.items())
         self._uniq_sites = []
         self._uniq_atoms = []
         for ind, mult in counts.items():
             site = self.sites[ind]
+            for site2 in self.duplicates[site]:
+                site2.multiplicity = mult
             site.index = ind
             site.multiplicity = mult
             self._uniq_sites.append(site)
@@ -615,6 +652,8 @@ class Structure(models.Model, object):
         """
 
         # 1
+        #if len(self) > 80 or len(other) > 80:
+        #    return False
         me = self.copy()
         you = other.copy()
 
@@ -758,16 +797,22 @@ class Structure(models.Model, object):
         logger.debug("Atoms don't match.")
         return False
 
+    def get_coord(self, vec, wrap=True):
+        trans = self.inv.T.dot(vec)
+        if wrap:
+            return wrap(trans)
+        else:
+            return trans
+
     def contains(self, atom, tol=0.01):
-        atom.dist = la.norm(np.dot(atom.coord-np.round(atom.coord), self.cell))
+        atom.structure = self
         for atom2 in self.atoms:
             if not atom2.element_id == atom.element_id:
                 continue
-            if not atom2.dist is None:
-                if abs(atom2.dist - atom.dist) > tol:
-                    continue
-            d = self.get_distance(atom,atom2)
-            if d < tol:
+            if abs(atom2.dist - atom.dist) > tol:
+                continue
+            d = self.get_distance(atom, atom2, limit=1)
+            if d < tol and not d is None:
                 return True
         return False
 
@@ -816,9 +861,9 @@ class Structure(models.Model, object):
         vec -= np.round(vec)
         dist = np.dot(vec, self.cell)
 
-        dist -= round(dist.dot(x)/xx)*x
-        dist -= round(dist.dot(y)/yy)*y
-        dist -= round(dist.dot(z)/zz)*z
+        dist -= np.round(dist.dot(x)/xx)*x
+        dist -= np.round(dist.dot(y)/yy)*y
+        dist -= np.round(dist.dot(z)/zz)*z
 
         if limit:
             if any([ abs(d) > limit for d in dist]):
@@ -826,7 +871,7 @@ class Structure(models.Model, object):
 
         dist = la.norm(dist)
         if not wrap_self:
-            if abs(dist) < 1e-6:
+            if abs(dist) < 1e-4:
                 dist = min(self.lp[:3])
 
         if limit:
@@ -836,7 +881,6 @@ class Structure(models.Model, object):
         return dist
 
     def _get_vector(self, atom1, atom2):
-
         x, y, z = self.cell
         xx = self.metrical_matrix[0,0]
         yy = self.metrical_matrix[1,1]
@@ -851,6 +895,14 @@ class Structure(models.Model, object):
         dist -= round(dist.dot(z)/zz)*z
         return dist
 
+    def add_site(self, site):
+        site.structure = self
+        self.sites.append(site)
+        for a in site.atoms:
+            a.structure = self
+            self.atoms.append(a)
+        self.spacegroup = None
+
     def add_atom(self, atom, tol=0.01):
         """
         Adds `atom` to the structure if it isn't already contained.
@@ -861,7 +913,7 @@ class Structure(models.Model, object):
         self.atoms.append(atom)
         for site in self.sites:
             if atom.is_on(site, tol=tol):
-                site.add_atom(atom, tol=tol)
+                site.add_atom(atom)
                 break
         else:
             site = atom.get_site()
@@ -876,7 +928,7 @@ class Structure(models.Model, object):
             self.composition = Composition.get(self.comp)
         return self.composition
 
-    def set_magnetism(self, type, scheme='primitive'):
+    def set_magnetism(self, order, elements=None, scheme='primitive'):
         """
         Assigns magnetic moments to all atoms in accordance with the specified
         magnetism scheme.
@@ -890,7 +942,8 @@ class Structure(models.Model, object):
         +---------+-------------------------------------+
         | "ferro" | atoms with partially filled d and   |
         |         | f shells are assigned a magnetic    |
-        |         | moment of 5 mu_b                    |
+        |         | moment of 5 mu_b and 7 mu_b         |
+        |         | respectively                        |
         +---------+-------------------------------------+
         | "anti"  | finds a highly ordererd arrangement |
         |         | arrangement of up and down spins.   |
@@ -900,12 +953,12 @@ class Structure(models.Model, object):
         +---------+-------------------------------------+
 
         """
-        if type == 'none':
+        if order == 'none':
             for atom in self.atoms:
                 atom.magmom = 0
                 if atom.id is not None:
                     atom.save()
-        if type == 'ferro':
+        if order == 'ferro':
             for atom in self.atoms:
                 if atom.element.d_elec > 0 and atom.element.d_elec < 10:
                     atom.magmom = 5
@@ -915,8 +968,11 @@ class Structure(models.Model, object):
                     atom.magmom = 0
                 if atom.id is not None:
                     atom.save()
-        elif type == 'anti-ferro':
-            raise NotImplementedError
+        elif order == 'anti-ferro':
+            if not elements:
+                raise NotImplementedError
+            ln = self.get_lattice_network(elements)
+
         self.spacegroup = None
 
     @property
@@ -965,7 +1021,8 @@ class Structure(models.Model, object):
     def site_coords(self, coords):
         assert len(self.sites) == len(coords)
         for site, coord in zip(self.sites, coords):
-            site.coord = coord
+            site.coord = wrap(coord)
+            site._dist = None
 
     @property
     def site_types(self):
@@ -978,7 +1035,7 @@ class Structure(models.Model, object):
         for a, c in zip(self.atoms, coords):
             c = np.array(map(float,c))
             a.coord = wrap(c)
-            a.dist = None
+            a._dist = None
 
     @property
     def magmoms(self):
@@ -1043,7 +1100,8 @@ class Structure(models.Model, object):
         recs = self.reciprocal_lattice
         rec_mags = [ norm(recs[0]), norm(recs[1]), norm(recs[2])]
         r0 = max(rec_mags)
-        refr = np.array([ np.round(r/r0, 4) for r in rec_mags ])
+        refr = np.array([ roundclose(r/r0, 1e-2) for r in rec_mags ])
+        refr = np.round(refr, 4)
         scale = 1.0
         kpts = np.ones(3)
 
@@ -1058,13 +1116,6 @@ class Structure(models.Model, object):
         if upper < lower:
             kpts = prev_kpts.copy()
         return kpts
-
-    _mrd = None
-    @property
-    def minimum_repeat_distance(self):
-        if self._mrd is None:
-            self._mrd = min(self.lat_params[:3])
-        return self._mrd
 
     def copy(self):
         """
@@ -1222,7 +1273,8 @@ class Structure(models.Model, object):
                 return False
         return True
 
-    def find_nearest_neighbors(self, method='closest', tol=0.05, limit=5.0):
+    def find_nearest_neighbors(self, method='closest', tol=0.05, limit=5.0,
+            **kwargs):
         """
         Determine the nearest neighbors for all Atoms in Structure.
 
@@ -1245,7 +1297,8 @@ class Structure(models.Model, object):
         """
         self._neighbor_dict = find_nearest_neighbors(self, method=method,
                                                            tol=tol, 
-                                                           limit=limit)
+                                                           limit=limit,
+                                                           **kwargs)
 
     _neighbor_dict = None
     @property
@@ -1266,13 +1319,13 @@ class Structure(models.Model, object):
         self.atoms = [ a for a in self if a.element_id in elements ]
         return self
 
-    def get_spin_lattice(self, elements=None, supercell=None):
+    def get_lattice_network(self, elements=None, supercell=None, **kwargs):
         """
-        Constructs a lattice of sites.
+        Constructs a :mod:`networkx.Graph` of lattice sites.
 
         Keyword Arguments:
             elements:
-                If `elements` is supplied, get_spin_lattice will return the 
+                If `elements` is supplied, get_lattice_network will return the 
                 lattice of those elements only. 
 
             supercell:
@@ -1282,14 +1335,14 @@ class Structure(models.Model, object):
                 their magnetic structure.
 
         Returns:
-            A SpinLattice, which is a container for a lattice graph, which
+            A LatticeNetwork, which is a container for a lattice graph, which
             contains nodes which are atoms and edges which indicate nearest
             neighbors.
 
         Examples::
             
             >>> s = io.read(INSTALL_PATH+'/io/files/fe3o4.cif')
-            >>> sl = s.get_spin_lattice(elements=['Fe'])
+            >>> sl = s.get_lattice_network(elements=['Fe'])
             >>> sl.set_fraction(0.33333)
             >>> sl.fraction
             0.3333333333333333
@@ -1298,20 +1351,25 @@ class Structure(models.Model, object):
         """
 
         if supercell:
-            self.transform(supercell)
-        pairs = []
+            new = self.transform(supercell, in_place=False)
+            return new.get_lattice_network(elements=elements, **kwargs)
+        pairs = set()
         if elements:
             struct = self.get_sublattice(elements)
-            return struct.get_spin_lattice()
-        self.find_nearest_neighbors()
-        for a1 in self.atoms:
+            return struct.get_lattice_network()
+        self.find_nearest_neighbors(**kwargs)
+        for s1 in self.sites:
             n0 = len(pairs)
-            for a2 in a1.neighbors:
+            lp1 = LatticePoint(s1.coord)
+            for s2 in s1.neighbors:
                 #if a1 < a2:
                 #    continue
-                pairs.append((a1, a2))
+                lp2 = LatticePoint(s2.coord)
+                #pairs.append((s1, s2))
+                pairs.add(frozenset([lp1, lp2]))
+        pairs = list(pairs)
 
-        lattice = SpinLattice(pairs)
+        lattice = LatticeNetwork(pairs)
         lattice.structure = self
         return lattice
 
@@ -1518,6 +1576,12 @@ class Structure(models.Model, object):
 
         return [ transform.T.dot(vec) for vec in trans_vecs ]
 
+    def remove_atom(self, atom):
+        ind = self.sites.index(atom.site)
+        self.sites[ind].atoms.remove(atom)
+        if len(self.sites[ind]) == 0:
+            del self.sites[ind]
+        self.atoms.remove(atom)
 
     def transform(self, transform, in_place=True, tol=1e-5):
         """
@@ -1563,6 +1627,23 @@ class Structure(models.Model, object):
             self.cell = new_cell
             return self
 
+        # Test for simple IxJxK lattice multiplication        
+        diag = True
+        for i, j in itertools.combinations(range(3), r=2):
+            if i == j:
+                continue
+            if transform[i,j] != 0:
+                diag = False
+                break
+        if diag:
+            # do simple expansion
+            i = int(transform[0,0])
+            j = int(transform[1,1])
+            k = int(transform[2,2])
+            points = itertools.product(range(i), range(j), range(k))
+        else:
+            points = self.find_lattice_points_by_transform(transform)
+
         # construct the new lattice
         cell = list(self.cell)
         elts = list(self.atom_types)
@@ -1570,27 +1651,44 @@ class Structure(models.Model, object):
         inv = la.inv(transform.T)
         n_cells = abs(roundclose(la.det(transform)))
 
-        atoms = []
-        for point in self.find_lattice_points_by_transform(transform):
-            for atom in self.atoms:
-                new = atom.copy()
-                coord = point + atom.coord
+        sites = []
+        self.lattice_points = points
+        self.sites_by_lattice_point = {}
+        self.atoms_by_lattice_point = {}
+        for point in points:
+            lp_sites = []
+            lp_atoms = []
+            for site in self.sites:
+                new = site.copy()
+                coord = point + site.coord
                 new.coord = inv.dot(coord)
-                atoms.append(new)
+                new.base_site = site
+                sites.append(new)
+
+                lp_atoms += new.atoms
+                lp_sites.append(new)
+            self.sites_by_lattice_point[tuple(point)] = lp_sites
+            self.atoms_by_lattice_point[tuple(point)] = lp_atoms
 
         self.cell = new_cell
-        self.atoms = atoms
+        self.sites = sites
         return self
 
     t = transform
 
-    def substitute(self, replace, rescale=True, in_place=False, **kwargs):
+    def substitute(self, replace, 
+                         rescale=True, rescale_method="relative",
+                         in_place=False, 
+                         **kwargs):
         """Replace atoms, as specified in a dict of pairs. 
 
         Keyword Arguments:
             rescale: 
                 rescale the volume of the final structure based on the per 
                 atom volume of the new composition.
+
+            rescale_method:
+                How to rescale the 
 
             in_place: 
                 change the species of the current Structure or return a new 
@@ -1615,11 +1713,14 @@ class Structure(models.Model, object):
                 volume -= atom.element.volume
                 atom.element = Element.get(replace[atom.element_id])
                 volume += atom.element.volume
-        if rescale:
+        if rescale and rescale_method == "relative":
             self.set_volume(volume)
+        elif rescale and rescale_method == "absolute":
+            self.set_volume_to_sum_of_elements()
         self.set_composition()
         return self
     sub = substitute
+    replace = substitute
 
     def refine(self, tol=1e-3, recurse=True):
         """
@@ -1652,7 +1753,7 @@ class Structure(models.Model, object):
                 test = rot.dot(atom.coord) + trans
                 test = wrap(test)
                 if not any([all(test==c) for c in coords]):
-                    if self.get_distance(test, atom) < tol:
+                    if self.get_distance(test, atom, limit=1) < tol:
                         coords.append(test)
             central = np.average(coords, 0)
             new_coords.append(central)
@@ -1688,7 +1789,7 @@ class Structure(models.Model, object):
 
         if not in_place:
             new = self.copy()
-            trans = new.reduction(tol=tol, limit=limit)
+            trans = new.reduce(tol=tol, limit=limit)
             return new, trans
 
         # reduction parameters

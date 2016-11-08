@@ -12,10 +12,11 @@ from django.core.context_processors import csrf
 from qmpy import INSTALL_PATH
 from qmpy.models import *
 from qmpy.io import write
+from ..tools import get_globals
 
 def structure_view(request, structure_id):
     structure = Structure.objects.get(pk=structure_id)
-    data = {}
+    data = get_globals()
 
     if request.method == "POST":
         p = request.POST
@@ -69,7 +70,8 @@ def export_structure(request, structure_id, convention='primitive', format='posc
 
 def prototype_view(request, name):
     proto = Prototype.objects.get(pk=name)
-    data = {'prototype':proto}
+    data = get_globals()
+    data['prototype'] = proto
     example = proto.entry_set.all()
     if request.method == 'POST':
         data['primitive'] = request.POST.get('primitive')
@@ -83,7 +85,7 @@ def prototype_view(request, name):
             RequestContext(request))
 
 def prototypes_view(request):
-    data = {}
+    data = get_globals()
     return render_to_response('materials/prototypes.html',
             data,
             RequestContext(request))

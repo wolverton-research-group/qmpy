@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import time
 import random
 import subprocess
 import os
@@ -7,15 +8,27 @@ import time
 from collections import defaultdict
 import json
 import logging
+import numbers
+import yaml
 
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+import pexpect, getpass
 
 import qmpy
 from qmpy.db.custom import DictField
 import queue as queue
+import threading
 
 logger = logging.getLogger(__name__)
+
+def is_yes(string):
+    char = string.lower()[0]
+    if char == 'n':
+        return False
+    if char == 'y':
+        return True
+    return None
 
 class AllocationError(Exception):
     """Problem with the allocation"""
@@ -60,6 +73,50 @@ class User(AbstractUser):
             return cls.objects.get(username=name)
         except cls.DoesNotExist:
             return cls(username=name)
+
+    @staticmethod
+    def create():
+        username = raw_input("Username: ")
+        email = raw_input("E-mail address: ")
+        user, new = User.objects.get_or_create(username=username)
+        if not new:
+            print 'User by that name exists!'
+            print 'Please try a new name, or exit with Ctrl-x'
+            return User.create()
+        print 'Okay, user created!'
+        user.save()
+        user.create_accounts()
+        #user.assign_allocations()
+        return user
+
+    def create_accounts(self):
+        msg = 'Would you like to create cluster accounts for this user?'
+        ans = is_yes(raw_input(msg+' [y/n]: '))
+        if ans is False:
+            return
+        elif ans is None:
+            print "I didn't understand that command."
+            return self.create_accounts()
+
+        msg = 'Does user %s have an account on %s? [y/n]: '
+        msg2 = 'What is %s\'s username on %s?: '
+        msg3 = 'On %s@%s where should calculations be run? (absolute path): '
+        known = self.account_set.values_list('host__name', flat=True)
+        for host in Host.objects.exclude(name__in=known):
+            ans = raw_input(msg % (self.username, host.name))
+            ans = is_yes(ans)
+            if ans is False:
+                continue
+            uname = raw_input(msg2 % (self.username, host.name))
+            acct, new = Account.objects.get_or_create(user=self, host=host)
+            if not new:
+                print 'Account exists!'
+                continue
+            path = raw_input(msg3 % (self.username, host.name))
+            acct.run_path = path
+            acct.username = uname.strip()
+            acct.save()
+            acct.create_passwordless_ssh()
 
 class Host(models.Model):
     """
@@ -111,8 +168,8 @@ class Host(models.Model):
     def __str__(self):
         return self.name
 
-    @classmethod
-    def interactive_create(cls):
+    @staticmethod
+    def create():
         """
         Classmethod to create a Host model. Script will ask you questions about
         the host to add, and will return the created Host.
@@ -120,21 +177,21 @@ class Host(models.Model):
         """
         host = {}
         host['name'] = raw_input('Hostname:')
-        if cls.objects.filter(name=host['name']).exists():
+        if Host.objects.filter(name=host['name']).exists():
             print 'Host by that name already exists!'
             exit(-1)
         host['ip_address'] = raw_input('IP Address:')
-        if cls.objects.filter(ip_address=host['ip_address']).exists():
+        if Host.objects.filter(ip_address=host['ip_address']).exists():
             print 'Host at that address already exists!'
             exit(-1)
         host['ppn'] = raw_input('Processors per node:')
         host['nodes'] = raw_input('Max nodes to run on:')
-        host['sub_script'] = raw_inputs('Command to submit a script '+
+        host['sub_script'] = raw_input('Command to submit a script '
                 '(e.g. /usr/local/bin/qsub):')
-        host['check_queue'] = raw_input('Command for showq (e.g.'+
+        host['check_queue'] = raw_input('Command for showq (e.g.'
                 '/usr/local/maui/bin/showq):')
         host['sub_text'] = raw_input('Path to qfile template:')
-        h = cls(**host)
+        h = Host(**host)
         h.save()
 
     @classmethod
@@ -159,7 +216,7 @@ class Host(models.Model):
     def active(self):
         if self.state < 1:
             return False
-        elif self.utilization > self.nodes*self.ppn:
+        elif self.utilization > 5*self.nodes*self.ppn:
             return False
         else:
             return True
@@ -177,6 +234,13 @@ class Host(models.Model):
         return util
 
     def get_project(self):
+        """
+        Out of the active projects able to run on this host,
+          select one at random
+
+        Output:
+            Project, Active project able to run on this host
+        """
         proj = Project.objects.filter(allocations__host=self, state=1)
         proj = proj.filter(task__state=0)
         if proj.exists():
@@ -191,7 +255,7 @@ class Host(models.Model):
         tasks = tasks.filter(project_set=project)
         tasks = tasks.filter(project_set__allocations__host=self)
         tasks = tasks.filter(project_set__users__account__host=self)
-        return tasks.order_by('priority')
+        return tasks.order_by('priority', 'id')
 
     @property
     def qfile(self):
@@ -200,6 +264,29 @@ class Host(models.Model):
     def get_binary(self, key):
         return self.binaries[key]
 
+    def _try_login(self, timeout=5.0):
+        def _login():
+            self._tmp_acct = Allocation.get('b1004').get_account()
+            self._tmp_ssh = 'ssh {user}@{host} "{cmd}"'.format(
+                    user=self._tmp_acct.user.username,
+                    host=self._tmp_acct.host.ip_address,
+                    cmd='whoami')
+            self._tmp_proc = subprocess.Popen(self._tmp_ssh, shell=True,
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            stdout, stderr = self._tmp_proc.communicate()
+            if stdout.strip() == self._tmp_acct.user.username:
+                print "quest is up"
+        
+        self._tmp_thread = threading.Thread(target=_login)
+        self._tmp_thread.start()
+
+        self._tmp_thread.join(timeout)
+        if self._tmp_thread.is_alive():
+            print "unable login on quest"
+            self._tmp_proc.terminate()
+            self._tmp_thread.join()
+        return self._tmp_proc.returncode
+
     def check_host(self):
         """Pings the host to see if it is online. Returns False if it is
         offline."""
@@ -207,15 +294,30 @@ class Host(models.Model):
                 shell=True,
                 stdout=open('/dev/null', 'w'),
                 stderr=subprocess.STDOUT)
+
         if ret == 0:
+            self.state = 1
+            self.save()
+            write_resources()
             return True
         else:
+            """Sometimes quest refuses to respond to ping requests. So, try
+            logging into it using an(y) account. Trying executing a command and
+            see if it is successful."""
+            if self.name == 'quest':
+                if self._try_login() == 0:
+                    self.state = 1
+                    self.save()
+                    write_resources()
+                    return True
             self.state = -2
             self.save()
             return False
 
     @property
     def running_now(self):
+        if not self.state == 1:
+            return {}
         if datetime.now() + timedelta(seconds=-60) > self.checked_time:
             self.check_running()
         return self.running
@@ -228,7 +330,7 @@ class Host(models.Model):
 
         """
         self.checked_time = datetime.now()
-        if self.state < 0:
+        if not self.state == 1:
             self.running = {}
             self.save()
             return
@@ -258,6 +360,19 @@ class Host(models.Model):
             return self.running
         else:
             return {}
+
+    def activate(self):
+        """
+        Allow jobs to be run on this system. Remember to save() to enact change
+        """
+        self.state = 1
+    
+    def deactivate(self):
+        """
+        Prevent new jobs from being started on this system. 
+        Remember to save() changes
+        """
+        self.state = -1
 
     @property
     def utilization_by_project(self):
@@ -318,6 +433,57 @@ class Account(models.Model):
             return Account.objects.get(user=user, host=host)
         except cls.DoesNotExist:
             return Account(host=host, user=user)
+
+    def create_passwordless_ssh(self, key='id_dsa', origin=None):
+        msg = 'password for {user}@{host}: '
+        if origin is None:
+            origin = '/home/{user}/.ssh'.format(user=getpass.getuser())
+
+        pas = getpass.getpass(msg.format(user=self.username, host=self.host.name))
+        msg = '/usr/bin/ssh {user}@{host} touch'
+        msg += ' /home/{user}/.ssh/authorized_keys'
+        p = pexpect.spawn(msg.format(
+                    origin=origin, key=key, 
+                    user=self.username, host=self.host.ip_address))
+        p.expect('assword:')
+        p.sendline(pas)
+        time.sleep(2)
+        p.close()
+
+        msg = '/usr/bin/scp {origin}/{key} {user}@{host}:/home/{user}/.ssh/'
+        p = pexpect.spawn(msg.format(
+                    origin=origin, key=key, 
+                    user=self.username, host=self.host.ip_address))
+        p.expect('assword:')
+        p.sendline(pas)
+        time.sleep(2)
+        p.close()
+
+        msg = '/usr/bin/ssh {user}@{host}'
+        msg += ' chmod 600 /home/{user}/.ssh/authorized_keys'
+        p = pexpect.spawn(msg.format(
+                    origin=origin, key=key, 
+                    user=self.username, host=self.host.ip_address))
+        p.expect('assword:')
+        p.sendline(pas)
+        time.sleep(2)
+        p.close()
+
+        msg = '/usr/bin/ssh-copy-id -i {origin}/{key} {user}@{host}'
+        p = pexpect.spawn(msg.format(
+                    origin=origin, key=key, 
+                    user=self.username, host=self.host.ip_address))
+        p.expect('assword:')
+        p.sendline(pas)
+        time.sleep(2)
+        p.close()
+
+        print 'Great! Lets test it real quick...'
+        out = self.execute('whoami')
+        if out == '%s\n' % self.username: 
+            print 'Awesome! It worked!'
+        else:
+            print 'Something appears to be wrong, talk to Scott...'
 
     @property
     def active(self):
@@ -465,9 +631,9 @@ class Allocation(models.Model):
         return self.name
     
     @classmethod
-    def create_interactive(cls):
+    def create(self):
         name = raw_input('Name your allocation:')
-        if cls.objects.filter(name=name).exists():
+        if Allocation.objects.filter(name=name).exists():
             print 'Allocation by that name already exists!'
             exit(-1)
         host = raw_input('Which cluster is this allocation on?')
@@ -475,12 +641,12 @@ class Allocation(models.Model):
             print "This host doesn't exist!"
             exit(-1)
         host = Host.objects.get(name=host)
-        alloc = cls(name=name, host=host)
+        alloc = Allocation(name=name, host=host)
         alloc.save()
         print 'Now we will assign users to this allocation'
         for acct in Account.objects.filter(host=host):
             inc = raw_input('Can %s use this allocation? y/n [y]:' % 
-                    acct.user.name )
+                    acct.user.username )
             if inc == 'y' or inc == '':
                 alloc.users.add(acct.user)
         print 'If this allocation requires a special password, enter',
@@ -571,21 +737,25 @@ class Project(models.Model):
     def failed(self):
         return self.task_set.filter(state=-1)
 
-    @classmethod
-    def interactive_create(cls):
+    @staticmethod
+    def create():
+        '''
+        Create a new project. Prompts user on std-in
+        for name, users, and allocations of this project.
+        '''
         name = raw_input('Name your project: ')
-        if cls.objects.filter(name=name).exists():
+        if Project.objects.filter(name=name).exists():
             print 'Project by that name already exists!'
             exit(-1)
-        proj = cls(name=name)
+        proj = Project(name=name)
         proj.save()
         proj.priority = raw_input('Project priority (1-100): ')
         users = raw_input('List project users (e.g. sjk648 jsaal531 bwm291): ')
         for u in users.split():
-            if not User.objects.filter(name=u).exists():
+            if not User.objects.filter(username=u).exists():
                 print 'User named', u, 'doesn\'t exist!'
             else:
-                proj.users.add(User.objects.get(name=u))
+                proj.users.add(User.objects.get(username=u))
 
         alloc = raw_input('List project allocations (e.g. byrd victoria b1004): ')
         for a in alloc.split():
@@ -610,3 +780,150 @@ class Project(models.Model):
             return random.choice(available)
         else:
             return []
+
+# !vih
+def write_resources():
+    
+    current_loc = os.path.dirname(__file__)
+
+    ######
+    # headers for various configuration files
+    ######
+    
+    hosts_header = """# host1:
+    #   binaries:
+    #       bin_name1: /path/to/bin1
+    #       bin_name2: /path/to/bin2
+    #   check_queue: /full/path/to/showq
+    #   hostname: full.host.name
+    #   ip_address: ###.###.##.###
+    #   nodes: # of nodes on machine
+    #   ppn: # of processors per node
+    #   sub_script: /full/path/to/submission/command
+    #   sub_text: filename for qfile to use a template. 
+    #            A file named "filename" must be in configuration/qfiles
+    #   walltime: maximum walltime, in seconds
+    # host2: ...
+    """
+    f_hosts = open(current_loc+'/../configuration/resources/hosts.yml', 'w')
+    f_hosts.write(hosts_header)
+    f_hosts.write('\n')
+    
+    users_header = """# user1:
+    #   hostname1:
+    #       run_path:/where/to/run/on/host1
+    #       username: usernameonhost1
+    #   hostname2: 
+    #       run_path:/where/to/run/on/host2
+    #       username: usernameonhost2
+    # user2:
+    #   hostname1: ...
+    """
+    f_users = open(current_loc+'/../configuration/resources/users.yml', 'w')
+    f_users.write(users_header)
+    f_users.write('\n')
+    
+    allocations_header = """# allocation1:
+    #   host: hostname
+    #   key: key needed for identifying allocation
+    #   users:
+    #       - user1
+    #       - user2
+    # allocation2: ...
+    """
+    f_allocations = open(current_loc+'/../configuration/resources/allocations.yml', 'w')
+    f_allocations.write(allocations_header)
+    f_allocations.write('\n')
+    
+    projects_header = """# project1:
+    #   allocations:
+    #       - allocation1
+    #       - allocation2
+    #   priority: Base priority for the project. Lower numbers will be done soonest.
+    #   users:
+    #       - user1
+    #       - user2
+    # project2: ...
+    """
+    f_projects = open(current_loc+'/../configuration/resources/projects.yml', 'w')
+    f_projects.write(projects_header)
+    f_projects.write('\n')
+    
+    ######
+    # list of values that need to be written into the configuration files
+    ######
+    
+    host_values = ['binaries', 'check_queue', 'hostname', 'ip_address', \
+            'nodes', 'ppn', 'sub_script', 'sub_text', 'walltime']
+    
+    user_values = ['run_path', 'username']
+    
+    allocation_values = ['host', 'key', 'users']
+    
+    project_values = ['allocations', 'priority', 'users']
+    
+    ######
+    # a function to 'clean' the values from type unicode/ long/ etc. to string/ int
+    ######
+    def clean(val):
+        if isinstance(val, unicode):
+            val = str(val)
+        elif isinstance(val, numbers.Number):
+            val = int(val)
+        return val
+     
+    ######
+    # write host configurations into hosts.yml
+    ######
+    
+    hosts = Host.objects.all()
+    dict1 = {}
+    for h in hosts:
+        dict2 = {}
+        for hv in host_values:
+            dict2[hv] = clean(h.__getattribute__(hv))
+        dict1[clean(h.name)] = dict2
+    yaml.dump(dict1, f_hosts, default_flow_style=False)
+    
+    ######
+    # write user configurations into users.yml
+    ######
+    
+    users = User.objects.all()
+    dict1 = {}
+    for u in users:
+        dict2 = {}
+        accounts = Account.objects.filter(user=u)
+        for a in accounts:
+            dict2[clean(a.host.name)] = {'run_path':clean(a.run_path), \
+                                        'username':clean(a.username)}
+        dict1[clean(u.username)] = dict2
+    yaml.dump(dict1, f_users, default_flow_style=False)
+    
+    ######
+    # write allocation configurations into allocations.yml
+    ######
+    
+    alloc = Allocation.objects.all()
+    dict1 = {}
+    for a in alloc:
+        dict2 = {}
+        dict2['host'] =  clean(a.host.name)
+        dict2['key'] = clean(a.key)
+        dict2['users'] = [ clean(u) for u in a.users.all().values_list('username', flat=True) ]
+        dict1[clean(a.name)] = dict2
+    yaml.dump(dict1, f_allocations, default_flow_style=False)
+    
+    ######
+    # write project configurations into projects.yml
+    ######
+    
+    pro = Project.objects.all()
+    dict1 = {}
+    for p in pro:
+        dict2 = {}
+        dict2['allocations'] = [ clean(a) for a in p.allocations.all().values_list('name', flat=True) ]
+        dict2['priority'] = clean(p.priority)
+        dict2['users'] = [ clean(u) for u in p.users.all().values_list('username', flat=True) ]
+        dict1[clean(p.name)] = dict2
+    yaml.dump(dict1, f_projects, default_flow_style=False)

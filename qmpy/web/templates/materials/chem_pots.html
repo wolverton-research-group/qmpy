@@ -1,0 +1,39 @@
+{% extends "base_site.html" %}
+{% load admin_static %}
+{% load custom_filters %}
+
+{% block extrastyle %}
+{% endblock %}
+
+{% block extrascript %}
+{% endblock %}
+
+{% block content_title %}
+<h2>Chemical Potentials</h2>
+{% endblock %}
+
+{% block content %}
+<table>
+	<thead>
+		<tr>
+			<th>Element</th>
+      <th>VASP Potential</th>
+      {% for fit in fits %}
+      <th> {{fit}} </th>
+      {% endfor %}
+		</tr>
+	</thead>
+	<tbody>
+    {% for elt in elements %}
+    <tr> 
+      <td> {{elt}} </td>
+      <td> {{chem_pots | get_item:elt | get_item:"vasp"}} </td>
+      {% for fit in fits %}
+      <td> {{chem_pots | get_item:elt | get_item:"fits" | get_item:fit | floatformat:-3}} </td>
+      {% endfor %} 
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
+
+{% endblock %}

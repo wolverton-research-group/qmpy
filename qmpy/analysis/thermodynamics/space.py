@@ -2,7 +2,10 @@
 
 import networkx as nx
 from scipy.spatial import ConvexHull
+import matplotlib.pylab as plt
 import logging
+
+from django.db import transaction
 
 import qmpy
 from qmpy.utils import *
@@ -19,6 +22,30 @@ else:
 
 class PhaseSpaceError(Exception):
     pass
+
+class Heap(dict):
+    def add(self, seq):
+        if len(seq) == 1:
+            self[seq[0]] = Heap()
+            return 
+        seq = sorted(seq)
+        e0 = seq[0]
+        if e0 in self:
+            self[e0].add(seq[1:])
+        else:
+            self[e0] = Heap()
+            self[e0].add(seq[1:])
+
+    @property
+    def sequences(self):
+        seqs = []
+        for k, v in self.items():
+            if not v:
+                seqs.append([k])
+            else:
+                for v2 in v.sequences:
+                    seqs.append([k] + v2)
+        return seqs
 
 class PhaseSpace(object):
     """
@@ -94,23 +121,10 @@ class PhaseSpace(object):
         return len(self.phases)
 
     def set_bounds(self, bounds):
+        bounds = parse_space(bounds)
         if bounds is None:
             self.bounds = None
-            return
-
-        if isinstance(bounds, basestring):
-            bounds = re.sub('[-,_]', ' ', bounds)
-            bounds = [ unit_comp(parse_comp(b)) for b in bounds.split()]
-        elif isinstance(bounds, (list,set)):
-            bounds = [ {elt:1} for elt in bounds ]
-        elif isinstance(bounds, dict):
-            bounds = [ {elt:1} for elt in bounds ]
-        else:
-            raise ValueError("Invalid bounds assignment: %s" % bounds)
-
-        if bounds is None:
-            self.bounds = None
-            return
+            return 
 
         elements = sorted(set.union(*[ set(b.keys()) for b in bounds ]))
         basis = []
@@ -171,6 +185,10 @@ class PhaseSpace(object):
             pass
         else:
             raise ValueError("Unknown load argument: %s" % target)
+
+    def get_subspace(self, space):
+        data = self.data.get_phase_data(space)
+        return PhaseSpace(space, data=data)
 
     _phases = None
     @property
@@ -323,7 +341,7 @@ class PhaseSpace(object):
 
         """
         if self.bounds is None:
-            return None
+            return set()
         return set.union(*[ set(b.keys()) for b in self.bounds ])
 
     @property
@@ -444,6 +462,14 @@ class PhaseSpace(object):
         self._spaces = list(map(list, spaces))
         return self._spaces
 
+    def find_stable(self):
+        stable = set()
+        for space in self.spaces:
+            subspace = self.get_subspace(space)
+            stable |= set(subspace.stable)
+        self._stable = stable
+        return stable
+
     _dual_spaces = None
     @property
     def dual_spaces(self):
@@ -452,36 +478,55 @@ class PhaseSpace(object):
         between two phases in phases is contained in at least one
         set, and no set is a subset of any other.
         """
-        if self._dual_spaces:
-            return self._dual_spaces
+        if self._dual_spaces is None:
+            #self._dual_spaces = self.get_dual_spaces()
+            self._dual_spaces = self.heap_structure_spaces()
+        return self._dual_spaces
 
+    def heap_structure_spaces(self):
         if len(self.spaces) == 1:
-            self._dual_spaces = self._spaces
-            return self._dual_spaces
+            return self.spaces
+        heap = Heap()
+        for i, (c1, c2) in enumerate(itertools.combinations(self.spaces, r=2)):
+            heap.add(set(c1 + c2))
+        return heap.sequences
+
+    def get_dual_spaces(self):
+        if len(self.spaces) == 1:
+            return self.spaces
 
         dual_spaces = []
         imax = len(self.spaces)**2 / 2
-        for i, c1 in enumerate(itertools.combinations(self.spaces, r=2)):
-            for j, c2 in enumerate(dual_spaces):
-                if c1 <= c2:
+        spaces = sorted(self.spaces, key=lambda x: -len(x))
+        for i, (c1, c2) in enumerate(itertools.combinations(spaces, r=2)):
+            c3 = frozenset(c1 + c2)
+            if c3 in sizes[n]:
+                break
+            for j, c4 in enumerate(dual_spaces):
+                if c3 <= c4:
                     break
-                elif c2 < c1:
-                    dual_spaces[j] = c1
-                    break
-            else:
-                dual_spaces.append(c1)
-
-        second_pass = []
-        imax = len(dual_spaces)
-        for i, c1 in enumerate(dual_spaces):
-            for c2 in list(second_pass):
-                if c1 <= c2:
+                elif c4 < c3:
+                    dual_spaces[j] = c3
                     break
             else:
-                second_pass.append(c1)
+                dual_spaces.append(c3)
 
-        self._dual_spaces = set(second_pass)
+        self._dual_spaces = dual_spaces
         return self._dual_spaces
+
+    def find_tie_lines(self):
+        phases = self.phase_dict.values()
+        indict = dict((k, v) for v, k in enumerate(phases))
+        adjacency = np.zeros((len(indict), len(indict)))
+        for space in self.dual_spaces:
+            subspace = self.get_subspace(space)
+            for p1, p2 in subspace.tie_lines:
+                i1, i2 = sorted([indict[p1], indict[p2]])
+                adjacency[i1, i2] = 1
+        tl = set( (phases[i], phases[j]) for i, j in 
+                zip(*np.nonzero(adjacency)) )
+        self._tie_lines = tl
+        return tl
 
     @property
     def stable(self):
@@ -513,7 +558,7 @@ class PhaseSpace(object):
         if self._tie_lines is None:
             self.hull
             #self.compute_hull()
-        return self._tie_lines
+        return [ list(tl) for tl in self._tie_lines ]
 
     @property
     def tie_lines_list(self):
@@ -526,7 +571,7 @@ class PhaseSpace(object):
         """
         if self._hull is None:
             self.get_hull()
-        return self._hull
+        return list(self._hull)
 
     def get_hull(self):
         if any( len(b) > 1 for b in self.bounds ):
@@ -559,8 +604,11 @@ class PhaseSpace(object):
         Iterator over maximal cliques in the phase space. To get a list of
         cliques, use list(PhaseSpace.cliques).
         """
-        if self._cliques:
-            return self._cliques
+        if self._cliques is None:
+            self.find_cliques()
+        return self._cliques
+
+    def find_cliques(self):
         self._cliques = nx.find_cliques(self.graph)
         return self._cliques
 
@@ -600,6 +648,8 @@ class PhaseSpace(object):
 
     def chempot_range(self, p, element=None):
         pot_bounds = {}
+        tcomp = dict(p.unit_comp)
+        e, c = self.gclp(tcomp, mus=None)
         for elt in p.comp.keys():
             tcomp = dict(p.unit_comp)
             tcomp[elt] -= 0.01
@@ -766,7 +816,6 @@ class PhaseSpace(object):
             tie_lines |= set([ frozenset([k1, k2]) for k1, k2 in
                     itertools.combinations(face, r=2)])
             hull.add(Equilibrium(face))
-            #hull.add(face)
 
         self._hull = hull 
         self._tie_lines = tie_lines 
@@ -850,7 +899,7 @@ class PhaseSpace(object):
         Examples::
 
             >>> space = PhaseSpace('Fe-Li-O')
-            >>> phases, energy = space.gclp('FeLiO2')
+            >>> energy, phases = space.gclp('FeLiO2')
             >>> print phases
             >>> print energy
 
@@ -879,6 +928,8 @@ class PhaseSpace(object):
             if not set(p.comp.keys()) <= space:
                 continue
             in_phases.append(p)
+        ##[vh]
+        ##print "in_phases: ", in_phases
 
         return self._gclp(composition=composition,
                 mus=_mus, phases=in_phases)
@@ -899,17 +950,18 @@ class PhaseSpace(object):
                 p.unit_comp.get(elt,0)*phase_vars[p]
                 for p in phases ]) == float(constraint),\
                         'Conservation of '+elt
-
+        ##[vh]
+        ##print prob
         if pulp.GUROBI().available():
             prob.solve(pulp.GUROBI(msg=False))
-        if pulp.COIN_CMD().available():
+        elif pulp.COIN_CMD().available():
             prob.solve(pulp.COIN_CMD())
         else:
             prob.solve()
 
         phase_comp = dict([ (p, phase_vars[p].varValue)
             for p in phases if phase_vars[p].varValue > 1e-5])
-
+        
         energy = sum( p.energy*amt for p, amt in phase_comp.items() )
         energy -= sum([ a*composition.get(e, 0) for e,a in mus.items()])
         return energy, phase_comp
@@ -968,12 +1020,21 @@ class PhaseSpace(object):
             stable = self.phase_dict[p.name]
             p.stability = p.energy - stable.energy
         else:
-            phases = [ pp for pp in self.phase_dict.values() if 
-                    p.name != pp.name ]
+            phases = list(self.phase_dict.values())
+            #try:
+            phases.remove(p)
+            #except ValueError:
+            #    pass
             energy, gclp_phases = self.gclp(p.unit_comp, phases=phases)
+            ##print p, energy, gclp_phases
+            #vh
+            #print p,  '------', gclp_phases
             p.stability = p.energy - energy
+            #vh
+            return energy, gclp_phases
 
-    def compute_stabilities(self, phases=None, save=False, new_only=False):
+    @transaction.atomic
+    def compute_stabilities(self, phases=None, save=False, reevaluate=True):
         """
         Calculate the stability for every Phase.
 
@@ -991,13 +1052,25 @@ class PhaseSpace(object):
         from qmpy.analysis.vasp.calculation import Calculation
         if phases is None:
             phases = self.phases
+
+        if reevaluate:
+            for p in self.phases:
+                p.stability = None
+
         for p in phases:
-            if new_only:
-                if not p.stability is None:
-                    continue
-            self.compute_stability(p)
-            qs = qmpy.FormationEnergy.objects.filter(id=p.id)
+            if p.stability is None:
+                if p in self.phase_dict.values():
+                    self.compute_stability(p)
+                else:
+                    p2 = self.phase_dict[p.name]
+                    if p2.stability is None:
+                        self.compute_stability(p2)
+                    base = max(0, p2.stability)
+                    diff = p.energy - p2.energy
+                    p.stability = base + diff
+
             if save:
+                qs = qmpy.FormationEnergy.objects.filter(id=p.id)
                 qs.update(stability=p.stability)
 
     def save_tie_lines(self):
@@ -1022,7 +1095,7 @@ class PhaseSpace(object):
         ref = np.array(ref)
 
         for p in self.phases:
-            p.dE_pa = p.E_pa - sum(self.coord(p) * ref)
+            p.energy = p.energy - sum(self.coord(p) * ref)
 
     renderer = None
     @property
@@ -1096,7 +1169,7 @@ class PhaseSpace(object):
             windows[window] = list(self.stable)
         return windows 
 
-    def get_phase_diagram(self):
+    def get_phase_diagram(self, **kwargs):
         """
         Creates a Renderer attribute with appropriate phase diagram components.
 
@@ -1109,22 +1182,22 @@ class PhaseSpace(object):
         """
         self.renderer = Renderer()
         if self.shape == (0,0):
-            self.make_as_unary()
+            self.make_as_unary(**kwargs)
         elif self.shape == (1,0):
-            self.make_as_binary()
+            self.make_as_binary(**kwargs)
         elif self.shape == (2,0):
-            self.make_as_ternary()
+            self.make_as_ternary(**kwargs)
         elif self.shape == (3,0):
-            self.make_as_quaternary()
+            self.make_as_quaternary(**kwargs)
         elif self.shape == (0,1):
-            self.make_1d_vs_chempot()
+            self.make_1d_vs_chempot(**kwargs)
         elif self.shape == (1,1):
-            self.make_vs_chempot()
+            self.make_vs_chempot(**kwargs)
         else:
             ps = PhaseSpace('-'.join(self.space), data=self.data,
                     load=None)
             ps.renderer = Renderer()
-            ps.make_as_graph()
+            ps.make_as_graph(**kwargs)
             self.renderer = ps.renderer
 
     def make_as_unary(self, **kwargs):
@@ -1275,7 +1348,7 @@ class PhaseSpace(object):
         xaxis.min, xaxis.max = (0, 1)
         yaxis = Axis('y', label='Delta H', units='eV/atom')
         self.renderer.xaxis = xaxis
-        self.renderer.yaxis= yaxis
+        self.renderer.yaxis = yaxis
 
         for p1, p2 in self.tie_lines:
             pt1 = Point([self.coord(p1)[0], self.phase_energy(p1)])
@@ -1340,7 +1413,9 @@ class PhaseSpace(object):
                 continue
             if self.phase_dict[p.name] in self.stable:
                 continue
-            pt = Point(coord_to_gtri(self.coord(p)), label=p.label)
+            ##pt = Point(coord_to_gtri(self.coord(p)), label=p.label)
+            options = {'hull_distance': p.stability}
+            pt = Point(coord_to_gtri(self.coord(p)), label=p.label, **options)
             points.append(pt)
         self.renderer.point_collections.append(PointCollection(points,
             fill=True, color='red'))
@@ -1480,11 +1555,11 @@ class PhaseSpace(object):
                     'identical %s composition on both sides' % celt
         prob += sum([ rvars[p] for p in phases ]) == 1
         
-        #if pulp.GUROBI().available():
-        #    prob.solve(pulp.GUROBI(msg=False))
-        if pulp.COIN_CMD().available():
+        if pulp.GUROBI().available():
+            prob.solve(pulp.GUROBI(msg=False))
+        elif pulp.COIN_CMD().available():
             prob.solve(pulp.COIN_CMD())
-        if pulp.COINMP_DLL().available():
+        elif pulp.COINMP_DLL().available():
             prob.solve(pulp.COINMP_DLL())
         else:
             prob.solve()
@@ -1493,10 +1568,10 @@ class PhaseSpace(object):
             if pvars[c].varValue > 1e-4 ])
         reacts = defaultdict(float,[ (c, rvars[c].varValue) for c in phases
             if rvars[c].varValue > 1e-4 ])
-        n_elt = value(prob.objective)
+        n_elt = pulp.value(prob.objective)
         return reacts, prods, n_elt
 
-    def get_reactions(self, var, electrons=2.0):
+    def get_reactions(self, var, electrons=1.0):
         """
         Returns a list of Reactions.
 
@@ -1525,7 +1600,7 @@ class PhaseSpace(object):
                 delta_var=delta_var,
                 variable=var, electrons=electrons)
 
-    def plot_reactions(self, var, electrons=2.0, save=False):
+    def plot_reactions(self, var, electrons=1.0, save=False):
         """
         Plot the convex hull along the reaction path, as well as the voltage
         profile.
@@ -1539,39 +1614,45 @@ class PhaseSpace(object):
 
         #plot tie lines
         for p1, p2 in self.tie_lines:
-            c1 = self.coord(p1)
-            c2 = self.coord(p2)
-            if abs(c1[1]) < 1e-4 or abs(c2[1]) < 1e-4:
-                if abs(c1[1] - 1) < 1e-4 or abs(c2[1] - 1) < 1e-4:
+            c1 = p1.fraction(var)['var']
+            c2 = p2.fraction(var)['var']
+            if abs(c1) < 1e-4 or abs(c2) < 1e-4:
+                if abs(c1 - 1) < 1e-4 or abs(c2 - 1) < 1e-4:
                     if len(self.tie_lines) > 1:
                         continue
-            ax1.plot([c1[1],c2[1]], [self.phase_energy(p1),
-                                     self.phase_energy(p2)], 'k')
+            ax1.plot([c1,c2], [self.phase_energy(p1),
+                               self.phase_energy(p2)], 'k')
 
         #plot compounds
         for p in self.stable:
-            x = self.coord(p.unit_comp)[1]
+            x = p.fraction(var)['var']
             ax1.plot(x, self.phase_energy(p), 'bo')
             ax1.text(x, self.phase_energy(p), '$\\rm{%s}$' % p.latex,
-                    ha='left', va='top')
+                            ha='left', va='top')
         plt.ylabel('$\\rm{\Delta H}$ $\\rm{[eV/atom]}$')
         ymin, ymax = ax1.get_ylim()
         ax1.set_ylim(ymin - 0.1, ymax)
 
         ax2 = fig.add_subplot(212, sharex=ax1)
-        ax2.set_xlim([0,1])
         points = set()
         for reaction in self.get_reactions(var, electrons=electrons):
             if reaction.delta_var == 0:
                 continue
             voltage = reaction.delta_h/reaction.delta_var/electrons
-            points |= set([(reaction.r_var_comp, voltage), 
-                    (reaction.p_var_comp, voltage)])
+            x1 = reaction.r_var_comp
+            x2 = reaction.p_var_comp
+            points |= set([(x1, voltage), 
+                    (x2, voltage)])
 
         points = sorted( points, key=lambda x: x[0] )
         points = sorted( points, key=lambda x: -x[1] )
+        #!v
+        #print points
+
         base = sorted(self.stable, key=lambda x:
-                x.fraction(var)['var'])[0]
+                x.amt(var)['var'])[0]
+
+        max_x = max([ k[0] for k in points ])
 
         if len(points) > 1:
             for i in range(len(points) - 2):
@@ -1580,10 +1661,10 @@ class PhaseSpace(object):
 
             ax2.plot([points[-2][0], points[-2][0]], 
                     [points[-2][1], points[-1][1]], 'k')
-            ax2.plot([points[-2][0], 1], 
+            ax2.plot([points[-2][0], max_x], 
                     [points[-1][1], points[-1][1]], 'k')
         else:
-            ax2.plot([0, 1], [points[0][1], points[0][1]], 'k')
+            ax2.plot([0, max_x], [points[0][1], points[0][1]], 'k')
         
         plt.xlabel('$\\rm{x}$ $\\rm{in}$ $\\rm{(%s)_{x}(%s)_{1-x}}$' % ( 
            format_latex(var),

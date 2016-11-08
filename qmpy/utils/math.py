@@ -50,6 +50,16 @@ def roundclose(v, tol=1e-8):
     else:
         return v
 
+def isclose(v1, v2, tol=1e-6):
+    """
+    Test if v1 and v2 are with `tol` of one another`.
+    Examples::
+        >>> if isclose(0.5, 0.49999999):
+                print 'True'
+        True
+    """
+    return abs(v1 - v2) < tol
+
 def lcm(a,b):
     """
     Returns least common multiple of two numbers.

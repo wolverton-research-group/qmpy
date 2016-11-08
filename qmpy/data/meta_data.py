@@ -33,7 +33,7 @@ class MetaData(models.Model):
         <Keyword: ICSD>
     """
     type = models.CharField(max_length=15)
-    value = models.CharField(max_length=63)
+    value = models.TextField()
 
     class Meta:
         app_label = 'qmpy'
@@ -51,6 +51,48 @@ class MetaData(models.Model):
         if new:
             md.save()
         return md
+
+class GlobalWarning(object):
+    @staticmethod
+    def set(warning):
+        md = MetaData.get('global_warning', warning)
+        md.save()
+        return md
+
+    @staticmethod
+    def clear(warning):
+        md = MetaData.get('global_warning', warning)
+        md.delete()
+
+    @staticmethod
+    def list():
+        return list(MetaData.objects.filter(type='global_warning'))
+
+class GlobalInfo(object):
+    @staticmethod
+    def set(warning):
+        md = MetaData.get('global_info', warning)
+        md.save()
+        return md
+
+    @staticmethod
+    def clear(warning):
+        md = MetaData.get('global_info', warning)
+        md.delete()
+
+    @staticmethod
+    def list():
+        return list(MetaData.objects.filter(type='global_info'))
+
+class DatabaseUpdate(object):
+    @staticmethod
+    def value():
+        return MetaData.objects.get(type='database_update').value
+
+    @staticmethod
+    def set():
+        MetaData.objects.filter(type='database_update').update(
+                value=str(datetime.date(datetime.now())))
 
 def add_meta_data(label, plural=None, cache=None, description=''):
     """

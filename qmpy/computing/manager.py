@@ -58,8 +58,7 @@ class JobManager(daemon.Daemon):
         while True:
             ddb.reset_queries()
             jobs = queue.Job.objects.filter(state=1, account__host__state=1,
-                    created__lt=datetime.now() - timedelta(seconds=-300))
-            jobs = jobs.exclude(account__host__name='hopper')
+                    created__lt=datetime.now() - timedelta(seconds=-200000))
             for job in jobs:    
                 check_die()
                 if job.is_done():
@@ -99,7 +98,7 @@ class TaskManager(daemon.Daemon):
         tlogger.debug('starting host %s', host.name)
         while True:
             check_die()
-            if host.utilization >= host.nodes*host.ppn:
+            if host.utilization >= 1.5*host.nodes*host.ppn:
                 tlogger.debug('Host utilization reached 100%')
                 return
             tasks = host.get_tasks(project=project)
@@ -135,7 +134,10 @@ class TaskManager(daemon.Daemon):
                     (task.id, task.entry.id))
 
         for job in jobs:
+            nattempts = 1
             while not job.state == 1:
+                if nattempts == 5:
+                    break
                 check_die()
                 try:
                     job.submit()
@@ -143,8 +145,10 @@ class TaskManager(daemon.Daemon):
                         time.sleep(5)
                 except Exception:
                     tlogger.warn('Submission error, waiting 30 seconds'
-                                    '(Host %s)' % host.name)
+                            ' (Host %s), Task: %s, Entry: %s' % (host.name,
+                                task.id, task.entry.id))
                     check_die(30)
+                    nattempts += 1
             job.save()
             host.utilization += job.ncpus
             tlogger.info('Submitted: %s (Entry %s)' % (task.id, task.entry.id))
@@ -157,3 +161,4 @@ class TaskManager(daemon.Daemon):
                 task.hold()
                 task.save()
                 tlogger.warn('Unknown error processing task: %s' % err)
+

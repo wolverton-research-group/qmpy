@@ -11,6 +11,7 @@ from django.core.context_processors import csrf
 
 from qmpy import *
 from qmpy.analysis.thermodynamics import *
+from ..tools import get_globals
 
 def construct_flot(phase_dict):
     data = []
@@ -87,14 +88,15 @@ def phase_diagram_view(request):
                 c = p['composition_%s' % i]
                 t = p['formationenergy_%s' % i]
                 phase = Phase(composition=c, energy=float(t))
-                phase.id = p['id_%s' % i]
+                phase.id = int(p['id_%s' % i])
                 phase.use = ( p['use_%s' % i] == 'on' )
                 phase.show_label = ( p['label_%s' % i] == 'on' )
                 pdata.add_phase(phase)
             data['phase_data'] = pdata.phases
             ps = PhaseSpace(data['search'], mus=data['chem_pots'], data=pdata,
                     load=None)
-            if p.get('stability'):
+
+            if p.get('stability') and not data["chem_pots"]:
                 ps.compute_stabilities()
                 data['stability'] = p.get('stability')
                 for phase in ps._phases:
@@ -105,7 +107,8 @@ def phase_diagram_view(request):
         data['flotscript'] = ps.phase_diagram.get_flot_script()
         data['renderer'] = ps.renderer
     return render_to_response('analysis/phase_diagram.html',
-            data,
+            get_globals(data),
+            #data,
             RequestContext(request))
 
 def chem_pot_view(request):

@@ -8,12 +8,14 @@ import StringIO
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 
+from ..tools import get_globals
 from qmpy.models import Author, Journal, Reference, Entry
 from qmpy.utils import *
 
 def reference_view(request, reference_id):
     ref = Reference.objects.get(id=reference_id)
-    data = {'reference':ref}
+    data = get_globals()
+    data['reference'] = ref
     return render_to_response('data/reference/paper.html', 
             data,
             RequestContext(request))
@@ -31,9 +33,10 @@ def journal_view(request, journal_id):
     plt.close()
 
     some_entries = Entry.objects.filter(reference__journal=journal)[:20]
-    data = {'journal':journal, 
-            'hist':data_uri,
-            'entries':some_entries}
+    data = get_globals()
+    data.update({'journal':journal, 
+        'hist':data_uri,
+        'entries':some_entries})
     return render_to_response('data/reference/journal.html', 
             data,
             RequestContext(request))
@@ -50,9 +53,11 @@ def author_view(request, author_id):
         data = {'papers': papers.distinct().count(),
                 'materials': mats.distinct().count()}
         coauths[co] = data
-    data = {'author':author,
-            'materials':materials,
-            'coauthors':coauths}
+
+    data = get_globals()
+    data.update({'author':author,
+        'materials':materials,
+        'coauthors':coauths})
     return render_to_response('data/reference/author.html', 
             data,
             RequestContext(request))
