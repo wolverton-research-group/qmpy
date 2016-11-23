@@ -11,6 +11,7 @@ import time
 import copy
 import pprint
 import random
+import subprocess
 from collections import defaultdict
 import logging
 
@@ -18,11 +19,12 @@ from django.db import models
 from django.db import transaction
 
 import qmpy
-from qmpy.utils import *
+import shutil
 from element import Element, Species
 from atom import Atom, Site
 from composition import Composition
 from qmpy.utils import *
+from qmpy.utils.folder_management import change_directory
 from qmpy.data.meta_data import *
 from qmpy.analysis.symmetry import *
 from qmpy.analysis import *
@@ -34,6 +36,9 @@ logger.setLevel(logging.INFO)
 
 class StructureError(Exception):
     """Structure related problem"""
+
+class TMKPointsError(Exception):
+    """Problem with TM k-points generation"""
 
 @add_meta_data('comment')
 @add_meta_data('keyword')
@@ -1095,6 +1100,19 @@ class Structure(models.Model, object):
         rec_mags = map(la.norm, rec_lat)
         r0 = min(rec_mags)
         return np.array([ np.round(r/r0, 4) for r in rec_mags ])
+
+    def get_tm_kpoint(self):
+        poscar_path = os.path.join(self.entry.path, 'POSCAR')
+        ##if not os.path.exists(poscar_path):
+        ##    qmpy.io.poscar.write(self, poscar_path)
+        get_kpoints_path = '/home/oqmd/oqmd_2.0/qmpy/qmpy/analysis/vasp/getKPoints'
+        with change_directory(self.entry.path):
+            tm_stdout = subprocess.check_output(get_kpoints_path)
+        if 'error' in tm_stdout.lower():
+            raise TMKPointsError('Failed to get KPOINTS from TM server')
+        KPOINTS_path = os.path.join(self.entry.path, 'KPOINTS')
+        kpts = open(KPOINTS_path,'r').readlines()
+        return kpts 
 
     def get_kpoint_mesh(self, kppra):
         recs = self.reciprocal_lattice

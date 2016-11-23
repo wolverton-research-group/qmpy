@@ -339,19 +339,34 @@ class Host(models.Model):
         running = {}
         if not raw_data:
             return
-        for line in raw_data.split('\n'):
-            if 'Active Jobs' in line:
-                continue
-            line = line.split()
-            if len(line) != 9:
-                continue
-            try:
-                running[int(line[0])] = {
-                        'user':line[1],
-                        'state':line[2],
-                        'proc':int(line[3])}
-            except:
-                pass
+        if 'showq' in self.check_queue: # pbs showq case
+            for line in raw_data.split('\n'):
+                if 'Active Jobs' in line:
+                    continue
+                line = line.split()
+                if len(line) != 9:
+                    continue
+                try:
+                    running[int(line[0])] = {
+                            'user':line[1],
+                            'state':line[2],
+                            'proc':int(line[3])}
+                except:
+                    pass
+        else: # slurm squeue case
+            for line in raw_data.split('\n'):
+                if 'JOBID' in line:
+                    continue
+                line = line.split()
+                if len(line) != 11:
+                    continue
+                try:
+                    running[int(line[0])] = {
+                            'user':line[1],
+                            'state':line[9],
+                            'proc':int(line[6])*self.ppn}
+                except:
+                    pass
         self.running = running
         self.save()
         

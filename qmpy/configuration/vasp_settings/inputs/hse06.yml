@@ -19,4 +19,4 @@ hfscreen: 0.2
 algo: d
 time: 0.4
 potentials: vasp_rec
-hubbards: wang
+hubbards: none

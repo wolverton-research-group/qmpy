@@ -1,0 +1,153 @@
+#!/bin/bash
+
+# Generate a k-point grid by calling the servlet
+# This script is assumes that the user is calling it from the directory containing the necessary files. (although the script can be placed some place else)
+# Questions, comments, feedback, saw some bad coding? Email us at kpoints@jhu.edu
+# by Pandu Wisesa
+
+version="C2016.06.06" 
+echo "Running getKPoints script version" $version".";
+
+# This switch controls the information regarding grid generation output file.
+# The default is "TRUE", replacing it with "FALSE" or any other values will turn it off.
+list_message="TRUE"
+
+# These format the messages accordingly
+warning_message()
+{
+  echo "Warning: "$1
+}
+
+error_message()
+{
+  echo "Error: "$1 
+}
+
+# Check for early kill signals.
+killed()
+{
+  echo `error_message "Command was terminated by user."`
+}
+trap 'killed' 1 2 3
+
+failed_to_connect()
+{
+  echo `error_message "There is a problem connecting to the database."`
+  echo ""
+}
+trap 'failed_to_connect' 6 7 10 27
+
+
+# Check for format of the software package, right now only VASP is supported.
+found_input_files="FALSE"
+determine_input_format()
+{
+  input="$1"
+  if [ "$input" == "POSCAR" ]; then
+    echo "-vasp"
+  fi 
+}
+
+# Generate a KPOINTS file for VASP.
+# Due to how VASP filenames are, the files can be fetched directly by their names.
+generate_grid_for_vasp()
+{
+  found_input_files="TRUE"
+  if [ -f INCAR ]; then
+    KPTS=$(curl -s http://muellergroup.jhu.edu:8080/PreCalcServer/PreCalcServlet?format=vasp\&messagelist="$list_message"\&clientversion=$version --form "fileupload=@PRECALC" --form "fileupload=@POSCAR" --form "fileupload=@INCAR")
+  else
+    echo `warning_message "No INCAR file detected. Using only symmetry information from structure file."`
+    KPTS=$(curl -s http://muellergroup.jhu.edu:8080/PreCalcServer/PreCalcServlet?format=vasp\&messagelist="$list_message"\&clientversion=$version --form "fileupload=@PRECALC" --form "fileupload=@POSCAR")
+  fi
+  STAT=$(echo $?)
+  if [ "$STAT" -ne 0 ]; then
+    echo `error_message "Can't connect to the database."`
+    exit 7
+  else
+    if [ "$list_message" == "TRUE" ]; then
+      HEAD=$(echo "$KPTS" | sed '/+++SEPARATE_HERE+++/,$d')
+      GRID=$(echo "$KPTS" | sed '/+++SEPARATE_HERE+++/,$!d' | sed 1d)
+      OUT_OK="TRUE"
+      if echo "$HEAD" | grep --quiet "\!\!\!"; then
+        OUT_OK="FALSE"
+      fi
+      echo "$HEAD" | sed "s/\!\!\!/Error: /"
+      if [ "$OUT_OK" == "TRUE" ]; then
+        echo "$GRID" > KPOINTS
+      fi
+    else
+      echo "$KPTS" > KPOINTS
+    fi
+  fi
+  # Do a quick check of the integrity of the KPOINTS file.
+  if [ -f KPOINTS ]; then
+    if grep --quiet "HTTP Status" KPOINTS; then
+      rm KPOINTS
+      echo `error_message "Invalid KPOINTS file was generated. Please check your input files and re-submit the request."`
+    fi
+    if grep --quiet "\!\!\!" KPOINTS; then
+      grep "\!\!\!" KPOINTS | sed "s/\!\!\!/Error: /"
+      rm KPOINTS 
+    fi
+  fi
+}
+
+# Check if PRECALC file exists
+precalc_default="FALSE"
+check_precalc()
+{
+  if [ -f PRECALC ]; then 
+    echo "Generating grids..."
+    precalc_default="FALSE"
+  else # In the case PRECALC does not exists, create an empty file to feed in
+    echo `warning_message "No PRECALC file detected. Using default values."`
+    touch PRECALC
+    # If you want to edit your own default PRECALC settings, you can uncomment and edit these lines.
+    echo "MINDISTANCE=50" >> PRECALC  
+    echo "INCLUDEGAMMA=TRUE" >> PRECALC
+    echo "Generating grids..."
+    precalc_default="TRUE"
+  fi   
+}
+
+
+# These lines below are the "main method" of this script.
+check_precalc
+# Check if the first argument is the format or filename.
+if [ "$1" == -* ]; then 
+  format="$1"
+  file1="$2"
+else
+  format=""
+  file1="$1"
+fi
+# If no format is specified, scour through the files in this directories for input structure(s).
+# In addition, generate the grids for every structures found.
+if [ "$format" == "" ]; then 
+  for files in *; do
+    format=$(determine_input_format $files)
+    if [ "$format" == "-vasp" ]; then
+      generate_grid_for_vasp 
+    fi
+  done
+  if [ "$precalc_default" == "TRUE" ]; then
+    rm PRECALC
+  fi
+  if [ "$found_input_files" == "FALSE" ]; then
+    echo `error_message "Found no input files for grid generation, exiting..."`
+  fi
+  echo "Finished."
+  exit 0
+# Otherwise generate the grid for that input file.
+elif [ "$format" == "-vasp" ]; then
+  generate_grid_for_vasp
+fi
+# Final cleanup
+if [ "$precalc_default" == "TRUE" ]; then
+  rm PRECALC
+fi
+if [ "$found_input_files" == "FALSE" ]; then
+  echo `error_message "Found no input files for grid generation, exiting..."`
+fi
+echo "Finished."
+

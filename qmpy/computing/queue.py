@@ -198,12 +198,19 @@ class Task(models.Model):
             if allocation.name == 'babbage':
                 # Check if calculation is parallel
                 if 'serial' in calc.instructions and not calc.instructions['serial']:
-    
                     # Different MPI call on Babbage
                     calc.instructions['mpi'] = 'mpirun -np $NPROCS -machinefile $PBS_NODEFILE -tmpdir /scratch'
+
             if allocation.name == 'd20829':
                 # Sheel doesn't have access to b1004 binaries
                 calc.instructions['binary'] = '~/vasp_53'
+
+            if allocation.name == 'alcc': 
+                # testing edison shared memory queue
+                calc.instructions['serial'] = False
+                calc.instructions['binary'] = 'vasp_535_O1'
+                calc.instructions['mpi'] = 'srun -n $NPROCS'
+                calc.instructions['walltime'] = 172800
 
         jobs = []
         #for calc in calcs:
@@ -328,6 +335,7 @@ class Job(models.Model):
             
         binary = job.account.host.get_binary(binary)
         if not binary:
+            print "VASP binary not found for host %s" %(job.account.host.name)
             raise AllocationError
 
         sec = timedelta(seconds=walltime)
@@ -338,6 +346,12 @@ class Job(models.Model):
                 d.hour, 
                 d.minute,
                 d.second)
+        if job.account.host.name == 'edison':
+            # edison sbatch throws a hissy fit for walltimes with days
+            walltime = '%02d:%02d:%02d' % (
+                    (d.day-1)*24, 
+                    d.minute,
+                    d.second)
 
         qp = qmpy.INSTALL_PATH + '/configuration/qfiles/'
         text = open(qp+job.account.host.sub_text+'.q', 'r').read()

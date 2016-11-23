@@ -358,7 +358,7 @@ def static(entry, xc_func='PBE', **kwargs):
         # separate hulls for LDA / PBE / ...
         f.save()
         ps = PhaseSpace(calc.input.comp.keys())
-        ps.compute_stabilities(save=True)
+        ps.compute_stabilities(reevalulate=True, save=True)
     else:
         calc.write()
     return calc
@@ -377,13 +377,26 @@ def static_lda(entry, **kwargs):
     return static(entry, xc_func='LDA', **kwargs)
 
 def wavefunction(entry, **kwargs):
+    '''
+    Run a DFT calcualtion that produces a WAVECAR file.
+
+    Useful as a step before running a hybrid functional calculation
+
+    Input:
+        entry - Entry, OQMD entry to be computed
+    
+    Output:
+        Calculation, result 
+    '''
     if entry.calculations.get('wavefunction', Calculation()).converged:
         return entry.calculations['wavefunction']
 
+    # Get the static calculation result 
     calc = static(entry, **kwargs)
     if not calc.converged:
         return calc
 
+    # Use the same input structure as input into our calculation
     input = calc.input
     calc = Calculation.setup(input, entry=entry,
                                     configuration='static',
@@ -391,17 +404,33 @@ def wavefunction(entry, **kwargs):
                                     chgcar=entry.path+'/static',
                                     settings={'lwave':True},
                                     **kwargs)
+
+    # Save the calculation and exit
     entry.calculations['wavefunction'] = calc
     if not calc.converged:
         calc.write()
     return calc
 
 def hybrid(entry, **kwargs):
+    '''
+    Perform one (or more) hybrid functional calculations
+
+    Input:
+        entry - Entry, OQMD entry to be computed
+
+    Keyword arguments:
+        forms - list, of strings denoting the kind of HSE calculation to run
+        (e.g., ['hse06'])
+    
+    Output:
+        list of Calculation, results
+    '''
     # first, get a wavecar
     wave = wavefunction(entry, **kwargs)
     if not wave.converged:
         return wave
 
+    # Run all the requested calculations
     calcs = []
     default = ['b3lyp', 'hse06', 'pbe0', 'vdw']
     for hybrid in kwargs.get('forms', default):
@@ -413,3 +442,15 @@ def hybrid(entry, **kwargs):
                                     **kwargs)
         calcs.append(calc)
     return calcs
+
+def hse06(entry, **kwargs):
+    '''
+    Run an HSE06 static calculation
+
+    Input:
+        entry - Entry, OQMD entry to be computed
+
+    Output:
+        list of Calculation, resultsA
+    '''
+    return hybrid(entry, forms=['hse06'], **kwargs) 
