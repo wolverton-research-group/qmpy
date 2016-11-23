@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name='qmpy',
     version='2.0.0a',
-    author='S. Kirklin <scott.kirklin@gmail.com>'
+    author='S. Kirklin <scott.kirklin@gmail.com>',
     author_email='oqmd.questions@gmail.com',
     license='LICENSE.txt',
     classifiers=[
