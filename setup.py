@@ -31,7 +31,7 @@ setup(
         "django-extensions",
         "lxml",
         "pyparsing <= 1.9.9",
-        "PyCifRW == 3.6.2.1",
+        "PyCifRW >= 3.6.2.1",
         "pexpect",
         "PyYAML",
         "scikit-learn"
