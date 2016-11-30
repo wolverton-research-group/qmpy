@@ -35,6 +35,7 @@ tlogger.addHandler(tlog_file)
 jlogger.setLevel(logging.INFO)
 tlogger.setLevel(logging.INFO)
 
+
 def check_die(n=None):
     if n is None:
         if os.path.exists('/home/oqmd/controls/stop/running'):
@@ -43,6 +44,7 @@ def check_die(n=None):
         for i in range(n):
             time.sleep(1)
             check_die()
+
 
 class JobManager(daemon.Daemon):
     """
@@ -98,7 +100,7 @@ class TaskManager(daemon.Daemon):
         tlogger.debug('starting host %s', host.name)
         while True:
             check_die()
-            if host.utilization >= 1.5*host.nodes*host.ppn:
+            if host.utilization >= 1.0*host.nodes*host.ppn:
                 tlogger.debug('Host utilization reached 100%')
                 return
             tasks = host.get_tasks(project=project)

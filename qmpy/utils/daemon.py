@@ -8,6 +8,7 @@ import qmpy
 
 logger = logging.getLogger(__name__)
 
+
 class Daemon:
     """
     A generic daemon class.
@@ -49,7 +50,6 @@ class Daemon:
         except OSError, e: 
             sys.stderr.write("fork #2 failed: %d (%s)\n" % (e.errno, e.strerror))
             sys.exit(1) 
-
 
         # redirect standard file descriptors
         sys.stdout.flush()

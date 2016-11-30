@@ -12,11 +12,14 @@ from qmpy.analysis.vasp import Calculation
 from qmpy.db.custom import *
 import qmpy
 
+
 class TaskError(Exception):
     """A project was needed but not provided"""
 
+
 class ResourceUnavailableError(Exception):
     """Resource is occupied"""
+
 
 class Task(models.Model):
     """
@@ -77,7 +80,7 @@ class Task(models.Model):
 
     def save(self, *args, **kwargs):
         super(Task, self).save(*args, **kwargs)
-        self.project_set = [ Project.get(p) for p in self.projects ]
+        self.project_set = [Project.get(p) for p in self.projects]
 
     @property
     def projects(self):
@@ -92,7 +95,7 @@ class Task(models.Model):
 
     def get_project(self):
         projects = self.project_set.filter(state=1)
-        projects = [ p for p in projects if p.active ]
+        projects = [p for p in projects if p.active]
         if not projects:
             return
         return random.choice(projects)
@@ -165,14 +168,14 @@ class Task(models.Model):
                 Raise if for the specified project, allocation, account and/or host
                 there are no available cores.
         """
-        if host != None:
+        if host is not None:
             if not project:
                 projects = self.project_set.filter(allocations__host=host, state=1)
                 project = random.choice(list(projects))
             if not allocation:
                 allocations = project.allocations.filter(host=host, state=1)
                 allocation = random.choice(list(allocations))
-        elif project != None:
+        elif project is not None:
             allocation = project.get_allocation()
             if not allocation:
                 raise ResourceUnavailableError
@@ -182,7 +185,7 @@ class Task(models.Model):
         if account is None:
             if project is None:
                 account = allocation.get_account()
-            elif not allocation is None:
+            elif allocation is not None:
                 account = allocation.get_account(users=list(project.users.all()))
 
         calc = self.entry.do(self.module, **self.kwargs)
@@ -213,7 +216,7 @@ class Task(models.Model):
                 calc.instructions['walltime'] = 172800
 
         jobs = []
-        #for calc in calcs:
+        # for calc in calcs:
         if calc.instructions:
             self.state = 1
             new_job = Job.create(

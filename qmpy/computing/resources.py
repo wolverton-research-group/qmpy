@@ -22,6 +22,7 @@ import threading
 
 logger = logging.getLogger(__name__)
 
+
 def is_yes(string):
     char = string.lower()[0]
     if char == 'n':
@@ -30,11 +31,14 @@ def is_yes(string):
         return True
     return None
 
+
 class AllocationError(Exception):
     """Problem with the allocation"""
 
+
 class SubmissionError(Exception):
     """Failed to submit a job"""
+
 
 class User(AbstractUser):
     """
@@ -117,6 +121,7 @@ class User(AbstractUser):
             acct.username = uname.strip()
             acct.save()
             acct.create_passwordless_ssh()
+
 
 class Host(models.Model):
     """
@@ -411,7 +416,6 @@ class Host(models.Model):
     def ncpus(self):
         return self.ppn * self.nodes
 
-#===============================================================================#
 
 class Account(models.Model):
     """ 
@@ -698,7 +702,6 @@ class Allocation(models.Model):
     def percent_utilization(self):
         return self.host.percent_utilization
 
-#===============================================================================#
 
 class Project(models.Model):
     """
@@ -720,6 +723,7 @@ class Project(models.Model):
     users = models.ManyToManyField(User)
     allocations = models.ManyToManyField(Allocation)
     state = models.IntegerField(default=1)
+
     class Meta:
         app_label = 'qmpy'
         db_table = 'projects'

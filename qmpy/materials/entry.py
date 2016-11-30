@@ -24,6 +24,8 @@ logger.setLevel(logging.INFO)
 
 k_desc = 'Descriptive keyword for looking up entries'
 h_desc = 'A note indicating a reason the entry should not be calculated'
+
+
 @add_meta_data('keyword', description=k_desc)
 @add_meta_data('hold', description=h_desc)
 class Entry(models.Model):
@@ -57,18 +59,18 @@ class Entry(models.Model):
         | label: An identifying name for the structure. e.g. icsd-1001 or A3
 
     """
-    ### structure properties
+    # structure properties
     path = models.CharField(max_length=255, unique=True)
     meta_data = models.ManyToManyField('MetaData')
     label = models.CharField(max_length=20, null=True)
 
-    ### record keeping
+    # record keeping
     duplicate_of = models.ForeignKey('Entry', related_name='duplicates',
             null=True)
     ntypes = models.IntegerField(blank=True, null=True)
     natoms = models.IntegerField(blank=True, null=True)
 
-    ### links
+    # links
     element_set = models.ManyToManyField('Element')
     species_set = models.ManyToManyField('Species')
     project_set = models.ManyToManyField('Project')
@@ -96,13 +98,13 @@ class Entry(models.Model):
                 v.label = k
                 v.entry = self
                 v.save()
-            #self.structure_set = self.structures.values()
+            # self.structure_set = self.structures.values()
         if self._calculations:
             for k, v in self.calculations.items():
                 v.label = k
                 v.entry = self
                 v.save()
-            #self.calculation_set = self.calculations.values()
+            # self.calculation_set = self.calculations.values()
         if self._elements:
             self.element_set = self.elements
         if self._species:
