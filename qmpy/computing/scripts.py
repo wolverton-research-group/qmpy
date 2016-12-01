@@ -12,6 +12,7 @@ from copy import deepcopy
 
 logger = logging.getLogger(__name__)
 
+
 def initialize(entry, **kwargs):
     '''
     DEPRECATED: Run a relaxation with very low settings
@@ -30,6 +31,7 @@ def initialize(entry, **kwargs):
         if calc.magmom > 0.1:
             entry.keywords.append('magnetic')
     return calc
+
 
 def coarse_relax(entry, **kwargs):
     '''
@@ -78,6 +80,7 @@ def fine_relax(entry, **kwargs):
         entry.calculations['fine_relax'] = calc
     return calc
 
+
 def standard(entry, **kwargs):
     ''''
     DEPRECATED: Run a final, static calculation at standard cutoff energy
@@ -104,6 +107,7 @@ def standard(entry, **kwargs):
         ps = PhaseSpace(calc.input.comp.keys())
         ps.compute_stabilities(save=True)
     return calc
+
 
 def check_spin(entry, xc_func='PBE'):
     '''
@@ -188,7 +192,7 @@ def relaxation(entry, xc_func='PBE', **kwargs):
     # Check whether to use high or low spin for Co compounds
     if 'Co' in entry.comp:
         spin = check_spin(entry, xc_func=xc_func)
-        if not spin is None:
+        if spin is not None:
             return spin
     else:
         # If relaxation calculation is converged, return that calculation
@@ -199,27 +203,11 @@ def relaxation(entry, xc_func='PBE', **kwargs):
     if not entry.calculations.get(cnfg_name, Calculation()).converged:
         input = entry.input.copy()
 
-        # because max likes to calculate fucking slowly
         projects = entry.project_set.all()
-        if Project.get('max') in projects:
-            calc = Calculation.setup(input, entry=entry,
-                                            configuration=cnfg_name, 
-                                            path=path, 
-                                            settings={'algo':'Normal'},
-                                            **kwargs)
-        else:
-
-            if 'relax_high_cutoff' in entry.keywords:
-                calc = Calculation.setup(input,  entry=entry,
-                                                 configuration=cnfg_name,
-                                                 path=path,
-                                                 settings={'prec':'ACC'},
-                                                 **kwargs)
-            else:
-                calc = Calculation.setup(input,  entry=entry,
-                                                 configuration=cnfg_name,
-                                                 path=path,
-                                                 **kwargs)
+        calc = Calculation.setup(input,  entry=entry,
+                                         configuration=cnfg_name,
+                                         path=path,
+                                         **kwargs)
 
         entry.calculations[cnfg_name] = calc
         entry.Co_lowspin = False
@@ -234,7 +222,7 @@ def relaxation(entry, xc_func='PBE', **kwargs):
         # Get name of low spin calculation
         low_name = 'Co_lowspin'
         if xc_func.lower() != 'pbe':
-            low_name += "_%s"%(xc_func.lower())
+            low_name += "_%s" %(xc_func.lower())
 
         # Update / start the low spin calculation
         if not entry.calculations.get(low_name, Calculation()).converged:
@@ -309,7 +297,7 @@ def static(entry, xc_func='PBE', **kwargs):
     # Get name of static run
     cnfg_name = 'static'
     if xc_func.lower() != 'pbe':
-        cnfg_name += "_%s"%(xc_func.lower())
+        cnfg_name += "_%s" % (xc_func.lower())
 
     # Get the calculation directory
     calc_dir = os.path.join(entry.path, cnfg_name)

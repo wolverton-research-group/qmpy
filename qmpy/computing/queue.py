@@ -220,6 +220,7 @@ class Task(models.Model):
         if calc.instructions:
             self.state = 1
             new_job = Job.create(
+                path=calc.path,
                 task=self, 
                 allocation=allocation, 
                 account=account,
@@ -232,6 +233,7 @@ class Task(models.Model):
         else:
             self.state = -1
         return jobs
+
 
 class Job(models.Model):
     """
@@ -301,27 +303,20 @@ class Job(models.Model):
         if entry is None:
             entry = task.entry
 
-        #assert isinstance(allocation, Allocation)
-        #assert isinstance(task, Task)
-        #assert path is not None
-
-        #if account is None:
-        #    account = allocation.get_account()
-        
-        job = Job(path=path, walltime=walltime, 
+        job = Job(path=path, walltime=walltime,
                 allocation=allocation,
                 account=account,
                 entry=entry,
                 task=task)
 
-        #if walltime < 3600:
-        #    nodes = 1
-        #    ppn = int(walltime/3600.*job.account.host.ppn)
-        #    walltime = walltime/ppn
-        #else:
-        #    ppn = job.account.host.ppn
-        #    nodes = 1+int(walltime/float(job.account.host.walltime))
-        #    walltime = walltime/float(ppn*nodes)
+        # if walltime < 3600:
+        #     nodes = 1
+        #     ppn = int(walltime/3600.*job.account.host.ppn)
+        #     walltime = walltime/ppn
+        # else:
+        #     ppn = job.account.host.ppn
+        #     nodes = 1+int(walltime/float(job.account.host.walltime))
+        #     walltime = walltime/float(ppn*nodes)
         
         if serial:
             ppn = 1
@@ -349,8 +344,9 @@ class Job(models.Model):
                 d.hour, 
                 d.minute,
                 d.second)
+
+        # edison sbatch throws a hissy fit for walltimes with days
         if job.account.host.name == 'edison':
-            # edison sbatch throws a hissy fit for walltimes with days
             walltime = '%02d:%02d:%02d' % (
                     (d.day-1)*24, 
                     d.minute,
@@ -366,7 +362,7 @@ class Job(models.Model):
                 mpi=mpi, binary=binary, pipes=pipes,
                 footer=footer)
 
-        qf=open(job.path+'/auto.q', 'w')
+        qf = open(job.path+'/auto.q', 'w')
         qf.write(qfile)
         qf.close()
         job.ncpus = ppn*nodes
@@ -397,7 +393,7 @@ class Job(models.Model):
     def description(self):
         uniq = ''
         if self.task.kwargs:
-            uniq='_' + '_'.join(['%s:%s' % (k, v) for k, v in self.task.kwargs.items()])
+            uniq = '_' + '_'.join(['%s:%s' % (k, v) for k, v in self.task.kwargs.items()])
         return '{entry}_{subdir}{uniq}'.format(
                 entry=self.entry.id,
                 subdir=self.subdir.strip('/').replace('/','_'),

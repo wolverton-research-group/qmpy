@@ -1452,7 +1452,7 @@ class Calculation(models.Model):
                     }
 
             if self.input.natoms <= 4:
-                self._instruction.update({'mpi':'','binary':'vasp_53_serial',
+                self._instruction.update({'mpi': '', 'binary': 'vasp_53_serial',
                     'serial':True})
         return self._instruction
     
@@ -1719,7 +1719,7 @@ class Calculation(models.Model):
 
         # What settings to use?
         if configuration not in VASP_SETTINGS:
-            raise ValueError('%s configuration does not exist!'%configuration)
+            raise ValueError('%s configuration does not exist!' % configuration)
 
         # Convert input to primitive cell, symmetrize it
         calc.input.make_primitive()

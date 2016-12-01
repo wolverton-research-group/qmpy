@@ -557,13 +557,13 @@ class Entry(models.Model):
         en_newpath = os.path.join(path, old_base)
         Entry.objects.filter(id=self.id).update(path=en_newpath)
         self.save()
-        #labels = [ c.label.strip('_[0-9]') for c in self.calculation_set.all() ]
+        # labels = [ c.label.strip('_[0-9]') for c in self.calculation_set.all() ]
         for calc in self.calculation_set.all():
             calc_base = os.path.basename(calc.path.strip('/'))
             if calc_base != calc.label.strip('_[0-9]'):
                 calc_base = os.path.join(calc.label.strip('_[0-9]'), calc_base)
             newpath = os.path.join(self.path, calc_base)
-            #newpath = calc.path.replace(old_path, path)
+            # newpath = calc.path.replace(old_path, path)
             vasp.Calculation.objects.filter(id=calc.id).update(path=newpath)
         logger.info('Moved %s to %s', self, path)
 

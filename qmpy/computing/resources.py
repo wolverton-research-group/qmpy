@@ -535,7 +535,7 @@ class Account(models.Model):
         call = subprocess.Popen(ssh, shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE)
-        stdout,stderr = call.communicate()
+        stdout, stderr = call.communicate()
 
         logging.debug('stdout: %s', stdout)
         logging.debug('stderr: %s', stderr)
@@ -559,7 +559,7 @@ class Account(models.Model):
 
         assert (isinstance(to, Account) or to == 'local')
         assert (isinstance(fr, Account) or fr == 'local')
-        assert ( not (file is None and folder is None) )
+        assert (not (file is None and folder is None))
 
         send_dir = False
         if file is None:
@@ -619,7 +619,6 @@ class Account(models.Model):
             stdout = fr.execute(rmcmd)
             logging.debug('output: %s', stdout)
 
-#===============================================================================#
 
 class Allocation(models.Model):
     """
