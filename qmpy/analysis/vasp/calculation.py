@@ -103,7 +103,7 @@ class Calculation(models.Model):
 
     """
     #= labeling =#
-    configuration = models.CharField(db_index=True, max_length=15, 
+    configuration = models.CharField(db_index=True, max_length=15,
             null=True, blank=True)
     meta_data = models.ManyToManyField(MetaData)
 
@@ -116,15 +116,15 @@ class Calculation(models.Model):
     natoms = models.IntegerField(blank=True, null=True)
 
     #= inputs =#
-    input = models.ForeignKey(strx.Structure, 
+    input = models.ForeignKey(strx.Structure,
                               related_name='calculated',
                               null=True, blank=True)
     hubbard_set = models.ManyToManyField('Hubbard')
     potential_set = models.ManyToManyField('Potential')
     settings = DictField(blank=True, null=True)
-    
+
     #= outputs =#
-    output = models.ForeignKey(strx.Structure, 
+    output = models.ForeignKey(strx.Structure,
                                related_name='source',
                                null=True, blank=True)
 
@@ -936,7 +936,7 @@ class Calculation(models.Model):
                 elif lreal == 'T':
                     settings['lreal'] = True
 
-            # ionic relaxation 
+            # ionic relaxation
             elif 'EDIFF  =' in line:
                 settings['ediff'] = float(line.split()[2])
             elif 'ISIF' in line:
@@ -985,7 +985,7 @@ class Calculation(models.Model):
                 settings['idipol'] = int(line.split()[2])
             elif ' EPSILON=' in line:
                 settings['epsilon'] = float(line.split()[1])
-            
+
             # potentials
             elif 'POTCAR:' in line:
                 this_pot = {'name':line.split()[2]}
@@ -1022,16 +1022,16 @@ class Calculation(models.Model):
         elts = [ p['name'].split('_')[0] for p in settings['potentials'] ]
         if any([ len(s) > 1 for s in [xcs, uss, paws]]):
             raise VaspError('Not all potentials are of the same type')
-        self.potentials = pot.Potential.objects.filter(us=uss[0], 
-                                              xc=xcs[0], 
+        self.potentials = pot.Potential.objects.filter(us=uss[0],
+                                              xc=xcs[0],
                                               paw=paws[0],
                                               name__in=pot_names)
 
         # assign hubbards
         self.hubbards = []
         if 'ldauls' in settings:
-            for elt, l, u in zip(elts, 
-                                 settings['ldauls'], 
+            for elt, l, u in zip(elts,
+                                 settings['ldauls'],
                                  settings['ldauus']):
                 self.hubbards.append(pot.Hubbard.get(elt, u=u, l=l))
         self.settings = settings
@@ -1455,7 +1455,7 @@ class Calculation(models.Model):
                 self._instruction.update({'mpi': '', 'binary': 'vasp_53_serial',
                     'serial':True})
         return self._instruction
-    
+
     def set_label(self, label):
         self.label = label
         if not self.entry is None:
@@ -1476,13 +1476,13 @@ class Calculation(models.Model):
         elif len(lig_int) > 1:
             raise Exception('More than 1 ligand matches. No convention\
             established for this case!')
-        
+
         if not elts & set(self.input.comp.keys()):
             return
 
         for atom in self.input:
             for hub in hubs:
-                if ( atom.element_id == hub[0] and 
+                if ( atom.element_id == hub[0] and
                         hub[2] in [ None, atom.ox ]):
                     self.hubbards.append(pot.Hubbard.get(
                         hub[0], lig=hub[1], ox=hub[2],
@@ -1633,7 +1633,7 @@ class Calculation(models.Model):
 
     @staticmethod
     def setup(structure, configuration='static', path=None, entry=None,
-            hubbard='wang', potentials='vasp_rec', settings={}, 
+            hubbard='wang', potentials='vasp_rec', settings={},
             chgcar=None, wavecar=None,
             **kwargs):
         """
@@ -1644,7 +1644,7 @@ class Calculation(models.Model):
             input structure file.
 
         Keyword Arguments:
-            configuration: 
+            configuration:
                 String indicating the type of calculation to
                 perform. Options can be found with qmpy.VASP_SETTINGS.keys().
                 Create your own configuration options by adding a new file to
@@ -1654,9 +1654,9 @@ class Calculation(models.Model):
             settings:
                 Dictionary of VASP settings to be applied to the calculation.
                 Is applied after the settings which are provided by the
-                `configuration` choice. 
+                `configuration` choice.
 
-            path: 
+            path:
                 Location at which to perform the calculation. If the
                 calculation takes repeated iterations to finish successfully,
                 all steps will be nested in the `path` directory.
@@ -1666,13 +1666,13 @@ class Calculation(models.Model):
                 an entry to associate with the calculation.
 
             hubbard:
-                String indicating the hubbard correctionconvention. Options 
+                String indicating the hubbard correctionconvention. Options
                 found with qmpy.HUBBARDS.keys(), and can be added to or
                 altered by editing configuration/vasp_settings/hubbards.yml.
                 Default="wang".
 
             potentials:
-                String indicating the vasp potentials to use. Options can be 
+                String indicating the vasp potentials to use. Options can be
                 found with qmpy.POTENTIALS.keys(), and can be added to or
                 altered by editing configuration/vasp_settings/potentials/yml.
                 Default="vasp_rec".
@@ -1743,7 +1743,7 @@ class Calculation(models.Model):
         calc.settings = vasp_settings
         if calc.input.natoms >= 10:
             calc.settings.update({
-                'ncore': 4, 
+                'ncore': 4,
                 'lscalu': False,
                 'lplane': True})
 
@@ -1779,4 +1779,4 @@ class Calculation(models.Model):
         fixed_calc.clear_outputs()
         fixed_calc.set_chgcar(calc)
         fixed_calc.write()
-        return fixed_calc
+        return fixed_cali

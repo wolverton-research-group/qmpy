@@ -12,14 +12,13 @@ from copy import deepcopy
 
 logger = logging.getLogger(__name__)
 
-
 def initialize(entry, **kwargs):
     '''
     DEPRECATED: Run a relaxation with very low settings
     '''
     entry.input.set_magnetism('ferro')
     calc = Calculation.setup(entry.input, entry=entry,
-            configuration='initialize', path=entry.path+'/initialize', 
+            configuration='initialize', path=entry.path+'/initialize',
             **kwargs)
 
     calc.set_label('initialize')
@@ -31,7 +30,6 @@ def initialize(entry, **kwargs):
         if calc.magmom > 0.1:
             entry.keywords.append('magnetic')
     return calc
-
 
 def coarse_relax(entry, **kwargs):
     '''
@@ -80,7 +78,6 @@ def fine_relax(entry, **kwargs):
         entry.calculations['fine_relax'] = calc
     return calc
 
-
 def standard(entry, **kwargs):
     ''''
     DEPRECATED: Run a final, static calculation at standard cutoff energy
@@ -107,7 +104,6 @@ def standard(entry, **kwargs):
         ps = PhaseSpace(calc.input.comp.keys())
         ps.compute_stabilities(save=True)
     return calc
-
 
 def check_spin(entry, xc_func='PBE'):
     '''
@@ -160,7 +156,6 @@ def check_spin(entry, xc_func='PBE'):
     # If both calculations are not complete
     return None
 
-
 def relaxation(entry, xc_func='PBE', **kwargs):
     '''
     Start a calculation to relax atom positions and lattice parameters
@@ -168,7 +163,7 @@ def relaxation(entry, xc_func='PBE', **kwargs):
     Arguments:
         entry:
             Entry, structure to be relaxed
-    
+
     Keyword Arguments:
         xc_func:
             String, name of XC function to use (Default='PBE'). Is used to
@@ -237,7 +232,7 @@ def relaxation(entry, xc_func='PBE', **kwargs):
                                              configuration=cnfg_name,
                                              path=lowspin_dir,
                                              **kwargs)
-           
+
             # Return atoms to the low-spin configuration
             for atom in calc.input:
                 if atom.element.symbol == 'Co':
@@ -264,7 +259,7 @@ def relaxation_lda(entry, **kwargs):
     Start a LDA relaxation calculation
 
     Arguments:
-        entry: 
+        entry:
             Entry to be run
 
     Output:
@@ -272,16 +267,15 @@ def relaxation_lda(entry, **kwargs):
     '''
 
     return relaxation_lda(entry, xc_func='LDA', **kwargs)
-        
 
 def static(entry, xc_func='PBE', **kwargs):
     '''
-    Start a final, accurate static calculation 
-    
+    Start a final, accurate static calculation
+
     Arguments:
         entry:
             Entry, structure to be relaxed
-    
+
     Keyword Arguments:
         xc_func:
             String, name of XC function to use (Default='PBE'). Is used to
@@ -326,8 +320,8 @@ def static(entry, xc_func='PBE', **kwargs):
 
     # Set up calculation
     calc = Calculation.setup(input, entry=entry,
-                                    configuration=cnfg_name, 
-                                    path=calc_dir, 
+                                    configuration=cnfg_name,
+                                    path=calc_dir,
                                     chgcar=chgcar_path,
                                     **kwargs)
 
@@ -357,9 +351,8 @@ def static_lda(entry, **kwargs):
 
     Input:
         entry - Entry, OQMD entry to be computed
-    
     Output:
-        Calculation, result 
+        Calculation, result
     '''
 
     return static(entry, xc_func='LDA', **kwargs)

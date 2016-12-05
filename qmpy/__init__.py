@@ -1,7 +1,7 @@
 # qmpy/__init__.py
 
 """
-qmpy is a package containing many tools for computational materials science. 
+qmpy is a package containing many tools for computational materials science.
 """
 import numpy as np
 try:
@@ -25,6 +25,7 @@ LOG_PATH = os.path.join(INSTALL_PATH, 'logs')
 config = ConfigParser.ConfigParser()
 config.read(os.path.join(INSTALL_PATH,'configuration','site.cfg'))
 
+# read in the location of the VASP Potential on the OQMD server
 VASP_POTENTIALS = config.get('VASP', 'potential_path')
 
 if not os.path.exists(LOG_PATH):
@@ -59,6 +60,7 @@ logger.addHandler(console)
 class qmpyBaseError(Exception):
     """Baseclass for qmpy Exceptions"""
 
+# try importing essential python packages and throw suitable warnings/exceptions
 try:
     import ase
     FOUND_ASE = True
@@ -80,14 +82,19 @@ except ImportError:
     FOUND_MPL = False
     logging.warn('Failed to import matplotlib')
 
+# pyspglib -> spglib in the later versions
 try:
-    import pyspglib 
+    import pyspglib
     FOUND_SPGLIB = True
 except ImportError:
-    logging.warn("Failed to import pyspglib."
-            'Download at: http://sourceforge.net/projects/spglib/ and'
-            'follow instructions for installing python API')
-    FOUND_SPGLIB = False
+    try:
+        import spglib
+        FOUND_SPGLIB = True
+    except ImportError:
+        logging.warn("Failed to import spglib/pyspglib."
+                     'Download at: http://sourceforge.net/projects/spglib/ and'
+                     'follow instructions for installing python API')
+        FOUND_SPGLIB = False
 
 try:
     import sklearn
@@ -112,7 +119,16 @@ import yaml
 import os
 
 def read_spacegroups(numbers=None):
-    data = open(INSTALL_PATH+'/data/spacegroups.yml').read()
+    """
+    read space group data: number, Hermann-Maguin notation, Hall number, 
+    Schonflies number, lattice system, symmetry operators, Wyckoff positions, 
+    for all the 230 space groups from 'INSTALL_PATH/data/spacegroups.yml'.
+    """
+    spg_datafile = os.path.join(INSTALL_PATH, 'data', 'spacegroups.yml')
+    if not os.path.exists(spg_datafile):
+        sys.stdout.write('Space groups data not found.\n')
+        return
+    data = open(spg_datafile).read()
     Spacegroup.objects.all().delete()
     spacegroups = yaml.load(data)
     for sgd in spacegroups.values():
@@ -138,7 +154,7 @@ def read_spacegroups(numbers=None):
 
         wycks = []
         for k, site in sgd['wyckoff_sites'].items():
-            wycks.append(WyckoffSite(symbol=k, 
+            wycks.append(WyckoffSite(symbol=k,
                                x=site['coordinate'].split()[0],
                                y=site['coordinate'].split()[1],
                                z=site['coordinate'].split()[2],
@@ -146,7 +162,15 @@ def read_spacegroups(numbers=None):
         sg.site_set = wycks
 
 def read_elements():
-    elements = open(INSTALL_PATH+'/data/elements/data.yml').read()
+    """
+    read elemental properties: atomic number, atomic weight, electronegativity,
+    HHI index, etc. for all the elements from 'INSTALL_PATH/data/elements.yml'. 
+    """
+    elem_datafile = os.path.join(INSTALL_PATH, 'data', 'elements', 'data.yml')
+    if not os.path.exists(elem_datafile):
+        sys.stdout.write('Elemental properties data not found.\n')
+        return
+    elements = open(elem_datafile).read()
     Element.objects.all().delete()
     elts = []
     for elt, data in yaml.load(elements).items():
@@ -156,7 +180,16 @@ def read_elements():
     Element.objects.bulk_create(elts)
 
 def read_hubbards():
-    hubs = open(INSTALL_PATH+'/configuration/vasp_settings/hubbards.yml').read()
+    """
+    read Hubbard U values to be used for the suitable elements from the file
+    'INSTALL_PATH/configuration/vasp_settings/hubbards.yml'
+    """
+    hubs_file = os.path.join(INSTALL_PATH, 'configuration', 'vasp_settings', 
+                             'hubbards.yml')
+    if not os.path.exists(hubs_file):
+        sys.stdout.write('Hubbard data file not found.\n')
+        return
+    hubs = open(hubs_file).read()
 
     for group, hubbard in yaml.load(hubs).items():
         for ident, data in hubbard.items():
@@ -172,6 +205,9 @@ def read_hubbards():
             hub.save()
 
 def read_potentials():
+    """
+    read the VASP POTCAR files and store them in the database.
+    """
     loaded = []
     if not VASP_POTENTIALS:
         return
@@ -188,61 +224,6 @@ def read_potentials():
                 except Exception:
                     print 'Couldn\'t load:', path
 
-def sync_resources():
-    for host, data in hosts.items():
-        h = Host.get(host)
-        h.__dict__.update({'check_queue':data['check_queue'],
-            'ip_address':data['ip_address'],
-            'binaries':data['binaries'],
-            'ppn':data['ppn'],
-            'nodes':data['nodes'],
-            'walltime':data['walltime'],
-            'sub_script':data['sub_script'],
-            'sub_text':data['sub_text']})
-        h.save()
-
-    for username, data in users.items():
-        try:
-            user = User.objects.get(username=username)
-        except User.DoesNotExist:
-            user = User(username=username)
-        user.save()
-
-        for host, adata in data.items():
-            host = Host.get(host)
-            host.save()
-            acc = Account.get(user, host)
-            acc.__dict__.update(**adata)
-            acc.save()
-
-    for allocation, data in allocations.items():
-        host = Host.get(data['host'])
-        host.save()
-        alloc = Allocation.get(allocation)
-        alloc.host_id = host
-        alloc.key = data.get('key', '')
-        if alloc.key is None:
-            alloc.key = ''
-        alloc.save()
-        for user in data['users']:
-            user = User.objects.get_or_create(username=user)[0]
-            user.save()
-            alloc.users.add(user)
-
-    for project, data in projects.items():
-        proj = Project.get(project)
-        proj.save()
-
-        for user in data['users']:
-            user = User.objects.get_or_create(username=user)[0]
-            user.save()
-            proj.users.add(user)
-
-        for allocation in data['allocations']:
-            alloc = Allocation.get(allocation)
-            alloc.save()
-            proj.allocations.add(alloc)
-
 # Load models (Django >= 1.7)
 try:
     import django
@@ -252,24 +233,29 @@ except:
 
 # Try to prevent exception when importing before database is set up
 try:
+    # read spacegroup data for all 230 spacegroups
     if not Spacegroup.objects.exists():
         read_spacegroups()
 
+    # read elemental data like atomic number, density, etc. for all elements
+    # the source, IIRC, is Mathematica
     if not Element.objects.exists():
         read_elements()
 
+    # read in all the VASP Potentials 
     if not Potential.objects.exists():
         read_potentials()
-
+    
+    # read in the Hubbard U values
     if not Hubbard.objects.exists():
         read_hubbards()
 
-    if not User.objects.exists():
-        sync_resources()
-
+    # global_warning and global_info created to alert users, dispense info on 
+    # the OQMD website in the form of pagewidth-spanning banners
     if MetaData.objects.filter(type='global_warning').exists:
         for md in MetaData.objects.filter(type='global_warning'):
             logger.warn(md.value)
+
     if MetaData.objects.filter(type='global_info').exists:
         for md in MetaData.objects.filter(type='global_info'):
             logger.info(md.value)

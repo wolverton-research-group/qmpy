@@ -26,8 +26,7 @@ class Potential(models.Model):
         | potcar
         | us
         | xc
-
-
+        | release
     """
 
     potcar = models.TextField()
@@ -42,6 +41,7 @@ class Potential(models.Model):
     enmin = models.FloatField()
     date = models.CharField(max_length=20)
     electrons = models.TextField(blank=True, null=True)
+    release = models.CharField(max_length=10)
 
     class Meta:
         app_label = 'qmpy'
@@ -60,7 +60,7 @@ class Potential(models.Model):
     @classmethod
     def read_potcar(cls, potfile):
         '''
-        Import pseudopotential(s) from VASP POTCAR. 
+        Import pseudopotential(s) from VASP POTCAR.
 
         Make sure to save each of them after importing
         in order to store in them in the OQMD
