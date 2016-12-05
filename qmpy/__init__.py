@@ -120,8 +120,8 @@ import os
 
 def read_spacegroups(numbers=None):
     """
-    read space group data: number, Hermann-Maguin notation, Hall number, 
-    Schonflies number, lattice system, symmetry operators, Wyckoff positions, 
+    read space group data: number, Hermann-Maguin notation, Hall number,
+    Schonflies number, lattice system, symmetry operators, Wyckoff positions,
     for all the 230 space groups from 'INSTALL_PATH/data/spacegroups.yml'.
     """
     spg_datafile = os.path.join(INSTALL_PATH, 'data', 'spacegroups.yml')
@@ -218,7 +218,7 @@ def read_potentials():
             if 'POTCAR' in files and not path in loaded:
                 loaded.append(path)
                 try:
-                    pots = Potential.read_potcar(path+'/POTCAR')
+                    pots = Potential.read_potcar(os.path.join(path, 'POTCAR'))
                     for pot in pots:
                         pot.save()
                 except Exception:
@@ -242,15 +242,15 @@ try:
     if not Element.objects.exists():
         read_elements()
 
-    # read in all the VASP Potentials 
+    # read in all the VASP Potentials
     if not Potential.objects.exists():
         read_potentials()
-    
+
     # read in the Hubbard U values
     if not Hubbard.objects.exists():
         read_hubbards()
 
-    # global_warning and global_info created to alert users, dispense info on 
+    # global_warning and global_info created to alert users, dispense info on
     # the OQMD website in the form of pagewidth-spanning banners
     if MetaData.objects.filter(type='global_warning').exists:
         for md in MetaData.objects.filter(type='global_warning'):

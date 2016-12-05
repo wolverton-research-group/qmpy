@@ -1492,15 +1492,17 @@ class Calculation(models.Model):
                 self.hubbards.append(pot.Hubbard.get(atom.element_id))
         self.hubbards = list(set(self.hubbards))
 
-    def set_potentials(self, choice='vasp_rec', distinct_by_ox=False):
+    def set_potentials(self, choice='vasp_rec_pbe', distinct_by_ox=False):
         if isinstance(choice, list):
             if len(self.potentials) == len(choice):
                 return
         pot_set = POTENTIALS[choice]
         potentials = pot.Potential.objects.filter(xc=pot_set['xc'],
-                                              gw=pot_set['gw'],
-                                              us=pot_set['us'],
-                                              paw=pot_set['paw'])
+                                                  gw=pot_set['gw'],
+                                                  us=pot_set['us'],
+                                                  paw=pot_set['paw'],
+                                                  release=pot_set['release'])
+
 
         for e in self.elements:
             if not e.symbol in pot_set['elements']:

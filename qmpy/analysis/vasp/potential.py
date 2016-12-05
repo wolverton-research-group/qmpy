@@ -1,3 +1,4 @@
+import os
 from django.db import models
 import logging
 
@@ -55,6 +56,7 @@ class Potential(models.Model):
             ident += ' US'
         if self.gw:
             ident += ' GW'
+        ident += ' %s' %(self.release)
         return ident
 
     @classmethod
@@ -75,6 +77,15 @@ class Potential(models.Model):
         # Read entire POTCAR file
         pots = open(potfile).read()
 
+        # If the file VERSION exists in the parent directory, read in the
+        # release info (manually added)
+        potfile_dir = os.path.dirname(os.path.abspath(potfile))
+        VERSION_file = os.path.join(potfile_dir, '..', 'VERSION')
+        VERSION = 'unknown'
+        if os.path.exists(VERSION_file):
+            with open(VERSION_file, 'r') as fr:
+                VERSION = fr.readline().strip()
+
         # Split into the component POTCARs
         pots = pots.strip().split('End of Dataset')
 
@@ -86,6 +97,7 @@ class Potential(models.Model):
 
             # Get key information from POTCAR
             potcar = {}
+            potcar['release'] = VERSION
             for line in pot.split('\n'):
 
                 # Get element name
