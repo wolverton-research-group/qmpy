@@ -224,6 +224,62 @@ def read_potentials():
                 except Exception:
                     print 'Couldn\'t load:', path
 
+def sync_resources():
+    for host, data in hosts.items():
+        h = Host.get(host)
+        h.__dict__.update({'check_queue':data['check_queue'],
+            'ip_address':data['ip_address'],
+            'binaries':data['binaries'],
+            'ppn':data['ppn'],
+            'nodes':data['nodes'],
+            'walltime':data['walltime'],
+            'sub_script':data['sub_script'],
+            'sub_text':data['sub_text']})
+        h.save()
+
+    for username, data in users.items():
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            user = User(username=username)
+        user.save()
+
+        for host, adata in data.items():
+            host = Host.get(host)
+            host.save()
+            acc = Account.get(user, host)
+            acc.__dict__.update(**adata)
+            acc.save()
+
+    for allocation, data in allocations.items():
+        host = Host.get(data['host'])
+        host.save()
+        alloc = Allocation.get(allocation)
+        alloc.host_id = host
+        alloc.key = data.get('key', '')
+        if alloc.key is None:
+            alloc.key = ''
+        alloc.save()
+        for user in data['users']:
+            user = User.objects.get_or_create(username=user)[0]
+            user.save()
+            alloc.users.add(user)
+
+    for project, data in projects.items():
+        proj = Project.get(project)
+        proj.save()
+
+        for user in data['users']:
+            user = User.objects.get_or_create(username=user)[0]
+            user.save()
+            proj.users.add(user)
+
+        for allocation in data['allocations']:
+            alloc = Allocation.get(allocation)
+            alloc.save()
+            proj.allocations.add(alloc)
+
+
 # Load models (Django >= 1.7)
 try:
     import django
@@ -249,6 +305,10 @@ try:
     # read in the Hubbard U values
     if not Hubbard.objects.exists():
         read_hubbards()
+
+    # sync resources
+    if not User.objects.exists():
+        sync_resources()
 
     # global_warning and global_info created to alert users, dispense info on
     # the OQMD website in the form of pagewidth-spanning banners

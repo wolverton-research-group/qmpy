@@ -5,7 +5,7 @@
 # Questions, comments, feedback, saw some bad coding? Email us at kpoints@jhu.edu
 # by Pandu Wisesa
 
-version="C2016.06.06" 
+version="C2016.06.06"
 echo "Running getKPoints script version" $version".";
 
 # This switch controls the information regarding grid generation output file.
@@ -20,7 +20,7 @@ warning_message()
 
 error_message()
 {
-  echo "Error: "$1 
+  echo "Error: "$1
 }
 
 # Check for early kill signals.
@@ -45,13 +45,14 @@ determine_input_format()
   input="$1"
   if [ "$input" == "POSCAR" ]; then
     echo "-vasp"
-  fi 
+  fi
 }
 
 # Generate a KPOINTS file for VASP.
 # Due to how VASP filenames are, the files can be fetched directly by their names.
 generate_grid_for_vasp()
 {
+  echo $1
   found_input_files="TRUE"
   if [ -f INCAR ]; then
     KPTS=$(curl -s http://muellergroup.jhu.edu:8080/PreCalcServer/PreCalcServlet?format=vasp\&messagelist="$list_message"\&clientversion=$version --form "fileupload=@PRECALC" --form "fileupload=@POSCAR" --form "fileupload=@INCAR")
@@ -87,7 +88,7 @@ generate_grid_for_vasp()
     fi
     if grep --quiet "\!\!\!" KPOINTS; then
       grep "\!\!\!" KPOINTS | sed "s/\!\!\!/Error: /"
-      rm KPOINTS 
+      rm KPOINTS
     fi
   fi
 }
@@ -96,25 +97,27 @@ generate_grid_for_vasp()
 precalc_default="FALSE"
 check_precalc()
 {
-  if [ -f PRECALC ]; then 
+  if [ -f PRECALC ]; then
     echo "Generating grids..."
     precalc_default="FALSE"
   else # In the case PRECALC does not exists, create an empty file to feed in
     echo `warning_message "No PRECALC file detected. Using default values."`
     touch PRECALC
     # If you want to edit your own default PRECALC settings, you can uncomment and edit these lines.
-    echo "MINDISTANCE=50" >> PRECALC  
     echo "INCLUDEGAMMA=TRUE" >> PRECALC
+    echo "MINDISTANCE=60" >> PRECALC
+    #echo "KPPRA=8000" >> PRECALC
     echo "Generating grids..."
     precalc_default="TRUE"
-  fi   
+  fi
 }
 
 
 # These lines below are the "main method" of this script.
 check_precalc
 # Check if the first argument is the format or filename.
-if [ "$1" == -* ]; then 
+if [[ "$1" == -* ]]; then
+  echo $1 $2
   format="$1"
   file1="$2"
 else
@@ -123,24 +126,24 @@ else
 fi
 # If no format is specified, scour through the files in this directories for input structure(s).
 # In addition, generate the grids for every structures found.
-if [ "$format" == "" ]; then 
+if [ "$format" == "" ]; then
   for files in *; do
     format=$(determine_input_format $files)
-    if [ "$format" == "-vasp" ]; then
-      generate_grid_for_vasp 
+    if [[ "$format" == -vasp ]]; then
+      generate_grid_for_vasp
     fi
   done
-  if [ "$precalc_default" == "TRUE" ]; then
+  if [[ "$precalc_default" == TRUE ]]; then
     rm PRECALC
   fi
-  if [ "$found_input_files" == "FALSE" ]; then
+  if [[ "$found_input_files" == FALSE ]]; then
     echo `error_message "Found no input files for grid generation, exiting..."`
   fi
   echo "Finished."
   exit 0
 # Otherwise generate the grid for that input file.
 elif [ "$format" == "-vasp" ]; then
-  generate_grid_for_vasp
+  generate_grid_for_vasp $file1
 fi
 # Final cleanup
 if [ "$precalc_default" == "TRUE" ]; then

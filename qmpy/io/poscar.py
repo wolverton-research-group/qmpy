@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 class POSCARError(Exception):
     pass
 
-def write(struct, filename=None, comments=None, direct=True, 
+def write(struct, filename=None, comments=None, direct=True,
             distinct_by_ox=False, vasp4=False, **kwargs):
     """
     Write a :mod:`~qmpy.Structure` to a file or string.
@@ -36,9 +36,9 @@ def write(struct, filename=None, comments=None, direct=True,
 
         direct:
             If True, write POSCAR in fractional coordinates. If False, returns
-            a POSCAR in cartesian coordinates. 
+            a POSCAR in cartesian coordinates.
 
-        distinct_by_ox: 
+        distinct_by_ox:
             If True, elements with different specified oxidation states will be
             treated as different species. i.e. the elements line of Fe3O4 would
             read Fe Fe O (Fe3+, Fe4+, O2-). This can be useful for breaking
@@ -49,7 +49,7 @@ def write(struct, filename=None, comments=None, direct=True,
             If True, omits the species line.
 
     Examples::
-        
+
         >>> s = io.read(INSTALL_PATH+'/io/files/POSCAR_BCC')
         >>> print io.poscar.write(s)
         Cu
@@ -85,10 +85,10 @@ def write(struct, filename=None, comments=None, direct=True,
         counts = [ int(cdict[k]) for k in ordered_keys ]
 
     if comments is not None:
-        poscar = '# %s \n 1.0\n' %(comments)
+        poscar = '# %s \n1.0\n' %(comments)
     else:
-        poscar = ' '.join(set(a.element_id for a in struct.atoms)) + '\n 1.0\n'
-    cell = '\n'.join([ ' '.join([ '%f' % v  for v in vec ]) for vec in
+        poscar = ' '.join(set(a.element_id for a in struct.atoms)) + '\n1.0\n'
+    cell = '\n'.join([ ' '.join([ '%16.12f' % v  for v in vec ]) for vec in
         struct.cell ])
     poscar += cell +'\n'
     names = ' '.join( a for a in ordered_keys ) + '\n'
@@ -97,13 +97,13 @@ def write(struct, filename=None, comments=None, direct=True,
         poscar += names
     poscar += ntypes
     if direct:
-        poscar += 'direct\n'
+        poscar += 'Direct\n'
         for x,y,z in struct.coords:
-            poscar += ' %.10f %.10f %.10f\n' % (x,y,z)
+            poscar += '%16.12f %16.12f %16.12f\n' % (x,y,z)
     else:
-        poscar += 'cartesian\n'
+        poscar += 'Cartesian\n'
         for x, y, z in struct.cartesian_coords:
-            poscar += ' %.10f %.10f %.10f\n' % (x,y,z)
+            poscar += ' %16.12f %16.12f %16.12f\n' % (x,y,z)
 
     if filename:
         open(filename, 'w').write(poscar)

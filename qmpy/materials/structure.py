@@ -72,7 +72,7 @@ class Structure(models.Model, object):
         | ntypes: Number of elements.
         | measured: Experimentally measured structure?
         | source: Name for source.
-        | 
+        |
         | **Lattice**
         | x1, x2, x3
         | y1, y2, y3
@@ -91,7 +91,7 @@ class Structure(models.Model, object):
         | syx, szx, szz: Stresses on the cell. Accessed via `stresses`.
 
     Examples::
-        
+
         >>> s = io.read(INSTALL_PATH+'/io/files/POSCAR_FCC')
         >>> s.atoms
         >>> s.cell
@@ -110,7 +110,7 @@ class Structure(models.Model, object):
                                                related_name='+')
     measured = models.BooleanField(default=False)
 
-    composition = models.ForeignKey('Composition', null=True, 
+    composition = models.ForeignKey('Composition', null=True,
                                     related_name='structure_set')
     natoms = models.IntegerField(null=True, blank=True)
     nsites = models.IntegerField(null=True, blank=True)
@@ -186,7 +186,7 @@ class Structure(models.Model, object):
             cell: 3x3 lattice vector array
 
         Keyword Arguments:
-            atoms: List of ``Atom`` creation arguments. Can be a list of 
+            atoms: List of ``Atom`` creation arguments. Can be a list of
             [element, coord], or a list of [element, coord, kwargs].
 
         Examples::
@@ -334,7 +334,7 @@ class Structure(models.Model, object):
         """Calculated stresses, a numpy.ndarray of shape (6,)"""
         return np.array([self.sxx, self.syy, self.szz,
             self.sxy, self.syz, self.szx ])
-        
+
     @stresses.setter
     def stresses(self, vector):
         self.sxx, self.syy, self.szz = vector[0:3]
@@ -515,7 +515,7 @@ class Structure(models.Model, object):
     def symmetrize(self, tol=1e-3, angle_tol=-1):
         """
         Analyze the symmetry of the structure. Uses spglib to find the
-        symmetry. 
+        symmetry.
 
         symmetrize sets:
          * spacegroup -> Spacegroup
@@ -531,7 +531,7 @@ class Structure(models.Model, object):
         self.get_sites()
         dataset = get_symmetry_dataset(self, symprec=tol)
         self.spacegroup = Spacegroup.objects.get(pk=dataset['number'])
-        for i, site in enumerate(self.sites):    
+        for i, site in enumerate(self.sites):
             site.wyckoff = self.spacegroup.get_site(dataset['wyckoffs'][i])
             site.structure = self
         counts = defaultdict(int)
@@ -628,7 +628,7 @@ class Structure(models.Model, object):
         [[-1, 0, 0], [0, -1, 0], [0, 0, 1]].
 
         7. Check that the cell internal angles are the same in both reduced
-        cells. 
+        cells.
 
         8. Check that the ratios of reduced cell basis lengths are the same. ie
         a1/b1 = a2/b2, a1/c1 = a2/c2, and b1/c1 = b2/c2 where a1, b1, c1, are
@@ -926,7 +926,7 @@ class Structure(models.Model, object):
         self.spacegroup = None
 
     def sort(self):
-        self.atoms = sorted(self.atoms) 
+        self.atoms = sorted(self.atoms)
 
     def set_composition(self, value=None):
         if value is None:
@@ -1020,7 +1020,7 @@ class Structure(models.Model, object):
     @property
     def site_coords(self):
         """numpy.ndarray of site coordinates."""
-        return np.array([ site.coord for site in self.sites ]) 
+        return np.array([ site.coord for site in self.sites ])
 
     @site_coords.setter
     def site_coords(self, coords):
@@ -1055,7 +1055,7 @@ class Structure(models.Model, object):
     @property
     def cartesian_coords(self):
         """Return atomic positions in cartesian coordinates."""
-        return np.array([ atom.cart_coord for atom in self.atoms ]) 
+        return np.array([ atom.cart_coord for atom in self.atoms ])
 
     @cartesian_coords.setter
     def cartesian_coords(self, cc):
@@ -1088,7 +1088,6 @@ class Structure(models.Model, object):
         """
         Precalculates the inverse of the lattice, for faster conversion
         between cartesian and direct coordinates.
-        
         """
         if self._inv is None:
             self._inv = la.inv(self.cell)
@@ -1101,20 +1100,33 @@ class Structure(models.Model, object):
         r0 = min(rec_mags)
         return np.array([ np.round(r/r0, 4) for r in rec_mags ])
 
-    def get_tm_kpoint(self):
-        poscar_path = os.path.join(self.entry.path, 'POSCAR')
-        ##if not os.path.exists(poscar_path):
-        ##    qmpy.io.poscar.write(self, poscar_path)
-        get_kpoints_path = '/home/oqmd/oqmd_2.0/qmpy/qmpy/analysis/vasp/getKPoints'
-        with change_directory(self.entry.path):
-            tm_stdout = subprocess.check_output(get_kpoints_path)
-        if 'error' in tm_stdout.lower():
-            raise TMKPointsError('Failed to get KPOINTS from TM server')
-        KPOINTS_path = os.path.join(self.entry.path, 'KPOINTS')
-        kpts = open(KPOINTS_path,'r').readlines()
-        return kpts 
+    def get_TM_kpoint_mesh(self):
+        poscar = os.path.join('/tmp', 'POSCAR')
+        try:
+            qmpy.io.poscar.write(self, poscar)
+        except:
+            raise TMKPointsError('Failed to write structure into /tmp/POSCAR')
+        TM_script = os.path.join(qmpy.INSTALL_PATH, 'analysis', 'vasp', 'getKPoints')
+        with change_directory('/tmp'):
+            TM_stdout = subprocess.check_output(TM_script)
+        if 'error' in TM_stdout.lower():
+            raise TMKPointsError('Failed to get KPOINTS from the TM server')
+        TM_KPOINTS = os.path.join('/tmp', 'KPOINTS')
+        kpts = open(TM_KPOINTS,'r').readlines()
+        return kpts
 
-    def get_kpoint_mesh(self, kppra):
+    def get_kpoint_mesh_with_sympy(self, kppra):
+        """
+        Generate the k-point mesh for a given KPPRA; requires sympy to be installed
+        """
+        raise NotImplementedError
+
+    def get_kpoint_mesh_by_increment(self, kppra):
+        """
+        DEPRECATED: Sometimes results in k-point meshes incommensurate with
+        lattice symmetry. Use either get_TM_kpoint_mesh() or (if you have
+        sympy installed) get_kpoint_mesh_with_sympy(kppra) instead.
+        """
         recs = self.reciprocal_lattice
         rec_mags = [ norm(recs[0]), norm(recs[1]), norm(recs[2])]
         r0 = max(rec_mags)
@@ -2035,7 +2047,7 @@ class Structure(models.Model, object):
         hopeless = False
 
         for s1, s2 in itertools.combinations(self.sites, r=2):
-            d = self.get_distance(s1, s2, limit=1, wrap_self=True) 
+            d = self.get_distance(s1, s2, limit=1, wrap_self=True)
             if d is None:
                 continue
             if d < 0.8:
@@ -2070,12 +2082,12 @@ class Structure(models.Model, object):
                     hopeless = True
                     break
             self.composition = Composition.get(self.comp)
-            
+
             if not hopeless:
                 return self
 
         self._sites = []
-        self.atoms = init_atoms 
+        self.atoms = init_atoms
         self.get_sites()
         return self
 
@@ -2094,7 +2106,7 @@ class Prototype(models.Model):
     """
 
     name = models.CharField(max_length=63, primary_key=True)
-    structure = models.ForeignKey(Structure, related_name='+', 
+    structure = models.ForeignKey(Structure, related_name='+',
                                   blank=True, null=True)
     composition = models.ForeignKey('Composition', blank=True, null=True)
 

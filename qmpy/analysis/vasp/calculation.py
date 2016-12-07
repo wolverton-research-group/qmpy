@@ -35,6 +35,7 @@ from qmpy.data.meta_data import MetaData, add_meta_data
 from qmpy.materials.element import Element
 from qmpy.db.custom import DictField, NumpyArrayField
 from qmpy.configuration.vasp_settings import *
+from qmpy.configuration.vasp_incar_format import *
 
 logger = logging.getLogger(__name__)
 #logger.setLevel(logging.DEBUG)
@@ -286,7 +287,13 @@ class Calculation(models.Model):
 
     @property
     def KPOINTS(self):
-        return self.get_kpoints()
+        set_INCAR_kpoints, kpoints = self.get_kpoints()
+        if set_INCAR_kpoints:
+            print 'k-points determined by automatically by VASP using\n\
+                    KSPACING = 0.15\n'
+            return None
+        else:
+            return kpoints
 
     @property
     def POTCAR(self):
@@ -298,14 +305,14 @@ class Calculation(models.Model):
         moments = [ a.magmom for a in self.input.atoms ]
         if all([ m in [0, None] for m in moments ]):
             return ''
-        magmoms = [[ 1, moments[0]]]
+        magmoms = [[1, moments[0]]]
         for n in range(1, len(moments)):
             if moments[n] == moments[n-1]:
                 magmoms[-1][0] += 1
             else:
                 magmoms.append([1, moments[n]])
         momstr = ' '.join('%i*%.4f' % (v[0],v[1]) for v in magmoms)
-        return '  MAGMOM = %s' % momstr
+        return 'MAGMOM = %s' % momstr
 
     @property
     def phase(self):
@@ -323,6 +330,94 @@ class Calculation(models.Model):
         ps.compute_stabilities()
 
     def get_incar(self):
+        """
+        construct the VASP INCAR
+
+        The general template for the INCAR file follows
+        (tags that are commented out are not always written)
+
+        -------------------------------
+        ### GENERAL
+        ISTART          = 0
+        ICHARG          = 2
+        PREC            = Accurate
+        LREAL           = .FALSE.
+        ENCUT           = 520
+        KSPACING        = 0.125
+        KGAMMA          = .TRUE.
+        # NBANDS          = 52
+
+        ### ELECTRONIC RELAXATION
+        ALGO            = Fast
+        EDIFF           = 1E-6
+        NELMIN          = 5
+        NELM            = 60
+        # NELMDL          = -30
+        ISMEAR          = 1
+        SIGMA           = 0.15
+        LASPH           = .TRUE.
+
+        ### STRUCTURAL RELAXATION
+        ISIF            = 3
+        IBRION          = 2
+        EDIFFG          = -1E-2
+        POTIM           = 0.187
+        NSW             = 60
+
+        ### SPIN
+        ISPIN           = 2
+        MAGMOM          = magmom
+        # LSORBIT         = .FALSE.
+        # LNONCOLLINEAR   = .FALSE.
+
+        ### DOS
+        EMIN            = -10.0
+        EMAX            = 10.0
+        NEDOS           = 2001
+
+        ### WRITE
+        LORBIT          = 11
+        LCHARG          = .TRUE.
+        LVTOT           = .TRUE.
+        LWAVE           = .FALSE.
+        LELF            = .FALSE.
+
+        ### HUBBARD_U
+        # LDAU          = .TRUE.
+        # LDAUPRINT     = 1
+        # LDAUU         = 0 0 0
+        # LDAUJ         = 0 0 0
+        # LDAUL         = -1 -1 -1
+        # LMAXMIX       = 6
+
+        ### MIXING
+        # AMIX            = 0.2
+        # AMIX_MAG        = 0.8
+        # BMIX            = 0.0001
+        # BMIX_MAG        = 0.0001
+        # MAXMIX          = -45
+
+        ### PARALLELIZATION
+        # NSIM            = 4
+        # NCORE           = 12
+        # NPAR            = 2
+        # KPAR            = 4
+        # LPLANE          = .FALSE.
+        -------------------------------
+        """
+        incar = ""
+
+        # VASP_INCAR_TAGS read from configuration/vasp_incar_format/incar_tag_groups.yml
+        for block, tags in VASP_INCAR_TAGS.items():
+            incar += '### {title}\n'.format(title=block)
+            for tag in tags:
+                if tag not in self.settings.keys():
+                    continue
+
+
+            
+        incar += incar_control_tags()
+
         s = dict((k.lower(), v) for k, v in self.settings.items() if not k in
                 ['gamma', 'kppra', 'scale_encut', 'potentials', 'hubbards'])
 
@@ -355,7 +450,7 @@ class Calculation(models.Model):
                 incar += ' %s\n' % vasp_format(key, s.pop(key))
 
         incar += '\n#= Ionic Relaxation Settings =#\n'
-        for key in ['nsw', 'ibrion', 'isif', 'isym', 
+        for key in ['nsw', 'ibrion', 'isif', 'isym',
                     'symprec', 'potim', 'ediffg']:
             if key in s:
                 incar += ' %s\n' % vasp_format(key, s.pop(key))
@@ -428,29 +523,14 @@ class Calculation(models.Model):
                         Atom.objects.filter(id=atom.id).update(magmom=mom)
         self.settings = settings
 
-    def get_tm_kpoints(self):
-        try:
-            kpoints = self.input.get_tm_kpoint()
-            return kpoints
-        except:
-            kpts = self.input.get_kpoint_mesh(self.settings.get('kppra', 8000))
-            if self.settings.get('gamma', True):
-                kpoints = 'KPOINTS \n0 \nGamma\n'
-            else:
-                kpoints = 'KPOINTS \n0 \nMonkhorst-Pack\n'
-            kpoints += ' '.join( str(int(k)) for k in kpts ) + '\n'
-            kpoints += '0 0 0'
-            return kpoints
-
     def get_kpoints(self):
-        kpts = self.input.get_kpoint_mesh(self.settings.get('kppra', 8000))
-        if self.settings.get('gamma', True):
-            kpoints = 'KPOINTS \n0 \nGamma\n'
-        else:
-            kpoints = 'KPOINTS \n0 \nMonkhorst-Pack\n'
-        kpoints += ' '.join( str(int(k)) for k in kpts ) + '\n'
-        kpoints += '0 0 0'
-        return kpoints
+        VASP_autogenerate = False
+        try:
+            kpoints = self.input.get_TM_kpoint_mesh()
+        except:
+            VASP_autogenerate = True
+            kpoints = None
+        return VASP_autogenerate, kpoints
 
     @KPOINTS.setter
     def KPOINTS(self, kpoints):
@@ -1080,7 +1160,7 @@ class Calculation(models.Model):
         for line in self.outcar:
             if 'INCAR:' in line:
                 found_inputs[0] = True
-            if 'POTCAR:' in line: 
+            if 'POTCAR:' in line:
                 found_inputs[1] = True
             if 'KPOINTS:' in line:
                 found_inputs[2] = True
@@ -1409,22 +1489,19 @@ class Calculation(models.Model):
     #### calculation management
 
     def write(self):
-        '''
+        """
         Write calculation to disk
-        '''
+        """
         os.system('mkdir %s 2> /dev/null' % self.path)
-        poscar = open(self.path+'/POSCAR','w')
-        potcar = open(self.path+'/POTCAR','w')
-        incar = open(self.path+'/INCAR','w')
-        kpoints = open(self.path+'/KPOINTS','w')
-        poscar.write(self.POSCAR)
-        potcar.write(self.POTCAR)
-        incar.write(self.INCAR)
-        kpoints.write(self.KPOINTS)
-        poscar.close()
-        potcar.close()
-        incar.close()
-        kpoints.close()
+        with open(os.path.join(self.path, 'POSCAR'),'w') as fw:
+            fw.write(self.POSCAR)
+        with open(os.path.join(self.path, 'POTCAR'),'w') as fw:
+            fw.write(self.POTCAR)
+        with open(os.path.join(self.path, 'INCAR'),'w') as fw:
+            fw.write(self.INCAR)
+        if self.KPOINTS is not None:
+            with open(self.path+'/KPOINTS','w') as fw:
+                fw.write(self.KPOINTS)
 
     @property
     def estimate(self):
@@ -1435,7 +1512,7 @@ class Calculation(models.Model):
     def instructions(self):
         if self.converged:
             return {}
-        
+
         if not self._instruction:
             self._instruction = {
                     'path':self.path,
@@ -1444,7 +1521,7 @@ class Calculation(models.Model):
                         'date +%s',
                         'ulimit -s unlimited']),
                     'mpi':'mpirun -machinefile $PBS_NODEFILE -np $NPROCS',
-                    'binary':'vasp_53', 
+                    'binary':'vasp_53',
                     'pipes':' > stdout.txt 2> stderr.txt',
                     'footer':'\n'.join(['gzip -f CHGCAR OUTCAR PROCAR ELFCAR',
                         'rm -f WAVECAR CHG',
@@ -1635,7 +1712,7 @@ class Calculation(models.Model):
 
     @staticmethod
     def setup(structure, configuration='static', path=None, entry=None,
-            hubbard='wang', potentials='vasp_rec', settings={},
+            hubbard='wang', potentials='vasp_rec_pbe', settings={},
             chgcar=None, wavecar=None,
             **kwargs):
         """
@@ -1677,7 +1754,7 @@ class Calculation(models.Model):
                 String indicating the vasp potentials to use. Options can be
                 found with qmpy.POTENTIALS.keys(), and can be added to or
                 altered by editing configuration/vasp_settings/potentials/yml.
-                Default="vasp_rec".
+                Default="vasp_rec_pbe".
 
             chgcar/wavecar:
                 Calculation, or path, indicating where to obtain an initial
@@ -1725,29 +1802,26 @@ class Calculation(models.Model):
 
         # Convert input to primitive cell, symmetrize it
         calc.input.make_primitive()
-#        calc.input.refine()
         calc.input.symmetrize()
 
         vasp_settings = {}
-        if calc.input.natoms > 20:
-            vasp_settings['lreal'] = 'auto'
+        # load the default settings for the configuration
         vasp_settings.update(VASP_SETTINGS[configuration])
+        # update it with settings passed as argument during function call
         vasp_settings.update(settings)
 
-        calc.set_potentials(vasp_settings.get('potentials', 'vasp_rec'))
+        calc.set_potentials(vasp_settings.get('potentials', potentials))
         calc.set_hubbards(vasp_settings.get('hubbards', hubbard))
         calc.set_magmoms(vasp_settings.get('magnetism', 'ferro'))
 
         if 'scale_encut' in vasp_settings:
             enmax = max(pot.enmax for pot in calc.potentials)
-            calc.encut = int(vasp_settings['scale_encut']*enmax)
+            encut = int(vasp_settings['scale_encut']*enmax)
+            if encut > 520:
+                encut = 520
+            vasp_settings.update({'encut':encut})
 
         calc.settings = vasp_settings
-        if calc.input.natoms >= 10:
-            calc.settings.update({
-                'ncore': 4,
-                'lscalu': False,
-                'lplane': True})
 
         # Has the calculation been run?
         try:
