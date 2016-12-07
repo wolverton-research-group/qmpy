@@ -4,7 +4,10 @@ import logging
 
 import qmpy
 if qmpy.FOUND_SPGLIB:
-    import pyspglib._spglib as spg
+    try:
+        import pyspglib._spglib as spg
+    except:
+        import spglib._spglib as spg
 
 import qmpy.data as data
 from qmpy.utils import *
@@ -104,7 +107,7 @@ def get_symmetry_dataset(structure, symprec=1e-3, angle_tolerance=-1.0):
     numbers = np.array(numbers, dtype='intc')
 
     dataset = {}
-    for key, data in zip(keys, 
+    for key, data in zip(keys,
             spg.dataset(
                 cell,
                 coords,

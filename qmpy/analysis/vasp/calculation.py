@@ -290,7 +290,7 @@ class Calculation(models.Model):
         set_INCAR_kpoints, kpoints = self.get_kpoints()
         if set_INCAR_kpoints:
             print 'k-points determined by automatically by VASP using\n\
-                    KSPACING = 0.15\n'
+                    the KSPACING tag in the INCAR\n'
             return None
         else:
             return kpoints
@@ -409,78 +409,77 @@ class Calculation(models.Model):
 
         # VASP_INCAR_TAGS read from configuration/vasp_incar_format/incar_tag_groups.yml
         for block, tags in VASP_INCAR_TAGS.items():
-            incar += '### {title}\n'.format(title=block)
+            incar += '### {title} ###\n'.format(title=block)
             for tag in tags:
+                # check if tag only set in specific case
                 if tag not in self.settings.keys():
                     continue
+                incar += '%s\n' % vasp_format(tag, self.settings[tag])
+            incar += '\n'
 
-
-            
-        incar += incar_control_tags()
-
-        s = dict((k.lower(), v) for k, v in self.settings.items() if not k in
-                ['gamma', 'kppra', 'scale_encut', 'potentials', 'hubbards'])
-
-        incar = '#= General Settings =#\n'
-        for key in ['prec', 'istart', 'icharg', 'lsorbit', 'nelect']:
-            if key in s:
-                incar += ' %s\n' % vasp_format(key, s.pop(key))
-
-        if self.MAGMOMS and not 'ispin' in s:
-            s['ispin'] = 2
-        incar += '  ISPIN = %d\n' % s.pop('ispin', 1)
-        if self.MAGMOMS:
-            incar += self.MAGMOMS+'\n'
-
-        if  any(hub for hub in self.hubbards):
-            incar += '\n#= LDA+U Fields =#\n'
-            incar += ' LDAU = .TRUE.\n'
-            incar += ' LDAUPRINT = 1\n'
-            hubbards = sorted(self.hubbards, key=lambda x: x.element_id)
-            uvals = ' '.join(str(hub.u) for hub in hubbards)
-            jvals = ' '.join('0' for hub in hubbards)
-            lvals = ' '.join(str(hub.l) for hub in hubbards)
-            incar += ' LDAUU = %s\n' % uvals
-            incar += ' LDAUJ = %s\n' % jvals
-            incar += ' LDAUL = %s\n' % lvals
-
-        incar += '\n#= Parallelization =#\n'
-        for key in ['lplane', 'nsim', 'ncore', 'lscalu', 'npar']:
-            if key in s:
-                incar += ' %s\n' % vasp_format(key, s.pop(key))
-
-        incar += '\n#= Ionic Relaxation Settings =#\n'
-        for key in ['nsw', 'ibrion', 'isif', 'isym',
-                    'symprec', 'potim', 'ediffg']:
-            if key in s:
-                incar += ' %s\n' % vasp_format(key, s.pop(key))
-
-        incar += '\n#= Electronic Relxation Settings =#\n'
-        for key in ['encut', 'nelm', 'nelmin', 'lreal', 'ediff', 'algo']:
-            if key in s:
-                incar += ' %s\n' % vasp_format(key, s.pop(key))
-
-        incar += '\n#= Write flags =#\n'
-        ##for key in ['lcharg', 'lwave', 'lelf', 'lhvar', 'lvtot']:
-        for key in ['lcharg', 'lwave', 'lhvar', 'lvtot']:
-            if key in s:
-                incar += ' %s\n' % vasp_format(key, s.pop(key))
-
-        incar += '\n#= DOS =#\n'
-        for key in ['nbands', 'ismear', 'sigma']:
-            if key in s:
-                incar += ' %s\n' % vasp_format(key, s.pop(key))
-
-        if s.get('ldipol', False):
-            incar += '\n# dipole fields\n'
-            incar += ' LDIPOL = .TRUE.\n'
-            for k in ['idipol', 'espilon']:
-                if k in s:
-                    incar += ' %s\n' % vasp_format(k, s.pop(k))
-
-        #incar += '\n#= Uncategorized/OQMD codes  =#\n'
-        #for k, v in s.items():
-        #    incar += ' %s\n' % (vasp_format(k, v))
+##        s = dict((k.lower(), v) for k, v in self.settings.items() if not k in
+##                ['gamma', 'kppra', 'scale_encut', 'potentials', 'hubbards'])
+##
+##        incar = '#= General Settings =#\n'
+##        for key in ['prec', 'istart', 'icharg', 'lsorbit', 'nelect']:
+##            if key in s:
+##                incar += ' %s\n' % vasp_format(key, s.pop(key))
+##
+##        if self.MAGMOMS and not 'ispin' in s:
+##            s['ispin'] = 2
+##        incar += '  ISPIN = %d\n' % s.pop('ispin', 1)
+##        if self.MAGMOMS:
+##            incar += self.MAGMOMS+'\n'
+##
+##        if  any(hub for hub in self.hubbards):
+##            incar += '\n#= LDA+U Fields =#\n'
+##            incar += ' LDAU = .TRUE.\n'
+##            incar += ' LDAUPRINT = 1\n'
+##            hubbards = sorted(self.hubbards, key=lambda x: x.element_id)
+##            uvals = ' '.join(str(hub.u) for hub in hubbards)
+##            jvals = ' '.join('0' for hub in hubbards)
+##            lvals = ' '.join(str(hub.l) for hub in hubbards)
+##            incar += ' LDAUU = %s\n' % uvals
+##            incar += ' LDAUJ = %s\n' % jvals
+##            incar += ' LDAUL = %s\n' % lvals
+##
+##        incar += '\n#= Parallelization =#\n'
+##        for key in ['lplane', 'nsim', 'ncore', 'lscalu', 'npar']:
+##            if key in s:
+##                incar += ' %s\n' % vasp_format(key, s.pop(key))
+##
+##        incar += '\n#= Ionic Relaxation Settings =#\n'
+##        for key in ['nsw', 'ibrion', 'isif', 'isym',
+##                    'symprec', 'potim', 'ediffg']:
+##            if key in s:
+##                incar += ' %s\n' % vasp_format(key, s.pop(key))
+##
+##        incar += '\n#= Electronic Relxation Settings =#\n'
+##        for key in ['encut', 'nelm', 'nelmin', 'lreal', 'ediff', 'algo']:
+##            if key in s:
+##                incar += ' %s\n' % vasp_format(key, s.pop(key))
+##
+##        incar += '\n#= Write flags =#\n'
+##        ##for key in ['lcharg', 'lwave', 'lelf', 'lhvar', 'lvtot']:
+##        for key in ['lcharg', 'lwave', 'lhvar', 'lvtot']:
+##            if key in s:
+##                incar += ' %s\n' % vasp_format(key, s.pop(key))
+##
+##        incar += '\n#= DOS =#\n'
+##        for key in ['nbands', 'ismear', 'sigma']:
+##            if key in s:
+##                incar += ' %s\n' % vasp_format(key, s.pop(key))
+##
+##        if s.get('ldipol', False):
+##            incar += '\n# dipole fields\n'
+##            incar += ' LDIPOL = .TRUE.\n'
+##            for k in ['idipol', 'espilon']:
+##                if k in s:
+##                    incar += ' %s\n' % vasp_format(k, s.pop(k))
+##
+##        #incar += '\n#= Uncategorized/OQMD codes  =#\n'
+##        #for k, v in s.items():
+##        #    incar += ' %s\n' % (vasp_format(k, v))
         return incar
 
     @INCAR.setter
@@ -524,13 +523,13 @@ class Calculation(models.Model):
         self.settings = settings
 
     def get_kpoints(self):
-        VASP_autogenerate = False
+        VASP_kpoints_autogenerate = False
         try:
             kpoints = self.input.get_TM_kpoint_mesh()
         except:
-            VASP_autogenerate = True
+            VASP_kpoints_autogenerate = True
             kpoints = None
-        return VASP_autogenerate, kpoints
+        return VASP_kpoints_autogenerate, kpoints
 
     @KPOINTS.setter
     def KPOINTS(self, kpoints):
