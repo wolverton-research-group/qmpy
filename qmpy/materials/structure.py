@@ -1112,7 +1112,7 @@ class Structure(models.Model, object):
         if 'error' in TM_stdout.lower():
             raise TMKPointsError('Failed to get KPOINTS from the TM server')
         TM_KPOINTS = os.path.join('/tmp', 'KPOINTS')
-        kpts = open(TM_KPOINTS,'r').readlines()
+        kpts = open(TM_KPOINTS,'r').read()
         return kpts
 
     def get_kpoint_mesh_with_sympy(self, kppra):

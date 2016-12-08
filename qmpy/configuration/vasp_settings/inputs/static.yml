@@ -1,9 +1,9 @@
 istart: 1
 icharg: 1
-prec: accurate
+prec: acc
 lreal: false
 encut: 520
-kspacing: 0.125
+kspacing: 0.15
 kgamma: True
 algo: fast
 ediff: 1E-6
@@ -14,6 +14,7 @@ sigma: 0.15
 lasph: True
 isif: 2
 nsw: 0
+ispin: 1
 emin: -10.0
 emax: 10.0
 nedos: 2001

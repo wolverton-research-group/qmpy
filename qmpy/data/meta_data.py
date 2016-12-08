@@ -106,7 +106,7 @@ def add_meta_data(label, plural=None, cache=None, description=''):
         >>> @add_label("keywords")
         >>> class NewModel(models.Model):
         >>>     meta_data = models.ManyToManyField('MetaData')
-        >>> 
+        >>>
         >>> instance = NewModel()
         >>> instance.keywords
         []
@@ -144,9 +144,9 @@ def add_meta_data(label, plural=None, cache=None, description=''):
         def setter(cls, values):
             setattr(cls, cache, values)
 
-        setattr(cls, plural, property(getter, 
-                                     setter, 
-                                     None, 
+        setattr(cls, plural, property(getter,
+                                     setter,
+                                     None,
                                      description))
         def adder(cls, value):
             'Helper function to add %s to list of %s.' % (label, plural)

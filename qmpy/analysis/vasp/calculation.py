@@ -57,7 +57,7 @@ def value_formatter(value):
         return str(value)
 
 def vasp_format(key, value):
-    return ' %s = %s' % (key.upper(), value_formatter(value))
+    return '{:14s} = {}'.format(key.upper(), value_formatter(value))
 
 class VaspError(Exception):
     """General problem with vasp calculation."""
@@ -164,8 +164,6 @@ class Calculation(models.Model):
             retval += self.configuration+' settings'
         elif 'prec' in self.settings:
             retval += 'PREC='+self.settings['prec'].upper()
-        if self.settings.get('nsw', 1) <= 1:
-            retval += ', static'
         if not retval:
             return 'Blank'
         return retval
@@ -311,8 +309,8 @@ class Calculation(models.Model):
                 magmoms[-1][0] += 1
             else:
                 magmoms.append([1, moments[n]])
-        momstr = ' '.join('%i*%.4f' % (v[0],v[1]) for v in magmoms)
-        return 'MAGMOM = %s' % momstr
+        momstr = ' '.join('%i*%.3f' % (v[0],v[1]) for v in magmoms)
+        return '{:14s} = {}'.format('MAGMOM', momstr)
 
     @property
     def phase(self):
@@ -337,18 +335,18 @@ class Calculation(models.Model):
         (tags that are commented out are not always written)
 
         -------------------------------
-        ### GENERAL
+        ### general ###
         ISTART          = 0
         ICHARG          = 2
-        PREC            = Accurate
+        PREC            = ACC
         LREAL           = .FALSE.
         ENCUT           = 520
-        KSPACING        = 0.125
+        KSPACING        = 0.15
         KGAMMA          = .TRUE.
         # NBANDS          = 52
 
-        ### ELECTRONIC RELAXATION
-        ALGO            = Fast
+        ### electronic relaxation ###
+        ALGO            = FAST
         EDIFF           = 1E-6
         NELMIN          = 5
         NELM            = 60
@@ -357,32 +355,32 @@ class Calculation(models.Model):
         SIGMA           = 0.15
         LASPH           = .TRUE.
 
-        ### STRUCTURAL RELAXATION
+        ### structural relaxation ###
         ISIF            = 3
         IBRION          = 2
         EDIFFG          = -1E-2
         POTIM           = 0.187
         NSW             = 60
 
-        ### SPIN
+        ### dos ###
+        EMIN            = -10.0
+        EMAX            = 10.0
+        NEDOS           = 2001
+
+        ### spin ###
         ISPIN           = 2
         MAGMOM          = magmom
         # LSORBIT         = .FALSE.
         # LNONCOLLINEAR   = .FALSE.
 
-        ### DOS
-        EMIN            = -10.0
-        EMAX            = 10.0
-        NEDOS           = 2001
-
-        ### WRITE
+        ### write ###
         LORBIT          = 11
         LCHARG          = .TRUE.
         LVTOT           = .TRUE.
         LWAVE           = .FALSE.
         LELF            = .FALSE.
 
-        ### HUBBARD_U
+        ### hubbard_u ###
         # LDAU          = .TRUE.
         # LDAUPRINT     = 1
         # LDAUU         = 0 0 0
@@ -390,14 +388,14 @@ class Calculation(models.Model):
         # LDAUL         = -1 -1 -1
         # LMAXMIX       = 6
 
-        ### MIXING
+        ### mixing ###
         # AMIX            = 0.2
         # AMIX_MAG        = 0.8
         # BMIX            = 0.0001
         # BMIX_MAG        = 0.0001
         # MAXMIX          = -45
 
-        ### PARALLELIZATION
+        ### parallelization ###
         # NSIM            = 4
         # NCORE           = 12
         # NPAR            = 2
@@ -411,75 +409,17 @@ class Calculation(models.Model):
         for block, tags in VASP_INCAR_TAGS.items():
             incar += '### {title} ###\n'.format(title=block)
             for tag in tags:
-                # check if tag only set in specific case
                 if tag not in self.settings.keys():
                     continue
                 incar += '%s\n' % vasp_format(tag, self.settings[tag])
+
+                # if spin-polarized, print MAGMOM after the ISPIN tag
+                if tag == 'ispin':
+                    if self.settings['ispin'] == 2:
+                        incar += '%s\n' % self.MAGMOMS
+
             incar += '\n'
 
-##        s = dict((k.lower(), v) for k, v in self.settings.items() if not k in
-##                ['gamma', 'kppra', 'scale_encut', 'potentials', 'hubbards'])
-##
-##        incar = '#= General Settings =#\n'
-##        for key in ['prec', 'istart', 'icharg', 'lsorbit', 'nelect']:
-##            if key in s:
-##                incar += ' %s\n' % vasp_format(key, s.pop(key))
-##
-##        if self.MAGMOMS and not 'ispin' in s:
-##            s['ispin'] = 2
-##        incar += '  ISPIN = %d\n' % s.pop('ispin', 1)
-##        if self.MAGMOMS:
-##            incar += self.MAGMOMS+'\n'
-##
-##        if  any(hub for hub in self.hubbards):
-##            incar += '\n#= LDA+U Fields =#\n'
-##            incar += ' LDAU = .TRUE.\n'
-##            incar += ' LDAUPRINT = 1\n'
-##            hubbards = sorted(self.hubbards, key=lambda x: x.element_id)
-##            uvals = ' '.join(str(hub.u) for hub in hubbards)
-##            jvals = ' '.join('0' for hub in hubbards)
-##            lvals = ' '.join(str(hub.l) for hub in hubbards)
-##            incar += ' LDAUU = %s\n' % uvals
-##            incar += ' LDAUJ = %s\n' % jvals
-##            incar += ' LDAUL = %s\n' % lvals
-##
-##        incar += '\n#= Parallelization =#\n'
-##        for key in ['lplane', 'nsim', 'ncore', 'lscalu', 'npar']:
-##            if key in s:
-##                incar += ' %s\n' % vasp_format(key, s.pop(key))
-##
-##        incar += '\n#= Ionic Relaxation Settings =#\n'
-##        for key in ['nsw', 'ibrion', 'isif', 'isym',
-##                    'symprec', 'potim', 'ediffg']:
-##            if key in s:
-##                incar += ' %s\n' % vasp_format(key, s.pop(key))
-##
-##        incar += '\n#= Electronic Relxation Settings =#\n'
-##        for key in ['encut', 'nelm', 'nelmin', 'lreal', 'ediff', 'algo']:
-##            if key in s:
-##                incar += ' %s\n' % vasp_format(key, s.pop(key))
-##
-##        incar += '\n#= Write flags =#\n'
-##        ##for key in ['lcharg', 'lwave', 'lelf', 'lhvar', 'lvtot']:
-##        for key in ['lcharg', 'lwave', 'lhvar', 'lvtot']:
-##            if key in s:
-##                incar += ' %s\n' % vasp_format(key, s.pop(key))
-##
-##        incar += '\n#= DOS =#\n'
-##        for key in ['nbands', 'ismear', 'sigma']:
-##            if key in s:
-##                incar += ' %s\n' % vasp_format(key, s.pop(key))
-##
-##        if s.get('ldipol', False):
-##            incar += '\n# dipole fields\n'
-##            incar += ' LDIPOL = .TRUE.\n'
-##            for k in ['idipol', 'espilon']:
-##                if k in s:
-##                    incar += ' %s\n' % vasp_format(k, s.pop(k))
-##
-##        #incar += '\n#= Uncategorized/OQMD codes  =#\n'
-##        #for k, v in s.items():
-##        #    incar += ' %s\n' % (vasp_format(k, v))
         return incar
 
     @INCAR.setter
@@ -1809,16 +1749,44 @@ class Calculation(models.Model):
         # update it with settings passed as argument during function call
         vasp_settings.update(settings)
 
+        # set potentials, hubbard values (if), magnetic moments (if)
         calc.set_potentials(vasp_settings.get('potentials', potentials))
         calc.set_hubbards(vasp_settings.get('hubbards', hubbard))
         calc.set_magmoms(vasp_settings.get('magnetism', 'ferro'))
 
-        if 'scale_encut' in vasp_settings:
-            enmax = max(pot.enmax for pot in calc.potentials)
-            encut = int(vasp_settings['scale_encut']*enmax)
+        # set ENCUT = 1.3*ENMAX for relaxation calculations
+        if 'relaxation' in configuration:
+            encut = int(max(pot.enmax for pot in calc.potentials)*1.3)
             if encut > 520:
                 encut = 520
-            vasp_settings.update({'encut':encut})
+            vasp_settings.update({'encut': encut})
+
+        # spin-polarized?
+        if calc.MAGMOMS:
+            vasp_settings.update({'ispin': 2})
+
+        # to U or not to U, that is the question
+        if any(hub for hub in calc.hubbards):
+            # increase LMAXMIX to 4 for d-elements and to 6 for f-elements
+            lmaxmix = 2
+            for atom in calc.input.atoms:
+                if atom.element.d_elec > 0 and atom.element.d_elec <= 10:
+                    lmaxmix = 4
+                    break
+            for atom in calc.input.atoms:
+                if atom.element.f_elec > 0 and atom.element.f_elec <= 14:
+                    lmaxmix = 6
+                    break
+            hubbards = sorted(calc.hubbards, key=lambda x: x.element_id)
+            U_settings = {'lda': True,
+                          'ldauprint': 2,
+                          'ldauu': ' '.join(str(hub.u) for hub in hubbards),
+                          'ldauj': ' '.join('0.0' for hub in hubbards),
+                          'ldaul': ' '.join(str(hub.l) for hub in hubbards),
+                          'lmaxmix': lmaxmix
+                         }
+            vasp_settings.update(U_settings)
+
 
         calc.settings = vasp_settings
 

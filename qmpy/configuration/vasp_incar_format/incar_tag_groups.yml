@@ -5,7 +5,6 @@
       - prec
       - isym
       - lreal
-      - nbands
       - encut
       - kspacing
       - kgamma
@@ -25,28 +24,21 @@
       - ediffg
       - potim
       - nsw
+  - - dos
+    - - emin
+      - emax
+      - nedos
   - - spin
     - - ispin
       - magmom
       - lsorbit
       - lnoncollinear
-  - - dos
-    - - emin
-      - emax
-      - nedos
   - - write
     - - lorbit
       - lcharg
       - lvtot
       - lwave
       - lelf
-  - - parallelization
-    - - nsim
-      - ncore
-      - npar
-      - kpar
-      - lplane
-      - lscalu
   - - hubbard_u
     - - ldau
       - ldauprint
@@ -60,3 +52,10 @@
       - amixmag
       - bmixmag
       - maxmix
+  - - parallelization
+    - - nsim
+      - ncore
+      - npar
+      - kpar
+      - lplane
+      - lscalu

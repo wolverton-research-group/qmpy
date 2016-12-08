@@ -1,9 +1,9 @@
 istart: 0
 icharg: 2
-prec: accurate
+prec: acc
 lreal: false
-scale_encut: 1.3
-kspacing: 0.125
+encut: 0
+kspacing: 0.15
 kgamma: True
 algo: fast
 ediff: 1E-6
@@ -17,6 +17,7 @@ ibrion: 2
 ediffg: -1E-2
 potim: 0.187
 nsw: 60
+ispin: 1
 lcharg: True
 lvtot: True
 lwave: False
