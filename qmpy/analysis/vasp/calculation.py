@@ -834,7 +834,7 @@ class Calculation(models.Model):
             stresses = self.read_stresses()
             positions = self.read_positions()
             forces = self.read_forces()
-            try: 
+            try:
                 magmoms = self.read_magmoms()
                 charges = self.read_charges()
             except:

@@ -372,7 +372,7 @@ def wavefunction(entry, **kwargs):
     if entry.calculations.get('wavefunction', Calculation()).converged:
         return entry.calculations['wavefunction']
 
-    # Get the static calculation result 
+    # Get the static calculation result
     calc = static(entry, **kwargs)
     if not calc.converged:
         return calc
@@ -402,7 +402,7 @@ def hybrid(entry, **kwargs):
     Keyword arguments:
         forms - list, of strings denoting the kind of HSE calculation to run
         (e.g., ['hse06'])
-    
+
     Output:
         list of Calculation, results
     '''
