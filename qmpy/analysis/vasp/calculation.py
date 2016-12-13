@@ -551,7 +551,7 @@ class Calculation(models.Model):
     def get_outcar(self):
         """
         Sets the calculations outcar attribute to a list of lines from the
-        outcar. 
+        outcar.
 
         Examples::
 
@@ -561,7 +561,6 @@ class Calculation(models.Model):
             >>> calc.get_outcar()
             >>> len(calc.outcar)
             12345L
-        
         """
         if not self.outcar is None:
             return self.outcar
@@ -1219,8 +1218,8 @@ class Calculation(models.Model):
         if calc.input is None:
             calc.read_input_structure()
         calc.set_label(os.path.basename(calc.path))
-        calc.read_outcar()
         calc.read_stdout()
+        calc.read_outcar()
         if calc.converged:
             calc.read_doscar()
         if not calc.output is None:
@@ -1778,7 +1777,7 @@ class Calculation(models.Model):
                     lmaxmix = 6
                     break
             hubbards = sorted(calc.hubbards, key=lambda x: x.element_id)
-            U_settings = {'lda': True,
+            U_settings = {'ldau': True,
                           'ldauprint': 2,
                           'ldauu': ' '.join(str(hub.u) for hub in hubbards),
                           'ldauj': ' '.join('0.0' for hub in hubbards),
@@ -1822,4 +1821,4 @@ class Calculation(models.Model):
         fixed_calc.clear_outputs()
         fixed_calc.set_chgcar(calc)
         fixed_calc.write()
-        return fixed_cali
+        return fixed_calc

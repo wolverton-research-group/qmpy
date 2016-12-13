@@ -19,7 +19,7 @@ potim: 0.187
 nsw: 60
 ispin: 1
 lcharg: True
-lvtot: True
+lvtot: False
 lwave: False
 lelf: False
 potentials: vasp_rec_pbe

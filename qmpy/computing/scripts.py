@@ -340,7 +340,7 @@ def static(entry, xc_func='PBE', **kwargs):
         # separate hulls for LDA / PBE / ...
         f.save()
         ps = PhaseSpace(calc.input.comp.keys())
-        ps.compute_stabilities(reevalulate=True, save=True)
+        ps.compute_stabilities(reevaluate=True, save=True)
     else:
         calc.write()
     return calc
@@ -434,4 +434,4 @@ def hse06(entry, **kwargs):
     Output:
         list of Calculation, resultsA
     '''
-    return hybrid(entry, forms=['hse06'], **kwargs) 
+    return hybrid(entry, forms=['hse06'], **kwargs)

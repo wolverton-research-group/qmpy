@@ -447,7 +447,6 @@ class Entry(models.Model):
         if not forms.exists():
             return None
         return any([ f.stability < 0 for f in forms ])
-        
 
     _history = None
     @property
