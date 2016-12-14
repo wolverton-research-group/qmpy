@@ -1,12 +1,13 @@
+### Format ###
 # project1:
-    #   allocations:
-    #       - allocation1
-    #       - allocation2
-    #   priority: Base priority for the project. Lower numbers will be done soonest.
-    #   users:
-    #       - user1
-    #       - user2
-    # project2: ...
+#   allocations:
+#       - allocation1
+#       - allocation2
+#   priority: Base priority for the project. Lower numbers will be done soonest.
+#   users:
+#       - user1
+#       - user2
+# project2: ...
     
 elements_pbe:
   allocations:

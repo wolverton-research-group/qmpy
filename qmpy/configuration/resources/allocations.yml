@@ -1,12 +1,14 @@
+### Format ###
 # allocation1:
-    #   host: hostname
-    #   key: key needed for identifying allocation
-    #   users:
-    #       - user1
-    #       - user2
-    # allocation2: ...
+#   host: hostname
+#   key: key needed for identifying allocation
+#   users:
+#       - user1
+#       - user2
+# allocation2: ...
     
 alcc:
-  host: edison
+  host: edison_shared
   key: m2588
-  users: []
+  users:
+  - vih173

@@ -194,12 +194,6 @@ def relaxation(entry, xc_func='PBE', **kwargs):
         if entry.calculations.get(cnfg_name, Calculation()).converged:
             return entry.calculations[cnfg_name]
 
-    # If any settings have been passed as keyword arguments from the 'parent'
-    # Task, pass it on specifically as the 'settings' argument to setup
-    settings = {}
-    if 'settings' in kwargs:
-        settings = kwargs['settings']
-
     # Check if the calculation is converged / started
     if not entry.calculations.get(cnfg_name, Calculation()).converged:
         input = entry.input.copy()
@@ -208,7 +202,6 @@ def relaxation(entry, xc_func='PBE', **kwargs):
         calc = Calculation.setup(input,  entry=entry,
                                          configuration=cnfg_name,
                                          path=path,
-                                         settings=settings,
                                          **kwargs)
 
         entry.calculations[cnfg_name] = calc
@@ -238,7 +231,6 @@ def relaxation(entry, xc_func='PBE', **kwargs):
             calc = Calculation.setup(input,  entry=entry,
                                              configuration=cnfg_name,
                                              path=lowspin_dir,
-                                             settings=settings,
                                              **kwargs)
 
             # Return atoms to the low-spin configuration
@@ -326,18 +318,11 @@ def static(entry, xc_func='PBE', **kwargs):
     # Get path to CHGCAR
     chgcar_path = calc.path
 
-    # If any settings have been passed as keyword arguments from the 'parent'
-    # Task, pass it on specifically as the 'settings' argument to setup
-    settings = {}
-    if 'settings' in kwargs:
-        settings = kwargs['settings']
-
     # Set up calculation
     calc = Calculation.setup(input, entry=entry,
                                     configuration=cnfg_name,
                                     path=calc_dir,
                                     chgcar=chgcar_path,
-                                    settings=settings,
                                     **kwargs)
 
     # Special Case: Set Co to low-spin configuration
@@ -394,11 +379,13 @@ def wavefunction(entry, **kwargs):
 
     # Use the same input structure as input into our calculation
     input = calc.input
+
+
     calc = Calculation.setup(input, entry=entry,
                                     configuration='static',
                                     path=entry.path+'/hybrids/wavefunction',
+                                    settings={'lwave': True},
                                     chgcar=entry.path+'/static',
-                                    settings={'lwave':True},
                                     **kwargs)
 
     # Save the calculation and exit
@@ -429,12 +416,13 @@ def hybrid(entry, **kwargs):
     # Run all the requested calculations
     calcs = []
     default = ['b3lyp', 'hse06', 'pbe0', 'vdw']
+
     for hybrid in kwargs.get('forms', default):
         calc = Calculation.setup(input, entry=entry,
                                     configuration=hybrid,
                                     path=entry.path+'/hybrids/'+hybrid,
+                                    settings={'lwave': True},
                                     wavecar=wave,
-                                    settings={'lwave':True},
                                     **kwargs)
         calcs.append(calc)
     return calcs

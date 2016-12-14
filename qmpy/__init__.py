@@ -307,8 +307,8 @@ try:
         read_hubbards()
 
     # sync resources
-    if not User.objects.exists():
-        sync_resources()
+    ###if not User.objects.exists():
+    ###    sync_resources()
 
     # global_warning and global_info created to alert users, dispense info on
     # the OQMD website in the form of pagewidth-spanning banners

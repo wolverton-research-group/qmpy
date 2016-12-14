@@ -1461,8 +1461,8 @@ class Calculation(models.Model):
                         'ulimit -s unlimited']),
                     'mpi':'mpirun -machinefile $PBS_NODEFILE -np $NPROCS',
                     'binary':'vasp_53',
-                    'pipes':' > stdout.txt 2> stderr.txt',
-                    'footer':'\n'.join(['gzip -f CHGCAR OUTCAR PROCAR ELFCAR',
+                    'pipes':' >stdout.txt 2>stderr.txt',
+                    'footer':'\n'.join(['gzip -f CHGCAR OUTCAR PROCAR',
                         'rm -f WAVECAR CHG',
                         'date +%s'])
                     }
@@ -1746,6 +1746,9 @@ class Calculation(models.Model):
         vasp_settings = {}
         # load the default settings for the configuration
         vasp_settings.update(VASP_SETTINGS[configuration])
+        # update it with parallelization tags passed on by the parent Task
+        if 'parallelization' in kwargs:
+            vasp_settings.update(kwargs['parallelization'])
         # update it with settings passed as argument during function call
         vasp_settings.update(settings)
 

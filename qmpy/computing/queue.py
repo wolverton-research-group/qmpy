@@ -197,7 +197,7 @@ class Task(models.Model):
                     parallelization_tags['kpar'] = 4
                 elif host.ppn%2 == 0:
                     parallelization_tags['kpar'] = 2
-        self.kwargs['settings'] = parallelization_tags
+        self.kwargs['parallelization'] = parallelization_tags
 
         calc = self.entry.do(self.module, **self.kwargs)
 
@@ -205,9 +205,10 @@ class Task(models.Model):
         if not allocation is None:
             if allocation.name == 'b1004':
                 # Can only run parallel VASP on b1004 allocation
-                calc.instructions['serial'] = False
-                calc.instructions['binary'] = 'vasp_53'
-                calc.instructions['mpi'] = 'mpirun -machinefile $PBS_NODEFILE -np $NPROCS'
+                calc.instructions.update({'serial': False,
+                                          'binary': 'vasp_53',
+                                          'mpi': 'mpirun -machinefile $PBS_NODEFILE -np $NPROCS'
+                                         })
 
             if allocation.name == 'babbage':
                 # Check if calculation is parallel
@@ -219,23 +220,23 @@ class Task(models.Model):
                 # Sheel doesn't have access to b1004 binaries
                 calc.instructions['binary'] = '~/vasp_53'
 
-            if host.name == 'edison_shared': 
+            if host.name == 'edison_shared':
                 # testing edison shared memory queue
-                calc.instructions['serial'] = False
-                calc.instructions['binary'] = 'vasp_535_O1'
-                calc.instructions['mpi'] = 'srun -n $NPROCS'
-                calc.instructions['walltime'] = 172800
+                calc.instructions.update({'serial': False,
+                                          'binary': 'vasp_535_O1',
+                                          'mpi': 'srun -n $NPROCS',
+                                          'walltime': 3600*48
+                                         })
 
         jobs = []
         # for calc in calcs:
         if calc.instructions:
             self.state = 1
             new_job = Job.create(
-                path=calc.path,
                 task=self,
                 allocation=allocation,
-                account=account,
                 entry=self.entry,
+                account=account,
                 **calc.instructions)
             jobs.append(new_job)
             calc.save()
@@ -305,7 +306,7 @@ class Job(models.Model):
     @staticmethod
     def create(task=None, allocation=None, entry=None,
             account=None,
-            path=None, 
+            path=None,
             walltime=3600, serial=None,
             header=None,
             mpi=None, binary=None, pipes=None,
@@ -328,7 +329,7 @@ class Job(models.Model):
         #     ppn = job.account.host.ppn
         #     nodes = 1+int(walltime/float(job.account.host.walltime))
         #     walltime = walltime/float(ppn*nodes)
-        
+
         if serial:
             ppn = 1
             nodes = 1
@@ -340,8 +341,9 @@ class Job(models.Model):
         else:
             nodes = 1
             ppn = job.account.host.ppn
-            walltime = job.account.host.walltime
-            
+            if walltime is None:
+                walltime = job.account.host.walltime
+
         binary = job.account.host.get_binary(binary)
         if not binary:
             print "VASP binary not found for host %s" %(job.account.host.name)
@@ -351,15 +353,15 @@ class Job(models.Model):
         d = datetime(1,1,1) + sec
         job.walltime = d
         walltime = '%02d:%02d:%02d:%02d' % (
-                d.day-1, 
-                d.hour, 
+                d.day-1,
+                d.hour,
                 d.minute,
                 d.second)
 
         # edison sbatch throws a hissy fit for walltimes with days
-        if job.account.host.name == 'edison':
+        if 'edison' in job.account.host.name:
             walltime = '%02d:%02d:%02d' % (
-                    (d.day-1)*24, 
+                    (d.day-1)*24,
                     d.minute,
                     d.second)
 
@@ -404,7 +406,12 @@ class Job(models.Model):
     def description(self):
         uniq = ''
         if self.task.kwargs:
-            uniq = '_' + '_'.join(['%s:%s' % (k, v) for k, v in self.task.kwargs.items()])
+            # ignore the parallelization kwargs
+            for k, v in self.task.kwargs.items():
+                if k == 'parallelization':
+                    continue
+                uniq = '_' + '_'.join(['%s:%s' % (k, v)])
+
         return '{entry}_{subdir}{uniq}'.format(
                 entry=self.entry.id,
                 subdir=self.subdir.strip('/').replace('/','_'),

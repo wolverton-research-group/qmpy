@@ -60,8 +60,8 @@ class JobManager(daemon.Daemon):
         while True:
             ddb.reset_queries()
             jobs = queue.Job.objects.filter(state=1, account__host__state=1,
-                    created__lt=datetime.now() - timedelta(seconds=-200000000))
-            for job in jobs:    
+                    created__lt=datetime.now() - timedelta(seconds=-86400))
+            for job in jobs:
                 check_die()
                 if job.is_done():
                     jlogger.info('Collected %s' % job)
@@ -106,7 +106,7 @@ class TaskManager(daemon.Daemon):
             tasks = host.get_tasks(project=project)
             if not tasks:
                 tlogger.debug('No tasks remaining')
-                return 
+                return
             task = tasks[0]
             self.handle_task(task, host)
 
@@ -127,7 +127,7 @@ class TaskManager(daemon.Daemon):
         except Exception, err:
             task.hold()
             task.save()
-            tlogger.warn('Unknown error processing task: %s' % err)
+            tlogger.warn('Unknown error processing task (get_jobs()): %s' % err)
             return
 
         if not jobs:
@@ -143,7 +143,7 @@ class TaskManager(daemon.Daemon):
                 check_die()
                 try:
                     job.submit()
-                    if job.account.host == 'quest':
+                    if job.account.host.name == 'quest':
                         time.sleep(5)
                 except Exception:
                     tlogger.warn('Submission error, waiting 30 seconds'
@@ -153,6 +153,7 @@ class TaskManager(daemon.Daemon):
                     nattempts += 1
             job.save()
             host.utilization += job.ncpus
+            host.save()
             tlogger.info('Submitted: %s (Entry %s)' % (task.id, task.entry.id))
 
         task.save()
@@ -162,5 +163,5 @@ class TaskManager(daemon.Daemon):
             except Exception, err:
                 task.hold()
                 task.save()
-                tlogger.warn('Unknown error processing task: %s' % err)
+                tlogger.warn('Unknown error processing task (transaction): %s' % err)
 

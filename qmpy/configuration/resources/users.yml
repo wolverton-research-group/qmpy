@@ -1,14 +1,16 @@
+### Format ###
 # user1:
-    #   hostname1:
-    #       run_path:/where/to/run/on/host1
-    #       username: usernameonhost1
-    #   hostname2: 
-    #       run_path:/where/to/run/on/host2
-    #       username: usernameonhost2
-    # user2:
-    #   hostname1: ...
+#   hostname1:
+#       run_path:/where/to/run/on/host1
+#       username: usernameonhost1
+#   hostname2:
+#       run_path:/where/to/run/on/host2
+#       username: usernameonhost2
+# user2:
+#   hostname1: ...
     
 vih173:
-  edison:
+  edison_shared:
     run_path: /scratch2/scratchdirs/vih173/oqmd_autorun
     username: vih173
+  email: hegdevinayi@gmail.com
