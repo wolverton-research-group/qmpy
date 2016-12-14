@@ -104,7 +104,8 @@ class User(AbstractUser):
 
         msg = 'Does user %s have an account on %s? [y/n]: '
         msg2 = 'What is %s\'s username on %s?: '
-        msg3 = 'On %s@%s where should calculations be run? (absolute path): '
+        msg3 = 'What is %s\'s home folder on %s? (absolute path): [default=/home/%s]'
+        msg4 = 'On %s@%s where should calculations be run? (absolute path): '
         known = self.account_set.values_list('host__name', flat=True)
         for host in Host.objects.exclude(name__in=known):
             ans = raw_input(msg % (self.username, host.name))
@@ -116,7 +117,11 @@ class User(AbstractUser):
             if not new:
                 print 'Account exists!'
                 continue
-            path = raw_input(msg3 % (self.username, host.name))
+            home = raw_input(msg3 % (self.username, host.name, self.username))
+            if home == '':
+                home = '/home/%s' %self.username
+            acct.user_home = home
+            path = raw_input(msg4 % (self.username, host.name))
             acct.run_path = path
             acct.username = uname.strip()
             acct.save()
@@ -435,6 +440,7 @@ class Account(models.Model):
     user = models.ForeignKey(User)
     host = models.ForeignKey(Host)
     username = models.CharField(max_length=255)
+    user_home = models.CharField(max_length=255)
     run_path = models.TextField()
     state = models.IntegerField(default=1)
 
@@ -453,36 +459,37 @@ class Account(models.Model):
         except cls.DoesNotExist:
             return Account(host=host, user=user)
 
-    def create_passwordless_ssh(self, key='id_dsa', origin=None):
+    def create_passwordless_ssh(self, key='id_rsa', origin=None):
         msg = 'password for {user}@{host}: '
         if origin is None:
             origin = '/home/{user}/.ssh'.format(user=getpass.getuser())
 
         pas = getpass.getpass(msg.format(user=self.username, host=self.host.name))
         msg = '/usr/bin/ssh {user}@{host} touch'
-        msg += ' /home/{user}/.ssh/authorized_keys'
-        p = pexpect.spawn(msg.format(
-                    origin=origin, key=key, 
-                    user=self.username, host=self.host.ip_address))
+        msg += ' {user_home}/.ssh/authorized_keys'
+        p = pexpect.spawn(msg.format(user=self.username,
+                                     host=self.host.ip_address,
+                                     user_home=self.user_home))
         p.expect('assword:')
         p.sendline(pas)
         time.sleep(2)
         p.close()
 
-        msg = '/usr/bin/scp {origin}/{key} {user}@{host}:/home/{user}/.ssh/'
+        msg = '/usr/bin/scp {origin}/{key} {user}@{host}:{user_home}/.ssh/'
         p = pexpect.spawn(msg.format(
-                    origin=origin, key=key, 
-                    user=self.username, host=self.host.ip_address))
+                    origin=origin, key=key,
+                    user=self.username, host=self.host.ip_address,
+                    user_home=self.user_home))
         p.expect('assword:')
         p.sendline(pas)
         time.sleep(2)
         p.close()
 
         msg = '/usr/bin/ssh {user}@{host}'
-        msg += ' chmod 600 /home/{user}/.ssh/authorized_keys'
+        msg += ' chmod 600 {user_home}/.ssh/authorized_keys'
         p = pexpect.spawn(msg.format(
-                    origin=origin, key=key, 
-                    user=self.username, host=self.host.ip_address))
+                    user=self.username, host=self.host.ip_address,
+                    user_home=self.user_home))
         p.expect('assword:')
         p.sendline(pas)
         time.sleep(2)
@@ -490,7 +497,7 @@ class Account(models.Model):
 
         msg = '/usr/bin/ssh-copy-id -i {origin}/{key} {user}@{host}'
         p = pexpect.spawn(msg.format(
-                    origin=origin, key=key, 
+                    origin=origin, key=key,
                     user=self.username, host=self.host.ip_address))
         p.expect('assword:')
         p.sendline(pas)
