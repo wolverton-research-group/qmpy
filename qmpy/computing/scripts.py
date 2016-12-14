@@ -194,6 +194,12 @@ def relaxation(entry, xc_func='PBE', **kwargs):
         if entry.calculations.get(cnfg_name, Calculation()).converged:
             return entry.calculations[cnfg_name]
 
+    # If any settings have been passed as keyword arguments from the 'parent'
+    # Task, pass it on specifically as the 'settings' argument to setup
+    settings = {}
+    if 'settings' in kwargs:
+        settings = kwargs['settings']
+
     # Check if the calculation is converged / started
     if not entry.calculations.get(cnfg_name, Calculation()).converged:
         input = entry.input.copy()
@@ -202,6 +208,7 @@ def relaxation(entry, xc_func='PBE', **kwargs):
         calc = Calculation.setup(input,  entry=entry,
                                          configuration=cnfg_name,
                                          path=path,
+                                         settings=settings,
                                          **kwargs)
 
         entry.calculations[cnfg_name] = calc
@@ -231,6 +238,7 @@ def relaxation(entry, xc_func='PBE', **kwargs):
             calc = Calculation.setup(input,  entry=entry,
                                              configuration=cnfg_name,
                                              path=lowspin_dir,
+                                             settings=settings,
                                              **kwargs)
 
             # Return atoms to the low-spin configuration
@@ -318,11 +326,18 @@ def static(entry, xc_func='PBE', **kwargs):
     # Get path to CHGCAR
     chgcar_path = calc.path
 
+    # If any settings have been passed as keyword arguments from the 'parent'
+    # Task, pass it on specifically as the 'settings' argument to setup
+    settings = {}
+    if 'settings' in kwargs:
+        settings = kwargs['settings']
+
     # Set up calculation
     calc = Calculation.setup(input, entry=entry,
                                     configuration=cnfg_name,
                                     path=calc_dir,
                                     chgcar=chgcar_path,
+                                    settings=settings,
                                     **kwargs)
 
     # Special Case: Set Co to low-spin configuration

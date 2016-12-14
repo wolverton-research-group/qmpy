@@ -157,7 +157,7 @@ class Task(models.Model):
         a list of :class:`Job` objects accordingly.
 
         Calls the task's entry's "do" method with the `Task.module` as the
-        first argument, and passing `Task.kwargs` as keyword arguments. 
+        first argument, and passing `Task.kwargs` as keyword arguments.
 
         Returns:
             List of Job objects. When nothing is left to do for the
@@ -188,6 +188,17 @@ class Task(models.Model):
             elif allocation is not None:
                 account = allocation.get_account(users=list(project.users.all()))
 
+        # Set VASP parallelization tags based on the host
+        parallelization_tags = {}
+        if host is not None:
+            if host.ppn is not None:
+                parallelization_tags ['ncore'] = host.ppn
+                if host.ppn%4 == 0:
+                    parallelization_tags['kpar'] = 4
+                elif host.ppn%2 == 0:
+                    parallelization_tags['kpar'] = 2
+        self.kwargs['settings'] = parallelization_tags
+
         calc = self.entry.do(self.module, **self.kwargs)
 
         # Special case: Adjustments for certain clusters
@@ -208,7 +219,7 @@ class Task(models.Model):
                 # Sheel doesn't have access to b1004 binaries
                 calc.instructions['binary'] = '~/vasp_53'
 
-            if allocation.name == 'alcc': 
+            if host.name == 'edison_shared': 
                 # testing edison shared memory queue
                 calc.instructions['serial'] = False
                 calc.instructions['binary'] = 'vasp_535_O1'
@@ -221,8 +232,8 @@ class Task(models.Model):
             self.state = 1
             new_job = Job.create(
                 path=calc.path,
-                task=self, 
-                allocation=allocation, 
+                task=self,
+                allocation=allocation,
                 account=account,
                 entry=self.entry,
                 **calc.instructions)

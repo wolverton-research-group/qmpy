@@ -113,7 +113,7 @@ class TaskManager(daemon.Daemon):
     def handle_task(self, task, host):
         os.umask(022)
         t0 = time.time()
-        tlogger.info('Processing: Task %s (Entry %s)' % 
+        tlogger.info('Processing: Task %s (Entry %s)' %
                 (task.id, task.entry.id))
         try:
             jobs = task.get_jobs(host=host)
@@ -132,7 +132,7 @@ class TaskManager(daemon.Daemon):
 
         if not jobs:
             task.complete()
-            tlogger.info('Finished: Task %s (Entry %s)' % 
+            tlogger.info('Finished: Task %s (Entry %s)' %
                     (task.id, task.entry.id))
 
         for job in jobs:

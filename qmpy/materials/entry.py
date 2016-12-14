@@ -527,7 +527,7 @@ class Entry(models.Model):
         Looks for a computing script matching the first argument, and attempts
         to run it with itself as the first argument. Sends args and kwargs
         to the script. Should return a Calculation object, or list of
-        Calculation objects. 
+        Calculation objects.
 
         Examples::
 

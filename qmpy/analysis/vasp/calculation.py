@@ -408,6 +408,7 @@ class Calculation(models.Model):
         # VASP_INCAR_TAGS read from configuration/vasp_incar_format/incar_tag_groups.yml
         for block, tags in VASP_INCAR_TAGS.items():
             incar += '### {title} ###\n'.format(title=block)
+            # if parallelization tags have been pased as kwargs, print them
             for tag in tags:
                 if tag not in self.settings.keys():
                     continue
