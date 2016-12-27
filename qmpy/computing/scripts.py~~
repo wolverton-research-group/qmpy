@@ -379,13 +379,11 @@ def wavefunction(entry, **kwargs):
 
     # Use the same input structure as input into our calculation
     input = calc.input
-
-
     calc = Calculation.setup(input, entry=entry,
                                     configuration='static',
                                     path=entry.path+'/hybrids/wavefunction',
-                                    settings={'lwave': True},
                                     chgcar=entry.path+'/static',
+                                    settings={'lwave':True},
                                     **kwargs)
 
     # Save the calculation and exit
@@ -416,7 +414,6 @@ def hybrid(entry, **kwargs):
     # Run all the requested calculations
     calcs = []
     default = ['b3lyp', 'hse06', 'pbe0', 'vdw']
-
     for hybrid in kwargs.get('forms', default):
         # special instructions for HSE calculations
         if hybrid == 'hse06':
@@ -426,8 +423,8 @@ def hybrid(entry, **kwargs):
         calc = Calculation.setup(input, entry=entry,
                                     configuration=hybrid,
                                     path=entry.path+'/hybrids/'+hybrid,
-                                    settings={'lwave': True},
                                     wavecar=wave,
+                                    settings={'lwave':True},
                                     **kwargs)
         calcs.append(calc)
     return calcs
@@ -440,6 +437,6 @@ def hse06(entry, **kwargs):
         entry - Entry, OQMD entry to be computed
 
     Output:
-        list of Calculation, resultsA
+        list of Calculation, results
     '''
     return hybrid(entry, forms=['hse06'], **kwargs)

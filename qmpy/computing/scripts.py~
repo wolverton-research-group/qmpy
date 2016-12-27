@@ -418,11 +418,6 @@ def hybrid(entry, **kwargs):
     default = ['b3lyp', 'hse06', 'pbe0', 'vdw']
 
     for hybrid in kwargs.get('forms', default):
-        # special instructions for HSE calculations
-        if hybrid == 'hse06':
-            if wave.band_gap > 0:
-                # do something amazing
-
         calc = Calculation.setup(input, entry=entry,
                                     configuration=hybrid,
                                     path=entry.path+'/hybrids/'+hybrid,
