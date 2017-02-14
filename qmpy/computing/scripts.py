@@ -429,6 +429,11 @@ def hybrid(entry, **kwargs):
                 pass
             else:
                 pass
+        # special instructions for HSE calculations
+        if hybrid == 'hse06':
+            if wave.band_gap > 0:
+                # do something amazing
+
         calc = Calculation.setup(input, entry=entry,
                                     configuration=hybrid,
                                     path=entry.path+'/hybrids/'+hybrid,
