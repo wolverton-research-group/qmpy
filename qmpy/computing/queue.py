@@ -110,14 +110,14 @@ class Task(models.Model):
 
     @staticmethod
     def create(entry, module='static', kwargs={},
-            priority=None, projects=None): 
+            priority=None, projects=None):
         if projects is None:
             projects = entry.projects
         elif isinstance(projects, basestring):
             projects = Project.objects.get(name=projects)
         if priority is None:
             priority = len(entry.input)
-        task, created = Task.objects.get_or_create(entry=entry, 
+        task, created = Task.objects.get_or_create(entry=entry,
                 kwargs=kwargs, module=module)
         if created:
             task.projects = projects
@@ -191,8 +191,10 @@ class Task(models.Model):
         # Set VASP parallelization tags based on the host
         parallelization_tags = {}
         if host is not None:
-            if host.ppn is not None:
-                parallelization_tags ['ncore'] = host.ppn
+            if host.name == 'edison_alcc':
+                parallelizaiton_tags['kpar'] = 4 #### number of nodes ####
+            elif host.ppn is not None:
+                parallelization_tags['ncore'] = host.ppn
                 if host.ppn%4 == 0:
                     parallelization_tags['kpar'] = 4
                 elif host.ppn%2 == 0:
@@ -224,9 +226,14 @@ class Task(models.Model):
                 # testing edison shared memory queue
                 calc.instructions.update({'serial': False,
                                           'binary': 'vasp_535_O1',
-                                          'mpi': 'srun -n $NPROCS',
-                                          'walltime': 3600*48
+                                          'mpi': 'srun -n $NPROCS'
                                          })
+            if host.name == 'edison_alcc':
+                calc.instructions.update({'serial': False,
+                                          'binary': 'vasp_hse',
+                                          'mpi': 'srun -n $SLURM_NTASKS'
+                                         })
+
 
         jobs = []
         # for calc in calcs:
@@ -321,15 +328,6 @@ class Job(models.Model):
                 entry=entry,
                 task=task)
 
-        # if walltime < 3600:
-        #     nodes = 1
-        #     ppn = int(walltime/3600.*job.account.host.ppn)
-        #     walltime = walltime/ppn
-        # else:
-        #     ppn = job.account.host.ppn
-        #     nodes = 1+int(walltime/float(job.account.host.walltime))
-        #     walltime = walltime/float(ppn*nodes)
-
         if serial:
             ppn = 1
             nodes = 1
@@ -361,7 +359,7 @@ class Job(models.Model):
         # edison sbatch throws a hissy fit for walltimes with days
         if 'edison' in job.account.host.name:
             walltime = '%02d:%02d:%02d' % (
-                    (d.day-1)*24,
+                    d.hour,
                     d.minute,
                     d.second)
 

@@ -144,11 +144,11 @@ class TaskManager(daemon.Daemon):
                 try:
                     job.submit()
                     if job.account.host.name == 'quest':
-                        time.sleep(5)
-                except Exception:
+                        time.sleep(10)
+                except Exception, err:
                     tlogger.warn('Submission error, waiting 30 seconds'
-                            ' (Host %s), Task: %s, Entry: %s' % (host.name,
-                                task.id, task.entry.id))
+                                 ' (Host %s), Task: %s, Entry: %s\nE: %s' % (
+                                 host.name, task.id, task.entry.id, err))
                     check_die(30)
                     nattempts += 1
             job.save()

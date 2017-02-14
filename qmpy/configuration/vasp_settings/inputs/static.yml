@@ -12,12 +12,13 @@ nelm: 60
 ismear: -5
 sigma: 0.15
 lasph: True
+ibrion: -1
 isif: 2
 nsw: 0
 ispin: 1
-emin: -10.0
-emax: 10.0
-nedos: 2001
+emin: -15.0
+emax: 15.0
+nedos: 3001
 lorbit: 11
 lcharg: True
 lvtot: True

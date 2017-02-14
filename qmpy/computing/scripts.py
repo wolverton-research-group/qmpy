@@ -333,16 +333,22 @@ def static(entry, xc_func='PBE', **kwargs):
 
     # Store calculation in Entry list
     entry.calculations[cnfg_name] = calc
+    entry.save()
+
+    if not calc.converged:
+        calc.write()
 
     # Save calculation [ LW 20Jan16: Only for PBE for now ]
-    if calc.converged and xc_func.lower() == 'pbe':
-        f = calc.get_formation() # LW 16 Jan 2016: Need to rewrite this to have
-        # separate hulls for LDA / PBE / ...
-        f.save()
-        ps = PhaseSpace(calc.input.comp.keys())
-        ps.compute_stabilities(reevaluate=True, save=True)
-    else:
-        calc.write()
+    # Uncomment after the chemical potentials runs are done
+    # [vh]
+###    if calc.converged and xc_func.lower() == 'pbe':
+###        f = calc.get_formation() # LW 16 Jan 2016: Need to rewrite this to have
+###        # separate hulls for LDA / PBE / ...
+###        f.save()
+###        ps = PhaseSpace(calc.input.comp.keys())
+###        ps.compute_stabilities(reevaluate=True, save=True)
+###    else:
+###        calc.write()
     return calc
 
 def static_lda(entry, **kwargs):
@@ -365,9 +371,9 @@ def wavefunction(entry, **kwargs):
 
     Input:
         entry - Entry, OQMD entry to be computed
-    
+
     Output:
-        Calculation, result 
+        Calculation, result
     '''
     if entry.calculations.get('wavefunction', Calculation()).converged:
         return entry.calculations['wavefunction']
@@ -380,9 +386,8 @@ def wavefunction(entry, **kwargs):
     # Use the same input structure as input into our calculation
     input = calc.input
 
-
     calc = Calculation.setup(input, entry=entry,
-                                    configuration='static',
+                                    configuration='wavefunction', ### Mohan ###
                                     path=entry.path+'/hybrids/wavefunction',
                                     settings={'lwave': True},
                                     chgcar=entry.path+'/static',
@@ -393,6 +398,7 @@ def wavefunction(entry, **kwargs):
     if not calc.converged:
         calc.write()
     return calc
+
 
 def hybrid(entry, **kwargs):
     '''
@@ -418,6 +424,11 @@ def hybrid(entry, **kwargs):
     default = ['b3lyp', 'hse06', 'pbe0', 'vdw']
 
     for hybrid in kwargs.get('forms', default):
+        if hybrid == 'hse06':
+            if wave.band_gap > 0:
+                pass
+            else:
+                pass
         calc = Calculation.setup(input, entry=entry,
                                     configuration=hybrid,
                                     path=entry.path+'/hybrids/'+hybrid,

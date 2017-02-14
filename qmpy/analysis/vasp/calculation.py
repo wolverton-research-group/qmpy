@@ -98,6 +98,7 @@ class Calculation(models.Model):
         | magmom_pa: Magnetic moment per atom. (mu_b/atom)
         | natoms: # of atoms in the input.
         | nsteps: # of ionic steps.
+        | nelecsteps: # of electronic steps.
         | path: Calculation path.
         | runtime: Runtime in seconds.
         | settings: dictionary of VASP settings.
@@ -142,6 +143,9 @@ class Calculation(models.Model):
     #= progress/completion =#
     attempt = models.IntegerField(default=0, blank=True, null=True)
     nsteps = models.IntegerField(blank=True, null=True)
+    ### uncomment in the non-test qmdb
+    ### [vh]
+    ###nelecsteps = models.IntegerField(blank=True, null=True)
     converged = models.NullBooleanField(null=True)
     runtime = models.FloatField(blank=True, null=True)
 
@@ -618,6 +622,12 @@ class Calculation(models.Model):
         self.get_outcar()
         self.nsteps = len([ l for l in self.outcar if 'free  energy' in l ])
         return self.nsteps
+
+    def read_n_electronic(self):
+        """Reads the number of electronic steps, and assigns the value to nelecsteps."""
+        self.get_outcar()
+        self.nelecsteps = len([ l for l in self.outcar if 'LOOP:' in l ])
+        return self.nelecsteps
 
     def read_input_structure(self):
         if os.path.exists(self.path+'/POSCAR'):
@@ -1251,7 +1261,7 @@ class Calculation(models.Model):
         if not errors or errors == ['found no errors']:
             logger.info('Found no errors')
             return self
-        
+
         #if self.label == '':
         #    self.set_label(os.path.basename(self.path))
         new_calc = self.copy()
@@ -1444,7 +1454,7 @@ class Calculation(models.Model):
 
     @property
     def estimate(self):
-        return 72*8*3600
+        return 3600*self.input.natoms/2.
 
     _instruction = {}
     @property
@@ -1807,7 +1817,9 @@ class Calculation(models.Model):
 
         # Did the calculation finish without errors?
         if calc.converged:
-            calc.calculate_stability()
+            ### uncomment after the chemical potential calculations are all done
+            ### [vh]
+            ###calc.calculate_stability()
             return calc
         elif not calc.errors:
             calc.write()

@@ -105,7 +105,7 @@ check_precalc()
     touch PRECALC
     # If you want to edit your own default PRECALC settings, you can uncomment and edit these lines.
     echo "INCLUDEGAMMA=TRUE" >> PRECALC
-    echo "MINDISTANCE=60" >> PRECALC
+    echo "MINDISTANCE=50" >> PRECALC
     #echo "KPPRA=8000" >> PRECALC
     echo "Generating grids..."
     precalc_default="TRUE"

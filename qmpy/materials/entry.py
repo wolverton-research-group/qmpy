@@ -593,7 +593,7 @@ class Entry(models.Model):
         self._calculations = None
 
         for task in self.tasks:
-            task.state = 0 
+            task.state = 0
             task.save()
 
         for job in self.job_set.filter(state=1):

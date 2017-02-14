@@ -22,7 +22,6 @@ import threading
 
 logger = logging.getLogger(__name__)
 
-
 def is_yes(string):
     char = string.lower()[0]
     if char == 'n':
@@ -193,7 +192,7 @@ class Host(models.Model):
         host['ip_address'] = raw_input('IP Address:')
         if Host.objects.filter(ip_address=host['ip_address']).exists():
             print 'Host at that address already exists!'
-            exit(-1)
+            ##exit(-1)
         host['ppn'] = raw_input('Processors per node:')
         host['nodes'] = raw_input('Max nodes to run on:')
         host['sub_script'] = raw_input('Command to submit a script '
@@ -334,7 +333,7 @@ class Host(models.Model):
 
     def check_running(self):
         """
-        Uses the hosts data and one of the associated accounts to check the PBS
+        Uses the hosts data and one of the associated accounts to check the
         queue on the Host. If it has been checked in the last 2 minutes, it
         will return the previously returned result.
 
@@ -345,11 +344,15 @@ class Host(models.Model):
             self.save()
             return
         account = random.choice(self.accounts)
-        raw_data = account.execute(self.check_queue)
+        user_tag = ''
+        if any([e in self.check_queue for e in ['sqs', 'squeue']]):
+            user_tag = ' -u %s' % account.username
+        raw_data = account.execute(self.check_queue+user_tag)
         running = {}
         if not raw_data:
             return
-        if 'showq' in self.check_queue: # pbs showq case
+        # pbs
+        if 'showq' in self.check_queue:
             for line in raw_data.split('\n'):
                 if 'Active Jobs' in line:
                     continue
@@ -363,13 +366,28 @@ class Host(models.Model):
                             'proc':int(line[3])}
                 except:
                     pass
-        else: # slurm squeue case
-            for line in raw_data.split('\n'):
+        # slurm
+        elif 'sqs' in self.check_queue:
+            for line in raw_data.strip().split('\n'):
+                # for Host:edison_shared, consider only 'shared' partition
+                if self.name == 'edison_shared':
+                    if 'shared' not in line:
+                        continue
                 if 'JOBID' in line:
                     continue
                 line = line.split()
-                if len(line) != 11:
+                try:
+                    running[int(line[0])] = {
+                            'user':line[3],
+                            'state':line[1],
+                            'proc':int(line[5])*self.ppn}
+                except:
+                    pass
+        elif 'squeue' in self.check_queue:
+            for line in raw_data.strip().split('\n'):
+                if 'JOBID' in line:
                     continue
+                line = line.split()
                 try:
                     running[int(line[0])] = {
                             'user':line[1],
@@ -379,7 +397,7 @@ class Host(models.Model):
                     pass
         self.running = running
         self.save()
-        
+
     def get_running(self):
         if self.running is not None:
             return self.running
@@ -391,7 +409,7 @@ class Host(models.Model):
         Allow jobs to be run on this system. Remember to save() to enact change
         """
         self.state = 1
-    
+
     def deactivate(self):
         """
         Prevent new jobs from being started on this system. 

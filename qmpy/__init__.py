@@ -114,6 +114,7 @@ from analysis.symmetry import *
 from analysis.vasp import *
 from computing import *
 from data import *
+from configuration.resources import *
 
 import yaml
 import os
@@ -245,6 +246,7 @@ def sync_resources():
         user.save()
 
         for host, adata in data.items():
+            print host, adata
             host = Host.get(host)
             host.save()
             acc = Account.get(user, host)
