@@ -79,7 +79,7 @@ except ImportError:
     logging.warn('Failed to import matplotlib')
 
 try:
-    import pyspglib 
+    import pyspglib
     FOUND_SPGLIB = True
 except ImportError:
     logging.warn("Failed to import pyspglib."

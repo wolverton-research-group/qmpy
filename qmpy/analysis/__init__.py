@@ -1,7 +1,7 @@
 from nearest_neighbors import *
 from miedema import *
 from pdf import PDF
-from network import *
+from networkx import *
 from xrd import XRD, Peak
 from griddata import GridData
 from elastic import *
