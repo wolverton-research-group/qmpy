@@ -5,17 +5,26 @@ from django.core.context_processors import csrf
 
 from qmpy import INSTALL_PATH
 from qmpy.models import *
+import logging
+
+logger = logging.getLogger(__name__)
 
 def task_view(request, task_id):
     task = Task.objects.get(id=task_id)
+    en = task.entry
     if request.method == 'POST':
-        for j in task.jobs.filter(state=1):
-            j.collect()
-        task.state = -2
-        task.save()
-    data = {'task':task}
-    return render_to_response('computing/task.html', 
-            data, 
+        p = request.POST
+        if "reset" in p:
+            en.hse_reset()
+            logger.info("Web reset: Entry {}".format(en.id))
+        if "cancel" in p:
+            for j in task.jobs.filter(state=1):
+                j.collect()
+            task.state = -2
+            task.save()
+    data = {'task': task}
+    return render_to_response('computing/task.html',
+            data,
             RequestContext(request))
 
 def job_view(request, job_id):

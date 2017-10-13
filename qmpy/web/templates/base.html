@@ -3,7 +3,6 @@
 <head>
 
 <title>{% block title %}{% endblock %}</title>
-
 <link rel="stylesheet" type="text/css" href="{% block stylesheet %}{% static "css/base.css" %}{% endblock %}" />
 
 {% block extrastyle %}{% endblock %}
@@ -30,6 +29,22 @@
 		});
 	});
 </script>
+<script>
+	jQuery(document).ready(function($) {
+      $(".parents-toggle > div").click(function () {
+    $(".parents-toggle > div.iteminfo-toggle").not($(this).siblings()).slideUp();
+    $(this).siblings(".iteminfo-toggle").slideToggle();
+        
+    // toggle open/close symbol
+    if($('.itemheading2_toggle span').text() == "+ " ){
+       $('.itemheading2_toggle span').text('-  ');   
+    } else {
+       $('.itemheading2_toggle span').text('+ ');
+           }
+    });
+  });
+</script>
+
 </head>
 
 {% load i18n %}

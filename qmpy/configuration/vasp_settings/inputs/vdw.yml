@@ -17,3 +17,4 @@ kppra: 8000
 gamma: True
 potentials: vasp_rec
 hubbards: wang
+kpoints_gen: TM

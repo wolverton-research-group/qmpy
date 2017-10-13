@@ -85,7 +85,7 @@
 </ul>
 
 <div>
-  <h2> Calculation History </h2>
+  <h2> Selected Calculation History </h2>
 <table>
   <thead>
     <tr>
@@ -108,11 +108,80 @@
       <td>{{calc.converged}}</td>
     </tr>
     {% endfor %}
+    {% if entry.calculations.relaxation %}
+    {% with entry.calculations.relaxation as calc %}
+    <tr class=clickableRow href="/analysis/calculation/{{calc.id}}">
+      <td>{{calc.label}}</td>
+      <td>{{calc.energy_pa | floatformat:-3}}</td>
+      <td>{{calc.band_gap | floatformat:-1}}</td>
+      <td>{{calc.output.volume_pa | floatformat:-3}}</td>
+      <td>{{calc.nsteps}}</td>
+      <td>{{calc.converged}}</td>
+    </tr>
+    {% endwith %}
+    {% endif %}
+    {% if entry.calculations.static %}
+    {% with entry.calculations.static as calc %}
+    <tr class=clickableRow href="/analysis/calculation/{{calc.id}}">
+      <td>{{calc.label}}</td>
+      <td>{{calc.energy_pa | floatformat:-3}}</td>
+      <td>{{calc.band_gap | floatformat:-1}}</td>
+      <td>{{calc.output.volume_pa | floatformat:-3}}</td>
+      <td>{{calc.nsteps}}</td>
+      <td>{{calc.converged}}</td>
+    </tr>
+    {% endwith %}
+    {% endif %}
+    {% if entry.calculations.hse06 %}
+    {% with entry.calculations.hse06 as calc %}
+    <tr class=clickableRow href="/analysis/calculation/{{calc.id}}">
+      <td>{{calc.label}}</td>
+      <td>{{calc.energy_pa | floatformat:-3}}</td>
+      <td>{{calc.band_gap | floatformat:-1}}</td>
+      <td>{{calc.output.volume_pa | floatformat:-3}}</td>
+      <td>{{calc.nsteps}}</td>
+      <td>{{calc.converged}}</td>
+    </tr>
+    {% endwith %}
+    {% endif %}
   </tbody>
 </table>
-
 </div>
-    
+
+<p>&nbsp;</p>
+
+<div>
+  <div class="parents-toggle">
+  <div class="itemheading2_toggle">
+    <h2><span class="symbol">+ </span>All Calculation History</h2>
+  </div>
+  <div class="iteminfo-toggle">
+  <table>
+  <thead>
+    <tr>
+      <th>Configuration</th>
+      <th>Total energy [eV/atom]</th>
+      <th>Band gap [eV]</th>
+      <th>Volume [&#8491;<sup>3</sup>/atom]</th>
+      <th># of ionic steps</th>
+      <th>Converged</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for calc in entry.calculation_set.all %}
+    <tr class=clickableRow href="/analysis/calculation/{{calc.id}}">
+      <td>{{calc.label}}</td>
+      <td>{{calc.energy_pa | floatformat:-3}}</td>
+      <td>{{calc.band_gap | floatformat:-1}}</td>
+      <td>{{calc.output.volume_pa | floatformat:-3}}</td>
+      <td>{{calc.nsteps}}</td>
+      <td>{{calc.converged}}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+  </table>
+  </div>
+</div>
 
 {% if entry.reference %}
 <div style=float:left>

@@ -9,9 +9,73 @@
 #       - user2
 # project2: ...
     
-icsd:
+HSE_aae109:
   allocations:
-  - alcc
+  - alcc_hse
+  priority: 0
+  users:
+  - aae109
+HSE_cwp710:
+  allocations:
+  - alcc_hse
+  priority: 11
+  users: []
+HSE_jhc585:
+  allocations:
+  - knl
+  priority: 50
+  users:
+  - jhc585
+HSE_mervyn:
+  allocations:
+  - alcc_hse
+  priority: 0
+  users:
+  - mlc152
+HSE_seangri:
+  allocations:
+  - knl
+  priority: 0
+  users:
+  - seangri
+HSE_shn898:
+  allocations:
+  - knl
+  priority: 0
+  users:
+  - shn898
+HSE_spm021:
+  allocations: []
+  priority: 0
+  users: []
+HSE_ssn492:
+  allocations: []
+  priority: 0
+  users: []
+cwp710_knl:
+  allocations:
+  - knl
+  priority: 50
+  users:
+  - cwp710
+hse_test:
+  allocations:
+  - alcc_hse
+  priority: 1
+  users:
+  - shn898
+icsd:
+  allocations: []
   priority: 0
   users:
   - vih173
+knl_test:
+  allocations:
+  - knl
+  priority: 50
+  users:
+  - mlc152
+  - cwp710
+  - jhc585
+  - seangri
+  - shn898

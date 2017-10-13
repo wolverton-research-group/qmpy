@@ -15,14 +15,24 @@
 
 <table>
   <thead>
-    <th>ID</th>
+    <th>Task ID</th>
+    <th>Entry ID</th>
     <th>Composition</th>
+    <th>Action</th>
   </thead>
   <tbody>
     {% for task in tasks %}
-    <tr class=clickableRow href="/computing/task/{{task.id}}">
-      <td>{{task.id}}</td>
-      <td>{{task.entry.name}}</td>
+    <tr>
+      <td class=clickableRow href="/computing/task/{{task.id}}">{{task.id}}</td>
+      <td class=clickableRow href="/computing/task/{{task.id}}">{{task.entry.id}}</td>
+      <td class=clickableRow href="/computing/task/{{task.id}}">{{task.entry.name}}</td>
+      {% if sname == "Failed" or sname == "Held" %}
+      <td>
+        <form action="" method="POST">{% csrf_token %}
+          <button type="submit" value="{{task.id}}" name="reset">Reset</button>
+        </form>
+      </td>
+      {% endif %}
     </tr>
     {% endfor %}
   </tbody>

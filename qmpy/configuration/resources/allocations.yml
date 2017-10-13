@@ -7,8 +7,12 @@
 #       - user2
 # allocation2: ...
     
-alcc:
-  host: edison_shared
+alcc_hse:
+  host: edison_alcc
   key: m2588
   users:
-  - vih173
+  - mlc152
+knl:
+  host: KNL
+  key: m2588
+  users: []

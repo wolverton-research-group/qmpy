@@ -34,7 +34,7 @@ if not os.path.exists(LOG_PATH):
     os.umask(oldmask)
 
 # the default log level for normal loggers
-logLevel = logging.INFO
+logLevel = logging.DEBUG
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logLevel)

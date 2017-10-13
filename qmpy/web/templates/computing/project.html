@@ -55,6 +55,9 @@
       <tr class="clickableRow" href="/computing/project/failed/{{project.name}}">
         <td>Failed</td>
         <td>{{project.failed.count}}</td></tr>
+      <tr class="clickableRow" href="/computing/project/held/{{project.name}}">
+        <td>Held</td>
+        <td>{{project.held.count}}</td></tr>
     </table>
   </div>
 </div>
@@ -68,6 +71,8 @@
         <th>Composition</th>
         <th>Running since</th>
         <th>Module</th>
+        <th># of Jobs</th>
+        <th>Status</th>
       </tr>
     </thead>
     <tbody>
@@ -77,6 +82,8 @@
         <td>{{j.entry.name}}</td>
         <td>{{j.created}}</td>
         <td>{{j.module}}</td>
+        <td>{{j.job_set.all.count}}</td>
+        <td>{{j.last_job_state}}</td>
       {% endfor %}
     </tbody>
   </table>
@@ -92,15 +99,28 @@
         <th>Composition</th>
         <th>Running since</th>
         <th>Module</th>
+        <th># of Jobs</th>
+        <th>Status</th>
+        <th>Action</th>
       </tr>
     </thead>
     <tbody>
       {% for j in project.running %}
-      <tr class=clickableRow href="/computing/task/{{j.id}}">
-        <td>{{j.entry.id}}</td>
-        <td>{{j.entry.name}}</td>
-        <td>{{j.created}}</td>
-        <td>{{j.module}}</td>
+      <tr>
+        <td class=clickableRow href="/computing/task/{{j.id}}">{{j.entry.id}}</td>
+        <td class=clickableRow href="/computing/task/{{j.id}}">{{j.entry.name}}</td>
+        <td class=clickableRow href="/computing/task/{{j.id}}">{{j.created}}</td>
+        <td class=clickableRow href="/computing/task/{{j.id}}">{{j.module}}</td>
+        <td class=clickableRow href="/computing/task/{{j.id}}">{{j.job_set.all.count}}</td>
+        <td class=clickableRow href="/computing/task/{{j.id}}">{{j.last_job_state}}</td>
+        {% if j.last_job_state != 1 %}
+         <td>
+          <form action="" method="POST">{% csrf_token %}
+            <button type="submit" value="{{j.entry.id}}" name="reset" style="float:right">Reset</button>
+          </form>
+         </td>
+        {% endif %}
+      </tr>
       {% endfor %}
     </tbody>
   </table>

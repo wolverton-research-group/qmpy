@@ -4,7 +4,7 @@
 
 /* GLOBAL DEFAULTS */
 body {
-	font-family:"Helvetica Neue", "Helvetica", Arial, Sans-Serif;
+  font-family:"Helvetica Neue", "Helvetica", Arial, Sans-Serif;
 }
 
 p, ol, ul, dl {
@@ -528,4 +528,10 @@ a.section:link, a.section:visited {
 #thermodata tr, td, input {
 	margin: 1px;
 	padding: 1px;
+}
+
+
+/*Xia added*/
+div.iteminfo-toggle {
+	display:none;
 }

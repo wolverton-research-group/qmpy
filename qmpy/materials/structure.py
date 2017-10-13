@@ -1100,20 +1100,23 @@ class Structure(models.Model, object):
         r0 = min(rec_mags)
         return np.array([ np.round(r/r0, 4) for r in rec_mags ])
 
-    def get_TM_kpoint_mesh(self):
+    def get_TM_kpoint_mesh(self, configuration=None):
         poscar = os.path.join('/tmp', 'POSCAR')
         try:
             qmpy.io.poscar.write(self, poscar)
         except:
             raise TMKPointsError('Failed to write structure into /tmp/POSCAR')
-        TM_script = os.path.join(qmpy.INSTALL_PATH, 'analysis', 'vasp', 'getKPoints')
+        if configuration in ['wavefunction', 'hse06']:
+            TM_script = os.path.join(qmpy.INSTALL_PATH, 'analysis', 'vasp','getKPoints_HSE')
+        else:
+            TM_script = os.path.join(qmpy.INSTALL_PATH, 'analysis', 'vasp', 'getKPoints')
         with change_directory('/tmp'):
             TM_stdout = subprocess.check_output(TM_script)
         if 'error' in TM_stdout.lower():
             raise TMKPointsError('Failed to get KPOINTS from the TM server')
         TM_KPOINTS = os.path.join('/tmp', 'KPOINTS')
-        kpts = open(TM_KPOINTS,'r').read()
-        return kpts
+        with open(TM_KPOINTS, 'r') as fr:
+            return fr.read()
 
     def get_kpoint_mesh_with_sympy(self, kppra):
         """

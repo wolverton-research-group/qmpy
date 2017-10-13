@@ -290,11 +290,7 @@ class Calculation(models.Model):
     @property
     def KPOINTS(self):
         set_INCAR_kpoints, kpoints = self.get_kpoints()
-        if set_INCAR_kpoints:
-            print 'k-points determined by automatically by VASP using\n\
-                    the KSPACING tag in the INCAR\n'
-            return None
-        else:
+        if not set_INCAR_kpoints:
             return kpoints
 
     @property
@@ -416,9 +412,14 @@ class Calculation(models.Model):
             for tag in tags:
                 if tag not in self.settings.keys():
                     continue
+
+                if self.settings['kpoints_gen'] == 'TM':
+                    if tag in ['kspacing', 'kgamma']:
+                        continue
+
                 incar += '%s\n' % vasp_format(tag, self.settings[tag])
 
-                # if spin-polarized, print MAGMOM after the ISPIN tag
+                # if spin-polarized, print MAGMOM
                 if tag == 'ispin':
                     if self.settings['ispin'] == 2:
                         incar += '%s\n' % self.MAGMOMS
@@ -468,13 +469,13 @@ class Calculation(models.Model):
         self.settings = settings
 
     def get_kpoints(self):
-        VASP_kpoints_autogenerate = False
-        try:
-            kpoints = self.input.get_TM_kpoint_mesh()
-        except:
-            VASP_kpoints_autogenerate = True
-            kpoints = None
-        return VASP_kpoints_autogenerate, kpoints
+        if self.settings['kpoints_gen'] == 'TM':
+            try:
+                kpoints = self.input.get_TM_kpoint_mesh(self.configuration)
+                return False, kpoints
+            except TMKPointsError:
+                pass
+        return True, None
 
     @KPOINTS.setter
     def KPOINTS(self, kpoints):
@@ -578,6 +579,28 @@ class Calculation(models.Model):
             self.outcar = outcar.splitlines()
         else:
             raise VaspError('No such file exists')
+
+    def get_qfile(self):
+        """
+        Collect information of job set up from qfile
+        """
+        if not exists(self.path):
+            raise VaspError('Calculation does not exist!')
+        elif exists(os.path.join(self.path, 'auto.q')):
+            with open(os.path.join(self.path, 'auto.q'), 'r') as fr:
+                return fr.readlines()
+        else:
+            raise VaspError('No such file exists')
+
+    @property
+    def nnodes_from_qfile(self):
+        for n, line in enumerate(self.get_qfile()):
+            if "nodes" in line:
+                tmp = re.search('(?<=nodes=)[0-9]*', line)
+                return int(tmp.group().strip())
+            elif " -N " in line:
+                tmp = re.search('(?<=-N)[\ 0-9]*', line)
+                return int(tmp.group().strip())
 
     def read_runtime(self):
         self.get_outcar()
@@ -697,7 +720,6 @@ class Calculation(models.Model):
         """
         Reads and returns VASP's calculated charges for each atom. Returns the
         RAW charge, not NET charge.
-        
         Examples::
 
             >>> calc = Calculation.read('path_to_calculation')
@@ -784,8 +806,6 @@ class Calculation(models.Model):
         for line in self.outcar:
             if 'FORCE on cell' in line:
                 check = True
-            #if check and 'Total' in line:
-            #[[mv]]
             if check and 'in kB' in line:
                 stresses.append(map(ffloat, line.split()[2:]))
                 check = False
@@ -927,13 +947,21 @@ class Calculation(models.Model):
                                   'standard']:
             basis_converged = True
 
-        if (sc_converged and 
-                ((forces_converged and check_ionic) or not check_ionic) and
-                basis_converged):
-            self.converged = True
+        # is it a relaxation?
+        if check_ionic:
+            # are forces, volume converged, SC achieved?
+            if forces_converged and basis_converged and sc_converged:
+                self.converged = True
+            else:
+                self.add_error('convergence')
+                self.converged = False
+        # if not a relaxation:
         else:
-            self.add_error('convergence')
-            self.converged = False
+            if sc_converged:
+                self.converged = True
+            else:
+                self.add_error('electronic_convergence')
+                self.converged = False
 
     def read_outcar_settings(self):
         self.get_outcar()
@@ -943,7 +971,7 @@ class Calculation(models.Model):
             ### general options
             if 'PREC' in line:
                 settings['prec'] = line.split()[2]
-            elif 'ENCUT' in line:
+            elif 'ENCUT ' in line:
                 settings['encut'] = float(line.split()[2])
             elif 'ISTART' in line:
                 settings['istart'] = int(line.split()[2])
@@ -1065,6 +1093,46 @@ class Calculation(models.Model):
                 self.hubbards.append(pot.Hubbard.get(elt, u=u, l=l))
         self.settings = settings
 
+    def check_hse_outcar(self):
+        """
+        Check if the calculation is really HSE.
+        """
+        self.get_outcar()
+        lhfcalc_in_outcar = False
+        for line in self.outcar:
+            if 'LHFCALC' in line:
+                lhfcalc_in_outcar = True
+                if line.strip().split()[2] != 'T':
+                    raise VaspError('HF tag is not on!')
+        if not lhfcalc_in_outcar:
+            raise VaspError('LHFCALC tag not found in OUTCAR')
+
+    @property
+    def max_looptime(self):
+        """
+        Return the maximum loop time
+        """
+        self.get_outcar()
+        loop = []
+        for line in self.outcar:
+            if 'LOOP:' in line:
+                tmp = re.search('(?<=cpu time)[0-9.\ ]*', line).group(0).strip()
+                loop.append(float(tmp))
+        if loop:
+            return max(loop)
+        else:
+            return 3600*4
+
+    @property
+    def kpar_from_incar(self):
+        """
+        Return KPAR from INCAR
+        """
+        for line in self.read_incar():
+            if 'KPAR' in line:
+                tmp = line.split('=')[1].strip()
+                return int(tmp)
+
     def read_stdout(self, filename='stdout.txt'):
         if not os.path.exists('%s/%s' % (self.path, filename)):
             print 'stdout file %s not found.' %(filename)
@@ -1125,9 +1193,23 @@ class Calculation(models.Model):
         self.get_outcar()
         if self.input is None:
             self.read_input_structure()
-        self.read_outcar_settings()
+        if self.configuration == 'hse06':
+            self.check_hse_outcar()
+        ##self.read_outcar_settings()
         self.read_outcar_results()
         self.read_n_ionic()
+
+    def read_incar(self):
+        """
+        Collect information of INCAR settings
+        """
+        if not exists(self.path):
+            raise VaspError('Calculation does not exist!')
+        elif exists(os.path.join(self.path, 'INCAR')):
+            with open(os.path.join(self.path, 'INCAR'), 'r') as fr:
+                return fr.readlines()
+        else:
+            raise VaspError('No such INCAR exists')
 
     def read_chgcar(self, filename='CHGCAR.gz', filetype='CHGCAR'):
         """
@@ -1255,15 +1337,15 @@ class Calculation(models.Model):
 
     def address_errors(self):
         """
-        Attempts to fix any encountered errors. 
+        Attempts to fix any encountered errors.
         """
         errors = self.errors
         if not errors or errors == ['found no errors']:
             logger.info('Found no errors')
             return self
 
-        #if self.label == '':
-        #    self.set_label(os.path.basename(self.path))
+        if not self.label:
+            self.set_label(os.path.basename(self.path))
         new_calc = self.copy()
         new_calc.set_label(self.label)
         self.set_label(self.label + '_%d' % self.attempt)
@@ -1379,9 +1461,35 @@ class Calculation(models.Model):
         self.remove_error('brmix')
 
     def fix_electronic_convergence(self):
-        if not self.settings.get('algo') == 'normal':
-            self.settings['algo'] = 'normal'
+        if 'hse06' in self.configuration:
+            if not self.nnodes_from_qfile:
+                return
+            # Estimation of finishing time: 40 electronic steps within 4 hrs
+            job_factor = max(1, int(self.max_looptime*40/(3600*4)))
+            job_factor = 2**(job_factor-1).bit_length()
+            while True:
+                if self.instructions['Nnodes']*job_factor > self.nnodes_from_qfile:
+                    break
+                job_factor *= 2
+            # This ensures that number of nodes used is always increasing
+            self.instructions.update({'job_factor': job_factor})
+            if self.instructions['fix_kpar'] is None:
+                self.settings['kpar'] *= job_factor
+            self.settings.update(self.settings)
             self.remove_error('electronic_convergence')
+
+        elif 'wavefunction' in self.configuration:
+            job_factor = 2
+            self.instructions.update({'job_factor': job_factor})
+            if self.instructions['fix_kpar'] is None:
+                self.settings['kpar'] *= job_factor
+            self.settings.update(self.settings)
+            self.remove_error('electronic_convergence')
+
+        else:
+            if not self.settings.get('algo') == 'normal':
+                self.settings['algo'] = 'normal'
+                self.remove_error('electronic_convergence')
 
     def increase_symprec(self):
         self.settings['symprec'] = 1e-7
@@ -1446,11 +1554,11 @@ class Calculation(models.Model):
             fw.write(self.POSCAR)
         with open(os.path.join(self.path, 'POTCAR'),'w') as fw:
             fw.write(self.POTCAR)
+        if self.KPOINTS is not None:
+            with open(os.path.join(self.path, 'KPOINTS'), 'w') as fw:
+                fw.write(self.KPOINTS)
         with open(os.path.join(self.path, 'INCAR'),'w') as fw:
             fw.write(self.INCAR)
-        if self.KPOINTS is not None:
-            with open(self.path+'/KPOINTS','w') as fw:
-                fw.write(self.KPOINTS)
 
     @property
     def estimate(self):
@@ -1540,8 +1648,6 @@ class Calculation(models.Model):
 
     def set_magmoms(self, ordering='ferro'):
         self.input.set_magnetism(ordering)
-        if any(self.input.magmoms):
-            self.ispin = 2
 
     def set_wavecar(self, source):
         """
@@ -1563,11 +1669,11 @@ class Calculation(models.Model):
 
         """
         if isinstance(source, Calculation):
-            source = calculation.path
+            source = source.path
 
         source = os.path.abspath(source)
         if not os.path.exists(source):
-            raise VaspError('WAVECAR does not exist at %s', source) 
+            raise VaspError('WAVECAR does not exist at %s', source)
 
         if not 'WAVECAR' in source:
             files = os.listdir(source)
@@ -1576,6 +1682,7 @@ class Calculation(models.Model):
                     new_path = '%s/%s' % (source, f)
                     self.set_wavecar(new_path)
         else:
+            logger.debug('copying %s to %s', source, self.path)
             subprocess.check_call(['cp', source, self.path])
 
     def set_chgcar(self, source):
@@ -1602,7 +1709,7 @@ class Calculation(models.Model):
 
         source = os.path.abspath(source)
         if not os.path.exists(source):
-            raise VaspError('CHGCAR does not exist at %s', source) 
+            raise VaspError('CHGCAR does not exist at %s', source)
 
         if not 'CHGCAR' in source:
             files = os.listdir(source)
@@ -1757,8 +1864,14 @@ class Calculation(models.Model):
         # load the default settings for the configuration
         vasp_settings.update(VASP_SETTINGS[configuration])
         # update it with parallelization tags passed on by the parent Task
-        if 'parallelization' in kwargs:
-            vasp_settings.update(kwargs['parallelization'])
+        vasp_settings.update(kwargs.get('parallelization', {}))
+
+        if 'kpoints_gen' in kwargs:
+            vasp_settings.update({'kpoints_gen': kwargs['kpoints_gen']})
+
+        calc.instructions.update({'fix_kpar': kwargs.get('fix_kpar', None)})
+        calc.instructions.update({'Nnodes': kwargs.get('Nnodes', 1)})
+
         # update it with settings passed as argument during function call
         vasp_settings.update(settings)
 
@@ -1777,6 +1890,8 @@ class Calculation(models.Model):
         # spin-polarized?
         if calc.MAGMOMS:
             vasp_settings.update({'ispin': 2})
+        else:
+            vasp_settings.update({'ispin': 1})
 
         # to U or not to U, that is the question
         if any(hub for hub in calc.hubbards):
@@ -1832,9 +1947,17 @@ class Calculation(models.Model):
         calc.backup()
         calc.save()
 
-        fixed_calc.set_magmoms(calc.settings.get('magnetism', 'ferro'))
+        ##fixed_calc.set_magmoms(calc.settings.get('magnetism', 'ferro'))
         fixed_calc.clear_results()
         fixed_calc.clear_outputs()
-        fixed_calc.set_chgcar(calc)
+        try:
+            fixed_calc.set_chgcar(calc)
+        except VaspError:
+            pass
+        try:
+            fixed_calc.set_wavecar(calc)
+        except VaspError:
+            pass
         fixed_calc.write()
         return fixed_calc
+

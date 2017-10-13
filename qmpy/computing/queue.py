@@ -111,14 +111,13 @@ class Task(models.Model):
     @staticmethod
     def create(entry, module='static', kwargs={},
             priority=None, projects=None):
-        if projects is None:
+        if not projects:
             projects = entry.projects
         elif isinstance(projects, basestring):
             projects = Project.objects.get(name=projects)
         if priority is None:
-            priority = len(entry.input)
-        task, created = Task.objects.get_or_create(entry=entry,
-                kwargs=kwargs, module=module)
+            priority = min(entry.natoms*4, 50)
+        task, created = Task.objects.get_or_create(entry=entry, kwargs=kwargs, module=module)
         if created:
             task.projects = projects
         else:
@@ -145,6 +144,11 @@ class Task(models.Model):
     def jobs(self):
         """List of jobs related to the task."""
         return self.job_set.all()
+
+    @property
+    def last_job_state(self):
+        if not self.job_set.all():
+            return self.job_set.all().order_by('-id')[0].state
 
     @property
     def errors(self):
@@ -188,11 +192,28 @@ class Task(models.Model):
             elif allocation is not None:
                 account = allocation.get_account(users=list(project.users.all()))
 
+        # Default keyword argument values
+        if 'Nnodes' not in self.kwargs:
+            self.kwargs['Nnodes'] = 1
+        if 'walltimehr' not in self.kwargs:
+            self.kwargs['walltimehr'] = 4
+
+        # Special parameters for KNL nodes
+        if host.name == 'KNL':
+            cpu_per_core = 4
+            cpu_per_task = 4
+            threads_per_core = 1
+            threads_per_task = cpu_per_task/cpu_per_core*threads_per_core
+
         # Set VASP parallelization tags based on the host
         parallelization_tags = {}
         if host is not None:
-            if host.name == 'edison_alcc':
-                parallelizaiton_tags['kpar'] = 4 #### number of nodes ####
+            if host.name == 'KNL':
+                parallelization_tags['kpar'] = self.kwargs.get('fix_kpar', None)
+                if not parallelization_tags['kpar']:
+                    # 4 is for Cori-KNL. This factor may change depending on the host.
+                    parallelization_tags['kpar'] = 4*self.kwargs['Nnodes']
+
             elif host.ppn is not None:
                 parallelization_tags['ncore'] = host.ppn
                 if host.ppn%4 == 0:
@@ -202,6 +223,15 @@ class Task(models.Model):
         self.kwargs['parallelization'] = parallelization_tags
 
         calc = self.entry.do(self.module, **self.kwargs)
+
+        # reduce the walltime for wavefunction calculations
+        if calc.configuration == 'wavefunction':
+            hse_walltime = 0.5*3600
+        elif calc.configuration == 'hse06':
+            hse_walltime = self.kwargs['walltimehr']*3600
+        elif calc.configuration == 'hse_relaxation':
+            hse_walltime = self.kwargs['walltimehr']*3600*2
+
 
         # Special case: Adjustments for certain clusters
         if not allocation is None:
@@ -228,10 +258,20 @@ class Task(models.Model):
                                           'binary': 'vasp_535_O1',
                                           'mpi': 'srun -n $NPROCS'
                                          })
-            if host.name == 'edison_alcc':
+            if host.name == 'KNL':
                 calc.instructions.update({'serial': False,
-                                          'binary': 'vasp_hse',
-                                          'mpi': 'srun -n $SLURM_NTASKS'
+                                          'binary': 'vasp_nersc',
+                                          'threads': threads_per_task,
+                                          'cpu_per_core': cpu_per_core,
+                                          'cpu_per_task': cpu_per_task,
+                                          'mpi': 'srun -n $mpi_task -c $cpu_per_task --cpu_bind=cores',
+                                          'walltime':hse_walltime,
+                                          'header':'\n'.join(['gunzip -f CHGCAR.gz WAVECAR.gz &> /dev/null',
+                                                             'date +%s',
+                                                             'ulimit -s unlimited']),
+                                          'footer':'\n'.join(['gzip -f CHGCAR OUTCAR PROCAR WAVECAR',
+                                                             'rm -f CHG',
+                                                             'date +%s'])
                                          })
 
 
@@ -317,7 +357,7 @@ class Job(models.Model):
             walltime=3600, serial=None,
             header=None,
             mpi=None, binary=None, pipes=None,
-            footer=None):
+            footer=None, **kwargs):
 
         if entry is None:
             entry = task.entry
@@ -337,7 +377,10 @@ class Job(models.Model):
             if job.allocation.name == 'p20747':
                 walltime = 3600*24
         else:
-            nodes = 1
+            job_factor = kwargs.get('job_factor', 1)
+            nodes = task.kwargs['Nnodes']*job_factor
+            if nodes > 256:
+                nodes = 256
             ppn = job.account.host.ppn
             if walltime is None:
                 walltime = job.account.host.walltime
@@ -357,7 +400,7 @@ class Job(models.Model):
                 d.second)
 
         # edison sbatch throws a hissy fit for walltimes with days
-        if 'edison' in job.account.host.name:
+        if any([h in job.account.host.name for h in ['edison', 'KNL']]):
             walltime = '%02d:%02d:%02d' % (
                     d.hour,
                     d.minute,
@@ -369,9 +412,10 @@ class Job(models.Model):
                 host=allocation.host.name,
                 key=allocation.key, name=job.description,
                 walltime=walltime, nodes=nodes, ppn=ppn,
-                header=header,
+                threads=threads, header=header,
                 mpi=mpi, binary=binary, pipes=pipes,
-                footer=footer)
+                footer=footer, cpu_per_core=cpu_per_core,
+                cpu_per_task=cpu_per_task)
 
         qf = open(job.path+'/auto.q', 'w')
         qf.write(qfile)
@@ -406,7 +450,7 @@ class Job(models.Model):
         if self.task.kwargs:
             # ignore the parallelization kwargs
             for k, v in self.task.kwargs.items():
-                if k == 'parallelization':
+                if k in ['parallelization', 'walltimehr', 'Nnodes', 'fix_kpar', 'kpoints_gen']:
                     continue
                 uniq = '_' + '_'.join(['%s:%s' % (k, v)])
 
@@ -424,7 +468,14 @@ class Job(models.Model):
             return False
 
         # then check to see if it is still there
-        if self.qid in self.account.host.running_now:
+        running = self.account.host.running_now
+        if not running:
+            return False
+            ### Mohan: This may cause some isssues once there are
+            ### actually no jobs running on the host.
+            ### However, to avoid some case when sbatch/squeue is
+            ### not responding, we decided to create this check.
+        elif self.qid in running:
             return False
         else:
             return True

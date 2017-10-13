@@ -37,6 +37,8 @@
       <th>State</th>
       <th>Host</th>
       <th>User</th>
+      <th>CPUs</th>
+      <th>qid</th>
       <th>Run path</th>
     </thead>
     <tbody>
@@ -46,6 +48,8 @@
         <td>{{job.state}}</td>
         <td>{{job.account.host.name}}</td>
         <td>{{job.account.user.name}}</td>
+        <td>{{job.ncpus}}</td>
+        <td>{{job.qid}}</td>
         <td>{{job.run_path}}</td>
       </tr>
       {% endfor %}
@@ -57,9 +61,20 @@
 {% block sidebar %}
 <div id="sidebar" class="box">
   <h1> Control panel </h1>
+  <h2> Cancel Task</h2>
   <form action="" method="post">{% csrf_token %}
     If you press this button, this task will be cancelled. Any related jobs will still finish, but no subsequent calculations will be started. Don't press it unless you mean it!
-    <input type="button" value="Cancel Task" onclick="this.form.submit();">
+    <input type="submit" value="Cancel Task" name="cancel">
+    <!-- <input type="button" value="Cancel Task" onclick="this.form.submit();"> -->
   </form>
+
+
+  {% if task.state < 0 %}
+    <h2> Reset HSE job</h2>
+    <form action="" method="post">{% csrf_token %}
+      CAUTION! This would ERASE all the previous HSE tasks/jobs/calculations/files/folders, and then submit a new one.  
+      <input type="submit" value="Reset" name="reset">
+    </form>
+  {% endif %}
 </div>
 {% endblock %}

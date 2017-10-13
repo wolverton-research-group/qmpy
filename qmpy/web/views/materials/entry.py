@@ -52,7 +52,6 @@ def duplicate_view(request, entry_id):
     data = get_globals()
     data['entries'] = entries
     data['entry'] = Entry.objects.get(pk=entry_id)
-    return render_to_response('materials/duplicates.html', 
-            data, 
+    return render_to_response('materials/duplicates.html',
+            data,
             RequestContext(request))
-

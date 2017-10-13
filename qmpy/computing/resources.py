@@ -124,7 +124,9 @@ class User(AbstractUser):
             acct.run_path = path
             acct.username = uname.strip()
             acct.save()
-            acct.create_passwordless_ssh()
+            set_pswd = is_yes(raw_input('Set up passwordless login? [y/n]'))
+            if set_pswd is True:
+                acct.create_passwordless_ssh()
 
 
 class Host(models.Model):
@@ -276,7 +278,7 @@ class Host(models.Model):
     def _try_login(self, timeout=5.0):
         def _login():
             self._tmp_acct = Allocation.get('b1004').get_account()
-            self._tmp_ssh = 'ssh {user}@{host} "{cmd}"'.format(
+            self._tmp_ssh = 'SSH_AUTH_SOCK=0 ssh {user}@{host} "{cmd}"'.format(
                     user=self._tmp_acct.user.username,
                     host=self._tmp_acct.host.ip_address,
                     cmd='whoami')
@@ -327,7 +329,12 @@ class Host(models.Model):
     def running_now(self):
         if not self.state == 1:
             return {}
-        if datetime.now() + timedelta(seconds=-60) > self.checked_time:
+        if datetime.now() + timedelta(seconds=-120) > self.checked_time:
+            self.check_running()
+        count = 0
+        while count < 5 and not self.running:
+            time.sleep(30)
+            count += 1
             self.check_running()
         return self.running
 
@@ -344,57 +351,79 @@ class Host(models.Model):
             self.save()
             return
         account = random.choice(self.accounts)
-        user_tag = ''
-        if any([e in self.check_queue for e in ['sqs', 'squeue']]):
-            user_tag = ' -u %s' % account.username
-        raw_data = account.execute(self.check_queue+user_tag)
+        allocations = Allocation.objects.filter(host=self.name)
         running = {}
-        if not raw_data:
-            return
-        # pbs
-        if 'showq' in self.check_queue:
-            for line in raw_data.split('\n'):
-                if 'Active Jobs' in line:
-                    continue
-                line = line.split()
-                if len(line) != 9:
-                    continue
-                try:
-                    running[int(line[0])] = {
-                            'user':line[1],
-                            'state':line[2],
-                            'proc':int(line[3])}
-                except:
-                    pass
-        # slurm
-        elif 'sqs' in self.check_queue:
-            for line in raw_data.strip().split('\n'):
-                # for Host:edison_shared, consider only 'shared' partition
-                if self.name == 'edison_shared':
-                    if 'shared' not in line:
+        for allocation in allocations:
+            tag = ''
+            if 'sqs' in self.check_queue:
+                tag = ' -a'
+            elif 'squeue' in self.check_queue:
+                tag = ' -A %s' % allocation.key
+            elif 'showq' in self.check_queue:
+                tag = ''
+            raw_data = account.execute(self.check_queue + tag)
+            if not raw_data:
+                continue
+
+            # pbs
+            if 'showq' in self.check_queue:
+                for line in raw_data.split('\n'):
+                    if 'Active Jobs' in line:
                         continue
-                if 'JOBID' in line:
-                    continue
-                line = line.split()
-                try:
-                    running[int(line[0])] = {
-                            'user':line[3],
-                            'state':line[1],
-                            'proc':int(line[5])*self.ppn}
-                except:
-                    pass
-        elif 'squeue' in self.check_queue:
-            for line in raw_data.strip().split('\n'):
-                if 'JOBID' in line:
-                    continue
-                line = line.split()
-                try:
-                    running[int(line[0])] = {
-                            'user':line[1],
-                            'state':line[9],
-                            'proc':int(line[6])*self.ppn}
-                except:
-                    pass
+                    line = line.split()
+                    if len(line) != 9:
+                        continue
+                    try:
+                        running[int(line[0])] = {
+                                'user':line[1],
+                                'state':line[2],
+                                'proc':int(line[3])}
+                    except:
+                        pass
+            # slurm
+            elif 'sqs' in self.check_queue:
+                for line in raw_data.strip().split('\n'):
+                    # for Host:edison_shared, consider only 'shared' partition
+                    if self.name == 'edison_shared':
+                        if 'shared' not in line:
+                            continue
+                    if 'JOBID' in line:
+                        continue
+                    line = line.split()
+                    try:
+                        running[int(line[0])] = {
+                                'user':line[3],
+                                'state':line[1],
+                                'proc':int(line[5])*self.ppn}
+                    except:
+                        pass
+            elif 'squeue' in self.check_queue:
+                if self.name == 'KNL':
+                    for line in raw_data.strip().split('\n'):
+                        if 'JOBID' in line:
+                            continue
+                        line = line.split()
+                        try:
+                            running[int(line[0])] = {
+                                    'user':line[3],
+                                    'state':line[4],
+                                    'proc':int(line[6])*self.ppn}
+                        except:
+                            pass
+
+                ## ALCC on Edison is not active anymore; Only for Mohan :-*
+                ##elif self.name == 'edison_alcc':
+                ##    for line in raw_data.strip().split('\n'):
+                ##        if 'JOBID' in line:
+                ##            continue
+                ##        line = line.split()
+                ##        try:
+                ##            running[int(line[0])] = {
+                ##                    'user':line[1],
+                ##                    'state':line[9],
+                ##                    'proc':int(line[6])*self.ppn}
+                ##        except:
+                ##            pass
         self.running = running
         self.save()
 
@@ -412,7 +441,7 @@ class Host(models.Model):
 
     def deactivate(self):
         """
-        Prevent new jobs from being started on this system. 
+        Prevent new jobs from being started on this system.
         Remember to save() changes
         """
         self.state = -1
@@ -524,7 +553,7 @@ class Account(models.Model):
 
         print 'Great! Lets test it real quick...'
         out = self.execute('whoami')
-        if out == '%s\n' % self.username: 
+        if out == '%s\n' % self.username:
             print 'Awesome! It worked!'
         else:
             print 'Something appears to be wrong, talk to Scott...'
@@ -553,7 +582,7 @@ class Account(models.Model):
         return jid
 
     def execute(self, command='exit 0', ignore_output=False):
-        ssh = 'ssh -o LogLevel=error {user}@{host} "{cmd}"'.format(
+        ssh = 'SSH_AUTH_SOCK=0 ssh -o LogLevel=error {user}@{host} "{cmd}"'.format(
                 user=self.username,
                 host=self.host.ip_address,
                 cmd=command)
@@ -564,6 +593,13 @@ class Account(models.Model):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE)
         stdout, stderr = call.communicate()
+
+        nattempts = 1
+        while 'reset by peer' in stderr.lower() and nattempts < 4:
+            logging.debug('Reset by peer error, wait 30s and retry')
+            time.sleep(30)
+            stdout, stderr = call.communicate()
+            nattempts += 1
 
         logging.debug('stdout: %s', stdout)
         logging.debug('stderr: %s', stderr)
@@ -782,6 +818,10 @@ class Project(models.Model):
     @property
     def failed(self):
         return self.task_set.filter(state=-1)
+
+    @property
+    def held(self):
+        return self.task_set.filter(state=-2)
 
     @staticmethod
     def create():

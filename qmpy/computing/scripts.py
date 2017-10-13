@@ -379,17 +379,19 @@ def wavefunction(entry, **kwargs):
         return entry.calculations['wavefunction']
 
     # Get the static calculation result
-    calc = static(entry, **kwargs)
-    if not calc.converged:
-        return calc
+    static_run = static(entry, **kwargs)
+    ## parallelization for PBE and HSE are different
+    if not static_run.converged:
+        raise NotImplementedError
 
     # Use the same input structure as input into our calculation
-    input = calc.input
+    input = static_run.input
+    ispin = static_run.settings['ispin']
 
     calc = Calculation.setup(input, entry=entry,
-                                    configuration='wavefunction', ### Mohan ###
-                                    path=entry.path+'/hybrids/wavefunction',
-                                    settings={'lwave': True},
+                                    configuration='wavefunction',
+                                    path=entry.path+'/wavefunction',
+                                    settings={'lwave': True, 'ispin':ispin},
                                     chgcar=entry.path+'/static',
                                     **kwargs)
 
@@ -408,39 +410,46 @@ def hybrid(entry, **kwargs):
         entry - Entry, OQMD entry to be computed
 
     Keyword arguments:
-        forms - list, of strings denoting the kind of HSE calculation to run
+        forms - list of strings denoting the kind of hybrid calculation to run
         (e.g., ['hse06'])
 
     Output:
-        list of Calculation, results
+        dict of Calculation, results
     '''
+    calcs = {}
+
     # first, get a wavecar
     wave = wavefunction(entry, **kwargs)
     if not wave.converged:
-        return wave
+        calcs['wavefunction'] = wave
+        return calcs
 
     # Run all the requested calculations
-    calcs = []
     default = ['b3lyp', 'hse06', 'pbe0', 'vdw']
 
+    input = wave.input
+    ispin = wave.settings['ispin']
     for hybrid in kwargs.get('forms', default):
         if hybrid == 'hse06':
             if wave.band_gap > 0:
-                pass
+                algo_flag = 'All'
             else:
-                pass
-        # special instructions for HSE calculations
-        if hybrid == 'hse06':
-            if wave.band_gap > 0:
-                # do something amazing
+                algo_flag = 'Damped'
 
-        calc = Calculation.setup(input, entry=entry,
+            # special instructions for HSE calculations
+            calc = Calculation.setup(input, entry=entry,
                                     configuration=hybrid,
-                                    path=entry.path+'/hybrids/'+hybrid,
-                                    settings={'lwave': True},
-                                    wavecar=wave,
+                                    path=entry.path+'/'+hybrid,
+                                    settings={'lwave': True, 'ispin': ispin, 'algo': algo_flag},
+                                    chgcar=entry.path+'/wavefunction',
+                                    wavecar=entry.path+'/wavefunction',
                                     **kwargs)
-        calcs.append(calc)
+
+        entry.calculations[hybrid] = calc
+        if not calc.converged:
+            calc.write()
+
+        calcs[hybrid] = calc
     return calcs
 
 def hse06(entry, **kwargs):
@@ -451,6 +460,53 @@ def hse06(entry, **kwargs):
         entry - Entry, OQMD entry to be computed
 
     Output:
-        list of Calculation, resultsA
+        Calculation, results
     '''
-    return hybrid(entry, forms=['hse06'], **kwargs)
+    calcs = hybrid(entry,forms=['hse06'], **kwargs)
+
+    if 'wavefunction' in calcs:
+        return calcs['wavefunction']
+    else:
+        return calc['hse06']
+
+def hse_relaxation(entry, **kwargs):
+    '''
+    Run an HSE06 relaxation calculation
+
+    Input:
+        entry - Entry, OQMD entry to be computed
+
+    Output:
+        Calculation, results
+    '''
+    if entry.calculations.get('hse_relaxation', Calculation()).converged:
+        return entry.calculations['hse_relaxation']
+
+    # Get the static calculation result
+    ### < Mohan ###
+    static_run = static(entry, **kwargs)
+    if not static_run.converged:
+        raise NotImplementedError
+    ### Mohan > ###
+
+    # Use the same input structure as input into our calculation
+    input = static_run.input
+    ispin = static_run.settings['ispin']
+
+    if static_run.band_gap > 0:
+        algo_flag = 'All'
+    else:
+        algo_flag = 'Damped'
+
+    calc = Calculation.setup(input, entry=entry,
+                            configuration='hse_relaxation',
+                            path=entry.path+'/hse_relaxation',
+                            settings={'lwave': True,'ispin':ispin, 'algo':algo_flag},
+                            **kwargs)
+
+    # Save the calculation and exit
+    entry.calculations['hse_relaxation'] = calc
+    if not calc.converged:
+        calc.write()
+    return calc
+

@@ -3,6 +3,7 @@
 from datetime import datetime
 import time
 import os
+import random
 
 from django.db import models
 from django.db import transaction
@@ -18,6 +19,7 @@ from qmpy.data.meta_data import *
 import qmpy.io as io
 import qmpy.computing.scripts as scripts
 import qmpy.analysis.vasp as vasp
+from qmpy.computing.queue import Task
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -606,6 +608,79 @@ class Entry(models.Model):
             if os.path.isdir(self.path+'/'+dir):
                 logger.debug('rm -rf %s/%s &> /dev/null', self.path, dir)
                 os.system('rm -rf %s/%s &> /dev/null' % (self.path, dir))
+
+    def hse_cleanup(self, remove_wf=False, keep_folder=False):
+        """
+        Delete HSE related calculations, tasks and jobs.
+        """
+        def cleanup(conf):
+            self.structure_set.filter(label__contains=conf).delete()
+
+            calcs = self.calculation_set.filter(configuration=conf)
+            calcs.delete()
+
+            for task in self.tasks.filter(module=conf):
+                task.delete()
+
+            for job in self.job_set.filter(task__module=conf):
+                job.collect()
+                job.delete()
+
+            if not keep_folder:
+                calc_dir = os.path.join(self.path, conf)
+                logger.debug('rm -rf {} &> /dev/null'.format(calc_dir))
+                os.system('rm -rf {} &> /dev/null'.format(calc_dir))
+
+        cleanup('hse06')
+        if remove_wf:
+            cleanup('wavefunction')
+
+    def hse_reset(self):
+        kwargs = {}
+        kpar = 0
+        node = 0
+        projects = []
+        for task in self.tasks.filter(module='hse06'):
+            kwargs = task.kwargs
+            projects = task.projects
+
+        min_time = 3600*24 # looptime
+        for c in self.calculation_set.filter(configuration='hse06'):
+            try:
+                t = c.read_looptime
+                k = c.read_kpar
+                n = c.read_qfile_node
+            except:
+                continue
+            else:
+                if t < min_time:
+                    min_time = t
+                    kpar = k
+                    node = n
+
+        if kpar != 0:
+            kwargs.update({'parallelization': {'kpar': kpar}})
+        if node != 0:
+            kwargs.update({'Nnodes': node})
+
+        ## HSE project management for Mohan
+        ##for p in projects:
+        ##    if p.state != 1:
+        ##        projects.remove(p)
+
+        ##if not projects:
+        ##    try:
+        ##        projects = [random.choice(Project.objects.filter(state=1))]
+        ##    except:
+        ##        print "No projects available"
+        ##        return
+
+        ##if not projects:
+        ##    return
+
+        self.hse_cleanup()
+        new_task = Task.create(entry=self, module='hse06', projects=projects, kwargs=kwargs)
+        new_task.save()
 
     def visualize(self, structure='source'):
         """Attempts to open the input structure for visualization using VESTA"""

@@ -22,3 +22,4 @@ aggac: 0
 time: 0.4
 potentials: vasp_rec
 hubbards: wang
+kpoints_gen: TM

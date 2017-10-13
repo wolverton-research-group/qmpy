@@ -32,7 +32,7 @@ tlog_file.setFormatter(qmpy.formatter)
 jlogger.addHandler(jlog_file)
 tlogger.addHandler(tlog_file)
 
-jlogger.setLevel(logging.INFO)
+jlogger.setLevel(logging.DEBUG)
 tlogger.setLevel(logging.INFO)
 
 
@@ -66,7 +66,7 @@ class JobManager(daemon.Daemon):
                 if job.is_done():
                     jlogger.info('Collected %s' % job)
                     job.collect()
-            check_die(20)
+            check_die(30)
 
 class TaskManager(daemon.Daemon):
     """
@@ -136,25 +136,18 @@ class TaskManager(daemon.Daemon):
                     (task.id, task.entry.id))
 
         for job in jobs:
-            nattempts = 1
-            while not job.state == 1:
-                if nattempts == 5:
-                    break
-                check_die()
-                try:
-                    job.submit()
-                    if job.account.host.name == 'quest':
-                        time.sleep(10)
-                except Exception, err:
-                    tlogger.warn('Submission error, waiting 30 seconds'
-                                 ' (Host %s), Task: %s, Entry: %s\nE: %s' % (
-                                 host.name, task.id, task.entry.id, err))
-                    check_die(30)
-                    nattempts += 1
+            try:
+                job.submit()
+                time.sleep(20)
+            except Exception, err:
+                tlogger.warn('Submission error (Host %s), Task: %s, Entry: %s, Error: %s\n' % (
+                    host.name, task.id, task.entry.id, err))
+                job.state = -1
+            else:
+                tlogger.info('Submitted: %s (Entry %s)' % (task.id, task.entry.id))
+                host.utilization += job.ncpus
+                host.save()
             job.save()
-            host.utilization += job.ncpus
-            host.save()
-            tlogger.info('Submitted: %s (Entry %s)' % (task.id, task.entry.id))
 
         task.save()
         with transaction.atomic():

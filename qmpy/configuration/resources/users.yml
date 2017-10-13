@@ -9,7 +9,71 @@
 # user2:
 #   hostname1: ...
     
+aae109:
+  edison_alcc:
+    run_path: /scratch2/scratchdirs/aae109/autorun
+    username: aae109
+  email: ''
+cwp710:
+  KNL:
+    run_path: /global/cscratch1/sd/cwp710/autorun
+    username: cwp710
+  edison_alcc:
+    run_path: /scratch1/scratchdirs/cwp710
+    username: cwp710
+  email: ''
+jhc585:
+  KNL:
+    run_path: /global/cscratch1/sd/jhc585/autorun
+    username: jhc585
+  edison_alcc:
+    run_path: /scratch1/scratchdirs/jhc585/autorun
+    username: jhc585
+  email: ''
+mlc152:
+  KNL:
+    run_path: /global/cscratch1/sd/mervyn/autorun
+    username: mervyn
+  edison_alcc:
+    run_path: /scratch1/scratchdirs/mervyn
+    username: mervyn
+  edison_shared:
+    run_path: /scratch1/scratchdirs/mervyn
+    username: mervyn
+  email: ''
+seangri:
+  KNL:
+    run_path: /global/cscratch1/sd/seangri/autorun
+    username: seangri
+  edison_alcc:
+    run_path: /scratch1/scratchdirs/seangri/autorun
+    username: seangri
+  email: ''
+shn898:
+  KNL:
+    run_path: /global/cscratch1/sd/shn898/autorun
+    username: shn898
+  edison_alcc:
+    run_path: /scratch1/scratchdirs/shn898/autorun
+    username: shn898
+  email: ''
+spm021:
+  edison_alcc:
+    run_path: /scratch1/scratchdirs/spm021/autorun
+    username: spm021
+  email: ''
+ssn492:
+  edison_alcc:
+    run_path: /global/homes/s/ssn492/autorun
+    username: ssn492
+  email: ''
 vih173:
   edison_shared:
     run_path: /scratch2/scratchdirs/vih173/oqmd_autorun
     username: vih173
+  email: ''
+xhz676:
+  edison_alcc:
+    run_path: /scratch2/scratchdirs/xhz676/autorun
+    username: xhz676
+  email: ''

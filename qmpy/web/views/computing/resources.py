@@ -6,6 +6,9 @@ from django.core.context_processors import csrf
 from qmpy import INSTALL_PATH
 from qmpy.models import *
 from ..tools import get_globals
+import logging
+
+logger = logging.getLogger(__name__)
 
 def get_marked_list(qs1, qs2):
     items = list(qs2)
@@ -44,12 +47,13 @@ def allocation_view(request, allocation_id):
     if request.method == 'POST':
         p = request.POST
 
-        users = [ k.split('_')[1] for k in p.keys() if 'user_' in k 
-                                        and p.get(k) == 'on' ]
+        # should remove issues with names with underscores
+        users = [ '_'.join(k.split('_')[1:]) for k in p.keys() if 'user_' in k
+                 and p.get(k) == 'on' ]
         alloc.users = [ User.get(u) for u in users ]
 
-        projects = [ k.split('_')[1] for k in p.keys() if 'project_' in k and 
-                                                p.get(k) == 'on' ]
+        projects = [ '_'.join(k.strip('_')[1:]) for k in p.keys() if 'project_'
+                    in k and p.get(k) == 'on' ]
         alloc.project_set = projects
 
     users = get_marked_list(alloc.users.all(), User.objects.all())
@@ -58,14 +62,15 @@ def allocation_view(request, allocation_id):
     data = {'allocation': alloc,
             'users': users,
             'projects': projects}
-    return render_to_response('computing/allocation.html', 
-            get_globals(data), 
+    return render_to_response('computing/allocation.html',
+            get_globals(data),
             RequestContext(request))
 
 def project_view(request, project_id):
     proj = Project.get(project_id)
-    chart = {'running': proj.running.count(), 
+    chart = {'running': proj.running.count(),
              'completed': proj.completed.count(),
+             'held': proj.held.count(),
              'failed': proj.failed.count(),
              'waiting': proj.waiting.count()}
     upcoming = proj.waiting
@@ -74,31 +79,38 @@ def project_view(request, project_id):
 
     if request.method == 'POST':
         p = request.POST
-        if not 'active' in p:
-            proj.state = -2
+        if 'reset' in p:
+            en_id = p.get('reset')
+            en = Entry.objects.get(id=en_id)
+            en.hse_reset()
+            logger.info("Web reset: Entry {}".format(en.id))
         else:
-            proj.state = 1
-        proj.priority = p.get('priority', 50)
-        proj.save()
+            if not 'active' in p:
+                proj.state = -2
+            else:
+                proj.state = 1
+            proj.priority = p.get('priority', 50)
+            proj.save()
 
-        allocs = [ k.split('_')[1] for k in p.keys() if 'alloc_' in k and
-                                                        p.get(k) == 'on' ]
-        proj.allocations = allocs 
 
-        users = [ k.split('_')[1] for k in p.keys() if 'user_' in k and
-                                                       p.get(k) == 'on']
-        proj.users = [ User.get(u) for u in users ]
+            allocs = [ '_'.join(k.split('_')[1:]) for k in p.keys() if 'alloc_' in k
+                      and p.get(k) == 'on' ]
+            proj.allocations = allocs
+
+            users = [ '_'.join(k.split('_')[1:]) for k in p.keys() if 'user_' in k
+                     and p.get(k) == 'on' ]
+            proj.users = [ User.get(u) for u in users ]
 
     allocs = get_marked_list(proj.allocations.all(), Allocation.objects.all())
     users = get_marked_list(proj.users.all(), User.objects.all())
 
     data = {'project': proj,
-            'allocations': allocs, 
+            'allocations': allocs,
             'users': users,
             'plot': construct_flot(chart),
             'upcoming': upcoming}
-    return render_to_response('computing/project.html', 
-            get_globals(data), 
+    return render_to_response('computing/project.html',
+            get_globals(data),
             RequestContext(request))
 
 def user_view(request, user_id):
@@ -112,6 +124,7 @@ def projects_view(request):
     for p in projects:
         chart = {'running': p.running.count(),
                  'completed': p.completed.count(),
+                 'held': p.held.count(), ### Mohan
                  'failed': p.failed.count(),
                  'waiting': p.waiting.count()}
         p.flot = construct_flot(chart)
@@ -157,7 +170,16 @@ def project_state_view(request, state=0, project_id=None):
     data['project'] = project
     data['tasks'] = tasks
 
-    return render_to_response('computing/project_state.html', 
-            data, 
+    if request.method == 'POST':
+        p = request.POST
+        if 'reset' in p:
+            task_id = p.get('reset')
+            t = Task.objects.get(id=task_id)
+            en = t.entry
+            en.hse_reset()
+            logger.info("Web reset: Entry {}".format(en.id))
+
+    return render_to_response('computing/project_state.html',
+            data,
             RequestContext(request))
 

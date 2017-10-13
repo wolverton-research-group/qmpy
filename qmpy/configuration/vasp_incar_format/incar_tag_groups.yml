@@ -46,6 +46,11 @@
       - ldauj
       - ldaul
       - lmaxmix
+  - - hse
+    - - lhfcalc
+      - hfscreen
+      - precfock
+      - time
   - - mixing
     - - amix
       - bmix
