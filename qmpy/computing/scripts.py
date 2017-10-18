@@ -358,7 +358,7 @@ def static(entry, xc_func='PBE', **kwargs):
         # separate hulls for LDA / PBE / ...
         f.save()
         ps = PhaseSpace(calc.input.comp.keys())
-        ps.compute_stabilities(save=True)
+        ps.compute_stabilities(reevaluate=True, save=True)
     else:
         calc.write()
     return calc

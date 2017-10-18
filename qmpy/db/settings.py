@@ -17,12 +17,12 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql', 
-        'NAME': 'qmdb_dev', 
-        'USER': 'root',                      
-        'PASSWORD': '',                  
-        'HOST': '',                      
-        'PORT': ''                       
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'qmdb_dev',
+        'USER': 'root',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': ''
     }
 }
 

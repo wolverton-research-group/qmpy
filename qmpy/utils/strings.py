@@ -206,6 +206,9 @@ def format_latex(comp):
 def format_bold_latex(comp):
     return format_comp(comp, template='{elt}$_{{\mathbf{{{amt}}}}}$')
 
+def format_gnuplot(comp):
+    return format_comp(comp, template='{elt}_{{{amt}}}')
+
 def normalize_dict(dictionary):
     tot = float(sum(dictionary.values()))
     return dict((k, v/tot) for k,v in dictionary.items())

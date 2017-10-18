@@ -26,7 +26,7 @@ class PhaseData(object):
     A PhaseData object is a container for storing and organizing phase data.
     Most importantly used when doing a large number of thermodynamic analyses
     and it is undesirable to access the database for every space you want to
-    consider. 
+    consider.
     """
     def __init__(self):
         self.clear()
@@ -89,7 +89,7 @@ class PhaseData(object):
 
     def add_phases(self, phases):
         """
-        Loops over a sequence of phases, and applies `add_phase` to each. 
+        Loops over a sequence of phases, and applies `add_phase` to each.
 
         Equivalent to::
 
@@ -106,7 +106,6 @@ class PhaseData(object):
         Load a library file, containing self-consistent thermochemical data.
 
         Equivalent to::
-            
             >>> pd = PhaseData()
             >>> pd.read_file(INSTALL_PATH+'/data/thermodata/%s' % library)
 
@@ -150,27 +149,26 @@ class PhaseData(object):
             else:
                 f.write(l+'\n')
 
-    def load_oqmd(self, space=None, search={}, exclude={}, 
-            stable=False, fit='standard', 
+    def load_oqmd(self, space=None, search={}, exclude={},
+            stable=False, fit='standard',
             total=False):
         """
         Load data from the OQMD.
 
         Keyword Arguments:
-            space: 
+            space:
                 sequence of elements. If supplied, will return only phases
-                within that region of phase space. i.e. ['Fe', 'O'] will 
+                within that region of phase space. i.e. ['Fe', 'O'] will
                 return Fe, O and all iron oxides.
 
             search:
-                dictionary of database search keyword:value pairs. 
+                dictionary of database search keyword:value pairs.
 
             stable:
                 Restrict search to only stable phases (faster, but relies on
                 having current phase stability analyses).
 
         Examples::
-            
             >>> pd = PhaseData()
             >>> search = {'calculation__path__contains':'icsd'}
             >>> pd.load_oqmd(space=['Fe','O'], search=search, stable=True)
@@ -215,18 +213,21 @@ class PhaseData(object):
                 energy = row['calculation__energy_pa']
             else:
                 energy = row['delta_e']
-            phase = Phase(energy=energy, 
-                      composition=parse_comp(row['composition_id']),
-                      description=row['calculation__input__spacegroup'],
-                      stability=row['stability'],
-                      per_atom=True,
-                      total=total)
+            ##try:
+            phase = Phase(energy=energy,
+                    composition=parse_comp(row['composition_id']),
+                    description=row['calculation__input__spacegroup'],
+                    stability=row['stability'],
+                    per_atom=True,
+                    total=total)
             phase.id = row['id']
             self.add_phase(phase)
+            ##except TypeError:
+            ##    print row['composition_id'], row['id']
 
     def read_file(self, filename, per_atom=True):
         """
-        Read in a thermodata file (named filename). 
+        Read in a thermodata file (named filename).
 
         File format::
 
@@ -315,7 +316,7 @@ class PhaseData(object):
 
 class Phase(object):
     """
-    A Phase object is a point in composition-energy space. 
+    A Phase object is a point in composition-energy space.
 
     Examples::
 
@@ -338,9 +339,9 @@ class Phase(object):
     _calculation = None
     custom_name = None
     phase_dict = {}
-    def __init__(self, 
-            composition=None, 
-            energy=None, 
+    def __init__(self,
+            composition=None,
+            energy=None,
             description='',
             per_atom=True,
             stability=None,
@@ -466,7 +467,7 @@ class Phase(object):
         """
         Set of elements in the phase.
         """
-        return set([ k for k, v in self.unit_comp.items() 
+        return set([ k for k, v in self.unit_comp.items()
             if abs(v) > 1e-6 ])
 
     @property
@@ -591,7 +592,7 @@ class Phase(object):
     def amt(self, comp):
         """
         Returns a composition dictionary with the specified composition pulled
-        out as 'var'. 
+        out as 'var'.
 
         Examples::
 
@@ -617,7 +618,7 @@ class Phase(object):
     def fraction(self, comp):
         """
         Returns a composition dictionary with the specified composition pulled
-        out as 'var'. 
+        out as 'var'.
 
         Examples::
 

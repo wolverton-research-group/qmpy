@@ -346,10 +346,16 @@ class Host(models.Model):
             if len(line) != 9:
                 continue
             try:
-                running[int(line[0])] = {
+                # < Mohan
+                if 'Moab' in line[0]:
+                    qid = int(line[0].strip().split('.')[1])
+                else:
+                    qid = int(line[0])
+                running[qid] = {
                         'user':line[1],
                         'state':line[2],
                         'proc':int(line[3])}
+                # Mohan >
             except:
                 pass
         self.running = running
@@ -497,12 +503,18 @@ class Account(models.Model):
     def submit(self, path=None, run_path=None, qfile=None):
         self.execute('mkdir %s' % run_path, ignore_output=True)
         self.copy(folder=path, file='*', destination=run_path)
-        cmd = 'cd {path} && {sub} {qfile}'.format(
-                path=run_path, 
+        cmd = 'command cd {path} && {sub} {qfile}'.format(
+                path=run_path,
                 sub=self.host.sub_script,
                 qfile=qfile)
         stdout = self.execute(cmd)
-        jid = int(stdout.split()[0].split('.')[0])
+        # < Mohan
+        tmp = stdout.strip().split()[0]
+        if 'Moab' in tmp:
+            jid = int(tmp.split('.')[1])
+        else:
+            jid = int(tmp.split('.')[0])
+        # Mohan >
         return jid
 
     def execute(self, command='exit 0', ignore_output=False):

@@ -59,7 +59,7 @@ class JobManager(daemon.Daemon):
             ddb.reset_queries()
             jobs = queue.Job.objects.filter(state=1, account__host__state=1,
                     created__lt=datetime.now() - timedelta(seconds=-200000000))
-            for job in jobs:    
+            for job in jobs:
                 check_die()
                 if job.is_done():
                     jlogger.info('Collected %s' % job)
@@ -130,24 +130,24 @@ class TaskManager(daemon.Daemon):
 
         if not jobs:
             task.complete()
-            tlogger.info('Finished: Task %s (Entry %s)' % 
+            tlogger.info('Finished: Task %s (Entry %s)' %
                     (task.id, task.entry.id))
 
         for job in jobs:
             nattempts = 1
             while not job.state == 1:
-                if nattempts == 5:
+                if nattempts == 2:
                     break
                 check_die()
                 try:
                     job.submit()
                     if job.account.host == 'quest':
-                        time.sleep(5)
+                        time.sleep(50)
                 except Exception:
                     tlogger.warn('Submission error, waiting 30 seconds'
                             ' (Host %s), Task: %s, Entry: %s' % (host.name,
                                 task.id, task.entry.id))
-                    check_die(30)
+                    check_die(60)
                     nattempts += 1
             job.save()
             host.utilization += job.ncpus

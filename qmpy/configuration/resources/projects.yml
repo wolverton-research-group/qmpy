@@ -8,14 +8,21 @@
     #       - user2
     # project2: ...
     
+FPASS:
+  allocations:
+  - babbage
+  - palestrina
+  - victoria
+  priority: 0
+  users:
+  - ltw578
 HT_TE:
   allocations:
   - byrd
   - palestrina
   - victoria
   priority: 0
-  users:
-  - vky561
+  users: []
 Li2MO3:
   allocations:
   - b1004
@@ -25,12 +32,18 @@ Li2MO3:
   priority: 1
   users:
   - vih173
+Li4M2O5:
+  allocations:
+  - byrd
+  - palestrina
+  - victoria
+  priority: 0
+  users:
+  - zyu584
 X4ABZ2:
   allocations:
   - byrd
-  - josquin
-  - p20746
-  - p20747
+  - palestrina
   - victoria
   priority: 0
   users:
@@ -38,7 +51,6 @@ X4ABZ2:
 ahmed:
   allocations:
   - byrd
-  - josquin
   - palestrina
   - victoria
   priority: 1
@@ -47,17 +59,20 @@ aq_Li:
   allocations:
   - b1004
   - byrd
-  - josquin
   - palestrina
   - victoria
   priority: 0
   users:
   - vih173
   - dhs751
+data_mining:
+  allocations: []
+  priority: 2
+  users:
+  - ltw578
 defect_perovskites:
   allocations:
   - byrd
-  - josquin
   - palestrina
   - victoria
   priority: 0
@@ -66,39 +81,31 @@ defect_perovskites:
 dongshu:
   allocations:
   - byrd
-  - josquin
   - victoria
   priority: 0
   users:
   - dwh485
-elements:
-  allocations:
-  - byrd
-  - josquin
-  - palestrina
-  - victoria
-  priority: 0
-  users: []
 garnets:
   allocations:
   - byrd
-  - josquin
   - palestrina
   - victoria
   priority: 0
   users: []
 icsd:
   allocations:
+  - b1004
   - byrd
-  - josquin
+  - p20746
+  - p20747
+  - palestrina
   - victoria
-  priority: 12
+  priority: 2
   users:
-  - vih173
+  - jhc585
 james:
   allocations:
   - byrd
-  - josquin
   - palestrina
   - victoria
   priority: 0
@@ -106,44 +113,72 @@ james:
 li-air:
   allocations:
   - byrd
-  - josquin
   - palestrina
   - victoria
   priority: 0
   users: []
 max:
   allocations:
+  - b1004
   - byrd
-  - josquin
-  - palestrina
   - victoria
-  priority: 0
+  priority: 1
   users:
-  - vih173
   - mka721
+mixed_anions:
+  allocations:
+  - byrd
+  - josquin
+  - palestrina
+  - victoria
+  priority: 1
+  users:
+  - vih173
+  - jhc585
+mohan:
+  allocations:
+  - josquin
+  - palestrina
+  priority: 1
+  users:
+  - mlc152
 prototypes:
-  allocations:
-  - byrd
-  - josquin
-  - palestrina
-  - victoria
-  priority: 0
-  users:
-  - vih173
-stresses:
-  allocations:
-  - byrd
-  - josquin
-  - palestrina
-  - victoria
-  priority: 0
-  users:
-  - vih173
-tony:
   allocations:
   - b1004
   - byrd
   - josquin
+  - palestrina
+  - victoria
+  priority: 2
+  users:
+  - vih173
+  - jhc585
+shash:
+  allocations:
+  - palestrina
+  priority: 0
+  users:
+  - vih173
+  - jhc585
+solid_acids:
+  allocations:
+  - josquin
+  priority: 2
+  users:
+  - sss749
+square_planar:
+  allocations:
+  - byrd
+  - p20746
+  - palestrina
+  - victoria
+  priority: 2
+  users:
+  - jhc585
+tony:
+  allocations:
+  - b1004
+  - byrd
   - palestrina
   - victoria
   priority: 0
@@ -152,25 +187,26 @@ tony:
 voorhees:
   allocations:
   - byrd
-  - josquin
   - palestrina
   - victoria
   priority: 0
   users: []
 xc_compare:
+  allocations: []
+  priority: 2
+  users:
+  - ltw578
+zhenpeng:
   allocations:
-  - babbage
+  - b1004
   - byrd
-  - josquin
-  - palestrina
   - victoria
   priority: 0
   users:
-  - ltw578
+  - zyu584
 zhi:
   allocations:
   - byrd
-  - josquin
   - palestrina
   - victoria
   priority: 0

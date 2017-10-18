@@ -542,6 +542,18 @@ class Calculation(models.Model):
         else:
             raise VaspError('No such file exists')
 
+    #!vh
+    def read_number_of_cores(self):
+        self.get_outcar()
+        ncores = 1
+        for line in self.outcar:
+            if "serial version" in line:
+                break
+            elif "running on" in line:
+                ncores = int(line.strip().split()[2])
+                break
+        return ncores
+        
     def read_runtime(self):
         self.get_outcar()
         runtime = 0
@@ -550,7 +562,8 @@ class Calculation(models.Model):
                 if not len(line.split()) == 7:
                     continue
                 runtime += ffloat(line.split()[-1])
-        self.runtime = runtime
+        num_cores = self.read_number_of_cores()
+        self.runtime = num_cores*runtime
         return runtime
 
     def read_energies(self):
@@ -1186,8 +1199,8 @@ class Calculation(models.Model):
         if calc.input is None:
             calc.read_input_structure()
         calc.set_label(os.path.basename(calc.path))
-        calc.read_outcar()
         calc.read_stdout()
+        calc.read_outcar()
         if calc.converged:
             calc.read_doscar()
         if not calc.output is None:
@@ -1722,7 +1735,8 @@ class Calculation(models.Model):
         if 'scale_encut' in vasp_settings:
             enmax = max(pot.enmax for pot in calc.potentials)
             calc.encut = int(vasp_settings['scale_encut']*enmax)
-
+        
+        # aug 18, 2016. i think the following line is the ENCUT culprit
         calc.settings = vasp_settings
         if calc.input.natoms >= 10:
             calc.settings.update({

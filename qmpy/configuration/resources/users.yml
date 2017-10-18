@@ -19,7 +19,7 @@ aae109:
     run_path: /home/aae109/autorun
     username: aae109
   quest:
-    run_path: /projects/b1004/aae109/autorun
+    run_path: /home/aae109/auto_run
     username: aae109
   victoria:
     run_path: /home/aae109/autorun
@@ -63,10 +63,29 @@ jhc585:
   quest:
     run_path: /home/jhc585/oqmd_autorun
     username: jhc585
+  stampede:
+    run_path: /scratch/03780/jh2336
+    username: jh2336
   victoria:
     run_path: /home/jhc585/oqmd_run
     username: jhc585
+kmb366:
+  byrd:
+    run_path: /home/kmb366/autorun
+    username: kmb366
+  josquin:
+    run_path: /home/kmb366/autorun
+    username: kmb366
+  palestrina:
+    run_path: /home/kmb366/autorun
+    username: kmb366
+  victoria:
+    run_path: /home/kmb366/autorun
+    username: kmb366
 ltw578:
+  babbage:
+    run_path: /home/ltw578/auto_run
+    username: ltw578
   byrd:
     run_path: /home/ltw578/auto_run
     username: ltw578
@@ -95,6 +114,32 @@ mka721:
   victoria:
     run_path: /home/mka721/autorun
     username: mka721
+mlc152:
+  byrd:
+    run_path: /home/mlc152
+    username: mlc152
+  josquin:
+    run_path: /home/mlc152
+    username: mlc152
+  palestrina:
+    run_path: /home/mlc152
+    username: mlc152
+sss749:
+  byrd:
+    run_path: /home/sss749/autorun
+    username: sss749
+  josquin:
+    run_path: /home/sss749/autorun
+    username: sss749
+  palestrina:
+    run_path: /home/sss749/autorun
+    username: sss749
+  quest:
+    run_path: /home/sss749/autorun
+    username: sss749
+  victoria:
+    run_path: /home/sss749/autorun
+    username: sss749
 vih173:
   byrd:
     run_path: /home/vih173/Work/oqmd
@@ -106,7 +151,7 @@ vih173:
     run_path: /home/vih173/Work/oqmd
     username: vih173
   quest:
-    run_path: /projects/b1004/vih173/oqmd
+    run_path: /home/vih173/auto_run
     username: vih173
   victoria:
     run_path: /home/vih173/Work/oqmd
@@ -143,3 +188,16 @@ zlb066:
   victoria:
     run_path: /home/zlb066/oqmd
     username: zlb066
+zyu584:
+  byrd:
+    run_path: /home/zyu584/auto_run/
+    username: zyu584
+  josquin:
+    run_path: /home/zyu584/auto_run/
+    username: zyu584
+  palestrina:
+    run_path: /home/zyu584/auto_run/
+    username: zyu584
+  victoria:
+    run_path: /home/zyu584/auto_run/
+    username: zyu584

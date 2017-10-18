@@ -52,9 +52,12 @@ Welcome, {{ user.username }}.<br>
     <li> <a href="/computing/projects">Projects</a>
       <ul>
         {% for project in project_list %}
-        <li> <a href="/computing/project/{{project.name}}">
-          {{project.name}}</a></li>
-        {% endfor %} </ul></li>
+          {% if project.active %}
+            <li> <a href="/computing/project/{{project.name}}">{{project.name}}</a></li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+    </li>
     <li> <a href="/computing/queue">Queue</a></li>
   </ul>
 	<li><a href="/analysis/">Analysis</a>

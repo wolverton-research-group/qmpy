@@ -19,7 +19,8 @@ b1004:
 babbage:
   host: babbage
   key: ''
-  users: []
+  users:
+  - ltw578
 byrd:
   host: byrd
   key: ''
@@ -30,6 +31,11 @@ byrd:
   - jhc585
   - mka721
   - dwh485
+d20829:
+  host: quest
+  key: d20829
+  users:
+  - sss749
 e20438:
   host: quest
   key: e20438
@@ -44,6 +50,7 @@ josquin:
   - jhc585
   - mka721
   - dwh485
+  - ltw578
 p20477:
   host: quest
   key: p20477
@@ -59,6 +66,10 @@ p20747:
   key: p20747
   users:
   - jhc585
+p30072:
+  host: quest
+  key: p30072
+  users: []
 palestrina:
   host: palestrina
   key: ''
@@ -69,6 +80,11 @@ palestrina:
   - jhc585
   - mka721
   - dwh485
+stampede:
+  host: stampede
+  key: ''
+  users:
+  - jhc585
 victoria:
   host: victoria
   key: ''
