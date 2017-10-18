@@ -19,9 +19,6 @@ before_script:
   - cd spglib-1.6.0
   - ./configure
   - make
-  - cd python/ase
-  - python setup.py install
-  - cd ../../..
   - mysql -e 'create database qmdb_dev;'
 script:
   - cd qmpy/db
