@@ -6,9 +6,8 @@
 #MSUB -o jobout.txt
 #MSUB -e joberr.txt
 
-module load intel/2011.3
 module load mpi/openmpi-1.6.3-intel2011.3
-# module load intel/2011.3
+module load intel/2011.3
 ulimit -s unlimited
 
 cd $PBS_O_WORKDIR

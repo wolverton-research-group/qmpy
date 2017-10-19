@@ -580,7 +580,6 @@ class Calculation(models.Model):
         else:
             raise VaspError('No such file exists')
 
-<<<<<<< HEAD
     def get_qfile(self):
         """
         Collect information of job set up from qfile
@@ -603,20 +602,6 @@ class Calculation(models.Model):
                 tmp = re.search('(?<=-N)[\ 0-9]*', line)
                 return int(tmp.group().strip())
 
-=======
-    #!vh
-    def read_number_of_cores(self):
-        self.get_outcar()
-        ncores = 1
-        for line in self.outcar:
-            if "serial version" in line:
-                break
-            elif "running on" in line:
-                ncores = int(line.strip().split()[2])
-                break
-        return ncores
-        
->>>>>>> ca8b049cf0a069dfad285aae4258ffaac3deea64
     def read_runtime(self):
         self.get_outcar()
         runtime = 0
@@ -625,8 +610,7 @@ class Calculation(models.Model):
                 if not len(line.split()) == 7:
                     continue
                 runtime += ffloat(line.split()[-1])
-        num_cores = self.read_number_of_cores()
-        self.runtime = num_cores*runtime
+        self.runtime = runtime
         return runtime
 
     def read_energies(self):
@@ -1896,7 +1880,6 @@ class Calculation(models.Model):
         calc.set_hubbards(vasp_settings.get('hubbards', hubbard))
         calc.set_magmoms(vasp_settings.get('magnetism', 'ferro'))
 
-<<<<<<< HEAD
         # set ENCUT = 1.3*ENMAX for relaxation calculations
         if 'relaxation' in configuration:
             encut = int(max(pot.enmax for pot in calc.potentials)*1.3)
@@ -1933,13 +1916,6 @@ class Calculation(models.Model):
             vasp_settings.update(U_settings)
 
 
-=======
-        if 'scale_encut' in vasp_settings:
-            enmax = max(pot.enmax for pot in calc.potentials)
-            calc.encut = int(vasp_settings['scale_encut']*enmax)
-        
-        # aug 18, 2016. i think the following line is the ENCUT culprit
->>>>>>> ca8b049cf0a069dfad285aae4258ffaac3deea64
         calc.settings = vasp_settings
 
         # Has the calculation been run?

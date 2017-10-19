@@ -115,7 +115,7 @@ class Renderer(object):
     def _write_matplotlib_text(self, px, py, p, **kwargs):
         stable = kwargs['stable']
         if not stable:
-            fs = 20 
+            fs = 20
         else:
             fs = 32
     
@@ -123,7 +123,7 @@ class Renderer(object):
             px -= 0.055; 
             return 'ax.text(%s, %s, r"%s", fontsize=%s)\n' %(px, py, p, fs)
         if abs(px-0.0) < 0.005 and abs(py-0.0) < 0.005:
-            px -= 0.055; py -= 0.025 
+            px -= 0.055; py -= 0.025
             return 'ax.text(%s, %s, r"%s", fontsize=%s)\n' %(px, py, p, fs)
         if abs(px-1.0) < 0.005 and abs(py-0.0) < 0.005:
             px += 0.025; py -= 0.025
@@ -135,10 +135,10 @@ class Renderer(object):
         else:
             py -= 0.005
             px += 0.020 if stable else 0.010
-         
+    
         return 'ax.text(%s, %s, r"%s", fontsize=%s)\n' %(px, py, p, fs)
 
-    def write_matplotlib_script_bk(self, **kwargs):
+    def write_matplotlib_script(self, **kwargs):
         prefixes = {0:'unary', 1:'binary', 2:'ternary', 3:'quaternary',
                 4:'graph'}
         prefix = kwargs['prefix'] if 'prefix' in kwargs else prefixes[self.dim]
@@ -194,132 +194,6 @@ class Renderer(object):
             penergy = float(p.label.split(':')[1].split()[0])
             fo.write('ax.plot(%s, %s, c="forestgreen", marker="o", ms=18.0, mew=0.0)\n' %(px, py))
             fo.write(self._write_matplotlib_text(px, py, pname, stable=True))
-        fo.write('\n')
-        
-        fo.write('# change axis limits and make axes invisible\n')
-        fo.write('ax.set_xlim(-0.05, 1.05)\n')
-        fo.write('ax.set_ylim(-0.05, 0.90)\n')
-        fo.write('ax.set_axis_off()\n')
-        fo.write('\n')
-        
-        fo.write('# save the plot in a PDF\n')
-        fo.write('plt.savefig("%s_hull.pdf", bbox_inches="tight", dpi=300)\n' %(prefix))
-
-    ### Mohan
-    def write_matplotlib_script(self, **kwargs):
-        prefixes = {0:'unary', 1:'binary', 2:'ternary', 3:'quaternary',
-                4:'graph'}
-        prefix = kwargs['prefix'] if 'prefix' in kwargs else prefixes[self.dim]
-        hd = kwargs['hull_distance'] if 'hull_distance' in kwargs else False
-        fo = open(prefix+'_hull_mpl.py', 'w')
-        
-        fo.write('# import statements go here\n')
-        fo.write('import matplotlib as mpl\n')
-        fo.write('import matplotlib.pyplot as plt\n')
-        fo.write('from matplotlib import rc\n')
-        fonts = ["New Century Schoolbook", "Times", "Palatino", "serif"]
-        fo.write('rc("font",**{"family":"serif","serif":%s})\n' %(fonts))
-        fo.write('rc("font",**{"weight":"bold"})\n')
-        fo.write('rc("text", usetex=True)\n')
-        fo.write('\n')
-
-        fo.write('# initialize the mpl figure, and add a big subplot\n')
-        fo.write('fig = plt.figure(figsize=(10,8.7))\n')
-        fo.write('ax = fig.add_subplot(111)\n')
-        fo.write('\n')
-
-        fo.write('''
-# Function to get the shift of each label
-def _shift(p,stable=True):
-    px, py = p
-    if abs(px-0.5) < 0.005 and abs(py-0.866) < 0.005:
-        sx = -0.055; sy = 0;
-    if abs(px-0.0) < 0.005 and abs(py-0.0) < 0.005:
-        sx = -0.055; sy = -0.025 
-    if abs(px-1.0) < 0.005 and abs(py-0.0) < 0.005:
-        sx =  0.025;  sy = -0.025
-
-    if py < 0.005:
-        sy = -0.070 if stable else -0.045
-        sx = -0.055 if stable else -0.025
-    else:
-        sy = -0.005
-        sx =  0.020 if stable else 0.010
-
-    return [sx,sy]
-
-# Function to plot tie lines
-def plot_tielines(px,py,**kwargs):
-    lw = kwargs.get('lw',3.0)
-    lc = kwargs.get('lc','#AAAAAA')
-    ls = kwargs.get('ls','-')
-    ax.plot(px,py,c=lc,lw=lw,ls=ls)
-
-# Function to plot stable phases
-def stable(p,name=None,**kwargs):
-    marker   = kwargs.get('marker','o')
-    ms       = kwargs.get('ms','18')
-    mfc      = kwargs.get('mfc','forestgreen')
-    mec      = kwargs.get('mec','none')
-    mew      = kwargs.get('mew','0.0')
-    fontsize = kwargs.get('fontsize',32)
-    label    = kwargs.get('label',True)
-    xshift   = kwargs.get('xshift',_shift(p,stable=True)[0])
-    yshift   = kwargs.get('yshift',_shift(p,stable=True)[1])
-    ax.plot(p[0],p[1],marker=marker,ms=ms,mfc=mfc,mec=mec,mew=mew)
-    if label and name:
-        ax.text(p[0]+xshift,p[1]+yshift,name,fontsize=fontsize)
-
-# Function to plot unstable phases
-def unstable(p,name=None,**kwargs):
-    marker   = kwargs.get('marker','o')
-    ms       = kwargs.get('ms','10')
-    mfc      = kwargs.get('mfc','crimson')
-    mec      = kwargs.get('mec','none')
-    mew      = kwargs.get('mew','0.0')
-    fontsize = kwargs.get('fontsize',20)
-    label    = kwargs.get('label',True)
-    xshift   = kwargs.get('xshift',_shift(p,stable=False)[0])
-    yshift   = kwargs.get('yshift',_shift(p,stable=False)[1])
-    ax.plot(p[0],p[1],marker=marker,ms=ms,mfc=mfc,mec=mec,mew=mew)
-    if label and name:
-        ax.text(p[0]+xshift,p[1]+yshift,name,fontsize=fontsize)
-        ''')
-        
-        fo.write('\n')
-
-        fo.write('# plot all the tie lines in the hull\n')
-        for line in self.lines:
-            px = [ p.coord[0] for p in line.points ]
-            py = [ p.coord[1] for p in line.points ]
-            fo.write('plot_tielines(%s, %s)\n' %(px, py))
-        fo.write('\n')
-        
-        unstable = self.point_collections[0].points
-        fo.write('# plot all the unstable phases \n')
-        phases = set()
-        for p in unstable: 
-            px = p.coord[0]; py = p.coord[1]
-            pname = p.label.split(':')[0]
-            if pname in phases:
-                continue
-            phases.add(pname)
-            pname = r'%s' %(format_bold_latex(parse_comp(pname)))
-            if hd:
-                pstab = p.options['hull_distance']
-                pname = '%s (%0.3f)' %(pname, pstab)
-            penergy = float(p.label.split(':')[1].split()[0])
-            fo.write('unstable([%s,%s],r"%s")\n' %(px, py, pname))
-        fo.write('\n')
-        
-        stable = self.point_collections[1].points
-        fo.write('# plot all the stable phases \n')
-        for p in stable:
-            px = p.coord[0]; py = p.coord[1]
-            pname = p.label.split(':')[0]
-            pname = r'%s' %(format_bold_latex(parse_comp(pname)))
-            penergy = float(p.label.split(':')[1].split()[0])
-            fo.write('stable([%s,%s],r"%s")\n' %(px, py, pname))
         fo.write('\n')
         
         fo.write('# change axis limits and make axes invisible\n')

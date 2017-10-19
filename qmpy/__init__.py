@@ -3,12 +3,6 @@
 """
 qmpy is a package containing many tools for computational materials science.
 """
-# Load models (Django >= 1.7)
-try:
-    import django
-    django.setup()
-except:
-    pass
 import numpy as np
 try:
     import pyximport; pyximport.install()
@@ -287,7 +281,6 @@ def sync_resources():
             alloc.save()
             proj.allocations.add(alloc)
 
-<<<<<<< HEAD
 
 # Load models (Django >= 1.7)
 try:
@@ -295,8 +288,6 @@ try:
     django.setup()
 except:
     pass
-=======
->>>>>>> ca8b049cf0a069dfad285aae4258ffaac3deea64
 
 # Try to prevent exception when importing before database is set up
 try:

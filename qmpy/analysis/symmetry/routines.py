@@ -115,7 +115,7 @@ def get_symmetry_dataset(structure, symprec=1e-3, angle_tolerance=-1.0):
                 symprec,
                 angle_tolerance)):
         dataset[key] = data
-    
+
     dataset['international'] = dataset['international'].strip()
     dataset['hall'] = dataset['hall'].strip()
     dataset['transformation_matrix'] = np.array(dataset['transformation_matrix']).T

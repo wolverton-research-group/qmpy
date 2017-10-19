@@ -364,7 +364,6 @@ class Host(models.Model):
             raw_data = account.execute(self.check_queue + tag)
             if not raw_data:
                 continue
-<<<<<<< HEAD
 
             # pbs
             if 'showq' in self.check_queue:
@@ -425,24 +424,6 @@ class Host(models.Model):
                 ##                    'proc':int(line[6])*self.ppn}
                 ##        except:
                 ##            pass
-=======
-            line = line.split()
-            if len(line) != 9:
-                continue
-            try:
-                # < Mohan
-                if 'Moab' in line[0]:
-                    qid = int(line[0].strip().split('.')[1])
-                else:
-                    qid = int(line[0])
-                running[qid] = {
-                        'user':line[1],
-                        'state':line[2],
-                        'proc':int(line[3])}
-                # Mohan >
-            except:
-                pass
->>>>>>> ca8b049cf0a069dfad285aae4258ffaac3deea64
         self.running = running
         self.save()
 
@@ -589,29 +570,15 @@ class Account(models.Model):
     def submit(self, path=None, run_path=None, qfile=None):
         self.execute('mkdir %s' % run_path, ignore_output=True)
         self.copy(folder=path, file='*', destination=run_path)
-<<<<<<< HEAD
         cmd = 'cd {path} && {sub} {qfile}'.format(
-=======
-        cmd = 'command cd {path} && {sub} {qfile}'.format(
->>>>>>> ca8b049cf0a069dfad285aae4258ffaac3deea64
                 path=run_path,
                 sub=self.host.sub_script,
                 qfile=qfile)
         stdout = self.execute(cmd)
-<<<<<<< HEAD
         if 'sbatch' in self.host.sub_script:
             jid = int(stdout.strip().split()[-1])
             return jid
         jid = int(stdout.split()[0].split('.')[0])
-=======
-        # < Mohan
-        tmp = stdout.strip().split()[0]
-        if 'Moab' in tmp:
-            jid = int(tmp.split('.')[1])
-        else:
-            jid = int(tmp.split('.')[0])
-        # Mohan >
->>>>>>> ca8b049cf0a069dfad285aae4258ffaac3deea64
         return jid
 
     def execute(self, command='exit 0', ignore_output=False):
