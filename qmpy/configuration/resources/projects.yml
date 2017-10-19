@@ -9,19 +9,67 @@
 #       - user2
 # project2: ...
     
+<<<<<<< HEAD
 HSE_aae109:
+=======
+FPASS:
+  allocations:
+  - babbage
+  - palestrina
+  - victoria
+  priority: 0
+  users:
+  - ltw578
+HT_TE:
+>>>>>>> ca8b049cf0a069dfad285aae4258ffaac3deea64
   allocations:
   - alcc_hse
   priority: 0
+<<<<<<< HEAD
   users:
   - aae109
 HSE_cwp710:
   allocations:
   - alcc_hse
   priority: 11
+=======
+  users: []
+Li2MO3:
+  allocations:
+  - b1004
+  - byrd
+  - palestrina
+  - victoria
+  priority: 1
+  users:
+  - vih173
+Li4M2O5:
+  allocations:
+  - byrd
+  - palestrina
+  - victoria
+  priority: 0
+  users:
+  - zyu584
+X4ABZ2:
+  allocations:
+  - byrd
+  - palestrina
+  - victoria
+  priority: 0
+  users:
+  - jhc585
+ahmed:
+  allocations:
+  - byrd
+  - palestrina
+  - victoria
+  priority: 1
+>>>>>>> ca8b049cf0a069dfad285aae4258ffaac3deea64
   users: []
 HSE_jhc585:
   allocations:
+<<<<<<< HEAD
   - knl
   priority: 50
   users:
@@ -29,11 +77,32 @@ HSE_jhc585:
 HSE_mervyn:
   allocations:
   - alcc_hse
+=======
+  - b1004
+  - byrd
+  - palestrina
+  - victoria
+  priority: 0
+  users:
+  - vih173
+  - dhs751
+data_mining:
+  allocations: []
+  priority: 2
+  users:
+  - ltw578
+defect_perovskites:
+  allocations:
+  - byrd
+  - palestrina
+  - victoria
+>>>>>>> ca8b049cf0a069dfad285aae4258ffaac3deea64
   priority: 0
   users:
   - mlc152
 HSE_seangri:
   allocations:
+<<<<<<< HEAD
   - knl
   priority: 0
   users:
@@ -50,10 +119,48 @@ HSE_spm021:
   users: []
 HSE_ssn492:
   allocations: []
+=======
+  - byrd
+  - victoria
+  priority: 0
+  users:
+  - dwh485
+garnets:
+  allocations:
+  - byrd
+  - palestrina
+  - victoria
+  priority: 0
+  users: []
+icsd:
+  allocations:
+  - b1004
+  - byrd
+  - p20746
+  - p20747
+  - palestrina
+  - victoria
+  priority: 2
+  users:
+  - jhc585
+james:
+  allocations:
+  - byrd
+  - palestrina
+  - victoria
+  priority: 0
+  users: []
+li-air:
+  allocations:
+  - byrd
+  - palestrina
+  - victoria
+>>>>>>> ca8b049cf0a069dfad285aae4258ffaac3deea64
   priority: 0
   users: []
 cwp710_knl:
   allocations:
+<<<<<<< HEAD
   - knl
   priority: 50
   users:
@@ -79,3 +186,98 @@ knl_test:
   - jhc585
   - seangri
   - shn898
+=======
+  - b1004
+  - byrd
+  - victoria
+  priority: 1
+  users:
+  - mka721
+mixed_anions:
+  allocations:
+  - byrd
+  - josquin
+  - palestrina
+  - victoria
+  priority: 1
+  users:
+  - vih173
+  - jhc585
+mohan:
+  allocations:
+  - josquin
+  - palestrina
+  priority: 1
+  users:
+  - mlc152
+prototypes:
+  allocations:
+  - b1004
+  - byrd
+  - josquin
+  - palestrina
+  - victoria
+  priority: 2
+  users:
+  - vih173
+  - jhc585
+shash:
+  allocations:
+  - palestrina
+  priority: 0
+  users:
+  - vih173
+  - jhc585
+solid_acids:
+  allocations:
+  - josquin
+  priority: 2
+  users:
+  - sss749
+square_planar:
+  allocations:
+  - byrd
+  - p20746
+  - palestrina
+  - victoria
+  priority: 2
+  users:
+  - jhc585
+tony:
+  allocations:
+  - b1004
+  - byrd
+  - palestrina
+  - victoria
+  priority: 0
+  users:
+  - aae109
+voorhees:
+  allocations:
+  - byrd
+  - palestrina
+  - victoria
+  priority: 0
+  users: []
+xc_compare:
+  allocations: []
+  priority: 2
+  users:
+  - ltw578
+zhenpeng:
+  allocations:
+  - b1004
+  - byrd
+  - victoria
+  priority: 0
+  users:
+  - zyu584
+zhi:
+  allocations:
+  - byrd
+  - palestrina
+  - victoria
+  priority: 0
+  users:
+  - zlb066
+>>>>>>> ca8b049cf0a069dfad285aae4258ffaac3deea64

@@ -225,6 +225,10 @@ class Composition(models.Model):
         return format_comp(reduce_comp(self.comp))
 
     @property
+    def name_unreduced(self):
+        return format_comp(self.comp)
+
+    @property
     def latex(self):
         return format_latex(reduce_comp(self.comp))
 

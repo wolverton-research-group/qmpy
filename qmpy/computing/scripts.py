@@ -335,7 +335,18 @@ def static(entry, xc_func='PBE', **kwargs):
     entry.calculations[cnfg_name] = calc
     entry.save()
 
+<<<<<<< HEAD
     if not calc.converged:
+=======
+    # Save calculation [ LW 20Jan16: Only for PBE for now ]
+    if calc.converged and xc_func.lower() == 'pbe':
+        f = calc.get_formation() # LW 16 Jan 2016: Need to rewrite this to have
+        # separate hulls for LDA / PBE / ...
+        f.save()
+        ps = PhaseSpace(calc.input.comp.keys())
+        ps.compute_stabilities(reevaluate=True, save=True)
+    else:
+>>>>>>> ca8b049cf0a069dfad285aae4258ffaac3deea64
         calc.write()
 
     # Save calculation [ LW 20Jan16: Only for PBE for now ]

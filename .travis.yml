@@ -1,7 +1,13 @@
 language: python
-sudo: False
+sudo: false
 python:
-  - "2.7"
+  - '2.7'
+  - '2.6'
+branches:
+  only:
+    - master
+virtualenv:
+  system_site_packages: true
 before_install:
   - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
   - chmod +x miniconda.sh
@@ -11,17 +17,13 @@ before_install:
 install: 
   - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy matplotlib scikit-learn
   - "python setup.py install"
-virtualenv:
-  system_site_packages: true
 before_script:
   - wget http://downloads.sourceforge.net/project/spglib/spglib/spglib-1.6/spglib-1.6.0.tar.gz
   - tar -xvf spglib-1.6.0.tar.gz
   - cd spglib-1.6.0
   - ./configure
   - make
-  - cd python/ase
-  - python setup.py install
-  - cd ../../..
+  - cd ..
   - mysql -e 'create database qmdb_dev;'
 script:
   - cd qmpy/db
