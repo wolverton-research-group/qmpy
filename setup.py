@@ -24,7 +24,7 @@ setup(
         "pytest",
         "python-memcached",
         "ase",
-        "django-extensions",
+        "django-extensions < 1.6.8",
         "lxml",
         "pyspglib == 1.8.3.1",
         "PyCifRW >= 4.3",
