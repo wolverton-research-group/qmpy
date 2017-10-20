@@ -27,7 +27,7 @@ setup(
         "django-extensions",
         "lxml",
         "pyspglib == 1.8.3.1",
-        "PyCifRW",
+        "PyCifRW >= 4.3",
         "pexpect",
         "pyparsing",
         "PyYAML",

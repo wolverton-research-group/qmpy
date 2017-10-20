@@ -51,5 +51,6 @@ class CifTestCase(TestCase):
         self.assertTrue(simple_equal(self.struct, s))
 
     def test_write(self):
-        ans = open(INSTALL_PATH+'/io/files/test.cif').read()
-        self.assertEqual(io.cif.write(self.struct), ans)
+        s = io.poscar.read(INSTALL_PATH+'/io/files/POSCAR_vasp4')
+        with open(INSTALL_PATH+'/io/files/test.cif') as fr:
+            self.assertEqual(io.cif.write(s), fr.read())
