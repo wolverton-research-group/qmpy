@@ -26,7 +26,7 @@ setup(
         "ase",
         "django-extensions",
         "lxml",
-        "pyspglib",
+        "pyspglib == 1.8.3",
         "PyCifRW",
         "pexpect",
         "pyparsing",

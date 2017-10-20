@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 if not qmpy.FOUND_SPGLIB:
     logger.critical('Must install spglib to be able to do symmetry analysis')
 
-## spglib functions | http://spglib.sourceforge.net/
+## spglib functions | http://spglib.sourceforge.net/ v1.8.3
 
 def find_structure_symmetry(structure, method='spglib',
         symprec=1e-5, angle_tolerance=-1.0):
@@ -88,6 +88,7 @@ def get_symmetry_dataset(structure, symprec=1e-3, angle_tolerance=-1.0):
 
     """
     keys = ('number',
+            'hall_number',
             'international',
             'hall',
             'transformation_matrix',
@@ -95,7 +96,12 @@ def get_symmetry_dataset(structure, symprec=1e-3, angle_tolerance=-1.0):
             'rotations',
             'translations',
             'wyckoffs',
-            'equivalent_atoms')
+            'equivalent_atoms',
+            'std_lattice',
+            'std_types',
+            'std_positions',
+            'pointgroup_number',
+            'pointgroup')
 
     cell = structure.cell.T.copy()
     coords = np.array(structure.site_coords)
@@ -104,24 +110,27 @@ def get_symmetry_dataset(structure, symprec=1e-3, angle_tolerance=-1.0):
     numbers = np.array(numbers, dtype='intc')
 
     dataset = {}
-    for key, data in zip(keys, 
-            spg.dataset(
-                cell,
-                coords,
-                numbers,
-                symprec,
-                angle_tolerance)):
+    for key, data in zip(keys, spg.dataset(cell,
+                                           coords,
+                                           numbers,
+                                           symprec,
+                                           angle_tolerance)):
         dataset[key] = data
-    
+
     dataset['international'] = dataset['international'].strip()
     dataset['hall'] = dataset['hall'].strip()
-    dataset['transformation_matrix'] = np.array(dataset['transformation_matrix']).T
-    dataset['origin_shift'] = np.array(dataset['origin_shift'])
-    dataset['rotations'] = np.array(dataset['rotations'])
-    dataset['translations'] = np.array(dataset['translations'])
+    dataset['transformation_matrix'] = np.array(dataset['transformation_matrix'], dtype='double', order='C')
+    dataset['origin_shift'] = np.array(dataset['origin_shift'], dtype='double')
+    dataset['rotations'] = np.array(dataset['rotations'], dtype='intc', order='C')
+    dataset['translations'] = np.array(dataset['translations'], dtype='double', order='C')
     letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
     dataset['wyckoffs'] = [letters[x] for x in dataset['wyckoffs']]
-    dataset['equivalent_atoms'] = np.array(dataset['equivalent_atoms'])
+    dataset['equivalent_atoms'] = np.array(dataset['equivalent_atoms'], dtype='intc')
+    dataset['std_lattice'] = np.array(np.transpose(dataset['std_lattice']), dtype='double', order='C')
+    dataset['std_types'] = np.array(dataset['std_types'], dtype='intc')
+    dataset['std_positions'] = np.array(dataset['std_positions'], dtype='double', order='C')
+    dataset['pointgroup'] = dataset['pointgroup'].strip()
+
     return dataset
 
 def get_spacegroup(structure, symprec=1e-5, angle_tolerance=-1.0):

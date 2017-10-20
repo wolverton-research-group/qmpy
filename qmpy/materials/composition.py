@@ -138,7 +138,7 @@ class Composition(models.Model):
 
     @property
     def entries(self):
-        entries = self.entry_set.filter(duplicate_of=F("id"))
+        entries = self.entry_set.filter(id=F("duplicate_of__id"))
         if not entries.exists():
             return []
         return sorted(entries, key=lambda x:
