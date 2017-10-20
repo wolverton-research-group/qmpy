@@ -2,7 +2,6 @@ language: python
 sudo: false
 python:
   - '2.7'
-  - '2.6'
 branches:
   only:
     - master
@@ -15,17 +14,10 @@ before_install:
   - export PATH=/home/travis/miniconda2/bin:$PATH
   - conda update --yes conda
 install: 
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy matplotlib scikit-learn
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy matplotlib scikit-learn lxml
   - "python setup.py install"
 before_script:
-  - wget http://downloads.sourceforge.net/project/spglib/spglib/spglib-1.6/spglib-1.6.0.tar.gz
-  - tar -xvf spglib-1.6.0.tar.gz
-  - cd spglib-1.6.0
-  - ./configure
-  - make
-  - cd ..
   - mysql -e 'create database qmdb_dev;'
 script:
-  - cd qmpy/db
-  - python manage.py syncdb --noinput
-  - python manage.py test qmpy
+  - python qmpy/db/manage.py syncdb --noinput
+  - python qmpy/db/manage.py test qmpy
