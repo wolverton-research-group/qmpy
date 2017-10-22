@@ -754,8 +754,6 @@ class Calculation(models.Model):
         for line in self.outcar:
             if 'FORCE on cell' in line:
                 check = True
-            #if check and 'Total' in line:
-            #[[mv]]
             if check and 'in kB' in line:
                 stresses.append(map(ffloat, line.split()[2:]))
                 check = False

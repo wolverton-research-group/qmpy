@@ -1490,7 +1490,7 @@ class PhaseSpace(object):
         Construct a graph-style visualization of the phase diagram.
         """
         G = self.graph
-        positions = nx.pygraphviz_layout(G)
+        positions = nx.drawing.nx_agraph.pygraphviz_layout(G)
         for p1, p2 in self.tie_lines:
             pt1 = Point(positions[p1])
             pt2 = Point(positions[p2])
