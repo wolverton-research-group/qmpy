@@ -138,7 +138,7 @@ class Composition(models.Model):
 
     @property
     def entries(self):
-        entries = self.entry_set.filter(duplicate_of=F("id"))
+        entries = self.entry_set.filter(id=F("duplicate_of__id"))
         if not entries.exists():
             return []
         return sorted(entries, key=lambda x:
@@ -223,6 +223,10 @@ class Composition(models.Model):
     @property
     def name(self):
         return format_comp(reduce_comp(self.comp))
+
+    @property
+    def name_unreduced(self):
+        return format_comp(self.comp)
 
     @property
     def latex(self):
