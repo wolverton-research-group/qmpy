@@ -95,8 +95,6 @@
 
 <div style="width:250px;float:left">
   <center>
-    <!-- <h3>Stresses [eV/&#8491;]</h3> -->
-    <!-- [[mv]] -->
     <h3>Stresses [kbar]</h3>
     <table class=matrix>
       N/A
@@ -106,22 +104,20 @@
 
 <div style="width:250px;height:150px;float:left">
   <center>
-    <!-- <h3>Stresses [eV/&#8491;]</h3> -->
-    <!-- [[mv]] -->
     <h3>Stresses [kbar]</h3>
     <table class=matrix>
       <tr>
-        <td>{{ calculation.output.stresses.0 | floatformat:-3 }}</td>
-        <td>{{ calculation.output.stresses.3 | floatformat:-3 }}</td>
-        <td>{{ calculation.output.stresses.5 | floatformat:-3 }}</td></tr>
+        <td>{{ calculation.output.sxx | floatformat:-3 }}</td>
+        <td>{{ calculation.output.sxy | floatformat:-3 }}</td>
+        <td>{{ calculation.output.szx | floatformat:-3 }}</td></tr>
       <tr>
-        <td>{{ calculation.output.stresses.3 | floatformat:-3 }}</td>
-        <td>{{ calculation.output.stresses.1 | floatformat:-3 }}</td>
-        <td>{{ calculation.output.stresses.4 | floatformat:-3 }}</td></tr>
+        <td>{{ calculation.output.sxy | floatformat:-3 }}</td>
+        <td>{{ calculation.output.syy | floatformat:-3 }}</td>
+        <td>{{ calculation.output.syz | floatformat:-3 }}</td></tr>
       <tr>
-        <td>{{ calculation.output.stresses.5 | floatformat:-3 }}</td>
-        <td>{{ calculation.output.stresses.4 | floatformat:-3 }}</td>
-        <td>{{ calculation.output.stresses.2 | floatformat:-3 }}</td></tr>
+        <td>{{ calculation.output.szx | floatformat:-3 }}</td>
+        <td>{{ calculation.output.syz | floatformat:-3 }}</td>
+        <td>{{ calculation.output.szz | floatformat:-3 }}</td></tr>
     </table>
   </center>
 </div>
@@ -197,12 +193,10 @@
     {{ calculation.INCAR | linebreaks }}
   </code>
 
-<!--
   <h2> KPOINTS </h2>
   <code>
     {{ calculation.KPOINTS | linebreaks}}
   </code>
--->
 
   <h2> Potentials </h2>
   <code>

@@ -413,7 +413,7 @@ class Calculation(models.Model):
                 if tag not in self.settings.keys():
                     continue
 
-                if self.settings['kpoints_gen'] == 'TM':
+                if self.settings.get('kpoints_gen', None) == 'TM':
                     if tag in ['kspacing', 'kgamma']:
                         continue
 
@@ -469,7 +469,7 @@ class Calculation(models.Model):
         self.settings = settings
 
     def get_kpoints(self):
-        if self.settings['kpoints_gen'] == 'TM':
+        if self.settings.get('kpoints_gen', None) == 'TM':
             try:
                 kpoints = self.input.get_TM_kpoint_mesh(self.configuration)
                 return False, kpoints
