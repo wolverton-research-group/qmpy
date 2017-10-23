@@ -18,11 +18,11 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'qmdb_v2_0',
-        'USER': 'oqmd',
-        'PASSWORD': 'oqmdpass@123!',
-        'HOST': '127.0.0.1',
-        'PORT': '5716'
+        'NAME': 'qmdb_dev',
+        'USER': 'root',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': ''
     }
 }
 
