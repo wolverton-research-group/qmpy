@@ -49,8 +49,8 @@ class Heap(dict):
 
 class PhaseSpace(object):
     """
-    A PhaseSpace object represents, naturally, a region of phase space. 
-    
+    A PhaseSpace object represents, naturally, a region of phase space.
+
     The most fundamental property of a PhaseSpace is its bounds,
     which are given as a hyphen-delimited list of compositions. These represent
     the extent of the phase space, and determine which phases are within the
@@ -65,7 +65,7 @@ class PhaseSpace(object):
     ways) is decided based on the size and shape of the phase space.
 
     """
-    
+
     def __init__(self, bounds, mus=None, data=None, **kwargs):
         """
         Arguments:
@@ -77,13 +77,13 @@ class PhaseSpace(object):
                 and NiO, just do "Fe3O4-NiO".
 
         Keyword Arguments
-            mus: 
+            mus:
                 define a dictionary of chemical potentials. Will adjust all
                 calculated formation energies accordingly.
-            
-            data: 
+
+            data:
                 If supplied with a PhaseData instance, it will be used
-                instead of loading from the OQMD. Can be used to significantly 
+                instead of loading from the OQMD. Can be used to significantly
                 reduce the amount of time spent querying the database when looping
                 through many PhaseSpaces.
 
@@ -379,7 +379,7 @@ class PhaseSpace(object):
         """Returns the barycentric coordinate of a composition, relative to the
         bounds of the PhaseSpace. If the object isn't within the bounds, raises
         a PhaseSpaceError.
-        
+
         Examples::
 
             >>> space = PhaseSpace('Fe-Li-O')
@@ -623,15 +623,15 @@ class PhaseSpace(object):
             element = self.mus.keys()[0]
         tcomp = dict(p.unit_comp)
         e, c = self.gclp(tcomp, mus=None)
-        tcomp[element] = tcomp.get(element, 0) + 0.01
+        tcomp[element] = tcomp.get(element, 0) + 0.001
         edo, xdo = self.gclp(tcomp, mus=None)
-        tcomp[element] -= 0.01
+        tcomp[element] -= 0.001
         if element in p.comp.keys():
-            tcomp[element] -= 0.01
+            tcomp[element] -= 0.001
             eup, xup = self.gclp(tcomp, mus=None)
-            return (edo-e)/0.01, (e-eup)/0.01
+            return (edo-e)/0.001, (e-eup)/0.001
         else:
-            return (edo-e)/0.01, -20
+            return (edo-e)/0.001, -20
 
     def chempot_bounds(self, composition, total=False):
         energy, phases = self.gclp(composition)
@@ -652,11 +652,11 @@ class PhaseSpace(object):
         e, c = self.gclp(tcomp, mus=None)
         for elt in p.comp.keys():
             tcomp = dict(p.unit_comp)
-            tcomp[elt] -= 0.01
+            tcomp[elt] -= 0.001
             eup, xup = self.gclp(tcomp)
-            tcomp[elt] += 0.02
+            tcomp[elt] += 0.002
             edo, xdo = self.gclp(tcomp)
-            pot_bounds[elt] = [ (edo-e)/0.01, (e-eup)/0.01 ]
+            pot_bounds[elt] = [ (edo-e)/0.001, (e-eup)/0.001 ]
         return pot_bounds
 
     def get_tie_lines_by_gclp(self, iterable=False):
@@ -676,7 +676,7 @@ class PhaseSpace(object):
                 if iterable:
                     yield [k1, k2]
         self._tie_lines = tie_lines
-            
+
     def in_space(self, composition):
         """
         Returns True, if the composition is in the right elemental-space 
@@ -709,7 +709,7 @@ class PhaseSpace(object):
         Returns True, if the composition is within the bounds of the phase space
 
         Examples::
-            
+
             >>> space = PhaseSpace('Fe2O3-NiO2-Li2O')
             >>> space.in_bounds('Fe3O4')
             False
@@ -783,7 +783,7 @@ class PhaseSpace(object):
         A = np.array(A)
         if len(A) == len(A[0]):
             self._hull = set([frozenset([ p for p in phases])])
-            self._tie_lines = set([ frozenset([k1, k2]) for k1, k2 in 
+            self._tie_lines = set([ frozenset([k1, k2]) for k1, k2 in
                     itertools.combinations(phases, r=2) ])
             self._stable = set([ p for p in phases])
             return
@@ -797,7 +797,7 @@ class PhaseSpace(object):
             if any([ ind >= len(phases) for ind in facet ]):
                 continue
 
-            if all( phases[ind].energy == 0 for ind in facet 
+            if all( phases[ind].energy == 0 for ind in facet
                     if ind < len(phases)):
                 continue
 
@@ -805,11 +805,11 @@ class PhaseSpace(object):
             face_matrix = np.array([ A[i] for i in facet ])
             face_matrix[:, -1] = 1
             v = np.linalg.det(face_matrix)
-            
+
             if abs(v) < 1e-8:
                 continue
 
-            face = frozenset([ phases[ind] for ind in facet 
+            face = frozenset([ phases[ind] for ind in facet
                 if ind < len(phases)])
 
             stable |= set(face)
@@ -817,8 +817,8 @@ class PhaseSpace(object):
                     itertools.combinations(face, r=2)])
             hull.add(Equilibrium(face))
 
-        self._hull = hull 
-        self._tie_lines = tie_lines 
+        self._hull = hull
+        self._tie_lines = tie_lines
         self._stable = stable
         return hull
 
@@ -1132,7 +1132,7 @@ class PhaseSpace(object):
             chem_pots |= set(self.stability_range(p, element))
         return sorted(chem_pots)
 
-    def chempot_scan(self):
+    def chempot_scan(self, element=None, umin=None, umax=None):
         """
         Scan through chemical potentials of `element` from `umin` to `umax`
         identifing values at which phase transformations occur.
@@ -1167,7 +1167,7 @@ class PhaseSpace(object):
             self.mus[element] = nu
             self.get_hull()
             windows[window] = list(self.stable)
-        return windows 
+        return windows
 
     def get_phase_diagram(self, **kwargs):
         """
@@ -1490,7 +1490,7 @@ class PhaseSpace(object):
         Construct a graph-style visualization of the phase diagram.
         """
         G = self.graph
-        positions = nx.pygraphviz_layout(G)
+        positions = nx.drawing.nx_agraph.pygraphviz_layout(G)
         for p1, p2 in self.tie_lines:
             pt1 = Point(positions[p1])
             pt2 = Point(positions[p2])
