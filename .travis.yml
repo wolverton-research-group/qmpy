@@ -5,7 +5,6 @@ python:
 branches:
   only:
     - master
-    - v2_0_0
 virtualenv:
   system_site_packages: true
 before_install:
