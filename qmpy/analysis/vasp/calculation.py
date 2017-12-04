@@ -558,30 +558,59 @@ class Calculation(models.Model):
         cbk = None           # conduction band kpoint
 
         for s, d in self.occupations_dict.items():
-            for b in range(len(d.values()[0]['band_energy'])):
-                kp_lst = d.keys()
-                band_energy_lst = [d[k]['band_energy'][b] for k in kp_lst]
-                max_be = max(band_energy_lst)
-                min_be = min(band_energy_lst)
+            for k in sorted(d.keys()):
+                for i in range(len(d[k]['band_energy'])):
+                    eigenval = d[k]['band_energy'][i]
+                    occu     = d[k]['occupation' ][i]
 
-                if max_be <= self.efermi and max_be > vbm:
-                    vbm = max_be 
-                    vbk = kp_lst[band_energy_lst.index(max_be)]
+                    if occu > 0 and eigenval > self.efermi:
+                        self.bandgap = 0.0
+                        self.is_direct_bandgap = None
+                        return 
 
-                elif min_be >= self.efermi and min_be < cbm:
-                    cbm = min_be
-                    cbk = kp_lst[band_energy_lst.index(min_be)]
+                    elif occu > 0 and eigenval > vbm:
+                        vbm = eigenval
+                        vbk = k
 
-                elif min_be < self.efermi and max_be > self.efermi:
-                    cbm = min_be
-                    vbm = max_be
-                    break
+                    elif occu <= 0 and eigenval < cbm:
+                        cbm = eigenval
+                        cbk = k 
 
-        self.bandgap = max(cbm - vbm, 0)
-        if self.bandgap == 0:
+
+        self.bandgap = max(cbm - vbm, 0.0)
+
+        if self.bandgap == 0.0:
             self.is_direct_bandgap = None
         else:
             self.is_direct_bandgap = (vbk == cbk)
+
+
+       #         band_energy_lst = [d[k]['band_energy'][b] for k in kp_lst]
+
+
+       #     for b in range(len(d.values()[0]['band_energy'])):
+       #         kp_lst = d.keys()
+       #         max_be = max(band_energy_lst)
+       #         min_be = min(band_energy_lst)
+
+       #         if max_be <= self.efermi and max_be > vbm:
+       #             vbm = max_be 
+       #             vbk = kp_lst[band_energy_lst.index(max_be)]
+
+       #         elif min_be >= self.efermi and min_be < cbm:
+       #             cbm = min_be
+       #             cbk = kp_lst[band_energy_lst.index(min_be)]
+
+       #         elif min_be < self.efermi and max_be > self.efermi:
+       #             cbm = min_be
+       #             vbm = max_be
+       #             break
+
+       # self.bandgap = max(cbm - vbm, 0)
+       # if self.bandgap == 0:
+       #     self.is_direct_bandgap = None
+       # else:
+       #     self.is_direct_bandgap = (vbk == cbk)
 
 #    xmlroot = None
 #    def read_vasprun_xml(self):
