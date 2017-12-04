@@ -1991,7 +1991,7 @@ class Calculation(models.Model):
                     break
             hubbards = sorted(calc.hubbards, key=lambda x: x.element_id)
             U_settings = {'ldau': True,
-                          'ldaupvasprun_soup = soupvasprun_soup = souprint': 2,
+                          'ldauprint': 2,
                           'ldauu': ' '.join(str(hub.u) for hub in hubbards),
                           'ldauj': ' '.join('0.0' for hub in hubbards),
                           'ldaul': ' '.join(str(hub.l) for hub in hubbards),
