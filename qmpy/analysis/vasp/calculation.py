@@ -13,7 +13,6 @@ from collections import defaultdict
 from os.path import exists, isfile, isdir
 
 from lxml import etree
-from bs4 import BeautifulSoup
 
 from django.db import models
 from django.db import transaction
