@@ -512,45 +512,96 @@ class Calculation(models.Model):
     ### Mohan modify vasprun.xml reader on qmpy
     def read_vasprun_xml(self):
         if os.path.exists(os.path.join(self.path, 'vasprun.xml')):
-            with open(os.path.join(self.path, 'vasprun.xml')) as xml:
-                soup = BeautifulSoup(xml, "xml")
+            with open(os.path.join(self.path, 'vasprun.xml'), 'rb') as xml:
+                tree = etree.parse(xml)
+                self.xmlroot = tree.getroot()
         elif os.path.exists(os.path.join(self.path, 'vasprun.xml.gz')): 
-            with gzip.open(os.path.join(self.path, 'vasprun.xml.gz')) as xml:
-                soup = BeautifulSoup(xml, "xml")
+            with gzip.open(os.path.join(self.path, 'vasprun.xml.gz'), 'rb') as xml:
+                tree = etree.parse(xml)
+                self.xmlroot = tree.getroot()
         else:
-            soup = None
-            print "No vasprun.xml file exists!"
-
-        self.vasprun_soup = soup
+            raise VaspError("No vasprun.xml file exists!")
 
     def read_band_occupations_xml(self):
-        if not hasattr(self, 'vasprun_soup'):
+        if not hasattr(self, 'xmlroot'):
             self.read_vasprun_xml()
 
-        if self.vasprun_soup == None:
-            return
-
-        final_ionic_step = self.vasprun_soup.modeling.find_all('calculation', recursive=False)[-1]
-        eigenvalues = final_ionic_step.find('eigenvalues').set
-        self.efermi = float(self.vasprun_soup.find('dos').i.string.strip())
+        # final ionic step
+        fis = self.xmlroot.findall('calculation')[-1]
+        
         occupations_dict = {}
-
-        for spin_set in eigenvalues.find_all('set', recursive=False):
-            spin = spin_set['comment'].replace(' ', '_')
+        for spin_set in fis.findall('eigenvalues/array/set/*'):
+            spin = spin_set.get('comment').replace(' ','_')
             occupations_dict[spin] = {}
-            for kpoint_set in spin_set.find_all('set', recursive=False):
-                kpoint = int(kpoint_set['comment'].split()[-1])
+            for kpoint_set in spin_set.findall('set'):
+                kpoint = int(kpoint_set.get('comment').split()[-1])
                 occupations_dict[spin][kpoint] = {'band_energy': [], 'occupation': []}
-                for band in kpoint_set.find_all('r', recursive=False):
-                    be, occ = [float(b) for b in band.string.strip().split()]
+                for band in kpoint_set.findall('r'):
+                    be, occ = [float(b) for b in band.text.strip().split()]
                     occupations_dict[spin][kpoint]['band_energy'].append(be)
                     occupations_dict[spin][kpoint]['occupation'].append(occ)
 
         self.occupations_dict = occupations_dict
 
+    def read_efermi_xml(self):
+        if not hasattr(self, 'xmlroot'):
+            self.read_vasprun_xml()
+
+        self.efermi = float(self.xmlroot.find('calculation/dos/i').text.strip())
+
+    def read_from_vasprun_xml(self):
+        if not hasattr(self, 'xmlroot'):
+            self.read_vasprun_xml()
+
+        # read settings
+        settings = {}
+        for s in self.xmlroot.findall('parameters/separator/*'):
+            t = s.get('type', 'float')
+            if not s.text:
+                continue
+            if s.tag == 'i':
+                if t == 'int':
+                    settings[s.get('name').lower()] = int(s.text.strip())
+                elif t == 'float':
+                    settings[s.get('name').lower()] = float(s.text.strip())
+                elif t == 'string':
+                    settings[s.get('name').lower()] = s.text.strip()
+            elif s.tag == 'v':
+                settings[s.get('name').lower()] = map(float, s.text.split())
+        self.settings = settings
+
+        # read other things
+        lattices = []
+        for b in self.xmlroot.findall("structure/crystal/*[@name='basis']"):
+            cell = []
+            for v in b:
+                cell.append(map(float, v.strip().split()))
+            lattices.append(np.vstack(cell))
+
+        # coords
+        positions = []
+        for c in self.xmlroot.findall("structure/varray[@name='positions']"):
+            coords = []
+            for v in c:
+                coords.append(map(float, v.strip().split()))
+            positions.append(np.vstack(coords))
+
+        raise NotImplementedError
+        # energies
+        energies = []
+
+        # forces
+        forces = []
+
+        # stresses
+        stresses = []
+
     def get_band_gap(self):
         if not hasattr(self, "occupations_dict"):
             self.read_band_occupations_xml()
+
+        if not hasattr(self, "efermi"):
+            self.read_efermi_xml()
 
         vbm = -float("inf")  # valence band energy
         cbm =  float("inf")  # conduction band energy
@@ -585,81 +636,6 @@ class Calculation(models.Model):
             self.is_direct_bandgap = (vbk == cbk)
 
 
-       #         band_energy_lst = [d[k]['band_energy'][b] for k in kp_lst]
-
-
-       #     for b in range(len(d.values()[0]['band_energy'])):
-       #         kp_lst = d.keys()
-       #         max_be = max(band_energy_lst)
-       #         min_be = min(band_energy_lst)
-
-       #         if max_be <= self.efermi and max_be > vbm:
-       #             vbm = max_be 
-       #             vbk = kp_lst[band_energy_lst.index(max_be)]
-
-       #         elif min_be >= self.efermi and min_be < cbm:
-       #             cbm = min_be
-       #             cbk = kp_lst[band_energy_lst.index(min_be)]
-
-       #         elif min_be < self.efermi and max_be > self.efermi:
-       #             cbm = min_be
-       #             vbm = max_be
-       #             break
-
-       # self.bandgap = max(cbm - vbm, 0)
-       # if self.bandgap == 0:
-       #     self.is_direct_bandgap = None
-       # else:
-       #     self.is_direct_bandgap = (vbk == cbk)
-
-#    xmlroot = None
-#    def read_vasprun_xml(self):
-#
-#        tree = etree.parse(gzip.open(self.path+'/vasprun.xml.gz','rb'))
-#        self.xmlroot = tree.getroot()
-#
-#        # read settings
-#        settings = {}
-#        for s in self.xmlroot.findall('parameters/separator/*'):
-#            t = s.get('type', 'float')
-#            if not s.text:
-#                continue
-#            if s.tag == 'i':
-#                if t == 'int':
-#                    settings[s.get('name').lower()] = int(s.text.strip())
-#                elif t == 'float':
-#                    settings[s.get('name').lower()] = float(s.text.strip())
-#                elif t == 'string':
-#                    settings[s.get('name').lower()] = s.text.strip()
-#            elif s.tag == 'v':
-#                settings[s.get('name').lower()] = map(float, s.text.split())
-#        self.settings = settings
-#
-#        # read other things
-#        lattices = []
-#        for b in self.xmlroot.findall("structure/crystal/*[@name='basis']"):
-#            cell = []
-#            for v in b:
-#                cell.append(map(float, v.strip().split()))
-#            lattices.append(np.vstack(cell))
-#
-#        # coords
-#        positions = []
-#        for c in self.xmlroot.findall("structure/varray[@name='positions']"):
-#            coords = []
-#            for v in c:
-#                coords.append(map(float, v.strip().split()))
-#            positions.append(np.vstack(coords))
-#
-#        raise NotImplementedError
-#        # energies
-#        energies = []
-#
-#        # forces
-#        forces = []
-#
-#        # stresses
-#        stresses = []
     ### !>
 
     def get_outcar(self):
