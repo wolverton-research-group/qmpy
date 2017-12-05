@@ -8,12 +8,11 @@
 {% endblock %}
 
 {% block extrascript %}
-<script id="source" language="javascript" type="text/javascript">
-    $(function() {
-        {{ dos | safe }}
-        });
-    
-  </script>
+<meta charset='UTF-8'>
+<link rel="stylesheet" href="http://cdn.pydata.org/bokeh/release/bokeh-0.12.11.min.css">
+<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.12.11.min.js">
+</script>
+{{ dos |safe }}
 {% endblock %}
 
 
@@ -164,11 +163,22 @@
   </center>
 </div>
 
+
+
+{% if dos %}
+<div style="width:500px;height:300px;float:left">
+    {{ dosdiv |safe }}
+</div>
+{% endif %}
+
+<!--
 {% if dos %}
 <div class="flot-container" style="width:540px;float:left">
   <div id="placeholder" class="flot-placeholder"></div>
 </div>
 {% endif %}
+-->
+
 
 {% if stdout %}
 <div class=box style="width:640px;margin:10px">
