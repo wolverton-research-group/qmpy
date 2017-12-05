@@ -627,12 +627,15 @@ class Calculation(models.Model):
                         cbk = k 
 
 
-        self.bandgap = max(cbm - vbm, 0.0)
+        band_gap = max(cbm - vbm, 0.0)
 
-        if self.bandgap == 0.0:
-            self.is_direct_bandgap = None
+        if band_gap == 0.0:
+            is_direct_bandgap = None
         else:
-            self.is_direct_bandgap = (vbk == cbk)
+            is_direct_bandgap = (vbk == cbk)
+
+        self.band_gap = band_gap
+        self.is_direct_bandgap = is_direct_bandgap
 
 
     ### !>
@@ -1342,7 +1345,7 @@ class Calculation(models.Model):
         if os.path.getsize(self.path+'/DOSCAR') < 300:
             return
         self.dos = dos.DOS.read(self.path+'/DOSCAR')
-        self.band_gap = self.dos.find_gap()
+        #self.band_gap = self.dos.find_gap() # Mohan comment this
         return self.dos
 
     def clear_outputs(self):
@@ -2018,7 +2021,14 @@ class Calculation(models.Model):
             ### uncomment after the chemical potential calculations are all done
             ### [vh]
             ###calc.calculate_stability()
+            ### < Mohan
+            try:
+                calc.get_band_gap()
+            except:
+                calc.band_gap = calc.dos.find_gap()
+            ### Mohan >
             return calc
+
         elif not calc.errors:
             calc.write()
             return calc
