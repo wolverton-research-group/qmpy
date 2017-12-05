@@ -32,3 +32,4 @@ six==1.4.1
 spglib==1.6.0
 tornado==3.1.1
 wsgiref==0.1.2
+bokeh==0.12.11

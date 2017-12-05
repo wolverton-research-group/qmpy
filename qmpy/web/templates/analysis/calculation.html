@@ -9,8 +9,8 @@
 
 {% block extrascript %}
 <meta charset='UTF-8'>
-<link rel="stylesheet" href="http://cdn.pydata.org/bokeh/release/bokeh-0.12.11.min.css">
-<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.12.11.min.js">
+<link rel="stylesheet" href="{% static "css/bokeh-0.12.11.min.css" %}">
+<script src="{% static "js/bokeh-0.12.11.min.js" %}">
 </script>
 {{ dos |safe }}
 {% endblock %}
