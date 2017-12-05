@@ -1,5 +1,5 @@
 Cython==0.20.1
-Django==1.6.2
+Django==1.8.18
 Jinja2==2.7.2
 MarkupSafe==0.19
 MySQL-python==1.2.5
