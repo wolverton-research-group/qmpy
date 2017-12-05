@@ -9,6 +9,9 @@ import qmpy
 import qmpy.db.custom as custom
 from qmpy.utils import *
 
+import bokeh.plotting as bkp
+from bokeh.models import HoverTool, Span
+
 logger = logging.getLogger(__name__)
 
 #class Orbital(models.Model):
@@ -142,6 +145,63 @@ class DOS(models.Model):
             self._plot = canvas
         return self._plot
 
+    ### < Mohan
+    _bokeh_plot = None
+    @property
+    def bokeh_plot(self):
+        if self._bokeh_plot is None:
+            spinflag = False
+            if len(self.dos) == 2:
+                spinflag = True
+
+            if spinflag:
+                source = bkp.ColumnDataSource(data=dict(
+                    en   = self.energy,
+                    up   = self.dos[0],
+                    down = -self.dos[1],
+                ))
+            else:
+                source = bkp.ColumnDataSource(data=dict(
+                    en  = self.energy,
+                    dos = self.dos[0],
+                ))
+
+            p = bkp.figure(width=500, height=300,
+                    tools=['pan', 'box_zoom', 'hover', 'reset'])
+
+            p.title.text = 'Density of State'
+            p.title.align = 'center'
+            p.title.text_font_size = "15pt"
+
+            p.xaxis.axis_label = 'Energy (eV)'
+            p.xaxis.axis_label_text_font_size = '15pt'
+            p.xaxis.major_label_text_font_size = '12pt'
+
+            p.yaxis.axis_label = '# of state'
+            p.yaxis.axis_label_text_font_size = '15pt'
+            p.yaxis.major_label_text_font_size = '12pt'
+
+            
+            vline = Span(location=0, dimension='height', 
+                         line_color='gray', line_width=1.5,
+                         line_dash='dotted')
+            p.renderers.extend([vline])
+
+            if spinflag:
+                p.line('en', 'up',   line_width = 2, line_color = 'blue',
+                       legend="Spin Up",   source=source)
+                p.line('en', 'down', line_width = 2, line_color = 'orange', 
+                       legend="Spin Down", source=source)
+            else:
+                p.line('en', 'dos',  line_width = 2, line_color = 'blue',
+                       legend='total',       source=source)
+
+            p.legend.click_policy = "hide"
+            self._bokeh_plot = p
+
+        return self._bokeh_plot
+    ### Mohan
+
 
     def get_projected_dos(self, strc, element, orbital=None, debug=False):
         """
@@ -273,7 +333,8 @@ class DOS(models.Model):
     @property
     def dos(self):
         if self.data.shape[0] == 3:
-            return self.data[1, :]
+            return np.array([self.data[1, :]]) # make output consistent (nested list)
+            #return self.data[1, :]
         elif self.data.shape[0] == 5:
             return self.data[1:3, :]
 
