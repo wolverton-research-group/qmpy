@@ -25,5 +25,8 @@ def calculation_view(request, calculation_id):
         data['dos'] = script
         data['dosdiv'] = div
 
+    ## Get exact INCAR settings from INCAR file
+    data['incar'] = ''.join(calculation.read_incar())
+
     return render_to_response('analysis/calculation.html', 
             data, RequestContext(request))

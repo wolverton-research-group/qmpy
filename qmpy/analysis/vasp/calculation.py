@@ -1219,6 +1219,18 @@ class Calculation(models.Model):
                 tmp = line.split('=')[1].strip()
                 return int(tmp)
 
+    def setting_from_incar(self, tag_name):
+        """
+        Return setting from INCAR
+        For example:
+            input:  calc.setting_from_incar('ISPIN')
+            output: '1'
+        """
+        for line in self.read_incar():
+            if tag_name in line:
+                tmp = line.split('=')[1].strip()
+                return tmp
+
     def read_stdout(self, filename='stdout.txt'):
         if not os.path.exists('%s/%s' % (self.path, filename)):
             print 'stdout file %s not found.' %(filename)
