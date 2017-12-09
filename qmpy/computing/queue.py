@@ -147,7 +147,7 @@ class Task(models.Model):
 
     @property
     def last_job_state(self):
-        if not self.job_set.all():
+        if self.job_set.all():
             return self.job_set.all().order_by('-id')[0].state
 
     @property
@@ -405,6 +405,10 @@ class Job(models.Model):
                     d.hour,
                     d.minute,
                     d.second)
+
+        cpu_per_task = kwargs.get('cpu_per_task', 4)
+        cpu_per_core = kwargs.get('cpu_per_core', 4)
+        threads = kwargs.get('threads', 1) 
 
         qp = qmpy.INSTALL_PATH + '/configuration/qfiles/'
         text = open(qp+job.account.host.sub_text+'.q', 'r').read()
