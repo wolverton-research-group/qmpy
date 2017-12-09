@@ -468,7 +468,7 @@ def hse06(entry, **kwargs):
     if 'wavefunction' in calcs:
         return calcs['wavefunction']
     else:
-        return calc['hse06']
+        return calcs['hse06']
 
 def hse_relaxation(entry, **kwargs):
     '''
