@@ -291,6 +291,7 @@ class Calculation(models.Model):
     @property
     def KPOINTS(self):
         set_INCAR_kpoints, kpoints = self.get_kpoints()
+        self.auto_kpoints = set_INCAR_kpoints # MOHAN
         if not set_INCAR_kpoints:
             return kpoints
 
@@ -414,7 +415,7 @@ class Calculation(models.Model):
                 if tag not in self.settings.keys():
                     continue
 
-                if self.settings.get('kpoints_gen', None) == 'TM':
+                if not self.auto_kpoints:
                     if tag in ['kspacing', 'kgamma']:
                         continue
 
@@ -474,7 +475,8 @@ class Calculation(models.Model):
             try:
                 kpoints = self.input.get_TM_kpoint_mesh(self.configuration)
                 return False, kpoints
-            except TMKPointsError:
+            except:
+            #except TMKPointsError:
                 pass
         return True, None
 
