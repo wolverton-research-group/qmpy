@@ -12,7 +12,7 @@ import numbers
 import yaml
 
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, Group, Permission
 import pexpect, getpass
 
 import qmpy
@@ -37,7 +37,6 @@ class AllocationError(Exception):
 
 class SubmissionError(Exception):
     """Failed to submit a job"""
-
 
 class User(AbstractUser):
     """
@@ -157,7 +156,7 @@ class Host(models.Model):
 
     """
     name = models.CharField(max_length=63, primary_key=True)
-    ip_address = models.IPAddressField(null=True)
+    ip_address = models.GenericIPAddressField(null=True)
     hostname = models.CharField(max_length=255)
     binaries = DictField()
     ppn = models.IntegerField(default=8)
