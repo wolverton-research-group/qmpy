@@ -619,7 +619,7 @@ class Entry(models.Model):
             calcs = self.calculation_set.filter(configuration=conf)
             calcs.delete()
 
-            for task in self.tasks.filter(module=conf):
+            for task in self.task_set.filter(module=conf):
                 task.delete()
 
             for job in self.job_set.filter(task__module=conf):
@@ -640,7 +640,7 @@ class Entry(models.Model):
         kpar = 0
         node = 0
         projects = []
-        for task in self.tasks.filter(module='hse06'):
+        for task in self.task_set.filter(module='hse06'):
             kwargs = task.kwargs
             projects = task.projects
 
