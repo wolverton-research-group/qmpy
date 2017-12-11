@@ -246,6 +246,7 @@ class Atom(models.Model):
         s.coord = self.coord
         s.atoms = [self]
         self.site = s
+        s.save()
         return s
 
     _dist = None

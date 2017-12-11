@@ -216,6 +216,8 @@ class Structure(models.Model, object):
                 atom = Atom.create(atom[0], atom[1], **atom[2])
             s.add_atom(atom)
 
+        s.get_sites()
+
         if s.comp:
             s.composition = Composition.get(s.comp)
 
@@ -1254,7 +1256,7 @@ class Structure(models.Model, object):
             if not any([ site is site2 for site2 in _sites ]):
                 _sites.append(site)
         self._sites = _sites
-        return self.sites
+        return self._sites
 
     def group_atoms_by_symmetry(self):
         """Sort self.atoms according to the site they occupy."""
