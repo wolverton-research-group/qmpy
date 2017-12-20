@@ -616,7 +616,7 @@ class Calculation(models.Model):
                     occu     = d[k]['occupation' ][i]
 
                     if occu > 0 and eigenval > self.efermi:
-                        self.bandgap = 0.0
+                        self.band_gap = 0.0
                         self.is_direct_bandgap = None
                         return 
 
@@ -627,7 +627,6 @@ class Calculation(models.Model):
                     elif occu <= 0 and eigenval < cbm:
                         cbm = eigenval
                         cbk = k 
-
 
         band_gap = max(cbm - vbm, 0.0)
 
