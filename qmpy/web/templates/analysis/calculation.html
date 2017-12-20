@@ -55,6 +55,16 @@
         <tr>
           <td>Band Gap [eV]</td>
           <td> {{ calculation.band_gap | floatformat:-3 }}</td></tr>
+        <tr>
+          <td>Band Gap Type</td>
+          {% if calculation.is_direct_bandgap == None %}
+            <td> N.A. </td>
+          {% elif calculation.is_direct_bandgap == False %}
+            <td> Indirect  </td>
+          {% elif calculation.is_direct_bandgap == True %}
+            <td> Direct </td>
+          {% endif %}
+        </tr>
       </tbody>
     </table>
   </h2>
@@ -203,10 +213,12 @@
     {{ incar | linebreaks }}
   </code>
 
+  <!--
   <h2> KPOINTS </h2>
   <code>
     {{ calculation.KPOINTS | linebreaks}}
   </code>
+  -->
 
   <h2> Potentials </h2>
   <code>
