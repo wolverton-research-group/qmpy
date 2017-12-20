@@ -22,7 +22,7 @@ import qmpy.analysis.vasp as vasp
 from qmpy.computing.queue import Task
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+#logger.setLevel(logging.INFO)
 
 k_desc = 'Descriptive keyword for looking up entries'
 h_desc = 'A note indicating a reason the entry should not be calculated'
@@ -647,10 +647,11 @@ class Entry(models.Model):
         min_time = 3600*24 # looptime
         for c in self.calculation_set.filter(configuration='hse06'):
             try:
-                t = c.read_looptime
-                k = c.read_kpar
-                n = c.read_qfile_node
+                t = c.max_looptime
+                k = c.kpar_from_incar
+                n = c.nnodes_from_qfile
             except:
+                logger.warn("Unable to collect info from previous calculation")
                 continue
             else:
                 if t < min_time:
@@ -660,8 +661,10 @@ class Entry(models.Model):
 
         if kpar != 0:
             kwargs.update({'parallelization': {'kpar': kpar}})
+            logger.info("Collect info from previous calculation: kpar = %d" %k)
         if node != 0:
             kwargs.update({'Nnodes': node})
+            logger.info("Collect info from previous calculation: nodes = %d," %n)
 
         ## HSE project management for Mohan
         ##for p in projects:
