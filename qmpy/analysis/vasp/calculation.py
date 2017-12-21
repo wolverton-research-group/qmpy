@@ -1232,6 +1232,29 @@ class Calculation(models.Model):
                 tmp = line.split('=')[1].strip()
                 return tmp
 
+    # Mohan #
+    def get_kpoints(self):
+        _kpoints_ = False
+        _ibzkpt_ = False
+        if os.path.exists(os.path.join(self.path, 'KPOINTS')):
+            with open(os.path.join(self.path, 'KPOINTS'), 'r') as f:
+                kpts_kpoints = f.readlines()
+                _kpoints_ = True
+        if os.path.exists(os.path.join(self.path, 'IBZKPT')):
+            with open(os.path.join(self.path, 'IBZKPT'), 'r') as f:
+                kpts_ibzkpt = f.readlines()
+                _ibzkpt_ = True
+
+        if _ibzkpt_ == True and _kpoints_ == False:
+            return ''.join(["(from IBZKPT)\n"] + kpts_ibzkpt[:3] + ["...\n"])
+        elif _ibzkpt_ == False and _kpoints_ == True:
+            return ''.join(kpts_kpoints[:3] + ["...\n"])
+        elif _ibzkpt_ == True and _kpoints_ == True:
+            return ''.join(kpts_kpoints + ['\n'] + kpts_ibzkpt[:3])
+        else:
+            return
+
+
     def read_stdout(self, filename='stdout.txt'):
         if not os.path.exists('%s/%s' % (self.path, filename)):
             print 'stdout file %s not found.' %(filename)
