@@ -597,6 +597,9 @@ class Account(models.Model):
         while 'reset by peer' in stderr.lower() and nattempts < 4:
             logging.debug('Reset by peer error, wait 30s and retry')
             time.sleep(30)
+            call = subprocess.Popen(ssh, shell=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE)
             stdout, stderr = call.communicate()
             nattempts += 1
 
