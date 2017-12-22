@@ -84,6 +84,7 @@
 	</li> {% endif %}
 </ul>
 
+
 <div>
   <h2> Selected Calculation History </h2>
 <table>
@@ -201,6 +202,12 @@
   </tbody>
   </table>
   </div>
+</div>
+
+<div>
+  <form action="" method="post">{% csrf_token %}
+    <input type="submit" name="recollect_calc" value="Read Calculation">
+  </form>
 </div>
 
 {% if entry.reference %}
