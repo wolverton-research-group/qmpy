@@ -1233,7 +1233,7 @@ class Calculation(models.Model):
                 return tmp
 
     # Mohan #
-    def get_kpoints(self):
+    def get_kpoints_file(self):
         _kpoints_ = False
         _ibzkpt_ = False
         if os.path.exists(os.path.join(self.path, 'KPOINTS')):
