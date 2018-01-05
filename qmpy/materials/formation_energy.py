@@ -105,6 +105,7 @@ class ReferenceEnergy(models.Model):
     value = models.FloatField()
     fit = models.ForeignKey('Fit', blank=True, null=True,
                                    related_name='reference_energy_set')
+    xc_label = models.CharField(max_length=10, null=True, blank=True)
 
     class Meta:
         app_label = 'qmpy'
@@ -224,10 +225,13 @@ class Fit(models.Model):
         except Fit.DoesNotExist:
             return Fit(name=name)
 
+    def _get_mus(self, xc_label='pbe'):
+        mus = self.reference_energy_set.filter(xc_label=xc_label).values_list('element_id', 'value')
+        return dict(mus)
+
     @property
     def mus(self):
-        mus = self.reference_energy_set.values_list('element_id', 'value')
-        return dict(mus)
+        return self._get_mus()
 
     @property
     def hubbard_mus(self):
