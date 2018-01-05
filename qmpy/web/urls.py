@@ -39,7 +39,7 @@ urlpatterns += [
     url(r'^materials/kpoints/(?P<mesh>.*)/(?P<structure_id>.*)/KPOINTS',
         'qmpy.web.views.export_kpoints'),
     url(r'^materials/discovery', 'qmpy.web.views.disco_view'),
-    url(r'^materials/chempots', 'qmpy.web.views.chem_pot_view'),
+    url(r'^materials/chem_pots', 'qmpy.web.views.chem_pot_view'),
     url(r'^materials/deposit', 'qmpy.web.views.deposit_view'),
 
     ## References
