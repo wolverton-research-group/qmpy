@@ -379,8 +379,8 @@ class Job(models.Model):
         else:
             job_factor = kwargs.get('job_factor', 1)
             nodes = task.kwargs['Nnodes']*job_factor
-            if nodes > 256:
-                nodes = 256
+            if nodes > 32:
+                nodes = 32 
             ppn = job.account.host.ppn
             if walltime is None:
                 walltime = job.account.host.walltime
