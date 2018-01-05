@@ -1472,7 +1472,7 @@ class Calculation(models.Model):
         new_calc.set_label(self.label)
         self.set_label(self.label + '_%d' % self.attempt)
         new_calc.attempt += 1
-        if new_calc.attempt > 5:
+        if new_calc.attempt > 2:
             new_calc.add_error('attempts')
 
         for err in errors:
@@ -1856,13 +1856,13 @@ class Calculation(models.Model):
             return
         return self.volume/len(self.output)
 
-    def formation_energy(self, reference='standard'):
+    def formation_energy(self, reference='nothing'):
         try:
             return self.get_formation(reference=reference).delta_e
         except AttributeError:
             return None
 
-    def get_formation(self, reference='standard'):
+    def get_formation(self, reference='nothing'): 
         if not self.converged:
             return
         formation = fe.FormationEnergy.get(self, fit=reference)
@@ -1875,8 +1875,14 @@ class Calculation(models.Model):
             formation.stability = None
             self.formation = formation
             return formation
-        hub_mus = chem_pots[reference]['hubbards']
-        elt_mus = chem_pots[reference]['elements']
+
+        if self.label in ['relaxation', 'static']:
+            hub_mus = chem_pots['pbe'][reference]['hubbards']
+            elt_mus = chem_pots['pbe'][reference]['elements']
+        elif self.label in ['hse06']:
+            hub_mus = chem_pots['hse'][reference]['hubbards']
+            elt_mus = chem_pots['hse'][reference]['elements']
+
         adjust = 0
         adjust -= sum([ hub_mus.get(k.key, 0)*v for k,v in self.hub_comp.items() ])
         adjust -= sum([ elt_mus[k]*v for k,v in self.comp.items() ])
