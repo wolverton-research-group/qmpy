@@ -421,6 +421,32 @@ class Entry(models.Model):
         #else:
         #    return min(es)
 
+
+    ## < Mohan
+    def _get_formation_energy(self, calc_label='static', fit='nothing'):
+        fes = self.formationenergy_set.filter(fit=fit, 
+                         calculation__label=calc_label, 
+                         calculation__converged=True)
+        if fes.exists():
+            return fes[0].delta_e
+        return
+
+    @property
+    def pbe_fe(self):
+        """
+        Return formation energy calculated by PBE
+        """
+        return self._get_formation_energy(calc_label='static')
+
+    @property
+    def hse_fe(self):
+        """
+        Return formation energy calculated by HSE
+        """
+        return self._get_formation_energy(calc_label='hse06')
+    
+    ## Mohan >
+
     _energy = None
     @property
     def energy(self):
@@ -429,7 +455,9 @@ class Entry(models.Model):
         final relaxed structure. Otherwise, returns None.
         """
         if self._energy is None:
-            fes = self.formationenergy_set.filter(fit='standard').order_by('delta_e')
+            fes = self.formationenergy_set.filter(fit='nothing').order_by('delta_e')
+            
+            #fes = self.formationenergy_set.filter(fit='standard').order_by('delta_e')
             if fes.exists():
                 self._energy = fes[0].delta_e
             #if 'static' in self.calculations:
@@ -444,7 +472,8 @@ class Entry(models.Model):
 
     @property
     def stable(self):
-        forms = self.formationenergy_set.filter(fit='standard')
+        forms = self.formationenergy_set.filter(fit='nothing')
+        #forms = self.formationenergy_set.filter(fit='standard')
         forms = forms.exclude(stability=None)
         if not forms.exists():
             return None
