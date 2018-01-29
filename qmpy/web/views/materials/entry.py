@@ -23,6 +23,13 @@ def entry_view(request, entry_id):
             t = Task.create(entry, 'static')
             t.save()
 
+        if p.get('req_pbe'):
+            pass
+
+        if p.get('req_hse'):
+            pass
+            
+
         if p.get('recollect_calc'):
             entry.calculation_set.all().delete()
             entry.structure_set.all().delete()
