@@ -819,8 +819,12 @@ class Calculation(models.Model):
         self.read_runtime()
         if self.settings is None:
             self.read_outcar_settings()
-        if not self.settings['lorbit'] == 11:
+
+        ## Mohan <
+        #if not self.settings['lorbit'] == 11:
+        if self.settings.get('lorbit', 0) != 11:
             return np.array([[0]*self.natoms]*self.nsteps)
+        ## Mohan >
 
         charges = []
         for n, line in enumerate(self.outcar):
@@ -846,12 +850,15 @@ class Calculation(models.Model):
                 mags = []
                 for i in range(self.natoms):
                     mags.append(float(self.outcar[n+4+i].split()[-1]))
-                magmoms.append(mags)
-            if 'number of electron' in line:
                 if 'magnetization' in line:
                     self.magmom = float(line.split()[-1])
-        if self.settings['lorbit'] != 11:
+        ## Mohan <
+        #if self.settings['lorbit'] != 11:
+        #    return np.array([[0]*self.natoms]*self.nsteps)
+
+        if self.settings.get('lorbit', 0) != 11:
             return np.array([[0]*self.natoms]*self.nsteps)
+        ## Mohan >
         return magmoms
 
     def read_forces(self):
@@ -1028,12 +1035,13 @@ class Calculation(models.Model):
         else:
             basis_converged = ( abs(v_fin - v_init)/v_init < 0.05 )
 
+
         if self.configuration in ['initialize', 
                                   'coarse_relax', 
                                   'fine_relax',
                                   'standard']:
             basis_converged = True
-
+        
         # is it a relaxation?
         if check_ionic:
             # are forces, volume converged, SC achieved?
@@ -1866,8 +1874,14 @@ class Calculation(models.Model):
         if not self.converged:
             return
         formation = fe.FormationEnergy.get(self, fit=reference)
+
+        if self.label in ['relaxation', 'static']:
+            xc_label = 'pbe'
+        elif self.label in ['hse06']:
+            xc_label = 'hse'
+
         if len(self.input.comp) == 1:
-            e = comp.Composition.get(self.input.comp).total_energy
+            e = comp.Composition.get(self.input.comp)._get_total_energy(xc_label=xc_label)
             formation.delta_e = self.energy_pa - e
             formation.composition = self.input.composition
             formation.entry = self.entry
@@ -1876,12 +1890,8 @@ class Calculation(models.Model):
             self.formation = formation
             return formation
 
-        if self.label in ['relaxation', 'static']:
-            hub_mus = chem_pots['pbe'][reference]['hubbards']
-            elt_mus = chem_pots['pbe'][reference]['elements']
-        elif self.label in ['hse06']:
-            hub_mus = chem_pots['hse'][reference]['hubbards']
-            elt_mus = chem_pots['hse'][reference]['elements']
+        hub_mus = chem_pots[xc_label][reference]['hubbards']
+        elt_mus = chem_pots[xc_label][reference]['elements']
 
         adjust = 0
         adjust -= sum([ hub_mus.get(k.key, 0)*v for k,v in self.hub_comp.items() ])
