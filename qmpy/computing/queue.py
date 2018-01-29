@@ -226,11 +226,13 @@ class Task(models.Model):
 
         # reduce the walltime for wavefunction calculations
         if calc.configuration == 'wavefunction':
-            hse_walltime = 0.5*3600
+            walltime = 0.5*3600
         elif calc.configuration == 'hse06':
-            hse_walltime = self.kwargs['walltimehr']*3600
+            walltime = self.kwargs['walltimehr']*3600
         elif calc.configuration == 'hse_relaxation':
-            hse_walltime = self.kwargs['walltimehr']*3600*2
+            walltime = self.kwargs['walltimehr']*3600*2
+        else:
+            walltime = self.kwargs['walltimehr']*3600
 
 
         # Special case: Adjustments for certain clusters
@@ -265,7 +267,7 @@ class Task(models.Model):
                                           'cpu_per_core': cpu_per_core,
                                           'cpu_per_task': cpu_per_task,
                                           'mpi': 'srun -n $mpi_task -c $cpu_per_task --cpu_bind=cores',
-                                          'walltime':hse_walltime,
+                                          'walltime':walltime,
                                           'header':'\n'.join(['gunzip -f CHGCAR.gz WAVECAR.gz &> /dev/null',
                                                              'date +%s',
                                                              'ulimit -s unlimited']),
