@@ -440,7 +440,7 @@ class Account(models.Model):
         except cls.DoesNotExist:
             return Account(host=host, user=user)
 
-    def create_passwordless_ssh(self, key='id_dsa', origin=None):
+    def create_passwordless_ssh(self, key='id_rsa', origin=None):
         msg = 'password for {user}@{host}: '
         if origin is None:
             origin = '/home/{user}/.ssh'.format(user=getpass.getuser())
@@ -528,12 +528,13 @@ class Account(models.Model):
         call = subprocess.Popen(ssh, shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE)
-        stdout,stderr = call.communicate()
+        stdout, stderr = call.communicate()
 
         logging.debug('stdout: %s', stdout)
         logging.debug('stderr: %s', stderr)
         if stderr and not ignore_output:
             logging.warn('WARNING: %s', stderr)
+            logging.warn('(u, h, cmd) = {}, {}, {}'.format(self.username, self.host, command))
         return stdout
 
     def copy(self, destination=None, to=None, # where to send the stuff
@@ -817,9 +818,6 @@ def write_resources():
     #   walltime: maximum walltime, in seconds
     # host2: ...
     """
-    f_hosts = open(current_loc+'/../configuration/resources/hosts.yml', 'w')
-    f_hosts.write(hosts_header)
-    f_hosts.write('\n')
     
     users_header = """# user1:
     #   hostname1:
@@ -831,9 +829,6 @@ def write_resources():
     # user2:
     #   hostname1: ...
     """
-    f_users = open(current_loc+'/../configuration/resources/users.yml', 'w')
-    f_users.write(users_header)
-    f_users.write('\n')
     
     allocations_header = """# allocation1:
     #   host: hostname
@@ -843,9 +838,6 @@ def write_resources():
     #       - user2
     # allocation2: ...
     """
-    f_allocations = open(current_loc+'/../configuration/resources/allocations.yml', 'w')
-    f_allocations.write(allocations_header)
-    f_allocations.write('\n')
     
     projects_header = """# project1:
     #   allocations:
@@ -857,10 +849,8 @@ def write_resources():
     #       - user2
     # project2: ...
     """
-    f_projects = open(current_loc+'/../configuration/resources/projects.yml', 'w')
-    f_projects.write(projects_header)
-    f_projects.write('\n')
     
+
     ######
     # list of values that need to be written into the configuration files
     ######
@@ -874,6 +864,7 @@ def write_resources():
     
     project_values = ['allocations', 'priority', 'users']
     
+
     ######
     # a function to 'clean' the values from type unicode/ long/ etc. to string/ int
     ######
@@ -884,6 +875,7 @@ def write_resources():
             val = int(val)
         return val
      
+
     ######
     # write host configurations into hosts.yml
     ######
@@ -895,8 +887,12 @@ def write_resources():
         for hv in host_values:
             dict2[hv] = clean(h.__getattribute__(hv))
         dict1[clean(h.name)] = dict2
-    yaml.dump(dict1, f_hosts, default_flow_style=False)
+    with open(current_loc+'/../configuration/resources/hosts.yml', 'w') as f_hosts:
+        f_hosts.write(hosts_header)
+        f_hosts.write('\n')
+        yaml.dump(dict1, f_hosts, default_flow_style=False)
     
+
     ######
     # write user configurations into users.yml
     ######
@@ -910,8 +906,12 @@ def write_resources():
             dict2[clean(a.host.name)] = {'run_path':clean(a.run_path), \
                                         'username':clean(a.username)}
         dict1[clean(u.username)] = dict2
-    yaml.dump(dict1, f_users, default_flow_style=False)
+    with open(current_loc+'/../configuration/resources/users.yml', 'w') as f_users:
+        f_users.write(users_header)
+        f_users.write('\n')
+        yaml.dump(dict1, f_users, default_flow_style=False)
     
+
     ######
     # write allocation configurations into allocations.yml
     ######
@@ -924,8 +924,12 @@ def write_resources():
         dict2['key'] = clean(a.key)
         dict2['users'] = [ clean(u) for u in a.users.all().values_list('username', flat=True) ]
         dict1[clean(a.name)] = dict2
-    yaml.dump(dict1, f_allocations, default_flow_style=False)
+    with open(current_loc+'/../configuration/resources/allocations.yml', 'w') as f_allocations:
+        f_allocations.write(allocations_header)
+        f_allocations.write('\n')
+        yaml.dump(dict1, f_allocations, default_flow_style=False)
     
+
     ######
     # write project configurations into projects.yml
     ######
@@ -938,4 +942,7 @@ def write_resources():
         dict2['priority'] = clean(p.priority)
         dict2['users'] = [ clean(u) for u in p.users.all().values_list('username', flat=True) ]
         dict1[clean(p.name)] = dict2
-    yaml.dump(dict1, f_projects, default_flow_style=False)
+    with open(current_loc+'/../configuration/resources/projects.yml', 'w') as f_projects:
+        f_projects.write(projects_header)
+        f_projects.write('\n')
+        yaml.dump(dict1, f_projects, default_flow_style=False)
