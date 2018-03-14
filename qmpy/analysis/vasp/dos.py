@@ -2,6 +2,7 @@ from django.db import models
 import yaml
 import os.path
 import logging
+import gzip
 
 import numpy as np
 
@@ -295,7 +296,10 @@ class DOS(models.Model):
         """Read a VASP DOSCAR file"""
         if os.path.getsize(fname) < 300:
             return
-        f = open(fname)
+        if os.path.splitext(fname)[1] == '.gz':
+            f = gzip.open(fname, 'rb')
+        else:
+            f = open(fname, 'r')
         natoms = int(f.readline().split()[0])
         [f.readline() for nn in range(4)]  # Skip next 4 lines.
         # First we have a block with total and total integrated DOS
@@ -323,3 +327,4 @@ class DOS(models.Model):
                 cdos[nd] = np.array([float(x) for x in line])
             dos.append(cdos.T)
         self._site_dos = np.array(dos)
+        f.close()
