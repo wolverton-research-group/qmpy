@@ -3,6 +3,7 @@
 #MSUB -l walltime={walltime}
 #MSUB -N {name}
 #MSUB -A {key}
+#MSUB -q normal
 #MSUB -o jobout.txt
 #MSUB -e joberr.txt
 
