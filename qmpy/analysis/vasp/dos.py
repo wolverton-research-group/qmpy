@@ -304,7 +304,7 @@ class DOS(models.Model):
         [f.readline() for nn in range(4)]  # Skip next 4 lines.
         # First we have a block with total and total integrated DOS
         ndos, efermi = f.readline().split()[2:4]
-        self._efermi = float(efermi)
+        self.efermi = float(efermi)
         ndos = int(ndos)
         dos = []
         for nd in xrange(ndos):
