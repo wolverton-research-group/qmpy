@@ -67,6 +67,7 @@ def project_view(request, project_id):
     chart = {'running': proj.running.count(), 
              'completed': proj.completed.count(),
              'failed': proj.failed.count(),
+             'held': proj.held.count(),
              'waiting': proj.waiting.count()}
     upcoming = proj.waiting
     if chart['waiting'] > 20:
@@ -74,20 +75,39 @@ def project_view(request, project_id):
 
     if request.method == 'POST':
         p = request.POST
-        if not 'active' in p:
-            proj.state = -2
+        if 'reset' in p:
+            task_id = p.get('reset')
+            task = Task.objects.get(id=task_id)
+            for j in task.jobs:
+                if j.state == 0:
+                    j.delete()
+            task.state = 0
+            task.save()
+            logger.info("Web reset: Task {}".format(task.id))
+        elif 'restartall' in p:
+            for t in proj.running:
+                if t.last_job_state != 1:
+                    for j in t.jobs:
+                        if j.state == 0:
+                            j.delete()
+                    t.state = 0
+                    t.save()
+                    logger.info("Web reset: Task {}".format(t.id))
         else:
-            proj.state = 1
-        proj.priority = p.get('priority', 50)
-        proj.save()
+            if not 'active' in p:
+                proj.state = -2
+            else:
+                proj.state = 1
+            proj.priority = p.get('priority', 50)
+            proj.save()
 
-        allocs = [ k.split('_')[1] for k in p.keys() if 'alloc_' in k and
+            allocs = [ k.split('_')[1] for k in p.keys() if 'alloc_' in k and
                                                         p.get(k) == 'on' ]
-        proj.allocations = allocs 
+            proj.allocations = allocs 
 
-        users = [ k.split('_')[1] for k in p.keys() if 'user_' in k and
+            users = [ k.split('_')[1] for k in p.keys() if 'user_' in k and
                                                        p.get(k) == 'on']
-        proj.users = [ User.get(u) for u in users ]
+            proj.users = [ User.get(u) for u in users ]
 
     allocs = get_marked_list(proj.allocations.all(), Allocation.objects.all())
     users = get_marked_list(proj.users.all(), User.objects.all())
@@ -112,6 +132,7 @@ def projects_view(request):
     for p in projects:
         chart = {'running': p.running.count(),
                  'completed': p.completed.count(),
+                 'held': p.held.count(),
                  'failed': p.failed.count(),
                  'waiting': p.waiting.count()}
         p.flot = construct_flot(chart)
@@ -156,6 +177,15 @@ def project_state_view(request, state=0, project_id=None):
 
     data['project'] = project
     data['tasks'] = tasks
+
+    if request.method == 'POST':
+        p = request.POST
+        if 'reset' in p:
+            task_id = p.get('reset')
+            t = Task.objects.get(id=task_id)
+            en = t.entry
+            en.reset()
+            logger.info("Web reset: Entry {}".format(en.id))
 
     return render_to_response('computing/project_state.html', 
             data, 
