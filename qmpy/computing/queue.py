@@ -144,6 +144,11 @@ class Task(models.Model):
         return self.job_set.all()
 
     @property
+    def last_job_state(self):
+        if self.job_set.all():
+            return self.job_set.all().order_by('-id')[0].state
+
+    @property
     def errors(self):
         """List of errors encountered by related calculations."""
         return self.entry.errors
