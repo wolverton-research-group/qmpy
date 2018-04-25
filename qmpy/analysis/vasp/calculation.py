@@ -1097,6 +1097,18 @@ class Calculation(models.Model):
         self.read_outcar_results()
         self.read_n_ionic()
 
+    def read_incar(self):
+        """
+        Collect information of INCAR settings
+        """
+        if not exists(self.path):
+            raise VaspError('Calculation does not exist!')
+        elif exists(os.path.join(self.path, 'INCAR')):
+            with open(os.path.join(self.path, 'INCAR'), 'r') as fr:
+                return fr.readlines()
+        else:
+            raise VaspError('No such INCAR exists')
+
     def read_chgcar(self, filename='CHGCAR.gz', filetype='CHGCAR'):
         """
         Reads a VASP CHGCAR or ELFCAR and returns a GridData instance.
