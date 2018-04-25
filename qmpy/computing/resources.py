@@ -750,6 +750,10 @@ class Project(models.Model):
     def failed(self):
         return self.task_set.filter(state=-1)
 
+    @property
+    def held(self):
+        return self.task_set.filter(state=-2)
+
     @staticmethod
     def create():
         '''
