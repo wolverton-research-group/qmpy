@@ -55,6 +55,9 @@
       <tr class="clickableRow" href="/computing/project/failed/{{project.name}}">
         <td>Failed</td>
         <td>{{project.failed.count}}</td></tr>
+      <tr class="clickableRow" href="/computing/project/held/{{project.name}}">
+        <td>Held</td>
+        <td>{{project.held.count}}</td></tr>
     </table>
   </div>
 </div>
@@ -65,6 +68,8 @@
     <thead>
       <tr>
         <th>Priority</th>
+        <th>Task</th>
+        <th>Entry</th>
         <th>Composition</th>
         <th>Running since</th>
         <th>Module</th>
@@ -75,8 +80,10 @@
       {% for j in upcoming %}
       <tr class=clickableRow href="/computing/task/{{j.id}}">
         <td>{{j.priority}}</td>
+        <td width="80">{{j.id}}</td>
+        <td width="80">{{j.entry.id}}</td>
         <td>{{j.entry.name}}</td>
-        <td>{{j.created}}</td>
+        <td width="150">{{j.created}}</td>
         <td>{{j.module}}</td>
         <td>{{j.kwargs}}</td></tr>
       {% endfor %}
@@ -87,25 +94,49 @@
 <div style="margin-top:30px;width:100%;float:left">
   <h2>Currently running</h2>
 
+<div style="margin-top:1px;margin-bottom:4px;width:100%;float:left">
+  <form action="" method="POST">{% csrf_token %}
+      <button type="submit" name="restartall" style="float:left">Restart ALL</button>
+      <p style="text-indent: .6em;">Restart all tasks that should be reset!</p>
+   </form>
+</div>
+
   <table>
     <thead>
       <tr>
+        <th>Entry</th>
         <th>Composition</th>
         <th>Running since</th>
         <th>Module</th>
+        <th>Status</th>
         <th>Extra arguments</th>
+        <th>Action</th>
       </tr>
     </thead>
     <tbody>
       {% for j in project.running %}
-      <tr class=clickableRow href="/computing/task/{{j.id}}">
-        <td>{{j.entry.name}}</td>
-        <td>{{j.created}}</td>
-        <td>{{j.module}}</td>
-        <td>{{j.kwargs}}</td></tr>
+      <tr>
+      <td width="80" class=clickableRow href="/computing/task/{{j.id}}">{{j.entry.id}}</td>
+      <td class=clickableRow href="/computing/task/{{j.id}}">{{j.entry.name}}</td>
+      <td width="150" class=clickableRow href="/computing/task/{{j.id}}">{{j.created}}</td>
+      <td class=clickableRow href="/computing/task/{{j.id}}">{{j.module}}</td>
+      <td class=clickableRow href="/computing/task/{{j.id}}">{{j.last_job_state}}</td>
+      <td class=clickableRow href="/computing/task/{{j.id}}">{{j.kwargs}}</td>
+      {% if j.last_job_state != 1 %}
+       <td>
+           <form action="" method="POST">{% csrf_token %}
+               <button type="submit" value="{{j.id}}" name="reset" style="float:right">Reset</button>
+            </form>
+       </td>
+       {% endif %}
+      </tr>
       {% endfor %}
     </tbody>
   </table>
+</div>
+<div style="margin-top:5px;margin-bottom:4px;width:50%;float:left">
+  <p>Note: "status=1" means tasks are running successfully. Otherwise, it is highly recommended to
+  reset the tasks (Press the 'Reset' or 'Restart ALL' button).</p>
 </div>
 {% endblock %}
 
