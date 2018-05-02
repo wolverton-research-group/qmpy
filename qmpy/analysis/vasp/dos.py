@@ -167,24 +167,25 @@ class DOS(models.Model):
                 ))
 
             p = bkp.figure(width=500, height=300,
-                    tools=['pan', 'box_zoom', 'hover', 'reset', 'save'])
+                           x_range=(-10, 10),
+                           tools=['pan', 'box_zoom', 'hover', 'reset', 'save', 'help'])
 
-            p.title.text = 'Density of State'
+            p.title.text = 'Density of States'
             p.title.align = 'center'
             p.title.text_font_size = "15pt"
 
-            p.xaxis.axis_label = 'E-E_f (eV)'
-            p.xaxis.axis_label_text_font_size = '15pt'
+            p.xaxis.axis_label = 'E-E_Fermi (eV)'
+            p.xaxis.axis_label_text_font_size = '14pt'
             p.xaxis.major_label_text_font_size = '12pt'
 
-            p.yaxis.axis_label = '# of state'
-            p.yaxis.axis_label_text_font_size = '15pt'
+            p.yaxis.axis_label = '# of states (arb. units)'
+            p.yaxis.axis_label_text_font_size = '14pt'
             p.yaxis.major_label_text_font_size = '12pt'
 
             
             vline = Span(location=0, dimension='height', 
                          line_color='gray', line_width=1.5,
-                         line_dash='dotted')
+                         line_dash='dashed')
             p.renderers.extend([vline])
 
             if spinflag:
@@ -331,7 +332,7 @@ class DOS(models.Model):
     @property
     def dos(self):
         if self.data.shape[0] == 3:
-            return self.data[1, :]
+            return np.array([self.data[1, :]]) # make output consistent (nested list)
         elif self.data.shape[0] == 5:
             return self.data[1:3, :]
 
