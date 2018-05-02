@@ -349,7 +349,7 @@ class Phase(object):
             name=''):
 
         if composition is None or energy is None:
-            raise IncompletePhaseError
+            raise PhaseError("Composition and/or energy missing.")
         if isinstance(composition, basestring):
             composition = parse_comp(composition)
 
