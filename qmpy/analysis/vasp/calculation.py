@@ -1093,7 +1093,8 @@ class Calculation(models.Model):
         self.get_outcar()
         if self.input is None:
             self.read_input_structure()
-        self.read_outcar_settings()
+        if self.settings is None:
+            self.read_outcar_settings()
         self.read_outcar_results()
         self.read_n_ionic()
 
@@ -1154,9 +1155,14 @@ class Calculation(models.Model):
         return self.xdens
 
     def read_doscar(self):
-        if os.path.getsize(self.path+'/DOSCAR') < 300:
+        doscar_file = os.path.join(self.path, 'DOSCAR')
+        if not os.path.isfile(doscar_file):
+            doscar_file = os.path.join(self.path, 'DOSCAR.gz')
+            if not os.path.isfile(doscar_file):
+                return
+        if os.path.getsize(doscar_file) < 300:
             return
-        self.dos = dos.DOS.read(self.path+'/DOSCAR')
+        self.dos = dos.DOS.read(doscar_file)
         self.band_gap = self.dos.find_gap()
         return self.dos
 
