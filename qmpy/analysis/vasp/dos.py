@@ -156,13 +156,13 @@ class DOS(models.Model):
 
             if spinflag:
                 source = bkp.ColumnDataSource(data=dict(
-                    en   = self.energy,
-                    up   = self.dos[0],
+                    en = self.energy,
+                    up = self.dos[0],
                     down = -self.dos[1],
                 ))
             else:
                 source = bkp.ColumnDataSource(data=dict(
-                    en  = self.energy,
+                    en = self.energy,
                     dos = self.dos[0],
                 ))
 
@@ -174,7 +174,7 @@ class DOS(models.Model):
             p.title.align = 'center'
             p.title.text_font_size = "15pt"
 
-            p.xaxis.axis_label = 'E-E_Fermi (eV)'
+            p.xaxis.axis_label = u'E \u2212 E_Fermi (eV)'
             p.xaxis.axis_label_text_font_size = '14pt'
             p.xaxis.major_label_text_font_size = '12pt'
 

@@ -32,6 +32,6 @@ setup(
         "pyparsing",
         "PyYAML",
         "scikit-learn",
-        "bokeh == 0.12.11"
+        "bokeh == 0.12.15"
     ],
 )
