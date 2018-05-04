@@ -68,6 +68,7 @@ urlpatterns += patterns('qmpy.web.views',
 
     url(r'^computing/task/(?P<task_id>.*)$', 'task_view'),
     url(r'^computing/job/(?P<job_id>.*)$', 'job_view'),
+    url(r'^computing/onlinesubmit$', 'online_view'),
 
     ## analysis
     url(r'^analysis/$', 'analysis_view'),

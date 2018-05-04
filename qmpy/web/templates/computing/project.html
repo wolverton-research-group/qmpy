@@ -29,12 +29,18 @@
 
 {% block content_title %}
 <h1>Project: <a href="/computing/project/{{project.name}}">{{ project.name }}</a></h1>
+
+{% if project.name == 'Online_submit' %}
+<div class="flot-container" style="width:50%;height:30px;float:left">
+<a href="/computing/onlinesubmit"> Upload Files </a>
+</div>
+{% endif %}
 {% endblock %}
 
 {% block content %}
 <div>
   <h2> Summary</h2>
-  <div clsss="flot-container" style="width:250px;height:250px;float:left">
+  <div class="flot-container" style="width:250px;height:250px;float:left">
     <div id="placeholder" class="flot-placeholder"></div>
   </div>
 
