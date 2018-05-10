@@ -3,6 +3,7 @@ from django.template import RequestContext
 import os
 
 from qmpy.models import Calculation
+from qmpy.analysis.vasp.calculation import VaspError
 from ..tools import get_globals
 
 from bokeh.embed import components
@@ -22,7 +23,7 @@ def calculation_view(request, calculation_id):
             data['stderr'] = fr.read()
     try:
         data['incar'] = ''.join(calculation.read_incar())
-    except FileNotFoundError:
+    except VaspError:
         data['incar'] = 'Could not read INCAR'
 
     if not calculation.dos is None:
