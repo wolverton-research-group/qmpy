@@ -386,7 +386,7 @@ def wavefunction(entry, **kwargs):
 
     # Use the same input structure as input into our calculation
     input = static_run.input
-    ispin = static_run.settings['ispin']
+    ispin = int(static_run.setting_from_incar('ISPIN'))
 
     calc = Calculation.setup(input, entry=entry,
                                     configuration='wavefunction',
@@ -428,7 +428,8 @@ def hybrid(entry, **kwargs):
     default = ['b3lyp', 'hse06', 'pbe0', 'vdw']
 
     input = wave.input
-    ispin = wave.settings['ispin']
+    ispin = int(wave.setting_from_incar('ISPIN'))
+    
     for hybrid in kwargs.get('forms', default):
         if hybrid == 'hse06':
             if wave.band_gap > 0:
@@ -467,7 +468,7 @@ def hse06(entry, **kwargs):
     if 'wavefunction' in calcs:
         return calcs['wavefunction']
     else:
-        return calc['hse06']
+        return calcs['hse06']
 
 def hse_relaxation(entry, **kwargs):
     '''
@@ -491,7 +492,7 @@ def hse_relaxation(entry, **kwargs):
 
     # Use the same input structure as input into our calculation
     input = static_run.input
-    ispin = static_run.settings['ispin']
+    ispin = int(static_run.setting_from_incar('ISPIN'))
 
     if static_run.band_gap > 0:
         algo_flag = 'All'

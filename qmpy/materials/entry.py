@@ -22,7 +22,7 @@ import qmpy.analysis.vasp as vasp
 from qmpy.computing.queue import Task
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+#logger.setLevel(logging.INFO)
 
 k_desc = 'Descriptive keyword for looking up entries'
 h_desc = 'A note indicating a reason the entry should not be calculated'
@@ -421,6 +421,32 @@ class Entry(models.Model):
         #else:
         #    return min(es)
 
+
+    ## < Mohan
+    def _get_formation_energy(self, calc_label='static', fit='nothing'):
+        fes = self.formationenergy_set.filter(fit=fit, 
+                         calculation__label=calc_label, 
+                         calculation__converged=True)
+        if fes.exists():
+            return fes[0].delta_e
+        return
+
+    @property
+    def pbe_fe(self):
+        """
+        Return formation energy calculated by PBE
+        """
+        return self._get_formation_energy(calc_label='static')
+
+    @property
+    def hse_fe(self):
+        """
+        Return formation energy calculated by HSE
+        """
+        return self._get_formation_energy(calc_label='hse06')
+    
+    ## Mohan >
+
     _energy = None
     @property
     def energy(self):
@@ -429,7 +455,9 @@ class Entry(models.Model):
         final relaxed structure. Otherwise, returns None.
         """
         if self._energy is None:
-            fes = self.formationenergy_set.filter(fit='standard').order_by('delta_e')
+            fes = self.formationenergy_set.filter(fit='nothing').order_by('delta_e')
+            
+            #fes = self.formationenergy_set.filter(fit='standard').order_by('delta_e')
             if fes.exists():
                 self._energy = fes[0].delta_e
             #if 'static' in self.calculations:
@@ -444,7 +472,8 @@ class Entry(models.Model):
 
     @property
     def stable(self):
-        forms = self.formationenergy_set.filter(fit='standard')
+        forms = self.formationenergy_set.filter(fit='nothing')
+        #forms = self.formationenergy_set.filter(fit='standard')
         forms = forms.exclude(stability=None)
         if not forms.exists():
             return None
@@ -619,7 +648,7 @@ class Entry(models.Model):
             calcs = self.calculation_set.filter(configuration=conf)
             calcs.delete()
 
-            for task in self.tasks.filter(module=conf):
+            for task in self.task_set.filter(module=conf):
                 task.delete()
 
             for job in self.job_set.filter(task__module=conf):
@@ -640,17 +669,18 @@ class Entry(models.Model):
         kpar = 0
         node = 0
         projects = []
-        for task in self.tasks.filter(module='hse06'):
+        for task in self.task_set.filter(module='hse06'):
             kwargs = task.kwargs
             projects = task.projects
 
         min_time = 3600*24 # looptime
         for c in self.calculation_set.filter(configuration='hse06'):
             try:
-                t = c.read_looptime
-                k = c.read_kpar
-                n = c.read_qfile_node
+                t = c.max_looptime
+                k = c.kpar_from_incar
+                n = c.nnodes_from_qfile
             except:
+                logger.warn("Unable to collect info from previous calculation")
                 continue
             else:
                 if t < min_time:
@@ -660,8 +690,10 @@ class Entry(models.Model):
 
         if kpar != 0:
             kwargs.update({'parallelization': {'kpar': kpar}})
+            logger.info("Collect info from previous calculation: kpar = %d" %k)
         if node != 0:
             kwargs.update({'Nnodes': node})
+            logger.info("Collect info from previous calculation: nodes = %d," %n)
 
         ## HSE project management for Mohan
         ##for p in projects:

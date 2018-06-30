@@ -49,8 +49,7 @@ class Atom(models.Model):
         | volume: Volume occupied by the atom
 
     """
-    structure = models.ForeignKey('Structure', related_name='atom_set',
-                                               null=True)
+    structure = models.ForeignKey('Structure', related_name='atom_set', null=True)
     site = models.ForeignKey('Site', related_name='atom_set', null=True)
 
     # species
@@ -232,10 +231,10 @@ class Atom(models.Model):
         return atom
 
     def get_site(self, tol=1e-1):
-        if not self.site is None:
+        if self.site is not None:
             return self.site
 
-        if not self.structure is None:
+        if self.structure is not None:
             for site in self.structure.sites:
                 if self.is_on(site):
                     site.add_atom(self, tol=tol)
@@ -294,7 +293,7 @@ class Site(models.Model):
         | x, y, z: Coordinate of the Site
 
     """
-    structure = models.ForeignKey('Structure', blank=True, null=True)
+    structure = models.ForeignKey('Structure', related_name='site_set', blank=True, null=True)
     wyckoff = models.ForeignKey(WyckoffSite, blank=True, null=True)
     x = models.FloatField()
     y = models.FloatField()
