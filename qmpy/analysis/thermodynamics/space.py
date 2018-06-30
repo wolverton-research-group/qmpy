@@ -166,8 +166,7 @@ class PhaseSpace(object):
             return
 
         stable = kwargs.get('stable', False)
-        ##fit = kwargs.get('fit', 'standard')
-        fit = kwargs.get('fit', 'nothing')
+        fit = kwargs.get('fit', 'standard')
         total = kwargs.get('total', (fit is None))
         if target == 'oqmd':
             self.data.load_oqmd(self.space, fit=fit, 
@@ -643,8 +642,7 @@ class PhaseSpace(object):
             pots = eq.chemical_potentials
             if total:
                 for k in pots:
-                    pots[k] += qmpy.chem_pots['pbe']['nothing']['elements'][k]
-                    #pots[k] += qmpy.chem_pots['standard']['elements'][k]
+                    pots[k] += qmpy.chem_pots['standard']['elements'][k]
             chems[eq] = pots
         return chems
 

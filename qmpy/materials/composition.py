@@ -164,21 +164,14 @@ class Composition(models.Model):
         self.element_set = elements
         self._elements = None
 
-    def _get_total_energy(self, xc_label='pbe'):
-        if xc_label == 'pbe':
-            calcs = self.calculation_set.filter(converged=True, configuration__in=['standard', 'static'])
-            if not calcs.exists():
-                return
-            return min( c.energy_pa for c in calcs )
-        elif xc_label == 'hse':
-            calcs = self.calculation_set.filter(converged=True, configuration__in=['hse06'])
-            if not calcs.exists():
-                return
-            return min( c.energy_pa for c in calcs )
-
     @property
     def total_energy(self):
-        return self._get_total_energy()
+        calcs = self.calculation_set.filter(converged=True, 
+                            configuration__in=['standard', 'static'])
+        if not calcs.exists():
+            return
+        return min( c.energy_pa for c in calcs )
+
 
     @property
     def energy(self):
