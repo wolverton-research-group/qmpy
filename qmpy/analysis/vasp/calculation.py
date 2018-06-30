@@ -155,6 +155,7 @@ class Calculation(models.Model):
     kpoints = None
     occupations = None
     formation = None
+    band_gap_from_occ = None
 
     class Meta:
         app_label = 'qmpy'
@@ -597,7 +598,7 @@ class Calculation(models.Model):
         # stresses
         stresses = []
 
-    def get_band_gap(self):
+    def get_band_gap_from_occ(self):
         if not hasattr(self, "occupations_dict"):
             self.read_band_occupations_xml()
 
@@ -616,9 +617,9 @@ class Calculation(models.Model):
                     occu     = d[k]['occupation' ][i]
 
                     if occu > 0 and eigenval > self.efermi:
-                        self.band_gap = 0.0
+                        self.band_gap_from_occ = 0.0
                         self.is_direct_bandgap = None
-                        return 
+                        return
 
                     elif occu > 0 and eigenval > vbm:
                         vbm = eigenval
@@ -626,7 +627,7 @@ class Calculation(models.Model):
 
                     elif occu <= 0 and eigenval < cbm:
                         cbm = eigenval
-                        cbk = k 
+                        cbk = k
 
         band_gap = max(cbm - vbm, 0.0)
 
@@ -635,7 +636,7 @@ class Calculation(models.Model):
         else:
             is_direct_bandgap = (vbk == cbk)
 
-        self.band_gap = band_gap
+        self.band_gap_from_occ = band_gap
         self.is_direct_bandgap = is_direct_bandgap
 
 
@@ -1389,7 +1390,7 @@ class Calculation(models.Model):
         if os.path.getsize(self.path+'/DOSCAR') < 300:
             return
         self.dos = dos.DOS.read(self.path+'/DOSCAR')
-        #self.band_gap = self.dos.find_gap() # Mohan comment this
+        self.band_gap = self.dos.find_gap()
         return self.dos
 
     def clear_outputs(self):
@@ -2073,12 +2074,10 @@ class Calculation(models.Model):
             ### uncomment after the chemical potential calculations are all done
             ### [vh]
             ###calc.calculate_stability()
-            ### < Mohan
             try:
-                calc.get_band_gap()
+                calc.get_band_gap_from_occ()
             except:
-                calc.band_gap = calc.dos.find_gap()
-            ### Mohan >
+                pass
             return calc
 
         elif not calc.errors:

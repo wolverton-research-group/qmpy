@@ -28,7 +28,6 @@ def entry_view(request, entry_id):
 
         if p.get('req_hse'):
             pass
-            
 
         if p.get('recollect_calc'):
             entry.calculation_set.all().delete()
@@ -65,9 +64,9 @@ def entry_view(request, entry_id):
                 if calc.converged:
                     calc.read_doscar()
                     try:
-                        calc.get_band_gap()
+                        calc.get_band_gap_from_occ()
                     except:
-                        calc.band_gap = calc.dos.find_gap()
+                        pass
                 else:
                     print calc.id, calc_path, "NOT CONVERGED"
                 calc.entry = entry
