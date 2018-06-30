@@ -19,17 +19,11 @@ def chem_pot_view(request):
     fits = []
 
     for fit in Fit.objects.all():
-        #fits.append(fit.name)
-        fits.append(fit.name +'_pbe')
-        fits.append(fit.name +'_hse')
-        #for elt, mu in fit.mus.items():
-        #    chem_pots[elt]['fits'][fit.name] = mu
-        for elt, mu in fit._get_mus(xc_label='pbe').items():
-            chem_pots[elt]['fits'][fit.name + '_pbe'] = mu
-        for elt, mu in fit._get_mus(xc_label='hse').items():
-            chem_pots[elt]['fits'][fit.name + '_hse'] = mu
+        fits.append(fit.name)
+        for elt, mu in fit.mus.items():
+            chem_pots[elt]['fits'][fit.name] = mu
 
-    pot_set = POTENTIALS['vasp_rec_pbe'] 
+    pot_set = POTENTIALS['vasp_rec']
     for elt in chem_pots:
         chem_pots[elt]['vasp'] = pot_set['elements'].get(elt, '')
 

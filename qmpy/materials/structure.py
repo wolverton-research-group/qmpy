@@ -222,29 +222,25 @@ class Structure(models.Model, object):
         return s
 
     @transaction.atomic
-    def save(self, *args, **kwargs):
+    def save(self,*args, **kwargs):
         if not self.composition:
             self.composition = Composition.get(self.comp)
+
+        if not self.spacegroup:
+            self.symmetrize()
 
         self.natoms = len(self.atoms)
         self.nsites = len(self.sites)
         self.ntypes = len(self.comp.keys())
         self.get_volume()
-
         super(Structure, self).save(*args, **kwargs)
-
+        if not self._atoms is None:
+            self.atom_set = self.atoms
+        if not self._sites is None:
+            self.site_set = self.sites
         self.element_set = self.elements
         self.species_set = self.species
         self.meta_data = self.comment_objects + self.keyword_objects
-
-        if not self._sites is None:
-            self.site_set = self.sites
-        if not self._atoms is None:
-            self.atom_set = self.atoms
-
-        if not self.spacegroup:
-            self.symmetrize()
-
 
     _atoms = None
     @property
@@ -262,7 +258,7 @@ class Structure(models.Model, object):
 
     @atoms.setter
     def atoms(self, atoms):
-        self._atoms = []
+        self._atoms =  []# list(atoms)
         self._sites = []
         for a in atoms:
             self.add_atom(a)
@@ -543,11 +539,7 @@ class Structure(models.Model, object):
         origins = {}
         for i, e in enumerate(dataset['equivalent_atoms']):
             counts[e] += 1
-            ##origins[self.sites[i]] = self.sites[e]
-            ## Dictionary keys cannot be objects that are not stored (only
-            ## models saved can be hashed). So, changing it to include only
-            ## the indices of the sites instead of the sites themselves.
-            origins[i] = e
+            origins[self.sites[i]] = self.sites[e]
             orbits[e].append(self.sites[i])
         self.origins = origins
         self.operations = zip(dataset['rotations'], dataset['translations'])
@@ -562,16 +554,12 @@ class Structure(models.Model, object):
                 trans.append(t)
         self.translations = trans
         self.orbits = orbits.values()
-        ##self.duplicates = dict((self.sites[e], v) for e, v in orbits.items())
-        ## See comment about hashes and Dictionary keys
-        self.duplicates = dict((e, v) for e, v in orbits.items())
+        self.duplicates = dict((self.sites[e], v) for e, v in orbits.items())
         self._uniq_sites = []
         self._uniq_atoms = []
         for ind, mult in counts.items():
             site = self.sites[ind]
-            ##for site2 in self.duplicates[site]:
-            ## See comment about hashes and Dictionary keys
-            for site2 in self.duplicates[ind]:
+            for site2 in self.duplicates[site]:
                 site2.multiplicity = mult
             site.index = ind
             site.multiplicity = mult
@@ -1266,7 +1254,7 @@ class Structure(models.Model, object):
             if not any([ site is site2 for site2 in _sites ]):
                 _sites.append(site)
         self._sites = _sites
-        return self._sites
+        return self.sites
 
     def group_atoms_by_symmetry(self):
         """Sort self.atoms according to the site they occupy."""

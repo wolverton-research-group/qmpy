@@ -103,8 +103,7 @@ theForm.onsubmit = function(e) {
     <th>ID</th>
     <th>Composition</th>
     <th>Spacegroup</th>
-    <th>Formation Energy [eV/atom] (PBE)</th>
-    <th>Formation Energy [eV/atom] (HSE)</th>
+    <th>Formation Energy [eV/atom]</th>
     <th>Prototype</th>
     <th># of atoms</th>
     <th>Reference</th>
@@ -117,8 +116,7 @@ theForm.onsubmit = function(e) {
     <td>{{ entry.id }}</td>
     <td>{{ entry.html | safe }}</td>
     <td>{{ entry.structure.spacegroup.symbol }}</td>
-    <td>{{ entry.pbe_fe |floatformat:-3 }}</td>
-    <td>{{ entry.hse_fe |floatformat:-3 }}</td>
+    <td>{{ entry.energy |floatformat:-3 }}</td>
     <td>{{ entry.prototype.name }}</td>
     <td>{{ entry.natoms }}</td>
     <td>{{ entry.reference.citation }}</td>
