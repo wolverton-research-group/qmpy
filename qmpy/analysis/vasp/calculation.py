@@ -136,6 +136,7 @@ class Calculation(models.Model):
     magmom_pa = models.FloatField(blank=True, null=True)
     dos = models.ForeignKey('DOS', blank=True, null=True)
     band_gap = models.FloatField(blank=True, null=True)
+    is_direct_bandgap = models.NullBooleanField(null=True, blank=True) ## Mohan ##
     irreducible_kpoints = models.FloatField(blank=True, null=True)
     #_lattice_vectors = models.FloatField(blank=True, null=True)
 
@@ -290,6 +291,7 @@ class Calculation(models.Model):
     @property
     def KPOINTS(self):
         set_INCAR_kpoints, kpoints = self.get_kpoints()
+        self.auto_kpoints = set_INCAR_kpoints # MOHAN
         if not set_INCAR_kpoints:
             return kpoints
 
@@ -413,7 +415,7 @@ class Calculation(models.Model):
                 if tag not in self.settings.keys():
                     continue
 
-                if self.settings.get('kpoints_gen', None) == 'TM':
+                if not self.auto_kpoints:
                     if tag in ['kspacing', 'kgamma']:
                         continue
 
@@ -473,7 +475,8 @@ class Calculation(models.Model):
             try:
                 kpoints = self.input.get_TM_kpoint_mesh(self.configuration)
                 return False, kpoints
-            except TMKPointsError:
+            except:
+            #except TMKPointsError:
                 pass
         return True, None
 
@@ -506,10 +509,50 @@ class Calculation(models.Model):
     def POSCAR(self, poscar):
         self.input = poscar.read(poscar)
 
-    xmlroot = None
+    ### <!
+    ### Mohan modify vasprun.xml reader on qmpy
     def read_vasprun_xml(self):
-        tree = etree.parse(gzip.open(self.path+'/vasprun.xml.gz','rb'))
-        self.xmlroot = tree.getroot()
+        if os.path.exists(os.path.join(self.path, 'vasprun.xml')):
+            with open(os.path.join(self.path, 'vasprun.xml'), 'rb') as xml:
+                tree = etree.parse(xml)
+                self.xmlroot = tree.getroot()
+        elif os.path.exists(os.path.join(self.path, 'vasprun.xml.gz')): 
+            with gzip.open(os.path.join(self.path, 'vasprun.xml.gz'), 'rb') as xml:
+                tree = etree.parse(xml)
+                self.xmlroot = tree.getroot()
+        else:
+            raise VaspError("No vasprun.xml file exists!")
+
+    def read_band_occupations_xml(self):
+        if not hasattr(self, 'xmlroot'):
+            self.read_vasprun_xml()
+
+        # final ionic step
+        fis = self.xmlroot.findall('calculation')[-1]
+        
+        occupations_dict = {}
+        for spin_set in fis.findall('eigenvalues/array/set/*'):
+            spin = spin_set.get('comment').replace(' ','_')
+            occupations_dict[spin] = {}
+            for kpoint_set in spin_set.findall('set'):
+                kpoint = int(kpoint_set.get('comment').split()[-1])
+                occupations_dict[spin][kpoint] = {'band_energy': [], 'occupation': []}
+                for band in kpoint_set.findall('r'):
+                    be, occ = [float(b) for b in band.text.strip().split()]
+                    occupations_dict[spin][kpoint]['band_energy'].append(be)
+                    occupations_dict[spin][kpoint]['occupation'].append(occ)
+
+        self.occupations_dict = occupations_dict
+
+    def read_efermi_xml(self):
+        if not hasattr(self, 'xmlroot'):
+            self.read_vasprun_xml()
+
+        self.efermi = float(self.xmlroot.find('calculation/dos/i').text.strip())
+
+    def read_from_vasprun_xml(self):
+        if not hasattr(self, 'xmlroot'):
+            self.read_vasprun_xml()
 
         # read settings
         settings = {}
@@ -553,6 +596,50 @@ class Calculation(models.Model):
 
         # stresses
         stresses = []
+
+    def get_band_gap(self):
+        if not hasattr(self, "occupations_dict"):
+            self.read_band_occupations_xml()
+
+        if not hasattr(self, "efermi"):
+            self.read_efermi_xml()
+
+        vbm = -float("inf")  # valence band energy
+        cbm =  float("inf")  # conduction band energy
+        vbk = None           # valence band kpoint
+        cbk = None           # conduction band kpoint
+
+        for s, d in self.occupations_dict.items():
+            for k in sorted(d.keys()):
+                for i in range(len(d[k]['band_energy'])):
+                    eigenval = d[k]['band_energy'][i]
+                    occu     = d[k]['occupation' ][i]
+
+                    if occu > 0 and eigenval > self.efermi:
+                        self.band_gap = 0.0
+                        self.is_direct_bandgap = None
+                        return 
+
+                    elif occu > 0 and eigenval > vbm:
+                        vbm = eigenval
+                        vbk = k
+
+                    elif occu <= 0 and eigenval < cbm:
+                        cbm = eigenval
+                        cbk = k 
+
+        band_gap = max(cbm - vbm, 0.0)
+
+        if band_gap == 0.0:
+            is_direct_bandgap = None
+        else:
+            is_direct_bandgap = (vbk == cbk)
+
+        self.band_gap = band_gap
+        self.is_direct_bandgap = is_direct_bandgap
+
+
+    ### !>
 
     def get_outcar(self):
         """
@@ -732,8 +819,12 @@ class Calculation(models.Model):
         self.read_runtime()
         if self.settings is None:
             self.read_outcar_settings()
-        if not self.settings['lorbit'] == 11:
+
+        ## Mohan <
+        #if not self.settings['lorbit'] == 11:
+        if self.settings.get('lorbit', 0) != 11:
             return np.array([[0]*self.natoms]*self.nsteps)
+        ## Mohan >
 
         charges = []
         for n, line in enumerate(self.outcar):
@@ -759,12 +850,15 @@ class Calculation(models.Model):
                 mags = []
                 for i in range(self.natoms):
                     mags.append(float(self.outcar[n+4+i].split()[-1]))
-                magmoms.append(mags)
-            if 'number of electron' in line:
                 if 'magnetization' in line:
                     self.magmom = float(line.split()[-1])
-        if self.settings['lorbit'] != 11:
+        ## Mohan <
+        #if self.settings['lorbit'] != 11:
+        #    return np.array([[0]*self.natoms]*self.nsteps)
+
+        if self.settings.get('lorbit', 0) != 11:
             return np.array([[0]*self.natoms]*self.nsteps)
+        ## Mohan >
         return magmoms
 
     def read_forces(self):
@@ -941,12 +1035,13 @@ class Calculation(models.Model):
         else:
             basis_converged = ( abs(v_fin - v_init)/v_init < 0.05 )
 
+
         if self.configuration in ['initialize', 
                                   'coarse_relax', 
                                   'fine_relax',
                                   'standard']:
             basis_converged = True
-
+        
         # is it a relaxation?
         if check_ionic:
             # are forces, volume converged, SC achieved?
@@ -1133,6 +1228,41 @@ class Calculation(models.Model):
                 tmp = line.split('=')[1].strip()
                 return int(tmp)
 
+    def setting_from_incar(self, tag_name):
+        """
+        Return setting from INCAR
+        For example:
+            input:  calc.setting_from_incar('ISPIN')
+            output: '1'
+        """
+        for line in self.read_incar():
+            if tag_name in line:
+                tmp = line.split('=')[1].strip()
+                return tmp
+
+    # Mohan #
+    def get_kpoints_file(self):
+        _kpoints_ = False
+        _ibzkpt_ = False
+        if os.path.exists(os.path.join(self.path, 'KPOINTS')):
+            with open(os.path.join(self.path, 'KPOINTS'), 'r') as f:
+                kpts_kpoints = f.readlines()
+                _kpoints_ = True
+        if os.path.exists(os.path.join(self.path, 'IBZKPT')):
+            with open(os.path.join(self.path, 'IBZKPT'), 'r') as f:
+                kpts_ibzkpt = f.readlines()
+                _ibzkpt_ = True
+
+        if _ibzkpt_ == True and _kpoints_ == False:
+            return ''.join(["(from IBZKPT)\n"] + kpts_ibzkpt[:3] + ["...\n"])
+        elif _ibzkpt_ == False and _kpoints_ == True:
+            return ''.join(kpts_kpoints[:3] + ["...\n"])
+        elif _ibzkpt_ == True and _kpoints_ == True:
+            return ''.join(kpts_kpoints + ['\n'] + kpts_ibzkpt[:3])
+        else:
+            return
+
+
     def read_stdout(self, filename='stdout.txt'):
         if not os.path.exists('%s/%s' % (self.path, filename)):
             print 'stdout file %s not found.' %(filename)
@@ -1259,7 +1389,7 @@ class Calculation(models.Model):
         if os.path.getsize(self.path+'/DOSCAR') < 300:
             return
         self.dos = dos.DOS.read(self.path+'/DOSCAR')
-        self.band_gap = self.dos.find_gap()
+        #self.band_gap = self.dos.find_gap() # Mohan comment this
         return self.dos
 
     def clear_outputs(self):
@@ -1350,7 +1480,7 @@ class Calculation(models.Model):
         new_calc.set_label(self.label)
         self.set_label(self.label + '_%d' % self.attempt)
         new_calc.attempt += 1
-        if new_calc.attempt > 5:
+        if new_calc.attempt > 2:
             new_calc.add_error('attempts')
 
         for err in errors:
@@ -1734,18 +1864,24 @@ class Calculation(models.Model):
             return
         return self.volume/len(self.output)
 
-    def formation_energy(self, reference='standard'):
+    def formation_energy(self, reference='nothing'):
         try:
             return self.get_formation(reference=reference).delta_e
         except AttributeError:
             return None
 
-    def get_formation(self, reference='standard'):
+    def get_formation(self, reference='nothing'): 
         if not self.converged:
             return
         formation = fe.FormationEnergy.get(self, fit=reference)
+
+        if self.label in ['relaxation', 'static']:
+            xc_label = 'pbe'
+        elif self.label in ['hse06']:
+            xc_label = 'hse'
+
         if len(self.input.comp) == 1:
-            e = comp.Composition.get(self.input.comp).total_energy
+            e = comp.Composition.get(self.input.comp)._get_total_energy(xc_label=xc_label)
             formation.delta_e = self.energy_pa - e
             formation.composition = self.input.composition
             formation.entry = self.entry
@@ -1753,8 +1889,10 @@ class Calculation(models.Model):
             formation.stability = None
             self.formation = formation
             return formation
-        hub_mus = chem_pots[reference]['hubbards']
-        elt_mus = chem_pots[reference]['elements']
+
+        hub_mus = chem_pots[xc_label][reference]['hubbards']
+        elt_mus = chem_pots[xc_label][reference]['elements']
+
         adjust = 0
         adjust -= sum([ hub_mus.get(k.key, 0)*v for k,v in self.hub_comp.items() ])
         adjust -= sum([ elt_mus[k]*v for k,v in self.comp.items() ])
@@ -1935,7 +2073,14 @@ class Calculation(models.Model):
             ### uncomment after the chemical potential calculations are all done
             ### [vh]
             ###calc.calculate_stability()
+            ### < Mohan
+            try:
+                calc.get_band_gap()
+            except:
+                calc.band_gap = calc.dos.find_gap()
+            ### Mohan >
             return calc
+
         elif not calc.errors:
             calc.write()
             return calc

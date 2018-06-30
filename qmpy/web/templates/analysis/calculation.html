@@ -8,12 +8,11 @@
 {% endblock %}
 
 {% block extrascript %}
-<script id="source" language="javascript" type="text/javascript">
-    $(function() {
-        {{ dos | safe }}
-        });
-    
-  </script>
+<meta charset='UTF-8'>
+<link rel="stylesheet" href="{% static "css/bokeh-0.12.11.min.css" %}">
+<script src="{% static "js/bokeh-0.12.11.min.js" %}">
+</script>
+{{ dos |safe }}
 {% endblock %}
 
 
@@ -56,6 +55,16 @@
         <tr>
           <td>Band Gap [eV]</td>
           <td> {{ calculation.band_gap | floatformat:-3 }}</td></tr>
+        <tr>
+          <td>Band Gap Type</td>
+          {% if calculation.is_direct_bandgap == None %}
+            <td> N.A. </td>
+          {% elif calculation.is_direct_bandgap == False %}
+            <td> Indirect  </td>
+          {% elif calculation.is_direct_bandgap == True %}
+            <td> Direct </td>
+          {% endif %}
+        </tr>
       </tbody>
     </table>
   </h2>
@@ -164,11 +173,22 @@
   </center>
 </div>
 
+
+
+{% if dos %}
+<div style="width:500px;height:300px;float:left">
+    {{ dosdiv |safe }}
+</div>
+{% endif %}
+
+<!--
 {% if dos %}
 <div class="flot-container" style="width:540px;float:left">
   <div id="placeholder" class="flot-placeholder"></div>
 </div>
 {% endif %}
+-->
+
 
 {% if stdout %}
 <div class=box style="width:640px;margin:10px">
@@ -190,12 +210,12 @@
 <div id="sidebar" class="box">
   <h2> INCAR settings </h2>
   <code>
-    {{ calculation.INCAR | linebreaks }}
+    {{ incar | linebreaks }}
   </code>
 
   <h2> KPOINTS </h2>
   <code>
-    {{ calculation.KPOINTS | linebreaks}}
+    {{ calculation.get_kpoints_file | linebreaks}}
   </code>
 
   <h2> Potentials </h2>

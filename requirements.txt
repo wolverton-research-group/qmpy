@@ -1,5 +1,5 @@
 Cython==0.20.1
-Django==1.6.2
+Django==1.8.18
 Jinja2==2.7.2
 MarkupSafe==0.19
 MySQL-python==1.2.5
@@ -32,3 +32,4 @@ six==1.4.1
 spglib==1.6.0
 tornado==3.1.1
 wsgiref==0.1.2
+bokeh==0.12.11
