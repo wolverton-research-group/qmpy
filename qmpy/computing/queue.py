@@ -147,7 +147,7 @@ class Task(models.Model):
 
     @property
     def last_job_state(self):
-        if not self.job_set.all():
+        if self.job_set.all():
             return self.job_set.all().order_by('-id')[0].state
 
     @property
@@ -226,11 +226,13 @@ class Task(models.Model):
 
         # reduce the walltime for wavefunction calculations
         if calc.configuration == 'wavefunction':
-            hse_walltime = 0.5*3600
+            walltime = 0.5*3600
         elif calc.configuration == 'hse06':
-            hse_walltime = self.kwargs['walltimehr']*3600
+            walltime = self.kwargs['walltimehr']*3600
         elif calc.configuration == 'hse_relaxation':
-            hse_walltime = self.kwargs['walltimehr']*3600*2
+            walltime = self.kwargs['walltimehr']*3600*2
+        else:
+            walltime = self.kwargs['walltimehr']*3600
 
 
         # Special case: Adjustments for certain clusters
@@ -265,7 +267,7 @@ class Task(models.Model):
                                           'cpu_per_core': cpu_per_core,
                                           'cpu_per_task': cpu_per_task,
                                           'mpi': 'srun -n $mpi_task -c $cpu_per_task --cpu_bind=cores',
-                                          'walltime':hse_walltime,
+                                          'walltime':walltime,
                                           'header':'\n'.join(['gunzip -f CHGCAR.gz WAVECAR.gz &> /dev/null',
                                                              'date +%s',
                                                              'ulimit -s unlimited']),
@@ -379,8 +381,8 @@ class Job(models.Model):
         else:
             job_factor = kwargs.get('job_factor', 1)
             nodes = task.kwargs['Nnodes']*job_factor
-            if nodes > 256:
-                nodes = 256
+            if nodes > 32:
+                nodes = 32 
             ppn = job.account.host.ppn
             if walltime is None:
                 walltime = job.account.host.walltime
@@ -405,6 +407,10 @@ class Job(models.Model):
                     d.hour,
                     d.minute,
                     d.second)
+
+        cpu_per_task = kwargs.get('cpu_per_task', 4)
+        cpu_per_core = kwargs.get('cpu_per_core', 4)
+        threads = kwargs.get('threads', 1) 
 
         qp = qmpy.INSTALL_PATH + '/configuration/qfiles/'
         text = open(qp+job.account.host.sub_text+'.q', 'r').read()

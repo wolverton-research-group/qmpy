@@ -1,8 +1,11 @@
 from setuptools import setup, find_packages
 
+with open('README.md', 'r') as fr:
+    long_description = fr.read()
+
 setup(
     name='qmpy',
-    version='0.4.9a',
+    version='2.0.0a',
     author='S. Kirklin',
     author_email='scott.kirklin@gmail.com',
     license='LICENSE.txt',
@@ -12,9 +15,9 @@ setup(
     url='http://pypi.python.org/pypi/qmpy',
     description='Suite of computational materials science tools',
     include_package_data=True,
-    long_description=open('README.md').read(),
+    long_description=long_description,
     install_requires=[
-        "Django >=1.6.2, <1.7",
+        "Django == 1.8.18",
         "PuLP",
         "numpy",
         "scipy",
@@ -31,6 +34,7 @@ setup(
         "pexpect",
         "pyparsing",
         "PyYAML",
-        "scikit-learn"
+        "scikit-learn",
+        "bokeh == 0.12.15"
     ],
 )

@@ -12,8 +12,27 @@
 {% endblock %}
 
 {% block content_title %}
-<h1> <a href="{{ ROOT_URL }}/materials/composition/{{entry.composition.name}}">{{ entry.composition.html|safe}}</a> 
-	{% if not entry.energy == None  %}: &Delta;H<sub>f</sub> = {{ entry.energy | floatformat:-3 }} eV/atom{% endif %}</h1>
+<h1> <a href="{{ ROOT_URL }}/materials/composition/{{entry.composition.name}}">{{ entry.composition.html|safe}}</a> </h1>
+<ul>
+    <li>
+    {% if not entry.pbe_fe == None  %} 
+    &Delta;H<sub>f</sub> (PBE) : {{ entry.pbe_fe | floatformat:-3 }} eV/atomi
+    {% else %} 
+    <form action="" method="post">{% csrf_token %}
+        <input type="submit" name="req_pbe" value="Request PBE calculation">
+    </form>
+    {% endif %} 
+    </li>
+    <li>
+	{% if not entry.hse_fe == None  %} 
+    &Delta;H<sub>f</sub> (HSE) : {{ entry.hse_fe | floatformat:-3 }} eV/atom
+    {% else %} 
+    <form action="" method="post">{% csrf_token %}
+        <input type="submit" name="req_hse" value="Request HSE calculation">
+    </form>
+    {% endif %} 
+    </li>
+</ul>
 {% endblock %}
 
 {% if warning %}
@@ -84,6 +103,7 @@
 	</li> {% endif %}
 </ul>
 
+
 <div>
   <h2> Selected Calculation History </h2>
 <table>
@@ -92,30 +112,26 @@
       <th>Configuration</th>
       <th>Total energy [eV/atom]</th>
       <th>Band gap [eV]</th>
+      <th>Bandgap Type</th>
       <th>Volume [&#8491;<sup>3</sup>/atom]</th>
       <th># of ionic steps</th>
       <th>Converged</th>
     </tr>
   </thead>
   <tbody>
-    {% if entry.calculations.relaxation %}
-    {% with entry.calculations.relaxation as calc %}
-    <tr class=clickableRow href="/analysis/calculation/{{calc.id}}">
-      <td>{{calc.label}}</td>
-      <td>{{calc.energy_pa | floatformat:-3}}</td>
-      <td>{{calc.band_gap | floatformat:-1}}</td>
-      <td>{{calc.output.volume_pa | floatformat:-3}}</td>
-      <td>{{calc.nsteps}}</td>
-      <td>{{calc.converged}}</td>
-    </tr>
-    {% endwith %}
-    {% endif %}
     {% if entry.calculations.static %}
     {% with entry.calculations.static as calc %}
     <tr class=clickableRow href="/analysis/calculation/{{calc.id}}">
-      <td>{{calc.label}}</td>
+      <td>{{calc.label}} (PBE)</td>
       <td>{{calc.energy_pa | floatformat:-3}}</td>
       <td>{{calc.band_gap | floatformat:-1}}</td>
+      {% if calc.is_direct_bandgap == None %}
+        <td> N.A. </td>
+      {% elif calc.is_direct_bandgap == False %}
+        <td> Indirect </td>
+      {% elif calc.is_direct_bandgap == True %}
+        <td> Direct </td>
+      {% endif %}
       <td>{{calc.output.volume_pa | floatformat:-3}}</td>
       <td>{{calc.nsteps}}</td>
       <td>{{calc.converged}}</td>
@@ -128,6 +144,13 @@
       <td>{{calc.label}}</td>
       <td>{{calc.energy_pa | floatformat:-3}}</td>
       <td>{{calc.band_gap | floatformat:-1}}</td>
+      {% if calc.is_direct_bandgap == None %}
+        <td> N.A. </td>
+      {% elif calc.is_direct_bandgap == False %}
+        <td> Indirect </td>
+      {% elif calc.is_direct_bandgap == True %}
+        <td> Direct </td>
+      {% endif %}
       <td>{{calc.output.volume_pa | floatformat:-3}}</td>
       <td>{{calc.nsteps}}</td>
       <td>{{calc.converged}}</td>
@@ -152,6 +175,7 @@
       <th>Configuration</th>
       <th>Total energy [eV/atom]</th>
       <th>Band gap [eV]</th>
+      <th>Bandgap Type</th>
       <th>Volume [&#8491;<sup>3</sup>/atom]</th>
       <th># of ionic steps</th>
       <th>Converged</th>
@@ -163,6 +187,13 @@
       <td>{{calc.label}}</td>
       <td>{{calc.energy_pa | floatformat:-3}}</td>
       <td>{{calc.band_gap | floatformat:-1}}</td>
+      {% if calc.is_direct_bandgap == None %}
+        <td> N.A. </td>
+      {% elif calc.is_direct_bandgap == False %}
+        <td> Indirect </td>
+      {% elif calc.is_direct_bandgap == True %}
+        <td> Direct </td>
+      {% endif %}
       <td>{{calc.output.volume_pa | floatformat:-3}}</td>
       <td>{{calc.nsteps}}</td>
       <td>{{calc.converged}}</td>
@@ -171,6 +202,12 @@
   </tbody>
   </table>
   </div>
+</div>
+
+<div>
+  <form action="" method="post">{% csrf_token %}
+    <input type="submit" name="recollect_calc" value="Read Calculation">
+  </form>
 </div>
 
 {% if entry.reference %}

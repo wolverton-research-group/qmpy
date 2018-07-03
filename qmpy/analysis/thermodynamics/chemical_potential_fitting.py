@@ -8,7 +8,7 @@ from qmpy.data import *
 
 logger = logging.getLogger(__name__)
 
-def fit(name, calculations=None, experiments=None, fit_for=[]):
+def fit(name, xc_label='pbe', calculations=None, experiments=None, fit_for=[]):
     f = qmpy.Fit.get(name)
     f.save()
 
@@ -24,8 +24,8 @@ def fit(name, calculations=None, experiments=None, fit_for=[]):
 
     expt_data = experiments.values_list('composition_id', 'delta_e')
     calc_data = calculations.values_list('composition_id', 'energy_pa')
-    base_mus = dict( (elt, qmpy.Composition.get(elt).total_energy) for elt in
-            element_groups['all'])
+    base_mus = dict( (elt, qmpy.Composition.get(elt)._get_total_energy(xc_label=xc_label))
+            for elt in element_groups['all'])
 
     for (name, delta_e), expt in zip(expt_data, experiments):
         if expt.delta_e is None:
@@ -141,6 +141,8 @@ def fit(name, calculations=None, experiments=None, fit_for=[]):
         hubbard_mus = dict(zip(hubbards, result))
 
     for elt, mu in base_mus.items():
+        if mu is None:
+            continue
         if elt not in element_mus:
             element_mus[qmpy.Element.get(elt)] = float(mu)
 
@@ -154,7 +156,7 @@ def fit(name, calculations=None, experiments=None, fit_for=[]):
     for elt, val in element_mus.items():
         if val > 100:
             val = base_mus[str(elt)]
-        mu = qmpy.ReferenceEnergy(element_id=elt, value=val)
+        mu = qmpy.ReferenceEnergy(xc_label=xc_label, element_id=elt, value=val)
         f.reference_energy_set.add(mu)
         new_e_mus[str(elt)] = float(val)
 

@@ -9,8 +9,12 @@ from tools import get_globals
 def home_page(request):
     data = get_globals()
     data.update({
-        'done':Entry.objects.filter(
-            formationenergy__fit='standard').distinct(),
+        'pbe_done':Formation.objects.filter(fit='nothing',
+            calculation__label='static',
+            calculation__converged=True).distinct(),
+        'hse_done':Formation.objects.filter(fit='nothing',
+            calculation__label='hse06',
+            calculation__converged=True).distinct(),
         'running':Task.objects.filter(state=1),
         'recent':Calculation.objects.filter(label='static',
             converged=True).order_by('-id')[:5]})
