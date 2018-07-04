@@ -514,5 +514,61 @@ def hse_relaxation(entry, **kwargs):
 def phonon_relaxation(entry, xc_func='PBE', **kwargs):
     """Subroutine to perform very accurate relaxation of structures for
     subsequent phonon calculations.
+
+    Arguments:
+        entry:
+            Entry, structure to be relaxed
+
+    Keyword Arguments:
+        xc_func:
+            String, name of XC function to use (Default='PBE'). Is used to
+            determine the name of the configuration settings file to use
+        kwargs:
+            Settings passed to calculation object
+
+    Output:
+        Calculation:
+            results of calculation object
     """
-    pass
+
+    # Get the name of this configuration
+    cnfg_name = 'phonon_relaxation'
+    if not xc_func.lower() == 'pbe':
+        cnfg_name = cnfg_name + '_' + xc_func.lower()
+
+    # Use this to define the calculation path
+    path = os.path.join(entry.path, cnfg_name)
+
+    # Check if the calculation is converged / started
+    if entry.calculations.get(cnfg_name, Calculation()).converged:
+        return entry.calculations[cnfg_name]
+
+    ## Get the relaxation calculation
+    #calc_rlx = relaxation(entry, xc_func=xc_func, **kwargs)
+
+    ## If converged, write results to disk and return calculation
+    #if not calc_rlx.converged:
+    #    calc_rlx.write()
+    #    return calc_rlx
+
+    ## Check special cases:
+    #if hasattr(calc_rlx, 'Co_lowspin'):
+    #    raise NotImplementedError
+
+    #input = calc_rlx.output
+    #ispin = int(calc_rlx.settings_from_incar('ISPIN'))
+    input = entry.input
+    ispin = 2
+
+    calc = Calculation.setup(input,  entry=entry,
+                                     configuration=cnfg_name,
+                                     path=path,
+                                     settings={'ispin':ispin},
+                                     **kwargs)
+
+    # Save the calculation
+    entry.calculations['phonon_relaxation'] = calc
+    if not calc.converged:
+        calc.write()
+
+    return calc

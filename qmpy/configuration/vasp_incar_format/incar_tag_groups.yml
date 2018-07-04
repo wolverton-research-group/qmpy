@@ -24,6 +24,7 @@
       - ediffg
       - potim
       - nsw
+      - addgrid
   - - dos
     - - emin
       - emax
