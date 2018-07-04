@@ -401,7 +401,6 @@ def wavefunction(entry, **kwargs):
         calc.write()
     return calc
 
-
 def hybrid(entry, **kwargs):
     '''
     Perform one (or more) hybrid functional calculations
@@ -429,7 +428,7 @@ def hybrid(entry, **kwargs):
 
     input = wave.input
     ispin = int(wave.setting_from_incar('ISPIN'))
-    
+
     for hybrid in kwargs.get('forms', default):
         if hybrid == 'hse06':
             if wave.band_gap > 0:
@@ -511,3 +510,9 @@ def hse_relaxation(entry, **kwargs):
         calc.write()
     return calc
 
+
+def phonon_relaxation(entry, xc_func='PBE', **kwargs):
+    """Subroutine to perform very accurate relaxation of structures for
+    subsequent phonon calculations.
+    """
+    pass
