@@ -1,6 +1,6 @@
 *~
 qmpy/migrations
-qmpy/configuration/site.cfg
+*site.cfg
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
