@@ -5,6 +5,13 @@ from django.views.generic import DetailView, ListView
 from django.contrib import admin
 from qmpy.db import settings
 
+from rest_framework import routers
+from qmpy.web.views.api import user_view
+
+router = routers.DefaultRouter()
+router.register(r'users', user_view.UserViewSet)
+router.register(r'groups', user_view.GroupViewSet)
+
 # Uncomment the next two lines to enable the admin:
 admin.autodiscover()
 
@@ -15,7 +22,11 @@ urlpatterns = [
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^accounts/login/.*$', 'django.contrib.auth.views.login'),
     url(r'^accounts/logout/.*$', 'django.contrib.auth.views.logout'),
-    url(r'^admin/', include(admin.site.urls))
+    url(r'^admin/', include(admin.site.urls)),
+
+    ## api
+    url(r'^api_login/', include(router.urls)),
+    url(r'^api_auth/', include('rest_framework.urls', namespace='rest_framework'))
     ]
 
 urlpatterns += [
@@ -57,9 +68,9 @@ urlpatterns += [
     url(r'^computing/queue$', 'qmpy.web.views.queue_view'),
 
     url(r'^computing/create/host$', 'qmpy.web.views.new_host_view'),
-    url(r'^computing/create/project', 'qmpy.web.views.new_project_view'),
-    url(r'^computing/create/user', 'qmpy.web.views.new_user_view'),
-    url(r'^computing/create/', 'qmpy.web.views.new_user_view'),
+    #url(r'^computing/create/project', 'qmpy.web.views.new_project_view'),
+    #url(r'^computing/create/user', 'qmpy.web.views.new_user_view'),
+    #url(r'^computing/create/', 'qmpy.web.views.new_user_view'),
 
     url(r'^computing/project/(?P<state>.*)/(?P<project_id>.*)$', 'qmpy.web.views.project_state_view'),
     url(r'^computing/project/(?P<project_id>.*)$', 'qmpy.web.views.project_view'),
@@ -93,6 +104,6 @@ urlpatterns += [
 
     ## other
     url(r'^faq', 'qmpy.web.views.faq_view'),
-    url(r'^playground', 'qmpy.web.views.play_view'),
+    url(r'^playground', 'qmpy.web.views.play_view')
 ]
 
