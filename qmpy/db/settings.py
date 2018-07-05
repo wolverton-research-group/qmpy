@@ -26,7 +26,8 @@ DATABASES = {
     }
 }
 
-ALLOWED_HOSTS = ['larue.northwestern.edu', 'www.larue.northwestern.edu']
+ALLOWED_HOSTS = ['127.0.0.1']
+#ALLOWED_HOSTS = ['larue.northwestern.edu', 'www.larue.northwestern.edu']
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -125,6 +126,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.admindocs',
     'qmpy',
+    'rest_framework',
 )
 
 # A sample logging configuration. The only tangible logging
