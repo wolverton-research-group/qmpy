@@ -16,7 +16,7 @@
 <ul>
     <li>
     {% if not entry.pbe_fe == None  %} 
-    &Delta;H<sub>f</sub> (PBE) : {{ entry.pbe_fe | floatformat:-3 }} eV/atomi
+    &Delta;H<sub>f</sub> (PBE) : {{ entry.pbe_fe | floatformat:-3 }} eV/atom
     {% else %} 
     <form action="" method="post">{% csrf_token %}
         <input type="submit" name="req_pbe" value="Request PBE calculation">
