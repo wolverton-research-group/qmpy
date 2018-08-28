@@ -18,16 +18,15 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'qmdb_ht',
-        'USER': 'msandbox',
-        'PASSWORD': 'msandbox',
+        'NAME': 'oqmd_api_test',
+        'USER': 'oqmd',
+        'PASSWORD': 'oqmdpass@123!',
         'HOST': '127.0.0.1',
-        'PORT': '5720'
+        'PORT': '5721'
     }
 }
 
-ALLOWED_HOSTS = ['127.0.0.1']
-#ALLOWED_HOSTS = ['larue.northwestern.edu', 'www.larue.northwestern.edu']
+ALLOWED_HOSTS = ['larue.northwestern.edu', 'www.larue.northwestern.edu']
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
