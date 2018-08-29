@@ -10,7 +10,7 @@ from qmpy.web.views.api import user_view
 
 router = routers.DefaultRouter()
 router.register(r'users', user_view.UserViewSet)
-router.register(r'groups', user_view.GroupViewSet)
+#router.register(r'groups', user_view.GroupViewSet)
 
 # Uncomment the next two lines to enable the admin:
 admin.autodiscover()
