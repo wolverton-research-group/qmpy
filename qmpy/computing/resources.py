@@ -139,6 +139,9 @@ class APIUser(models.Model):
         app_label = 'qmpy'
         db_table = 'apiusers'
 
+    def __str__(self):
+        return self.username
+
 class Host(models.Model):
     """
     Host model - stores all host information for a cluster.
