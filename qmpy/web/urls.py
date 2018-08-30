@@ -99,6 +99,9 @@ urlpatterns += [
     url(r'^documentation/overview$', 'qmpy.web.views.overview_docs'),
     url(r'^documentation/publications$', 'qmpy.web.views.pubs_docs'),
 
+    ## serializer
+    url(r'^serializer/entry$', 'qmpy.web.views.get_entry_list'),
+
     ## download
     url(r'^download/', 'qmpy.web.views.download_home'),
 
