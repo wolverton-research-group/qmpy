@@ -4,4 +4,4 @@ from qmpy.materials.entry import Entry
 class EntrySerializer(serializers.ModelSerializer):
     class Meta:
         model = Entry
-        fields = ('id', 'path', 'natoms')
+        fields = ('id', 'path', 'natoms', 'energy', 'calculation_set')
