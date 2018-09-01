@@ -6,12 +6,10 @@ from django.contrib import admin
 from qmpy.db import settings
 
 from rest_framework import routers
-from qmpy.web.views.api import user_view
-from qmpy.web.views import EntryList
+from qmpy.web import views
 
 router = routers.DefaultRouter()
-router.register(r'users', user_view.UserViewSet)
-#router.register(r'groups', user_view.GroupViewSet)
+router.register(r'users', views.UserViewSet)
 
 # Uncomment the next two lines to enable the admin:
 admin.autodiscover()
@@ -101,7 +99,8 @@ urlpatterns += [
     url(r'^documentation/publications$', 'qmpy.web.views.pubs_docs'),
 
     ## serializer
-    url(r'^serializer/entry$', EntryList.as_view()),
+    url(r'^serializer/users$', views.UserList.as_view()),
+    url(r'^serializer/entry$', views.EntryList.as_view()),
 
     ## download
     url(r'^download/', 'qmpy.web.views.download_home'),
