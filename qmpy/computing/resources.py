@@ -128,20 +128,6 @@ class User(AbstractUser):
             if set_pswd is True:
                 acct.create_passwordless_ssh()
 
-class APIUser(models.Model):
-    username = models.CharField(max_length=255, null=False, blank=False, db_index=True)
-    password = models.CharField(max_length=128, blank=True)
-    email = models.EmailField(max_length=254, null=False, blank=True)
-    last_login = models.DateTimeField(null=True, verbose_name='last login', blank=True)
-    date_joined = models.DateTimeField(default=timezone.now, verbose_name='date joined')
-
-    class Meta:
-        app_label = 'qmpy'
-        db_table = 'apiusers'
-
-    def __str__(self):
-        return self.username
-
 class Host(models.Model):
     """
     Host model - stores all host information for a cluster.

@@ -8,8 +8,8 @@ from qmpy.db import settings
 from rest_framework import routers
 from qmpy.web import views
 
-router = routers.DefaultRouter()
-router.register(r'users', views.UserViewSet)
+#router = routers.DefaultRouter()
+#router.register(r'users', views.UserViewSet)
 
 # Uncomment the next two lines to enable the admin:
 admin.autodiscover()
@@ -24,8 +24,8 @@ urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
 
     ## api
-    url(r'^api_login/', include(router.urls)),
-    url(r'^api_auth/', include('rest_framework.urls', namespace='rest_framework'))
+#    url(r'^api_login/', include(router.urls)),
+#    url(r'^api_auth/', include('rest_framework.urls', namespace='rest_framework'))
     ]
 
 urlpatterns += [
@@ -99,7 +99,6 @@ urlpatterns += [
     url(r'^documentation/publications$', 'qmpy.web.views.pubs_docs'),
 
     ## serializer
-    url(r'^serializer/users$', views.UserList.as_view()),
     url(r'^serializer/entry$', views.EntryList.as_view()),
 
     ## download
