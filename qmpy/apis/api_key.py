@@ -3,7 +3,7 @@ import binascii
 from django.db import models
 
 def generate_key():
-    return binascii.hexlify(os.urandom(20)).decode()
+    return binascii.hexlify(os.urandom(10)).decode()
 
 class APIKey(models.Model):
     username = models.CharField(max_length=255, null=False, blank=False, db_index=True)
@@ -21,17 +21,16 @@ class APIKey(models.Model):
 
 
     @staticmethod
-    def create():
-        username = raw_input("Username: ")
-        email = raw_input("Email address: ")
+    def create(username=None, email=None):
+        if not username:
+            username = raw_input("Username: ")
+        if not email:
+            email = raw_input("Email address: ")
         apiuser, new = APIKey.objects.get_or_create(username=username)
-        if not new:
-            print "User by that name exists!"
-            print "Please try a new name, or exit with Ctrl-x"
-            return APIKey.create()
-        apiuser.email = email
-        apiuser.key = generate_key()
-        apiuser.save()
+        if new:
+            apiuser.email = email
+            apiuser.key = generate_key()
+            apiuser.save()
         return apiuser
 
 
