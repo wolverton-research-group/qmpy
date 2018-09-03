@@ -4,7 +4,6 @@
 OQMD
 {% endblock %}
 
-
 {% block extrahead %}
 {% endblock %}
 
@@ -37,7 +36,17 @@ OQMD
 
 <div style="margin:10px;">
 {% if key %}
-Your API key is: {{ key }}
+Your API key is: 
+<input type='text' value={{ key }} id="myapikey" 
+    style="width: 180px; 
+    border: none; font-size: 14px"
+    autocomplete="off"
+    autocorrect="off"
+    spellcheck="false"
+    >
+<button onclick="myFunction()">
+    Copy API key
+</button>
 {% endif %}
 </div>
 
@@ -49,4 +58,13 @@ API key supplied as a GET variable: <br>
 oqmd.org:/serializer/entry?apikey=YOUR_API_KEY
 </div>
 
-{% endblock %} 
+<script>
+function myFunction() {
+    var copyText = document.getElementById("myapikey");
+    copyText.select();
+    document.execCommand("copy");
+}
+</script>
+
+{% endblock %}
+
