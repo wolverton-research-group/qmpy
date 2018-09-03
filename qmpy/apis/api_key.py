@@ -26,14 +26,9 @@ class APIKey(models.Model):
             username = raw_input("Username: ")
         if not email:
             email = raw_input("Email address: ")
-        apiuser, new = APIKey.objects.get_or_create(username=username)
+        apiuser, new = APIKey.objects.get_or_create(username=username, email=email)
         if new:
             apiuser.email = email
             apiuser.key = generate_key()
             apiuser.save()
         return apiuser
-
-
-
-
-
