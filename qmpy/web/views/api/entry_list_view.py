@@ -1,23 +1,22 @@
-from rest_framework.views import APIView
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
+from rest_framework import generics
+import django_filters.rest_framework
 from qmpy.web.serializers.entry import EntrySerializer
 from qmpy.materials.entry import Entry, Composition
 from api_perm import *
 
-class EntryList(APIView):
+class EntryList(generics.ListAPIView):
     #permission_classes = (OnlyAPIPermission, )
-    def get(self, request, format=None):
-        self.entries = Entry.objects.all()
-        self.request = request
-        self.composition_filter()
+    serializer_class = EntrySerializer
+    #filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
 
-        serializer = EntrySerializer(self.entries, many=True)
-        return Response(serializer.data)
+    def get_queryset(self):
+        entries = Entry.objects.all()
+        entries = self.composition_filter(entries)
 
-    def composition_filter(self):
+        return entries
+
+    def composition_filter(self, entries):
         request = self.request
-        entries = self.entries
 
         comp = request.GET.get('composition', False)
         if comp:
@@ -43,4 +42,4 @@ class EntryList(APIView):
                 tmp_ex = cex_lst.pop()
                 entries = entries.exclude(composition__element_set=tmp_ex)
 
-        self.entries = entries
+        return entries
