@@ -167,6 +167,10 @@ TEMPLATE_CONTEXT_PROCESSORS = (
         "django.core.context_processors.request",
         )
 
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKEND': ('django_filters.rest_framework.DjangoFilterBackend',)
+}
+                              
 #CACHES = {
 #        'default': {
 #            'BACKEND':
