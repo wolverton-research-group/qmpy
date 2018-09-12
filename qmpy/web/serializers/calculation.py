@@ -4,4 +4,4 @@ from qmpy.analysis.vasp import Calculation
 class CalculationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Calculation
-        fields = ('id', 'path', 'label', 'band_gap', 'converged', 'energy_pa', 'natoms')
+        fields = ('id', 'label', 'band_gap', 'converged', 'energy_pa')
