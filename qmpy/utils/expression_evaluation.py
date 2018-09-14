@@ -1,5 +1,6 @@
 from django.db.models import Q 
 import operator
+import qmpy.data as data
 
 def precedence(op):
     if op == '-':
@@ -25,22 +26,37 @@ class Token:
         else:
             return Q(composition__element_list__contains=val+'_')
 
+    def parse_element_group(self, group):
+        lst = data.element_groups[group]
+        q_lst = [Q(composition__element_list__contains=v+'_') for v in lst]
+        return reduce(operator.or_, q_lst)
+
     def evaluate(self, method='element2q'):
         value_stack = []
         operator_stack = []
 
         tokens = self.tokens
-        for t in tokens:
-            if t.isupper():
+        it = 0
+        while it < len(tokens):
+            t = tokens[it]
+
+            if t == ' ':
+                it += 1
+                continue
+
+            elif t.isupper():
                 value_stack.append(t)
+                it += 1
     
             elif t.islower():
                 ele = value_stack.pop()
                 ele += t
                 value_stack.append(ele)
+                it += 1
     
             elif t == '(':
                 operator_stack.append(t)
+                it += 1
     
             elif t == ')':
                 while operator_stack[-1] != '(':
@@ -54,6 +70,19 @@ class Token:
                     value_stack.append(val)
     
                 operator_stack.pop()
+                it += 1
+
+            elif t == '{':
+                it += 1
+                t = tokens[it]
+                group = ''
+                while t != '}':
+                    group += t
+                    it += 1
+                    t = tokens[it]
+                it += 1
+                value_stack.append(self.parse_element_group(group))
+                continue
     
             elif t in ['-', ',']:
                 thisop = t
@@ -71,6 +100,7 @@ class Token:
                         break
     
                 operator_stack.append(thisop)
+                it += 1
     
             else:
                 raise
@@ -85,4 +115,4 @@ class Token:
             
             value_stack.append(val)
     
-        return value_stack.pop()
+        return getattr(self, method)(value_stack.pop())
