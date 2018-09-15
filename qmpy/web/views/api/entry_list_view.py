@@ -73,3 +73,6 @@ class EntryList(generics.ListAPIView):
 
         return entries.exclude(formationenergy=None)
 
+    def general_filter(self, entries):
+        return entries
+
