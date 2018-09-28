@@ -199,27 +199,13 @@ def relaxation(entry, xc_func='PBE', **kwargs):
     if not entry.calculations.get(cnfg_name, Calculation()).converged:
         input = entry.input.copy()
 
-        # because max likes to calculate fucking slowly
         projects = entry.project_set.all()
-        if Project.get('max') in projects:
-            calc = Calculation.setup(input, entry=entry,
-                                            configuration=cnfg_name, 
-                                            path=path, 
-                                            settings={'algo':'Normal'},
-                                            **kwargs)
-        else:
-
-            if 'relax_high_cutoff' in entry.keywords:
-                calc = Calculation.setup(input,  entry=entry,
-                                                 configuration=cnfg_name,
-                                                 path=path,
-                                                 settings={'prec':'ACC'},
-                                                 **kwargs)
-            else:
-                calc = Calculation.setup(input,  entry=entry,
-                                                 configuration=cnfg_name,
-                                                 path=path,
-                                                 **kwargs)
+        calc = Calculation.setup(input,
+                                 entry=entry,
+                                 configuration=cnfg_name,
+                                 path=path,
+                                 **kwargs
+                                )
 
         entry.calculations[cnfg_name] = calc
         entry.Co_lowspin = False
