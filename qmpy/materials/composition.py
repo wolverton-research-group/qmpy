@@ -167,7 +167,7 @@ class Composition(models.Model):
     @property
     def total_energy(self):
         calcs = self.calculation_set.filter(converged=True, 
-                            configuration__in=['standard', 'static'])
+                            label__in=['standard', 'static'])
         if not calcs.exists():
             return
         return min( c.energy_pa for c in calcs )
@@ -176,7 +176,7 @@ class Composition(models.Model):
     @property
     def energy(self):
         calcs = self.calculation_set.filter(converged=True, 
-                            configuration__in=['standard', 'static'])
+                            label__in=['standard', 'static'])
         if not calcs.exists():
             return
         return min( c.formation_energy() for c in calcs )

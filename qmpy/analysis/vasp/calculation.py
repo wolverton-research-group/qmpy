@@ -135,8 +135,6 @@ class Calculation(models.Model):
     dos = models.ForeignKey('DOS', blank=True, null=True)
     band_gap = models.FloatField(blank=True, null=True)
     irreducible_kpoints = models.FloatField(blank=True, null=True)
-    #_lattice_vectors = models.FloatField(blank=True, null=True)
-
 
     #= progress/completion =#
     attempt = models.IntegerField(default=0, blank=True, null=True)
@@ -190,7 +188,7 @@ class Calculation(models.Model):
         super(Calculation, self).save(*args, **kwargs)
         self.hubbard_set = self.hubbards
         self.potential_set = self.potentials
-        self.element_set = self.elements
+        self.element_set = [Element.get(e) for e in set(self.elements)]
         self.meta_data = self.error_objects
         if not self.formation is None:
             self.formation.save()
@@ -217,7 +215,7 @@ class Calculation(models.Model):
             if self.id:
                 self._elements = list(self.element_set.all())
             else:
-                self._elements = list(set([ a.element for a in self.input ]))
+                self._elements = list(set([ a.element for a in self.input.atoms ]))
         return self._elements
 
     @elements.setter
@@ -327,7 +325,7 @@ class Calculation(models.Model):
                 ['gamma', 'kppra', 'scale_encut', 'potentials', 'hubbards'])
 
         incar = '#= General Settings =#\n'
-        for key in ['prec', 'istart', 'icharg', 'lsorbit', 'nelect']:
+        for key in ['prec', 'istart', 'icharg', 'nelect']:
             if key in s:
                 incar += ' %s\n' % vasp_format(key, s.pop(key))
 
@@ -366,8 +364,7 @@ class Calculation(models.Model):
                 incar += ' %s\n' % vasp_format(key, s.pop(key))
 
         incar += '\n#= Write flags =#\n'
-        ##for key in ['lcharg', 'lwave', 'lelf', 'lhvar', 'lvtot']:
-        for key in ['lcharg', 'lwave', 'lhvar', 'lvtot']:
+        for key in ['lcharg', 'lwave', 'lvhar', 'lvtot', 'lorbit']:
             if key in s:
                 incar += ' %s\n' % vasp_format(key, s.pop(key))
 
@@ -542,7 +539,6 @@ class Calculation(models.Model):
         else:
             raise VaspError('No such file exists')
 
-    #!vh
     def read_number_of_cores(self):
         self.get_outcar()
         ncores = 1
@@ -583,7 +579,6 @@ class Calculation(models.Model):
             if 'free  energy' in line:
                 energies.append(ffloat(line.split()[4]))
         self.energies = np.array(energies)
-        return self.energies
 
     def read_natoms(self):
         """Reads the number of atoms, and assigns the value to natoms."""
@@ -591,17 +586,16 @@ class Calculation(models.Model):
         for line in self.outcar:
             if 'NIONS' in line:
                 self.natoms = int(line.split()[-1])
-                return self.natoms
+                break
 
     def read_n_ionic(self):
         """Reads the number of ionic steps, and assigns the value to nsteps."""
         self.get_outcar()
         self.nsteps = len([ l for l in self.outcar if 'free  energy' in l ])
-        return self.nsteps
 
     def read_input_structure(self):
-        if os.path.exists(self.path+'/POSCAR'):
-            self.input = poscar.read(self.path+'/POSCAR')
+        if os.path.exists(os.path.join(self.path, 'POSCAR')):
+            self.input = poscar.read(os.path.join(self.path, 'POSCAR'))
             self.input.entry = self.entry
 
     def read_elements(self):
@@ -624,15 +618,14 @@ class Calculation(models.Model):
                 elt = line.split()[2].split('_')[0]
                 elt_list.append(elt)
             if 'ions per type' in line:
+                # there are 2*N occurrences of "POTCAR:" in OUTCAR
                 elt_list = elt_list[:len(elt_list)/2]
-                self.elements = [ Element.get(e) for e in elt_list ]
                 counts = map(int, line.split()[4:])
                 assert len(counts) == len(elt_list)
                 for n, e in zip(counts, elt_list):
                     elements += [e]*n
                 break
         self.elements = elements
-        return self.elements
 
     def read_lattice_vectors(self):
         """
@@ -660,12 +653,11 @@ class Calculation(models.Model):
                 for n in range(3):
                     tlv.append(read_fortran_array(self.outcar[i+n+1], 6)[:3])
                 lattice_vectors.append(tlv)
-        #self._lattice_vectors = lattice_vectors
         return np.array(lattice_vectors)
 
     def read_charges(self):
         """
-        Reads and returns VASP's calculated charges for each atom. Returns the
+        Reads and returns VASP-calculated projected charge for each atom. Returns the
         RAW charge, not NET charge.
         
         Examples::
@@ -677,30 +669,25 @@ class Calculation(models.Model):
         self.get_outcar()
         self.read_natoms()
         self.read_n_ionic()
-        self.read_runtime()
-        if self.settings is None:
-            self.read_outcar_settings()
-        if not self.settings['lorbit'] == 11:
-            return np.array([[0]*self.natoms]*self.nsteps)
-
         charges = []
         for n, line in enumerate(self.outcar):
-            if 'total charge ' in line:
+            if ' total charge ' in line:
                 chgs = []
                 for i in range(self.natoms):
                     chgs.append(float(self.outcar[n+4+i].split()[-1]))
                 charges.append(chgs)
+        if not charges:
+            return np.array([[0]*self.natoms]*self.nsteps)
         return np.array(charges)
 
     def read_magmoms(self):
         self.get_outcar()
         self.read_natoms()
         self.read_n_ionic()
-        if self.settings is None:
-            self.read_outcar_settings()
-        if self.settings['ispin'] == 1:
-            return np.array([[0]*self.natoms]*self.nsteps)
-
+        for line in self.outcar:
+            if 'ISPIN  =' in line:
+                if int(line.strip().split()[2]) == 1:
+                    return np.array([[0]*self.natoms]*self.nsteps)
         magmoms = []
         for n, line in enumerate(self.outcar):
             if 'magnetization (x)' in line:
@@ -708,10 +695,13 @@ class Calculation(models.Model):
                 for i in range(self.natoms):
                     mags.append(float(self.outcar[n+4+i].split()[-1]))
                 magmoms.append(mags)
+        for line in self.outcar[::-1]:
             if 'number of electron' in line:
                 if 'magnetization' in line:
                     self.magmom = float(line.split()[-1])
-        if self.settings['lorbit'] != 11:
+                    self.magmom_pa = self.magmom/self.natoms
+                    break
+        if not magmoms:
             return np.array([[0]*self.natoms]*self.nsteps)
         return magmoms
 
@@ -726,7 +716,12 @@ class Calculation(models.Model):
             elif len(force_loop) < self.natoms:
                 if '------' in line:
                     continue
-                force_loop.append(map(float, line.split()[3:]))
+                try:
+                    force_loop.append(map(float, line.split()[3:]))
+                except ValueError:
+                    # when the forces output format is messed up
+                    # e.g. "0.0000000 0.0000000-1173493.45" without space b/w f_y, f_z
+                    force_loop.append([0., 0., 0.])
                 if len(force_loop) == self.natoms:
                     forces.append(force_loop)
         return np.array(forces)
@@ -750,13 +745,9 @@ class Calculation(models.Model):
     def read_stresses(self):
         self.get_outcar()
         stresses = []
-        check = False
         for line in self.outcar:
-            if 'FORCE on cell' in line:
-                check = True
-            if check and 'in kB' in line:
+            if 'in kB' in line:
                 stresses.append(map(ffloat, line.split()[2:]))
-                check = False
         return np.array(stresses)
 
     def read_kpoints(self):
@@ -803,63 +794,66 @@ class Calculation(models.Model):
         self.bands = np.array(bands)
 
     def read_outcar_results(self):
-        try:
-            self.read_natoms()
-            self.read_convergence()
-            elts = self.read_elements()
-            energies = self.read_energies()
-            lattice_vectors = self.read_lattice_vectors()
-            stresses = self.read_stresses()
-            positions = self.read_positions()
-            forces = self.read_forces()
-            try: 
-                magmoms = self.read_magmoms()
-                charges = self.read_charges()
-            except:
-                print "Magmoms and/or charges information not found."
-        except:
-            print "Failed in reading results from OUTCAR:\
-            read_outcar_results():L793"
-            self.add_error("failed to read")
-            return
+        logger.info("Reading results from OUTCAR. Calculation ID: {}, path: {}".format(
+            self.id, self.path))
+
+        self.read_natoms()
+        self.read_elements()
+        self.read_n_ionic()
+        self.read_convergence()
+        self.read_energies()
+        lattice_vectors = self.read_lattice_vectors()
+        stresses = self.read_stresses()
+        positions = self.read_positions()
+        all_forces = self.read_forces()
+        magmoms = self.read_magmoms()
+        charges = self.read_charges()
+
 
         if len(self.energies) > 0:
             self.energy = self.energies[-1]
             self.energy_pa = self.energy/self.natoms
-        if not self.magmom is None:
-            self.magmom_pa = self.magmom/self.natoms
 
-        if self.nsteps > 0:
-            try:
-                output = strx.Structure()
-                output.total_energy = energies[-1]
-                output.cell = lattice_vectors[-1]
-                output.stresses = stresses[-1]
-                inv = numpy.linalg.inv(output.cell).T
-                atoms = []
-                for coord, forces, charge, magmom, elt in zip(positions[-1], 
-                                                              forces[-1],
-                                                              charges[-1],
-                                                              magmoms[-1],
-                                                              elts):
-                    a = Atom(element_id=elt, charge=charge, magmom=magmom)
-                    a.coord = np.dot(inv, coord)
-                    a.forces = forces
-                    atoms.append(a)
-                output.atoms = atoms
-                self.output = output
-                self.output.set_label(self.label)
-            except:
-                self.add_error("failed to read")
-                return
+        output = strx.Structure()
+        output.cell = lattice_vectors[-1]
+        output.stresses = stresses[-1]
+        inv = numpy.linalg.inv(output.cell).T
+        atoms = []
+        for coord, forces, charge, magmom, elt in zip(positions[-1], 
+                                                      all_forces[-1],
+                                                      charges[-1],
+                                                      magmoms[-1],
+                                                      self.elements):
+            a = Atom(element_id=elt, charge=charge, magmom=magmom)
+            a.coord = np.dot(inv, coord)
+            a.forces = forces
+            atoms.append(a)
+        output.atoms = atoms
+        self.output = output
+        self.output.set_label(self.label)
+        logger.info("Reading results from OUTCAR complete.")
+        logger.info("Errors found: [{}]".format(", ".join(self.errors)))
 
     def read_convergence(self):
         self.get_outcar()
-        if not self.settings:
-            self.read_outcar_settings()
-        check_ionic = False
-        if self.settings.get('nsw', 1) > 1:
+        # read the input maximum ionic/electronic steps
+        sett_nsw = 0
+        for line in self.outcar:
+            if 'NSW ' in line:
+                sett_nsw = int(line.strip().split()[2])
+                break
+        sett_nelm = 60
+        for line in self.outcar:
+            if 'NELM ' in line:
+                sett_nelm = int(line.strip().split()[2].strip(';'))
+                break
+        if sett_nsw > 0:
             check_ionic = True
+        else:
+            check_ionic = False
+
+        logger.info("Calculation configuration: {}. Ionic relaxation? {}".format(
+            self.configuration, check_ionic))
 
         v_init = None
         for line in self.outcar:
@@ -872,9 +866,9 @@ class Calculation(models.Model):
         for line in self.outcar[::-1]:
             if 'Iteration' in line:
                 ionic, electronic = map(int, re_iter.findall(line)[0])
-                if self.settings.get('nelm', 60) == electronic:
+                if sett_nelm == electronic:
                     sc_converged = False
-                if self.settings.get('nsw', 0) == ionic:
+                if sett_nsw == ionic:
                     forces_converged = False
                 break
             if 'EDIFF is reached' in line:
@@ -885,9 +879,11 @@ class Calculation(models.Model):
                 v_fin = float(line.split(':')[1].strip())
 
         if v_fin is None or v_init is None:
-            basis_converged = False
+            v_delta = None
         else:
-            basis_converged = ( abs(v_fin - v_init)/v_init < 0.05 )
+            v_delta = abs(v_fin - v_init)/v_init
+        v_delta_str = '{:.2f}'.format(v_delta) if v_delta is not None else 'None'
+        basis_converged = v_delta < 0.05 if v_delta is not None else False
 
         if self.configuration in ['initialize', 
                                   'coarse_relax', 
@@ -895,13 +891,14 @@ class Calculation(models.Model):
                                   'standard']:
             basis_converged = True
 
-        if (sc_converged and 
-                ((forces_converged and check_ionic) or not check_ionic) and
-                basis_converged):
+        logger.info("(sc, forces, basis): {}, {}, {} ({})".format(
+            sc_converged, forces_converged, basis_converged, v_delta_str))
+        if (sc_converged and ((forces_converged and check_ionic) or not check_ionic) and
+            basis_converged):
             self.converged = True
         else:
-            self.add_error('convergence')
             self.converged = False
+            self.add_error('convergence')
 
     def read_outcar_settings(self):
         self.get_outcar()
@@ -1096,7 +1093,6 @@ class Calculation(models.Model):
         if self.settings is None:
             self.read_outcar_settings()
         self.read_outcar_results()
-        self.read_n_ionic()
 
     def read_incar(self):
         """
@@ -1245,11 +1241,9 @@ class Calculation(models.Model):
         """
         errors = self.errors
         if not errors or errors == ['found no errors']:
-            logger.info('Found no errors')
+            logger.info('Calculation {}: Found no errors'.format(self.id))
             return self
         
-        #if self.label == '':
-        #    self.set_label(os.path.basename(self.path))
         new_calc = self.copy()
         new_calc.set_label(self.label)
         self.set_label(self.label + '_%d' % self.attempt)
@@ -1396,9 +1390,9 @@ class Calculation(models.Model):
 
     def fix_dav(self):
         if self.settings['algo'] == 'fast':
-            self.settings['algo'] = 'very_fast'
+            self.settings['algo'] = 'normal'
         elif self.settings['algo'] == 'normal':
-            self.settings['algo'] = 'very_fast'
+            self.settings['algo'] = 'fast'
         else:
             return
         self.remove_error('edddav')
@@ -1525,7 +1519,7 @@ class Calculation(models.Model):
     def set_magmoms(self, ordering='ferro'):
         self.input.set_magnetism(ordering)
         if any(self.input.magmoms):
-            self.ispin = 2
+            self.settings.update({'ispin': 2})
 
     def set_wavecar(self, source):
         """
