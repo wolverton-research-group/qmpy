@@ -8,8 +8,8 @@ import StringIO
 import fractions as frac
 import logging
 
-import qmpy
 from qmpy.utils import *
+from django.db.models import F
 
 logger = logging.getLogger(__name__)
 
@@ -178,6 +178,7 @@ class PhaseData(object):
         from qmpy.materials.element import Element
         logger.debug('Loading Phases from the OQMD')
         data = FormationEnergy.objects.all()
+        ##data = data.filter(entry__id=F('entry__duplicate_of__id'))
 
         if fit:
             data = data.filter(fit=fit)
