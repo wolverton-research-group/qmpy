@@ -1104,7 +1104,7 @@ class Calculation(models.Model):
             with open(os.path.join(self.path, 'INCAR'), 'r') as fr:
                 return fr.readlines()
         else:
-            raise VaspError('No such INCAR exists')
+            raise VaspError('{} not found'.format(os.path.join(self.path, 'INCAR')))
 
     def read_chgcar(self, filename='CHGCAR.gz', filetype='CHGCAR'):
         """
