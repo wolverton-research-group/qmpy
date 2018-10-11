@@ -42,5 +42,5 @@ class EntrySerializer(serializers.ModelSerializer):
     class Meta:
         model = Entry
         fields = ('id', 'name', 'path', 'composition', 'prototype', 
-                  'ntypes', 'natoms', 'energy', 'keywords', 'holds',
+                  'ntypes', 'natoms', 'keywords', 'holds',
                   'structures', 'calculations', 'formationenergies')
