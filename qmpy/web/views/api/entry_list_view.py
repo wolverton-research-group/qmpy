@@ -71,7 +71,7 @@ class EntryList(generics.ListAPIView):
         request = self.request
         ifcalc = request.GET.get('calculated', True)
         
-        if ifcalc == 'False':
+        if ifcalc in ['False', 'false', 'F', 'f']:
             return entries
 
         return entries.exclude(formationenergy=None)

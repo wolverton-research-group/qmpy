@@ -32,9 +32,9 @@ class CalculationList(generics.ListAPIView):
         converged = request.GET.get('converged', False)
 
         if converged:
-            if converged == 'False':
+            if converged in ['False', 'false', 'f', 'F']:
                 converged_filter = False
-            elif converged == 'True':
+            elif converged in ['True', 'true', 't', 'T']:
                 converged_filter = True
 
             calcs = calcs.filter(converged=converged_filter)
