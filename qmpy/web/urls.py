@@ -103,6 +103,7 @@ urlpatterns += [
 
     ## serializer
     url(r'^serializer/entry$', views.EntryList.as_view()),
+    url(r'^serializer/entry/(?P<pk>[0-9]+)/$', views.EntryDetail.as_view()),
 
     ## download
     url(r'^download/', 'qmpy.web.views.download_home'),

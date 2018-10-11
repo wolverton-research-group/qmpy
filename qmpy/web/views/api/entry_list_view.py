@@ -5,6 +5,10 @@ from qmpy.materials.entry import Entry, Composition
 from api_perm import *
 from qmpy.utils import Token, parse_formula_regex
 
+class EntryDetail(generics.RetrieveAPIView):
+    queryset = Entry.objects.all()
+    serializer_class = EntrySerializer
+
 class EntryList(generics.ListAPIView):
     #permission_classes = (OnlyAPIPermission, )
     serializer_class = EntrySerializer
@@ -38,7 +42,6 @@ class EntryList(generics.ListAPIView):
                 for cd in c_dict_lst:
                     f = ' '.join(['%s%g' % (k, cd[k]) for k in sorted(cd.keys())])
                     f_lst.append(f)
-                print f_lst
                 entries = entries.filter(composition__formula__in=f_lst)
             else:
                 c_lst = comp.strip().split('-')
