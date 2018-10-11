@@ -36,3 +36,4 @@ bokeh==0.12.11
 djangorestframework==3.6.4
 markdown
 django-filter==1.0.4
+requests
