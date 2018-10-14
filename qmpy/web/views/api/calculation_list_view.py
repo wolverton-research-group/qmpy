@@ -70,4 +70,3 @@ class CalculationList(generics.ListAPIView):
 
     def general_filter(self, entries):
         return entries
-
