@@ -25,4 +25,4 @@ def api_key_gen(request):
         data['form'] = form
 
 
-    return render(request, 'api_gen.html', data)
+    return render(request, 'api/api_gen.html', data)
