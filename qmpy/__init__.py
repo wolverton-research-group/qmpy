@@ -116,6 +116,7 @@ from computing import *
 from data import *
 from configuration.resources import *
 from apis import *
+from rester import *
 
 import yaml
 import os
