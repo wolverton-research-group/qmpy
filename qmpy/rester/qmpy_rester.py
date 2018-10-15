@@ -32,6 +32,18 @@ class QMPYRester(object):
             if k in kwargs:
                 url_args.append('%s=%s' %(k, kwargs[k]))
 
+        print "Your Entry filters are:"
+        if url_args == []:
+            print "   No filters? This will return the whole database!!!"
+        else:
+            for arg in url_args:
+                print "   ", arg
+
+        ans = raw_input('Proceed? [Y/n]:')
+
+        if ans not in ['Y', 'y', 'Yes', 'yes']:
+            return
+
         _url = '&'.join(url_args)
         return self._make_requests('/entry?%s'%_url)
 
@@ -45,6 +57,18 @@ class QMPYRester(object):
         for k in kwargs_list:
             if k in kwargs:
                 url_args.append('%s=%s' %(k, kwargs[k]))
+
+        print "Your Calculation filters are:"
+        if url_args == []:
+            print "   No filters? This will return the whole database!!!"
+        else:
+            for arg in url_args:
+                print "   ", arg
+
+        ans = raw_input('Proceed? [Y/n]:')
+
+        if ans not in ['Y', 'y', 'Yes', 'yes']:
+            return
 
         _url = '&'.join(url_args)
         return self._make_requests('/calculation?%s'%_url)
