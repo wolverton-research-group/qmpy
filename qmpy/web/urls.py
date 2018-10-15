@@ -99,7 +99,9 @@ urlpatterns += [
     url(r'^documentation/publications$', 'qmpy.web.views.pubs_docs'),
 
     ## api
-    url(r'^api', 'qmpy.web.views.api_key_gen'),
+    url(r'^api/$', 'qmpy.web.views.api_view'),
+    url(r'^api/register', 'qmpy.web.views.api_key_gen'),
+    url(r'^api/search', 'qmpy.web.views.search_data'),
 
     ## serializer
     url(r'^serializer/entry$', views.EntryList.as_view()),
