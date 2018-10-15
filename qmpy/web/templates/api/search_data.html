@@ -1,0 +1,78 @@
+{% extends "base_site.html" %}
+
+{% block title %}
+OQMD
+{% endblock %}
+
+{% block extrahead %}
+{% endblock %}
+
+{% block content %}
+
+<h1> Search Entries through OQMD </h1>
+  <form method='post' novalidate>{% csrf_token %}
+      {{ form.non_field_errors }}
+      {% for hidden_field in form.hidden_fields %}
+        {{ hidden_field.errors }}
+        {{ hidden_field }}
+      {% endfor %}
+    <table border="1">
+        {% for field in form.visible_fields %}
+            <tr>
+                <th> {{ field.label_tag }} </th>
+                <td>
+                    {{ field.errors }}
+                    {{ field }}
+                    {{ field.help_text }}
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    <div style="margin:10px;">
+        <button type='submit' style='padding: 5px 5px'>Search</button>
+    </div>
+  </form>
+
+{% if result %}
+<h2> Results: </h2>
+<table>
+    <thead>
+        <th> id </th>
+        <th> name </th>
+        <th> generic </th>
+        <th> spacegroup </th>
+        <th> ntypes </th>
+        <th> natoms </th>
+        <th> energy_pa </th>
+        <th> energy_pa_hse </th>
+        <th> formation_energy </th>
+        <th> formation_energy_hse </th>
+        <th> band_gap </th>
+        <th> band_gap_hse </th>
+        <th> stability </th>
+    </thead>
+    <tbody>
+    {% for e in result %}
+        <tr class=clickableRow href="/materials/entry/{{e.id}}">
+        <td width="60"> {{ e.id }} </td>
+        <td width="90"> {{ e.name }} </td>
+        <td> {{ e.composition_generic }} </td>
+        <td width="80"> {{ e.spacegroup }} </td>
+        <td> {{ e.ntypes }} </td>
+        <td> {{ e.natoms}} </td>
+        <td> {{ e.energy_per_atom | floatformat:-3 }} </td>
+        <td> {{ e.energy_per_atom_hse | floatformat:-3 }} </td>
+        <td> {{ e.formation_energy | floatformat:-3 }} </td>
+        <td> {{ e.formation_energy_hse | floatformat:-3 }} </td>
+        <td> {{ e.band_gap | floatformat:-3 }} </td>
+        <td> {{ e.band_gap_hse | floatformat:-3 }} </td>
+        <td> {{ e.stability | floatformat:-3 }} </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+{% endblock %}
+
