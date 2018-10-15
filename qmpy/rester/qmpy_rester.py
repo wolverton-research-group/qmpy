@@ -26,7 +26,7 @@ class QMPYRester(object):
     def get_entries(self, **kwargs):
         url_args = []
         kwargs_list = ['composition', 'composition_include', 'calculated',
-                       'gap', 'ntypes', 'generic']
+                       'band_gap', 'ntypes', 'generic']
 
         for k in kwargs_list:
             if k in kwargs:
@@ -52,7 +52,7 @@ class QMPYRester(object):
 
     def get_calculations(self, **kwargs):
         url_args = []
-        kwargs_list = ['converged', 'label', 'gap']
+        kwargs_list = ['converged', 'label', 'band_gap']
 
         for k in kwargs_list:
             if k in kwargs:

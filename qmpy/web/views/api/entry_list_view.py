@@ -83,25 +83,25 @@ class EntryList(generics.ListAPIView):
     def bandgap_filter(self, entries):
         """
         Allowed syntax:
-            1. ?gap=0
-            2. ?gap=~0
-            3. ?gap=>1.0
-            4. ?gap=<2.0
+            1. ?band_gap=0
+            2. ?band_gap=~0
+            3. ?band_gap=>1.0
+            4. ?band_gap=<2.0
         """
         request = self.request
-        gap = request.GET.get('gap', False)
+        band_gap = request.GET.get('band_gap', False)
         
-        if gap:
+        if band_gap:
             calcs = Calculation.objects.filter(converged=True, label='static')
-            if gap == '0':
+            if band_gap == '0':
                 calcs = calcs.filter(band_gap=0)
-            elif gap == '~0':
+            elif band_gap == '~0':
                 calcs = calcs.exclude(band_gap=0)
-            elif gap[0] == '<':
-                gap_range = float(gap[1:])
+            elif band_gap[0] == '<':
+                gap_range = float(band_gap[1:])
                 calcs = calcs.filter(band_gap__lt=gap_range)
-            elif gap[0] == '>':
-                gap_range = float(gap[1:])
+            elif band_gap[0] == '>':
+                gap_range = float(band_gap[1:])
                 calcs = calcs.filter(band_gap__gt=gap_range)
             
             entries = entries.filter(calculation__in=calcs)

@@ -14,7 +14,7 @@ class CalculationList(generics.ListAPIView):
         calcs = Calculation.objects.all()
         calcs = self.label_filter(calcs)
         calcs = self.converged_filter(calcs)
-        calcs = self.gap_filter(calcs)
+        calcs = self.band_gap_filter(calcs)
 
         return calcs
 
@@ -41,27 +41,27 @@ class CalculationList(generics.ListAPIView):
 
         return calcs
 
-    def gap_filter(self, calcs):
+    def band_gap_filter(self, calcs):
         """
         Allowed syntax:
-            1. ?gap=0
-            2. ?gap=~0
-            3. ?gap=>1.0
-            4. ?gap=<2.0
+            1. ?band_gap=0
+            2. ?band_gap=~0
+            3. ?band_gap=>1.0
+            4. ?band_gap=<2.0
         """
         request = self.request
-        gap = request.GET.get('gap', False)
+        band_gap = request.GET.get('band_gap', False)
         
-        if gap:
-            if gap == '0':
+        if band_gap:
+            if band_gap == '0':
                 calcs = calcs.filter(band_gap=0)
-            elif gap == '~0':
+            elif band_gap == '~0':
                 calcs = calcs.exclude(band_gap=0)
-            elif gap[0] == '<':
-                gap_range = float(gap[1:])
+            elif band_gap[0] == '<':
+                gap_range = float(band_gap[1:])
                 calcs = calcs.filter(band_gap__lt=gap_range)
-            elif gap[0] == '>':
-                gap_range = float(gap[1:])
+            elif band_gap[0] == '>':
+                gap_range = float(band_gap[1:])
                 calcs = calcs.filter(band_gap__gt=gap_range)
 
         return calcs
