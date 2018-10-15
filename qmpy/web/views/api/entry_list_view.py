@@ -2,6 +2,7 @@ from rest_framework import generics
 import django_filters.rest_framework
 from qmpy.web.serializers.entry import EntrySerializer
 from qmpy.materials.entry import Entry, Composition
+from qmpy.analysis.vasp import Calculation
 from api_perm import *
 from qmpy.utils import Token, parse_formula_regex
 
@@ -18,6 +19,9 @@ class EntryList(generics.ListAPIView):
         entries = Entry.objects.all()
         entries = self.composition_filter(entries)
         entries = self.calculated_filter(entries)
+        entries = self.bandgap_filter(entries)
+        entries = self.ntypes_filter(entries)
+        entries = self.generic_filter(entries)
 
         return entries
 
@@ -76,6 +80,49 @@ class EntryList(generics.ListAPIView):
 
         return entries.exclude(formationenergy=None)
 
-    def general_filter(self, entries):
+    def bandgap_filter(self, entries):
+        """
+        Allowed syntax:
+            1. ?gap=0
+            2. ?gap=~0
+            3. ?gap=>1.0
+            4. ?gap=<2.0
+        """
+        request = self.request
+        gap = request.GET.get('gap', False)
+        
+        if gap:
+            calcs = Calculation.objects.filter(converged=True, label='static')
+            if gap == '0':
+                calcs = calcs.filter(band_gap=0)
+            elif gap == '~0':
+                calcs = calcs.exclude(band_gap=0)
+            elif gap[0] == '<':
+                gap_range = float(gap[1:])
+                calcs = calcs.filter(band_gap__lt=gap_range)
+            elif gap[0] == '>':
+                gap_range = float(gap[1:])
+                calcs = calcs.filter(band_gap__gt=gap_range)
+            
+            entries = entries.filter(calculation__in=calcs)
+
         return entries
 
+    def ntypes_filter(self, entries):
+        request = self.request
+        ntypes = request.GET.get('ntypes', False)
+
+        if ntypes:
+            n = int(ntypes)
+            entries = entries.filter(ntypes=n)
+
+        return entries
+
+    def generic_filter(self, entries):
+        request = self.request
+        generic = request.GET.get('generic', False)
+
+        if generic:
+            entries = entries.filter(composition__generic=generic)
+
+        return entries

@@ -65,8 +65,3 @@ class CalculationList(generics.ListAPIView):
                 calcs = calcs.filter(band_gap__gt=gap_range)
 
         return calcs
-
-        return entries.exclude(formationenergy=None)
-
-    def general_filter(self, entries):
-        return entries
