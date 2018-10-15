@@ -23,26 +23,27 @@ class QMPYRester(object):
                 data = json.loads(response.text)
                 return data
 
-    def get_entries(self, **kwargs):
+    def get_entries(self, verbose=True, **kwargs):
         url_args = []
-        kwargs_list = ['composition', 'composition_include', 'calculated',
+        kwargs_list = ['composition', 'calculated',
                        'band_gap', 'ntypes', 'generic']
 
         for k in kwargs_list:
             if k in kwargs:
                 url_args.append('%s=%s' %(k, kwargs[k]))
 
-        print "Your Entry filters are:"
-        if url_args == []:
-            print "   No filters? This will return the whole database!!!"
-        else:
-            for arg in url_args:
-                print "   ", arg
+        if verbose:
+            print "Your Entry filters are:"
+            if url_args == []:
+                print "   No filters? This will return the whole database!!!"
+            else:
+                for arg in url_args:
+                    print "   ", arg
 
-        ans = raw_input('Proceed? [Y/n]:')
+            ans = raw_input('Proceed? [Y/n]:')
 
-        if ans not in ['Y', 'y', 'Yes', 'yes']:
-            return
+            if ans not in ['Y', 'y', 'Yes', 'yes']:
+                return
 
         _url = '&'.join(url_args)
         return self._make_requests('/entry?%s'%_url)
@@ -50,7 +51,7 @@ class QMPYRester(object):
     def get_entry_by_id(self, entry_id):
         return self._make_requests('/entry/%d'%entry_id)
 
-    def get_calculations(self, **kwargs):
+    def get_calculations(self, verbose=True, **kwargs):
         url_args = []
         kwargs_list = ['converged', 'label', 'band_gap']
 
@@ -58,17 +59,18 @@ class QMPYRester(object):
             if k in kwargs:
                 url_args.append('%s=%s' %(k, kwargs[k]))
 
-        print "Your Calculation filters are:"
-        if url_args == []:
-            print "   No filters? This will return the whole database!!!"
-        else:
-            for arg in url_args:
-                print "   ", arg
+        if verbose:
+            print "Your Calculation filters are:"
+            if url_args == []:
+                print "   No filters? This will return the whole database!!!"
+            else:
+                for arg in url_args:
+                    print "   ", arg
 
-        ans = raw_input('Proceed? [Y/n]:')
+            ans = raw_input('Proceed? [Y/n]:')
 
-        if ans not in ['Y', 'y', 'Yes', 'yes']:
-            return
+            if ans not in ['Y', 'y', 'Yes', 'yes']:
+                return
 
         _url = '&'.join(url_args)
         return self._make_requests('/calculation?%s'%_url)
