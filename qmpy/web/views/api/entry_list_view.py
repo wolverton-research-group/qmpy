@@ -32,14 +32,14 @@ class EntryList(generics.ListAPIView):
             2. ?composition=Fe-O
             3. ?composition={Fe,Ni}O
             4. ?composition={3d}2O3
-            5. ?composition_include=(Fe,Mn)-O : (Fe OR Mn) AND O
-            6. ?composition_include=Cl,O-H : Cl OR O AND H 
-            6. ?composition_include=H-{3d} : 3d elements AND H
+            5. ?composition=include_(Fe,Mn)-O : (Fe OR Mn) AND O
+            6. ?composition=include_Cl,O-H : Cl OR O AND H 
+            6. ?composition=include_H-{3d} : 3d elements AND H
         """
         request = self.request
 
         comp = request.GET.get('composition', False)
-        if comp:
+        if not 'include_' in comp:
             if '{' and '}' in comp:
                 c_dict_lst = parse_formula_regex(comp)
                 f_lst = []
@@ -56,18 +56,18 @@ class EntryList(generics.ListAPIView):
                     c = cs
                 entries = entries.filter(composition=c)
 
-        comp_in = request.GET.get('composition_include', False)
-        if comp_in:
+        else:
+            comp_in = comp.replace('include_', '')
             t = Token(comp_in)
             q = t.evaluate()
             entries = entries.filter(q)
 
-        comp_ex = request.GET.get('composition_exclude', False)
-        if comp_ex:
-            cex_lst = Composition.get(comp_ex).comp.keys()
-            while cex_lst:
-                tmp_ex = cex_lst.pop()
-                entries = entries.exclude(composition__element_set=tmp_ex)
+        #comp_ex = request.GET.get('composition_exclude', False)
+        #if comp_ex:
+        #    cex_lst = Composition.get(comp_ex).comp.keys()
+        #    while cex_lst:
+        #        tmp_ex = cex_lst.pop()
+        #        entries = entries.exclude(composition__element_set=tmp_ex)
 
         return entries
 
