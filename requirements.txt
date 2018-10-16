@@ -37,3 +37,4 @@ djangorestframework==3.6.4
 markdown
 django-filter==1.0.4
 requests
+django-crispy-forms

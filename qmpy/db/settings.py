@@ -126,6 +126,7 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'qmpy',
     'rest_framework',
+    'crispy_forms',
 )
 
 # A sample logging configuration. The only tangible logging
