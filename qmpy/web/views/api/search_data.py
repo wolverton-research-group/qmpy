@@ -7,8 +7,25 @@ from qmpy import INSTALL_PATH
 from search_data_forms import DataFilterForm
 from qmpy.rester import qmpy_rester
 
+import operator
+
 import logging
 logger = logging.getLogger(__name__)
+
+def sort_data(data, sorted_by=None):
+    """
+    Input:
+        data: list of dictionaries
+        sorted_by: str
+    Output:
+        list of dictionaries
+    """
+    if not sorted_by:
+        return data
+    try:
+        return sorted(data, key=operator.itemgetter(sorted_by))
+    except:
+        return data
 
 def search_data(request):
     data = {}
@@ -20,10 +37,14 @@ def search_data(request):
             kwargs = {}
             for arg in ['composition', 'calculated', 'band_gap',
                         'ntypes', 'generic']:
-                kwargs[arg] = form.cleaned_data.get(arg)
+                tmp = form.cleaned_data.get(arg)
+                if tmp != '':
+                    kwargs[arg] = tmp
 
             with qmpy_rester.QMPYRester() as q:
-                data['result'] = q.get_entries(verbose=False, **kwargs)
+                d = q.get_entries(verbose=False, **kwargs)
+                sort_by = form.cleaned_data.get('sorted_by')
+                data['result'] = sort_data(d, sort_by)
     else:
         form = DataFilterForm()
         data['form'] = form

@@ -1,4 +1,5 @@
 {% extends "base_site.html" %}
+{% load crispy_forms_tags %}
 
 {% block title %}
 OQMD
@@ -10,32 +11,15 @@ OQMD
 {% block content %}
 
 <h1> Search Entries through OQMD </h1>
-  <form method='post' novalidate>{% csrf_token %}
-      {{ form.non_field_errors }}
-      {% for hidden_field in form.hidden_fields %}
-        {{ hidden_field.errors }}
-        {{ hidden_field }}
-      {% endfor %}
-    <table border="1">
-        {% for field in form.visible_fields %}
-            <tr>
-                <th> {{ field.label_tag }} </th>
-                <td>
-                    {{ field.errors }}
-                    {{ field }}
-                    {{ field.help_text }}
-                </td>
-            </tr>
-        {% endfor %}
-    </table>
+  <form method='post'>{% csrf_token %}
+      {{ form|crispy }}
+      <input type="submit" name="search" value="SEARCH" class="submit submitButton"
+      id="submit-id-search"/>
 
-    <div style="margin:10px;">
-        <button type='submit' style='padding: 5px 5px'>Search</button>
-    </div>
   </form>
 
 {% if result %}
-<h2> Results: </h2>
+<h1> Results: </h1>
 <table>
     <thead>
         <th> id </th>
@@ -72,6 +56,7 @@ OQMD
     {% endfor %}
     </tbody>
 </table>
+</div>
 {% endif %}
 
 {% endblock %}
