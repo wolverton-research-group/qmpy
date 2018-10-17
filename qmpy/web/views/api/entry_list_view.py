@@ -39,6 +39,9 @@ class EntryList(generics.ListAPIView):
         request = self.request
 
         comp = request.GET.get('composition', False)
+        if not comp:
+            return entries
+
         if not 'include_' in comp:
             if '{' and '}' in comp:
                 c_dict_lst = parse_formula_regex(comp)
