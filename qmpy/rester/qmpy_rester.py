@@ -24,6 +24,18 @@ class QMPYRester(object):
                 return data
 
     def get_entries(self, verbose=True, **kwargs):
+        """
+        Input:
+            verbose: boolean
+            **kwargs: dict
+                :composition
+                :calculated
+                :band_gap
+                :ntypes
+                :generic
+        Output:
+            dict
+        """
         url_args = []
         kwargs_list = ['composition', 'calculated',
                        'band_gap', 'ntypes', 'generic']
@@ -52,6 +64,16 @@ class QMPYRester(object):
         return self._make_requests('/entry/%d'%entry_id)
 
     def get_calculations(self, verbose=True, **kwargs):
+        """
+        Input:
+            verbose: boolean
+            **kwargs: dict
+                :converged
+                :label
+                :band_gap
+        Output:
+            dict
+        """
         url_args = []
         kwargs_list = ['converged', 'label', 'band_gap']
 
