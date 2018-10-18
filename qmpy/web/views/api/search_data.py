@@ -51,13 +51,14 @@ def search_data(request):
 
         if form.is_valid():
             kwargs = {}
-            suburl = ''
+            suburl_lst = []
             for arg in ['composition', 'calculated', 'band_gap',
                         'ntypes', 'generic']:
                 tmp = form.cleaned_data.get(arg)
                 if tmp != '':
                     kwargs[arg] = tmp
-                    suburl += '%s=%s'%(arg, tmp)
+                    suburl_lst.append('%s=%s'%(arg, tmp))
+            suburl = '&'.join(suburl_lst)
 
             with qmpy_rester.QMPYRester() as q:
                 d = q.get_entries(verbose=False, **kwargs)
