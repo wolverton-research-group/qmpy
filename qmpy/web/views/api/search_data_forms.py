@@ -1,5 +1,5 @@
 from django import forms
-from django.core.urlresolvers import reverse
+#from django.core.urlresolvers import reverse
 from crispy_forms.bootstrap import Field, TabHolder, Tab, FormActions
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Layout, Div, Fieldset, ButtonHolder
@@ -28,6 +28,12 @@ class DataFilterForm(forms.Form):
                     label='Sort results by:',
                     widget=forms.Select,
     )
+    order = forms.TypedChoiceField(
+                    required=False,
+                    choices=[('ascending', 'Ascending'), ('descending', 'Descending')],
+                    label='Order:',
+                    widget=forms.RadioSelect,
+    )
 
     def __init__(self, *args, **kwargs):
         super(DataFilterForm, self).__init__(*args, **kwargs)
@@ -35,11 +41,3 @@ class DataFilterForm(forms.Form):
         self.helper.form_method = 'POST'
         self.helper.form_class = 'form-horizontal'
         self.helper.add_input(Submit('search', 'Search', css_class='btn-primary'))
-
-    #def clean(self):
-    #    cleaned_data = super(DataFilterForm, self).clean()
-    #    composition = cleaned_data.get('composition')
-    #    calculated = cleaned_data.get('calcualted')
-    #    band_gap = cleaned_data.get('band_gap')
-    #    ntypes = cleaned_data.get('ntypes')
-    #    generic = cleaned_data.get('generic')

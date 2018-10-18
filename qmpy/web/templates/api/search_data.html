@@ -20,6 +20,9 @@ OQMD
 
 {% if result %}
 <h1> Results: </h1>
+<div style="margin: 10px">
+    There are {{count}} entries found:
+</div>
 <table>
     <thead>
         <th> id </th>
@@ -56,6 +59,8 @@ OQMD
     {% endfor %}
     </tbody>
 </table>
+<div style="margin: 10px">
+    <a href="/serializer/entry?{{suburl}}&format=json" class="button">Output Result in JSON format</a>
 </div>
 {% endif %}
 

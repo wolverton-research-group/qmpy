@@ -12,7 +12,7 @@ import operator
 import logging
 logger = logging.getLogger(__name__)
 
-def sort_data(data, sorted_by=None):
+def sort_data(data, sorted_by=None, order='ascending'):
     """
     Input:
         data: list of dictionaries
@@ -23,11 +23,27 @@ def sort_data(data, sorted_by=None):
     if not sorted_by:
         return data
     try:
-        return sorted(data, key=operator.itemgetter(sorted_by))
+        if order == 'ascending':
+            reverse = False
+        elif order == 'descending':
+            reverse = True
+        return sorted(data, 
+                      key=operator.itemgetter(sorted_by), 
+                      reverse=reverse)
     except:
         return data
 
 def search_data(request):
+    """
+    Input:
+        request:
+    Output:
+        data: dict
+            :form (django form format)
+            :result (list of dictionaries)
+            :count (int)
+            :suburl (str)
+    """
     data = {}
     if request.method == 'POST':
         form = DataFilterForm(request.POST)
@@ -35,16 +51,21 @@ def search_data(request):
 
         if form.is_valid():
             kwargs = {}
+            suburl = ''
             for arg in ['composition', 'calculated', 'band_gap',
                         'ntypes', 'generic']:
                 tmp = form.cleaned_data.get(arg)
                 if tmp != '':
                     kwargs[arg] = tmp
+                    suburl += '%s=%s'%(arg, tmp)
 
             with qmpy_rester.QMPYRester() as q:
                 d = q.get_entries(verbose=False, **kwargs)
                 sort_by = form.cleaned_data.get('sorted_by')
-                data['result'] = sort_data(d, sort_by)
+                order = form.cleaned_data.get('order')
+                data['result'] = sort_data(d, sort_by, order)
+                data['count'] = len(d)
+                data['suburl'] = suburl
     else:
         form = DataFilterForm()
         data['form'] = form
