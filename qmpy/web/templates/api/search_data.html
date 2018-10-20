@@ -1,14 +1,31 @@
-{% extends "base_site.html" %}
 {% load crispy_forms_tags %}
+<!DOCTYPE html>
+<html>
+<head>
+<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet" />
+</head>
 
-{% block title %}
-OQMD
-{% endblock %}
+<style>
+table {
+    border-spacing: 0;
+    width: 100%;
+    border: 1px solid #ddd;
+}
 
-{% block extrahead %}
-{% endblock %}
+th {
+    cursor: pointer;
+}
+                                                                             }
+th, td {
+    text-align: left;
+    padding: 16px;
+}
 
-{% block content %}
+tr:nth-child(even) {
+    background-color: #f2f2f2
+}
+</style>
+<body>
 
 <h1> Search Entries through OQMD </h1>
   <form method='post'>{% csrf_token %}
@@ -23,25 +40,27 @@ OQMD
 <div style="margin: 10px">
     There are {{count}} entries found:
 </div>
-<table>
-    <thead>
-        <th> id </th>
-        <th> name </th>
-        <th> generic </th>
-        <th> spacegroup </th>
-        <th> ntypes </th>
-        <th> natoms </th>
-        <th> energy_pa </th>
-        <th> energy_pa_hse </th>
-        <th> formation_energy </th>
-        <th> formation_energy_hse </th>
-        <th> band_gap </th>
-        <th> band_gap_hse </th>
-        <th> stability </th>
-    </thead>
-    <tbody>
+<table id="ResultTable">
+    <tr>
+        <th onclick="sortTable(0, 'num')"> id </th>
+        <th onclick="sortTable(1, 'str')"> name </th>
+        <th onclick="sortTable(2, 'str')"> generic </th>
+        <th onclick="sortTable(3, 'str')"> spacegroup </th>
+        <th onclick="sortTable(4, 'num')"> ntypes </th>
+        <th onclick="sortTable(5, 'num')"> natoms </th>
+        <th onclick="sortTable(6, 'num')"> energy_pa </th>
+        <th onclick="sortTable(7, 'num')"> energy_pa_hse </th>
+        <th onclick="sortTable(8, 'num')"> formation_energy </th>
+        <th onclick="sortTable(9, 'num')"> formation_energy_hse </th>
+        <th onclick="sortTable(10, 'num')"> band_gap </th>
+        <th onclick="sortTable(11, 'num')"> band_gap_hse </th>
+        <th onclick="sortTable(12, 'num')"> stability </th>
+    </tr>
     {% for e in result %}
+        <!--
         <tr class=clickableRow href="/materials/entry/{{e.id}}">
+        -->
+        <tr>
         <td width="60"> {{ e.id }} </td>
         <td width="90"> {{ e.name }} </td>
         <td> {{ e.composition_generic }} </td>
@@ -57,12 +76,72 @@ OQMD
         <td> {{ e.stability | floatformat:-3 }} </td>
         </tr>
     {% endfor %}
-    </tbody>
 </table>
 <div style="margin: 10px">
     <a href="/serializer/entry?{{suburl}}&format=json" class="button">Output Result in JSON format</a>
 </div>
 {% endif %}
 
-{% endblock %}
+
+<!-- The following function is from www.w3cshools.com/
+    Section: 'How TO - Sort a Table'
+    The link is https://www.w3schools.com/howto/howto_js_sort_table.asp
+-->
+<script>
+function sortTable(n, type) {
+    var table, rows, switching, i, x, y, xc, yc, shouldSwitch, dir, switchcount = 0;
+    table = document.getElementById('ResultTable');
+    switching = true;
+
+    dir = "asc";
+
+    while (switching) {
+        switching = false;
+        rows = table.rows;
+
+        for (i = 1; i < (rows.length - 1); i++) {
+            shouldswitch = false;
+
+            x = rows[i].getElementsByTagName("TD")[n];
+            y = rows[i + 1].getElementsByTagName("TD")[n];
+
+            if (type == 'num') {
+                xc = Number(x.innerHTML)
+                yc = Number(y.innerHTML)
+            } else if (type == 'str') {
+                xc = x.innerHTML.toLowerCase()
+                yc = y.innerHTML.toLowerCase()
+            }
+
+
+            if (dir == "asc") {
+                if (xc > yc){
+                    shouldSwitch = true;
+                    break;
+                }
+            } else if (dir == "desc") {
+                if (xc < yc){
+                    shouldSwitch = true;
+                    break;
+                }
+            }
+        }
+
+        if (shouldSwitch) {
+            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+            switching = true;
+            switchcount ++;
+        } else {
+            if (switchcount == 0 && dir == "asc") {
+                dir = "desc";
+                switching = true;
+            }
+        }
+    }
+}
+</script>
+
+</body>
+
+</html>
 
