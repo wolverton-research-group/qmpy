@@ -50,19 +50,31 @@ def search_data(request):
         data['form'] = form
 
         if form.is_valid():
-            kwargs = {}
-            suburl_lst = []
+            kwargs = {} # input kwargs for QMPYRester()
+            suburl_lst = [] # partial url request options 
+
+            ## Collect information from django forms 
+            # general paramters
             for arg in ['composition', 'calculated', 'band_gap',
                         'ntypes', 'generic',
-                        'sort_by', 'desc',
-                        'sort_limit', 'sort_offset']:
+                        'sort_by', 'desc', 'sort_offset', 'limit']:
                 tmp = form.cleaned_data.get(arg)
                 if tmp != '' and tmp != None:
                     kwargs[arg] = tmp
                     suburl_lst.append('%s=%s'%(arg, tmp))
+
+            # update 'offset'
+            if 'sort_by' not in kwargs:
+                if 'sort_offset' in kwargs:
+                    kwargs['offset'] = kwargs['sort_offset']
+                    suburl_lst.append('%s=%s'%('offset', kwargs['offset']))
+                    suburl_lst.remove('%s=%s'
+                                      %('sort_offset', kwargs['sort_offset']))
+
             suburl = '&'.join(suburl_lst)
             data['suburl'] = suburl
 
+            # Call QMPYRester() to collect data
             with qmpy_rester.QMPYRester() as q:
                 d = q.get_entries(verbose=False, **kwargs)
                 data['result'] = d['results']

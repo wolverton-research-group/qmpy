@@ -29,12 +29,12 @@ class EntryList(generics.ListAPIView):
         if not sort_entries:
             return entries
         else:
-            sort_limit = self.request.GET.get('sort_limit')
+            limit = self.request.GET.get('limit')
             sort_offset = self.request.GET.get('sort_offset')
             try:
-                sort_limit = int(sort_limit)
+                limit = int(limit)
             except:
-                sort_limit = 100
+                limit = 100
             try:
                 sort_offset = int(sort_offset)
             except:
@@ -42,11 +42,11 @@ class EntryList(generics.ListAPIView):
             desc = self.request.GET.get('desc', False)
 
         if sort_entries == 'bandgap':
-            entries = self.sort_by_bandgap(entries, sort_limit, sort_offset, desc)
+            entries = self.sort_by_bandgap(entries, limit, sort_offset, desc)
         elif sort_entries == 'formationenergy':
-            entries = self.sort_by_formationenergy(entries, sort_limit, sort_offset, desc)
+            entries = self.sort_by_formationenergy(entries, limit, sort_offset, desc)
         elif sort_entries == 'energyperatom':
-            entries = self.sort_by_energyperatom(entries, sort_limit, sort_offset, desc)
+            entries = self.sort_by_energyperatom(entries, limit, sort_offset, desc)
 
         return entries
 
@@ -155,7 +155,7 @@ class EntryList(generics.ListAPIView):
 
         return entries
 
-    def sort_by_bandgap(self, entries, sort_limit=100, sort_offset=0, desc=False):
+    def sort_by_bandgap(self, entries, limit=100, sort_offset=0, desc=False):
         es_id = [e.id for e in entries]
 
         cs = Calculation.objects.filter(entry__id__in=es_id, 
@@ -165,9 +165,9 @@ class EntryList(generics.ListAPIView):
             ordered_cs = cs.order_by('-band_gap')
         else:
             ordered_cs = cs.order_by('band_gap')
-        return [c.entry for c in ordered_cs[sort_offset:sort_offset+sort_limit]]
+        return [c.entry for c in ordered_cs[sort_offset:sort_offset+limit]]
 
-    def sort_by_energyperatom(self, entries, sort_limit=100, sort_offset=0, desc=False):
+    def sort_by_energyperatom(self, entries, limit=100, sort_offset=0, desc=False):
         es_id = [e.id for e in entries]
 
         cs = Calculation.objects.filter(entry__id__in=es_id, 
@@ -178,9 +178,9 @@ class EntryList(generics.ListAPIView):
             ordered_cs = cs.order_by('-energy_pa')
         else:
             ordered_cs = cs.order_by('energy_pa')
-        return [c.entry for c in ordered_cs[sort_offset:sort_offset+sort_limit]]
+        return [c.entry for c in ordered_cs[sort_offset:sort_offset+limit]]
 
-    def sort_by_formationenergy(self, entries, sort_limit=100, sort_offset=0, desc=False):
+    def sort_by_formationenergy(self, entries, limit=100, sort_offset=0, desc=False):
         es_id = [e.id for e in entries]
 
         cs = Calculation.objects.filter(entry__id__in=es_id, 
@@ -195,5 +195,5 @@ class EntryList(generics.ListAPIView):
             ordered_fes = fes.order_by('-delta_e')
         else:
             ordered_fes = fes.order_by('delta_e')
-        return [fe.entry for fe in ordered_fes[sort_offset:sort_offset+sort_limit]]
+        return [fe.entry for fe in ordered_fes[sort_offset:sort_offset+limit]]
 

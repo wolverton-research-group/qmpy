@@ -5,14 +5,15 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Layout, Div, Fieldset, ButtonHolder
 
 filter_choices = [
-    ('id', 'id'),
-    ('name', 'name'),
-    ('natoms', 'natoms'),
-    ('ntypes', 'ntypes'),
-    ('energy_per_atom', 'energy_per_atom'),
-    ('band_gap', 'band_gap'),
-    ('formation_energy', 'formation_energy'),
-    ('stability', 'stability'),
+    #('id', 'id'),
+    #('name', 'name'),
+    #('natoms', 'natoms'),
+    #('ntypes', 'ntypes'),
+    (None, 'None'),
+    ('energyperatom', 'energy_per_atom'),
+    ('bandgap', 'band_gap'),
+    ('formationenergy', 'formation_energy'),
+    #('stability', 'stability'),
 ]
 
 class DataFilterForm(forms.Form):
@@ -21,16 +22,18 @@ class DataFilterForm(forms.Form):
     band_gap = forms.CharField(required=False, max_length=30)
     ntypes = forms.CharField(required=False, max_length=10)
     generic = forms.CharField(required=False, max_length=30)
+    limit = forms.IntegerField(required=False, label='limit')
+    sort_offset = forms.IntegerField(required=False, label='offset')
 
-    sorted_by = forms.TypedChoiceField(
+    sort_by = forms.TypedChoiceField(
                     required=False,
                     choices=filter_choices,
                     label='Sort results by:',
                     widget=forms.Select,
     )
-    order = forms.TypedChoiceField(
+    desc = forms.TypedChoiceField(
                     required=False,
-                    choices=[('ascending', 'Ascending'), ('descending', 'Descending')],
+                    choices=[('False', 'Ascending'), ('True', 'Descending')],
                     label='Order:',
                     widget=forms.RadioSelect,
     )
