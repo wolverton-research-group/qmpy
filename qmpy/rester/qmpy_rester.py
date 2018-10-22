@@ -33,12 +33,17 @@ class QMPYRester(object):
                 :band_gap
                 :ntypes
                 :generic
+                :sort_by
+                :desc
+                :sort_limit
+                :sort_offset
         Output:
             dict
         """
         url_args = []
         kwargs_list = ['composition', 'calculated',
-                       'band_gap', 'ntypes', 'generic']
+                       'band_gap', 'ntypes', 'generic',
+                       'sort_by', 'desc', 'sort_limit', 'sort_offset']
 
         for k in kwargs_list:
             if k in kwargs:
@@ -71,11 +76,16 @@ class QMPYRester(object):
                 :converged
                 :label
                 :band_gap
+                :sort_by
+                :desc
+                :sort_limit
+                :sort_offset
         Output:
             dict
         """
         url_args = []
-        kwargs_list = ['converged', 'label', 'band_gap']
+        kwargs_list = ['converged', 'label', 'band_gap',
+                       'sort_by', 'desc', 'sort_limit', 'sort_offset']
 
         for k in kwargs_list:
             if k in kwargs:
