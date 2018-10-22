@@ -53,20 +53,27 @@ def search_data(request):
             kwargs = {}
             suburl_lst = []
             for arg in ['composition', 'calculated', 'band_gap',
-                        'ntypes', 'generic']:
+                        'ntypes', 'generic',
+                        'sort_by', 'desc',
+                        'sort_limit', 'sort_offset']:
                 tmp = form.cleaned_data.get(arg)
-                if tmp != '':
+                if tmp != '' and tmp != None:
                     kwargs[arg] = tmp
                     suburl_lst.append('%s=%s'%(arg, tmp))
             suburl = '&'.join(suburl_lst)
+            data['suburl'] = suburl
 
             with qmpy_rester.QMPYRester() as q:
                 d = q.get_entries(verbose=False, **kwargs)
-                sort_by = form.cleaned_data.get('sorted_by')
-                order = form.cleaned_data.get('order')
-                data['result'] = sort_data(d, sort_by, order)
-                data['count'] = len(d)
-                data['suburl'] = suburl
+                data['result'] = d['results']
+                
+                if 'sort_by' in kwargs:
+                    kwargs.pop('sort_by', None)
+                    kwargs['limit'] = 1
+                    kwargs['offset'] = 0
+                    data['count'] = q.get_entries(verbose=False, **kwargs)['count']
+                else:
+                    data['count'] = d['count']
     else:
         form = DataFilterForm()
         data['form'] = form
