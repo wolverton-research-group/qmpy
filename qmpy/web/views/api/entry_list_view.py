@@ -2,6 +2,7 @@ from rest_framework import generics
 import django_filters.rest_framework
 from qmpy.web.serializers.entry import EntrySerializer
 from qmpy.materials.entry import Entry, Composition
+from qmpy.materials.formation_energy import FormationEnergy
 from qmpy.analysis.vasp import Calculation
 from api_perm import *
 from qmpy.utils import Token, parse_formula_regex
@@ -22,6 +23,30 @@ class EntryList(generics.ListAPIView):
         entries = self.bandgap_filter(entries)
         entries = self.ntypes_filter(entries)
         entries = self.generic_filter(entries)
+
+        sort_entries = self.request.GET.get('sort_by', False)
+
+        if not sort_entries:
+            return entries
+        else:
+            sort_limit = self.request.GET.get('sort_limit')
+            sort_offset = self.request.GET.get('sort_offset')
+            try:
+                sort_limit = int(sort_limit)
+            except:
+                sort_limit = 100
+            try:
+                sort_offset = int(sort_offset)
+            except:
+                sort_offset = 0
+            desc = self.request.GET.get('desc', False)
+
+        if sort_entries == 'bandgap':
+            entries = self.sort_by_bandgap(entries, sort_limit, sort_offset, desc)
+        elif sort_entries == 'formationenergy':
+            entries = self.sort_by_formationenergy(entries, sort_limit, sort_offset, desc)
+        elif sort_entries == 'energyperatom':
+            entries = self.sort_by_energyperatom(entries, sort_limit, sort_offset, desc)
 
         return entries
 
@@ -129,3 +154,46 @@ class EntryList(generics.ListAPIView):
             entries = entries.filter(composition__generic=generic)
 
         return entries
+
+    def sort_by_bandgap(self, entries, sort_limit=100, sort_offset=0, desc=False):
+        es_id = [e.id for e in entries]
+
+        cs = Calculation.objects.filter(entry__id__in=es_id, 
+                                        label='static')
+
+        if desc in ['T', 't', 'True', 'true']:
+            ordered_cs = cs.order_by('-band_gap')
+        else:
+            ordered_cs = cs.order_by('band_gap')
+        return [c.entry for c in ordered_cs[sort_offset:sort_offset+sort_limit]]
+
+    def sort_by_energyperatom(self, entries, sort_limit=100, sort_offset=0, desc=False):
+        es_id = [e.id for e in entries]
+
+        cs = Calculation.objects.filter(entry__id__in=es_id, 
+                                        label='static')
+
+        
+        if desc in ['T', 't', 'True', 'true']:
+            ordered_cs = cs.order_by('-energy_pa')
+        else:
+            ordered_cs = cs.order_by('energy_pa')
+        return [c.entry for c in ordered_cs[sort_offset:sort_offset+sort_limit]]
+
+    def sort_by_formationenergy(self, entries, sort_limit=100, sort_offset=0, desc=False):
+        es_id = [e.id for e in entries]
+
+        cs = Calculation.objects.filter(entry__id__in=es_id, 
+                                        label='static')
+
+        cs_id = [c.id for c in cs]
+
+        fes = FormationEnergy.objects.filter(calculation_id__in=cs_id)
+
+        
+        if desc in ['T', 't', 'True', 'true']:
+            ordered_fes = fes.order_by('-delta_e')
+        else:
+            ordered_fes = fes.order_by('delta_e')
+        return [fe.entry for fe in ordered_fes[sort_offset:sort_offset+sort_limit]]
+
