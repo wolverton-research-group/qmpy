@@ -4,17 +4,12 @@
 qmpy is a package containing many tools for computational materials science.
 """
 import numpy as np
-try:
-    import pyximport; pyximport.install()
-except ImportError:
-    pass
 import logging
 import logging.handlers
-import os, os.path
+import os
 import stat
 import sys
 import ConfigParser
-
 import django.core.exceptions as de
 
 INSTALL_PATH = os.path.abspath(os.path.dirname(__file__))
@@ -23,7 +18,7 @@ sys.path = [os.path.join(INSTALL_PATH, 'qmpy', 'db')] + sys.path
 LOG_PATH = os.path.join(INSTALL_PATH, 'logs')
 
 config = ConfigParser.ConfigParser()
-config.read(os.path.join(INSTALL_PATH,'configuration','site.cfg'))
+config.read(os.path.join(INSTALL_PATH, 'configuration', 'site.cfg'))
 
 # read in the location of the VASP Potential on the OQMD server
 VASP_POTENTIALS = config.get('VASP', 'potential_path')
@@ -82,19 +77,14 @@ except ImportError:
     FOUND_MPL = False
     logging.warn('Failed to import matplotlib')
 
-# pyspglib -> spglib in the later versions
+# Use spglib versions >1.9.0
 try:
-    import pyspglib
+    import spglib
     FOUND_SPGLIB = True
 except ImportError:
-    try:
-        import spglib
-        FOUND_SPGLIB = True
-    except ImportError:
-        logging.warn("Failed to import spglib/pyspglib."
-                     'Download at: http://sourceforge.net/projects/spglib/ and'
-                     'follow instructions for installing python API')
-        FOUND_SPGLIB = False
+    logging.warn("Failed to import spglib"
+                 " (https://atztogo.github.io/spglib/python-spglib.html)")
+    FOUND_SPGLIB = False
 
 try:
     import sklearn
@@ -118,6 +108,7 @@ from configuration.resources import *
 
 import yaml
 import os
+
 
 def read_spacegroups(numbers=None):
     """
