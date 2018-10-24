@@ -3,64 +3,63 @@ import numpy as np
 import logging
 
 import qmpy
-if qmpy.FOUND_SPGLIB:
-    import pyspglib._spglib as spg
+if not qmpy.FOUND_SPGLIB:
+    logger.critical('Must install spglib to be able to do symmetry analysis')
+import spglib
 
 import qmpy.data as data
 from qmpy.utils import *
+from qmpy.materials.structure import Structure
+from qmpy.materials.structure import StructureError
 
 logger = logging.getLogger(__name__)
 
-if not qmpy.FOUND_SPGLIB:
-    logger.critical('Must install spglib to be able to do symmetry analysis')
 
-## spglib functions | https://atztogo.github.io/spglib/ v1.8.3
+## wrappers for spglib functions | https://atztogo.github.io/spglib/
 
-def find_structure_symmetry(structure, method='spglib',
-        symprec=1e-5, angle_tolerance=-1.0):
+
+def __structure_to_cell(structure):
+    """Convert `qmpy.Structure` objects to tuple of (lattice, positions, ...)
+    required as input to all spglib functions.
+    """
+    if not isinstance(structure, Structure):
+        raise StructureError('Input is not of type `qmpy.Structure`')
+    lattice = structure.cell.copy()
+    positions = structure.site_coords.copy()
+    numbers = structure.species_id_types.copy()
+    magmoms = structure.magmoms.copy()
+    if not any(magmoms):
+        return (lattice, positions, numbers)
+    else:
+        return (lattice, positions, numbers, magmoms)
+
+
+def get_structure_symmetry(structure,
+                           method='spglib',
+                           symprec=1e-5,
+                           angle_tolerance=-1.0):
     """
     Return the rotatiosn and translations which are possessed by the structure.
-    
+
     Examples::
 
         >>> from qmpy.io import read
-        >>> from qmpy.analysis.symmetry import find_structure_symmetry
+        >>> from qmpy.analysis.symmetry import get_structure_symmetry
         >>> structure = read('POSCAR')
-        >>> find_structure_symmetry(structure)
-    
+        >>> get_structure_symmetry(structure)
+
     """
-    # Get number of symmetry operations and allocate symmetry operations
-    multi = 48 * len(structure)
-    rotation = np.zeros((multi, 3, 3), dtype='intc')
-    translation = np.zeros((multi, 3))
+    if 'spglib' not in method.lower():
+        raise NotImplementedError("Currently only supports analysis based on"
+                                  " spglib routines")
+    return spglib.get_symmetry(__structure_to_cell(structure),
+                               symprec=symprec,
+                               angle_tolerance=angle_tolerance)
 
-    cell = structure.cell.T.copy()
-    coords = structure.site_coords.copy()
-    numbers = np.array(structure.site_ids, dtype='intc')
-  
-    # Get symmetry operations
-    magmoms = structure.magmoms
-    if not any(magmoms):
-        num_sym = spg.symmetry(rotation,
-                               translation,
-                               cell,
-                               coords,
-                               numbers,
-                               symprec,
-                               angle_tolerance)
-    else:
-        num_sym = spg.symmetry_with_collinear_spin(rotation,
-                                                   translation,
-                                                   cell,
-                                                   coords,
-                                                   numbers,
-                                                   magmoms,
-                                                   symprec,
-                                                   angle_tolerance)
-  
-    return rotation[:num_sym], translation[:num_sym]
 
-def get_symmetry_dataset(structure, symprec=1e-3, angle_tolerance=-1.0):
+def get_symmetry_dataset(structure,
+                         symprec=1e-5,
+                         angle_tolerance=-1.0):
     """
     Return a full set of symmetry information from a given input structure.
 
