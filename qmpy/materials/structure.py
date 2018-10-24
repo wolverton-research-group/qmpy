@@ -514,7 +514,14 @@ class Structure(models.Model, object):
     @property
     def species_types(self):
         """List of species, length equal to number of atoms."""
-        return np.array([ atom.species_id for atom in self.atoms ])
+        return np.array([ atom.species for atom in self.atoms ])
+
+    @property
+    def species_id_types(self):
+        """List of species, length equal to number of atoms, each unique species
+        identified by an integer.
+        """
+        return np.unique(self.species_types, return_inverse=True)[-1]
 
     def symmetrize(self, tol=1e-3, angle_tol=-1):
         """
