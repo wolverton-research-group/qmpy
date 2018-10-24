@@ -139,9 +139,9 @@ def read(poscar, species=None):
     title = poscar.readline().strip()
     scale = float(poscar.readline().strip())
     s = float(scale)
-    cell = [[ float(v) for v in poscar.readline().split() ],
-            [ float(v) for v in poscar.readline().split() ],
-            [ float(v) for v in poscar.readline().split() ]]
+    cell = [[ float(v) for v in poscar.readline().strip().split() ],
+            [ float(v) for v in poscar.readline().strip().split() ],
+            [ float(v) for v in poscar.readline().strip().split() ]]
     cell = np.array(cell)
 
     if s > 0:
@@ -159,7 +159,7 @@ def read(poscar, species=None):
         float(_species[0])
     except:
         vasp5 = True
-        counts = [ int(v) for v in poscar.readline().split() ]
+        counts = [ int(v) for v in poscar.readline().strip().split() ]
 
     # If the format is not VASP 5, the elements should
     #  have been listed in the title
@@ -182,11 +182,11 @@ def read(poscar, species=None):
 
     # Determine whether coordinates are in direct or cartesian
     direct = False
-    style = poscar.readline()
+    style = poscar.readline().strip()
 
     if style[0].lower() == 's':
         # The POSCAR contains selective dynamics info
-        style = poscar.readline()
+        style = poscar.readline().strip()
 
     if style[0] in ['D', 'd']:
         direct = True
@@ -200,9 +200,9 @@ def read(poscar, species=None):
         atom = st.Atom()
         atom.element_id = atom_types[i]
         if direct:
-            atom.coord = [ float(v) for v in poscar.readline().split()[0:3] ]
+            atom.coord = [ float(v) for v in poscar.readline().strip().split()[0:3] ]
         else:
-            cart = [ float(v) for v in poscar.readline().split()[0:3] ]
+            cart = [ float(v) for v in poscar.readline().strip().split()[0:3] ]
             atom.coord = np.dot(inv, cart)
         struct.add_atom(atom)
     struct.get_volume()
