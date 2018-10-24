@@ -7,15 +7,20 @@ import numpy as np
 import logging
 import logging.handlers
 import os
+import yaml
 import stat
 import sys
 import ConfigParser
 import django.core.exceptions as de
 
+
+##############################################################################
+# Config files
+# Try reading in the base config file and path to VASP pseudopotentials
+##############################################################################
+
 INSTALL_PATH = os.path.abspath(os.path.dirname(__file__))
 sys.path = [os.path.join(INSTALL_PATH, 'qmpy', 'db')] + sys.path
-
-LOG_PATH = os.path.join(INSTALL_PATH, 'logs')
 
 config = ConfigParser.ConfigParser()
 config.read(os.path.join(INSTALL_PATH, 'configuration', 'site.cfg'))
@@ -23,6 +28,14 @@ config.read(os.path.join(INSTALL_PATH, 'configuration', 'site.cfg'))
 # read in the location of the VASP Potential on the OQMD server
 VASP_POTENTIALS = config.get('VASP', 'potential_path')
 
+
+
+##############################################################################
+# Logging
+# Set path to the default log file, format for the logger, etc.
+##############################################################################
+
+LOG_PATH = os.path.join(INSTALL_PATH, 'logs')
 if not os.path.exists(LOG_PATH):
     oldmask = os.umask(666)
     os.mkdir(LOG_PATH)
@@ -52,10 +65,16 @@ general.setFormatter(formatter)
 logger.addHandler(general)
 logger.addHandler(console)
 
+
+
+##############################################################################
+# Imports
+# Try importing essential packages and throw suitable warnings/exceptions
+##############################################################################
+
 class qmpyBaseError(Exception):
     """Baseclass for qmpy Exceptions"""
 
-# try importing essential python packages and throw suitable warnings/exceptions
 try:
     import ase
     FOUND_ASE = True
@@ -97,6 +116,13 @@ sys.path.insert(-1, INSTALL_PATH)
 if 'DJANGO_SETTINGS_MODULE' not in os.environ:
     os.environ['DJANGO_SETTINGS_MODULE'] = 'qmpy.db.settings'
 
+
+
+
+##############################################################################
+# Imports
+# Imports from qmpy subpackages to remove relative imports
+##############################################################################
 from models import *
 from analysis import *
 from analysis.thermodynamics import *
@@ -106,11 +132,8 @@ from computing import *
 from data import *
 from configuration.resources import *
 
-import yaml
-import os
 
-
-def read_spacegroups(numbers=None):
+def read_spacegroups(numbers=None, overwrite_existing=True):
     """
     read space group data: number, Hermann-Maguin notation, Hall number,
     Schonflies number, lattice system, symmetry operators, Wyckoff positions,
@@ -118,11 +141,13 @@ def read_spacegroups(numbers=None):
     """
     spg_datafile = os.path.join(INSTALL_PATH, 'data', 'spacegroups.yml')
     if not os.path.exists(spg_datafile):
-        sys.stdout.write('Space groups data not found.\n')
+        print('Space groups data file {} not found.'.format(spg_datafile))
         return
-    data = open(spg_datafile).read()
+
     Spacegroup.objects.all().delete()
-    spacegroups = yaml.load(data)
+    with open(spg_datafile, 'r') as fr:
+        spacegroups = yaml.load(fr)
+
     for sgd in spacegroups.values():
         if numbers:
             if sgd['number'] not in numbers:
@@ -153,10 +178,11 @@ def read_spacegroups(numbers=None):
                                multiplicity=site['multiplicity']))
         sg.site_set = wycks
 
+
 def read_elements():
     """
     read elemental properties: atomic number, atomic weight, electronegativity,
-    HHI index, etc. for all the elements from 'INSTALL_PATH/data/elements.yml'. 
+    HHI index, etc. for all the elements from 'INSTALL_PATH/data/elements.yml'.
     """
     elem_datafile = os.path.join(INSTALL_PATH, 'data', 'elements', 'data.yml')
     if not os.path.exists(elem_datafile):
@@ -272,6 +298,10 @@ def sync_resources():
             alloc.save()
             proj.allocations.add(alloc)
 
+
+##############################################################################
+# Configuration files and pseudopotentials
+##############################################################################
 
 # Load models (Django >= 1.7)
 try:
