@@ -173,6 +173,8 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 100,
 }
+
+CRIPSY_TEMPLATE_PACK = 'bootstrap'
                               
 #CACHES = {
 #        'default': {
