@@ -9,8 +9,6 @@ import spglib
 
 import qmpy.data as data
 from qmpy.utils import *
-from qmpy.materials.structure import Structure
-from qmpy.materials.structure import StructureError
 
 logger = logging.getLogger(__name__)
 
@@ -22,8 +20,8 @@ def __structure_to_cell(structure):
     """Convert `qmpy.Structure` objects to tuple of (lattice, positions, ...)
     required as input to all spglib functions.
     """
-    if not isinstance(structure, Structure):
-        raise StructureError('Input is not of type `qmpy.Structure`')
+    if not isinstance(structure, qmpy.Structure):
+        raise qmpy.StructureError('Input is not of type `qmpy.Structure`')
     lattice = structure.cell.copy()
     positions = structure.site_coords.copy()
     numbers = structure.species_id_types.copy()
@@ -39,7 +37,7 @@ def get_structure_symmetry(structure,
                            symprec=1e-5,
                            angle_tolerance=-1.0):
     """
-    Return the rotatiosn and translations which are possessed by the structure.
+    Return the rotations and translations possessed by the structure.
 
     Examples::
 

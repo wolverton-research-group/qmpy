@@ -2,7 +2,7 @@
 
 import itertools
 import numpy as np
-from symmetry.routines import find_structure_symmetry
+from symmetry.routines import get_structure_symmetry
 import logging
 
 from qmpy.data import elements
