@@ -1,11 +1,9 @@
+# wrappers for spglib functions | https://atztogo.github.io/spglib/
 import fractions as frac
 import numpy as np
 import logging
 
 import qmpy
-if not qmpy.FOUND_SPGLIB:
-    logger.critical('Must install spglib to be able to do symmetry analysis')
-import spglib
 
 import qmpy.data as data
 from qmpy.utils import *
@@ -13,12 +11,62 @@ from qmpy.utils import *
 logger = logging.getLogger(__name__)
 
 
-## wrappers for spglib functions | https://atztogo.github.io/spglib/
+def _check_spglib_install():
+    """Imports `spglib`, raises :exc:`ImportError` if unsuccessful."""
+    if not qmpy.FOUND_SPGLIB:
+        error_message = 'Could not import `spglib`. Is it installed?'
+        raise ImportError(error_message)
+    import spglib
 
 
-def __structure_to_cell(structure):
-    """Convert `qmpy.Structure` objects to tuple of (lattice, positions, ...)
-    required as input to all spglib functions.
+def _check_spglib_success(cell,
+                         func='standardize_cell',
+                         verbosity=0):
+    """
+    Checks if `spglib` was successful, log error messages if not.
+
+    Args:
+        cell: Output from `spglib` functions. None or a tuple.
+        func: String with the name of the parent `spglib` function
+        verbosity: Integer with the level of standard output verbosity.
+
+    Returns:
+        True if `spglib` was successful, False if not.
+
+    """
+    if cell is None:
+        err_msg = "`spglib.{}` failed".format(func)
+        if verbosity > 0:
+            print(err_msg)
+        logging.debug(err_msg)
+        return False
+    else:
+        return True
+
+
+def _structure_to_cell(structure):
+    """
+    Converts :class:`qmpy.Structure` objects to tuple of (lattice, positions,
+    atom_types, magmoms) for input to `spglib` functions.
+
+    Args:
+        structure: :class:`qmpy.Structure` object with the crystal structure.
+
+    Returns:
+        Tuple of (`lattice`, `positions`, `atom_types`) or (`lattice`,
+        `positions`, `atom_types`, `magmoms`) depending on whether any
+        `structure.magmoms` is nonzero.
+
+        `lattice` is a 3x3 array of float, `positions` is an Nx3 array of
+        float, `atom_types` in an Nx1 list of integers, `magmoms` (if
+        specified) is an Nx1 array of float, where N is the number of atoms
+        in `structure. `atom_types` has numbers in place of element symbols
+        (see :func:`qmpy.Structure.species_id_types`).
+
+    Raises:
+        :exc:`qmpy.StructureError` if `structure` is not a
+        :class:`qmpy.Structure` object.
+
     """
     if not isinstance(structure, qmpy.Structure):
         raise qmpy.StructureError('Input is not of type `qmpy.Structure`')
@@ -32,212 +80,323 @@ def __structure_to_cell(structure):
         return (lattice, positions, numbers, magmoms)
 
 
+def _cell_to_structure(cell, structure, rev_lookup):
+    """
+    Assign crystal structure info in `cell` onto `structure`.
+
+    Args:
+        cell: Tuple of (lattice, positions, atom_indices) output from `spglib`
+            functions. See `_structure_to_cell()` for more details.
+        structure: `qmpy.Structure` object with the crystal structure.
+        rev_lookup: Dictionary mapping the atomic indices onto elements.
+
+    Returns:
+        None. (`structure` is modified in place.)
+
+    """
+    if not isinstance(structure, qmpy.Structure):
+        raise qmpy.StructureError('Input is not of type `qmpy.Structure`')
+    structure.cell = cell[0]
+    nsites = len(cell[1])
+    structure.set_nsites(nsites)
+    structure.site_coords = cell[1]
+    site_comps = [rev_lookup[k] for k in cell[2]]
+    structure.site_compositions = site_comps
+
+
 def get_structure_symmetry(structure,
-                           method='spglib',
-                           symprec=1e-5,
-                           angle_tolerance=-1.0):
+                           symprec=1e-3):
     """
-    Return the rotations and translations possessed by the structure.
+    Gets symmetry operations for `structure` using `spglib`.
 
-    Examples::
+    Args:
+        structure: :class:`qmpy.Structure` object with the crystal structure.
+        symprec: Float with the Cartesian distance tolerance.
 
-        >>> from qmpy.io import read
-        >>> from qmpy.analysis.symmetry import get_structure_symmetry
-        >>> structure = read('POSCAR')
-        >>> get_structure_symmetry(structure)
+    Returns:
+        Dictionary of symmetry operations with keys "translations",
+        "rotations", "equivalent_atoms" and values Nx(3x3) array of float,
+        Nx3 array of integers, Nx3 array of integers, respectively.
+
+        None if `spglib` is unable to determine symmetry.
+
+    Raises:
+        ImportError: If `spglib` cannot be imported.
 
     """
-    if 'spglib' not in method.lower():
-        raise NotImplementedError("Currently only supports analysis based on"
-                                  " spglib routines")
-    return spglib.get_symmetry(__structure_to_cell(structure),
-                               symprec=symprec,
-                               angle_tolerance=angle_tolerance)
+    _check_spglib_install()
+    return spglib.get_symmetry(
+        _structure_to_cell(structure),
+        symprec=symprec
+    )
 
 
 def get_symmetry_dataset(structure,
-                         symprec=1e-5,
-                         angle_tolerance=-1.0):
+                         symprec=1e-3):
     """
-    Return a full set of symmetry information from a given input structure.
+    Get complete symmetry information for `structure` using `spglib`.
 
-    Mapping values:
-        number: International space group number
-        international: International symbol
-        hall: Hall symbol
-        transformation_matrix:
-          Transformation matrix from lattice of input cell to Bravais lattice
-          L^bravais = L^original * Tmat
-        origin shift: Origin shift in the setting of 'Bravais lattice'
-        rotations, translations:
-          Rotation matrices and translation vectors
-          Space group operations are obtained by
-            [(r,t) for r, t in zip(rotations, translations)]
-        wyckoffs:
-          Wyckoff letters
+    Args:
+        structure: :class:`qmpy.Structure` object with the crystal structure.
+        symprec: Float with the Cartesian distance tolerance.
 
-    Examples::
+    Returns:
+        Dictionary of various symmetry related information:
+        - `choice`: Choice of origin, basis vector centering
+        - `equivalent_atoms`: Nx1 array of integers specifying which atoms are
+              symmetrically equivalent
+        - `hall`: String with the Hall symbol
+        - `hall_number`: Long integer with the Hall number
+        - `international`: String ITC space group short symbol
+        - `mapping_to_primitive`: Nx1 array of integers with the atomic indices
+              in the primitive unit cell
+        - `number`: Long integer with the ITC space group number
+        - `origin_shift`: 1x3 array of float with shift of origin
+        - `pointgroup`: String with the point group symbol
+        - `rotations`: Nx(3x3) array of float with rotation operations
+        - `std_lattice`: 3x3 array of float with standardized lattice vectors
+        - `std_positions`: Nx3 array of float with standardized atomic
+              positions in fractional coordinates
+        - `std_types`: Nx1 array of integers with atomic indices in the
+              standardized unit cell
+        - `std_mapping_to_primitive`: Nx1 array of integers with the atomic
+              indices in the standardized primitive unit cell
+        - `transformation_matrix`: 3x3 array of float with the transformation
+              to standardized unit cell
+        - `translations`: Nx3 array of float with translation operations
+        - `wyckoffs`: Nx1 array of string with the Wyckoff symbol of each site
 
-        >>> from qmpy.io import read
-        >>> from qmpy.analysis.symmetry import get_symmetry_dataset
-        >>> structure = read('POSCAR')
-        >>> get_symmetry_dataset(structure)
+        The original reference for the dataset is at
+        https://atztogo.github.io/spglib/python-spglib.html#get-symmetry-dataset
+        and may change in future versions.
+
+        None if `spglib` fails to determine symmetry.
+
+    Raises:
+        ImportError: If `spglib` cannot be imported.
 
     """
-    keys = ('number',
-            'hall_number',
-            'international',
-            'hall',
-            'transformation_matrix',
-            'origin_shift',
-            'rotations',
-            'translations',
-            'wyckoffs',
-            'equivalent_atoms',
-            'std_lattice',
-            'std_types',
-            'std_positions',
-            'pointgroup_number',
-            'pointgroup')
+    _check_spglib_install()
+    return spglib.get_symmetry_dataset(
+        _structure_to_cell(structure),
+        symprec=symprec
+    )
 
-    cell = structure.cell.T.copy()
-    coords = np.array(structure.site_coords)
-    comps = structure.site_compositions
-    numbers = [ comps.index(c) for c in comps ]
-    numbers = np.array(numbers, dtype='intc')
 
-    dataset = {}
-    for key, data in zip(keys, spg.dataset(cell,
-                                           coords,
-                                           numbers,
-                                           symprec,
-                                           angle_tolerance)):
-        dataset[key] = data
-
-    dataset['international'] = dataset['international'].strip()
-    dataset['hall'] = dataset['hall'].strip()
-    dataset['transformation_matrix'] = np.array(dataset['transformation_matrix'], dtype='double', order='C')
-    dataset['origin_shift'] = np.array(dataset['origin_shift'], dtype='double')
-    dataset['rotations'] = np.array(dataset['rotations'], dtype='intc', order='C')
-    dataset['translations'] = np.array(dataset['translations'], dtype='double', order='C')
-    letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    dataset['wyckoffs'] = [letters[x] for x in dataset['wyckoffs']]
-    dataset['equivalent_atoms'] = np.array(dataset['equivalent_atoms'], dtype='intc')
-    dataset['std_lattice'] = np.array(np.transpose(dataset['std_lattice']), dtype='double', order='C')
-    dataset['std_types'] = np.array(dataset['std_types'], dtype='intc')
-    dataset['std_positions'] = np.array(dataset['std_positions'], dtype='double', order='C')
-    dataset['pointgroup'] = dataset['pointgroup'].strip()
-
-    return dataset
-
-def get_spacegroup(structure, symprec=1e-5, angle_tolerance=-1.0):
+def get_spacegroup(structure,
+                   symprec=1e-3,
+                   symbol_type=0):
     """
-    Return space group in international table symbol and number
-    as a string.
-    """
-    cell = structure.cell.T.copy(),
-    scaled = structure.site_coords.copy()
-    comps = structure.site_compositions
-    numbers = [ comps.index(c) for c in comps ]
-    numbers = np.array(numbers, dtype='intc')
-    # Atomic positions have to be specified by scaled positions for spglib.
-    return int(spg.spacegroup(cell,
-                          coords,
-                          numbers,
-                          symprec,
-                          angle_tolerance).strip(' ()'))
+    Get the space group symbol and number of a crystal structure.
 
-def get_pointgroup(rotations):
-    """
-    Return point group in international table symbol and number.
-    """
+    Args:
+        structure: :class:`qmpy.Structure` object with the crystal structure.
+        symprec: Float with the Cartesian distance tolerance.
+        symbol_type: Integer with the type: 0 - Schoenflies, 1 - ITC short
 
-    # (symbol, pointgroup_number, transformation_matrix)
-    return spg.pointgroup(rotations)
+    Returns:
+        String with the space group symbol and number. E.g. u"R-3m (166)"
 
-def refine_cell(structure, symprec=1e-5, angle_tolerance=-1.0):
+        None if `spglib` fails to determine the space group.
+
+    Raises:
+        ImportError: If `spglib` cannot be imported.
+
     """
-    Return refined cell
+    _check_spglib_install()
+    return spglib.get_spacegroup(
+        _structure_to_cell(structure),
+        symprec=symprec,
+        symbol_type=symbol_type
+    )
+
+
+def get_spacegroup_type(hall_number):
     """
-    # Atomic positions have to be specified by scaled positions for spglib.
-    num_atom = len(structure.sites)
-    cell = structure.cell.T.copy()
-    coords = np.zeros((num_atom * 4, 3), dtype='double')
-    coords[:num_atom] = structure.site_coords.copy()
-    comps = structure.site_compositions
-    numbers = [ comps.index(c) for c in comps ]
-    numbers = np.array(numbers*4, dtype='intc')
+    Get space group information corresponding to the Hall number.
 
-    num_atom_bravais = spg.refine_cell(cell,
-                                       coords,
-                                       numbers,
-                                       num_atom,
-                                       symprec,
-                                       angle_tolerance)
+    Args:
+        hall_number: Integer with the Hall number.
 
-    coords = wrap(coords)
-    comps = [ comps[i] for i in numbers ]
-    if num_atom_bravais > 0:
-        structure.cell = cell.T
-        structure.set_nsites(num_atom_bravais)
-        structure.site_coords = coords[:num_atom_bravais]
-        structure.site_compositions = comps[:num_atom_bravais]
-        return structure
+    Returns:
+        Dictionary with the corresponding space group information. Keys:
+        - `arithmetic_crystal_class_number`
+        - `arithmetic_crystal_class_symbol`
+        - `choice`
+        - `hall_symbol`
+        - 'international`
+        - `international_full`
+        - `international_short`
+        - `number`
+        - `pointgroup_international`
+        - `pointgroup_schoenflies`
+        - `schoenflies`
+
+        None if `spglib` fails to determine space group type.
+
+    Raises:
+        ImportError: If `spglib` cannot be imported.
+
+    """
+    _check_spglib_install()
+    return spglib.get_spacegroup_type(hall_number)
+
+
+def get_pointgroup(structure):
+    """
+    Get the point group of the crystal structure.
+
+    Args:
+        structure: :class:`qmpy.Structure` object with the crystal structure.
+
+    Returns:
+        List of point group symbol, point group number, and the
+        transformation matrix.
+
+        None if `spglib` fails to determine symmetry.
+
+    Raises:
+        ImportError: If `spglib` cannot be imported.
+
+    """
+    _check_spglib_install()
+    data = get_structure_symmetry(structure)
+    if data is None:
+        return None
     else:
-        return structure
+        return spglib.get_pointgroup(data['rotations'])
 
 
-def find_primitive(structure, symprec=1e-4, angle_tolerance=-1.0):
+def standardize_cell(structure,
+                     to_primitive=True,
+                     no_idealize=False,
+                     symprec=1e-3,
+                     verbosity=0):
     """
-    A primitive cell in the input cell is searched and returned
-    as an object of Atoms class.
-    If no primitive cell is found, (None, None, None) is returned.
+    Standardizes the input crystal structure using `spglib`.
+
+    Args:
+        structure: :class:`qmpy.Structure` object with a crystal structure.
+        to_primitive: Boolean specifying whether to convert the input structure
+            to a primitive unit cell.
+        no_idealize: Boolean specifying whether to "idealize" lattice vectors,
+            angles according to the ITC.
+        symprec: Float with the Cartesian distance tolerance.
+        verbosity: Integer with the level of standard output verbosity.
+
+    Returns: :class:`qmpy.Structure` object with the standardized unit cell
+        if successful, the input structure as is, otherwise.
+
     """
-    cell = structure.cell.T.copy()
-    coords = np.array(structure.site_coords.copy(), dtype='double')
-    comps = structure.site_compositions
-    numbers = [ comps.index(c) for c in comps ]
-    numbers = np.array(numbers*4, dtype='intc')
-
-    num_atom_prim = spg.primitive(cell,
-                                  coords,
-                                  numbers,
-                                  symprec,
-                                  angle_tolerance)
-
-    coords = wrap(coords)
-    comps = [ comps[i] for i in numbers ]
-    if num_atom_prim > 0:
-        structure.cell = cell.T
-        structure.set_nsites(num_atom_prim)
-        structure.site_coords = coords[:num_atom_prim]
-        structure.site_compositions = comps[:num_atom_prim]
+    _check_spglib_install()
+    rev_lookup = dict(zip(structure.site_comp_indices,
+                          structure.site_compositions))
+    cell = spglib.standardize_cell(
+        _structure_to_cell(structure),
+        to_primitive=to_primitive,
+        no_idealize=no_idealize,
+        symprec=symprec
+    )
+    if not _check_spglib_success(cell,
+                                 verbosity=verbosity):
         return structure
-    else:
-        return structure
+    _cell_to_structure(cell, structure, rev_lookup)
+    return structure
 
-def parse_sitesym(sitesym, sep=','):
-    rot = np.zeros((3, 3))
-    trans = np.zeros(3)
-    for i, s in enumerate (sitesym.split(sep)):
-        s = s.lower().strip()
-        while s:
-            sign = 1
-            if s[0] in '+-':
-                if s[0] == '-':
-                    sign = -1
-                s = s[1:]
-            if s[0] in 'xyz':
-                j = ord(s[0]) - ord('x')
-                rot[i, j] = sign
-                s = s[1:]
-            elif s[0].isdigit() or s[0] == '.':
-                n = 0
-                while n < len(s) and (s[n].isdigit() or s[n] in '/.'):
-                    n += 1
-                t = s[:n]
-                s = s[n:]
-                trans[i] = float(frac.Fraction(t))
-            else:
-                raise ValueError('Failed to parse symmetry of %s' % (sitesym))
-    return rot, trans
+
+def refine_cell(structure,
+                symprec=1e-3,
+                verbosity=0):
+    """
+    Refines the input crystal structure to within a tolerance using `spglib`.
+
+    Args:
+        structure: :class:`qmpy.Structure` object with a crystal structure.
+        symprec: Float with the Cartesian distance tolerance.
+        verbosity: Integer with the level of standard output verbosity.
+
+    Returns: :class:`qmpy.Structure` object with the refined unit cell
+        if successful, the input structure as is, otherwise.
+
+    """
+    _check_spglib_install()
+    rev_lookup = dict(zip(structure.site_comp_indices,
+                          structure.site_compositions))
+    cell = spglib.refine_cell(
+        _structure_to_cell(structure),
+        symprec=symprec
+    )
+    if not _check_spglib_success(cell,
+                                 func='refine_cell',
+                                 verbosity=verbosity):
+        return structure
+    _cell_to_structure(cell, structure, rev_lookup)
+    return structure
+
+
+def find_primitive(structure,
+                   symprec=1e-3,
+                   verbosity=0):
+    """
+    Finds the primitive unit cell of the crystal structure.
+
+    Args:
+        structure: :class:`qmpy.Structure` object with a crystal structure.
+        symprec: Float with the Cartesian distance tolerance.
+        verbosity: Integer with the level of standard output verbosity.
+
+    Returns: :class:`qmpy.Structure` object with the primitive unit cell
+        if successful, the input structure as is, otherwise.
+
+    """
+    _check_spglib_install()
+    rev_lookup = dict(zip(structure.site_comp_indices,
+                          structure.site_compositions))
+    cell = spglib.find_primitive(
+        _structure_to_cell(structure),
+        symprec=symprec
+    )
+    if not _check_spglib_success(cell,
+                                 func='find_primitive',
+                                 verbosity=verbosity):
+        return structure
+    _cell_to_structure(cell, structure, rev_lookup)
+    return structure
+
+
+def get_symmetry_from_database(hall_number):
+    """
+    Get symmetry operations corresponding to a Hall number.
+
+    Args:
+        hall_number: Integer with the Hall number.
+
+    Returns:
+        Dictionary of symmetry operations with keys "rotations", "translations"
+        and values Nx(3x3) array of integers, Nx3 array of float, respectively.
+
+        None if `spglib` is unable to determine symmetry.
+
+    Raises:
+        ImportError: If `spglib` cannot be imported.
+
+    """
+    _check_spglib_install()
+    return spglib.get_symmetry_from_database(hall_number)
+
+
+def niggli_reduce(structure,
+                  symprec=1e-3):
+    """
+    TODO: Get the Niggli reduced cell of the input structure.
+    """
+    raise NotImplementedError
+
+
+def delauney_reduce(structure,
+                    symprec=1e-3):
+    """
+    TODO: Get the Delauney reduced cell of the input structure.
+    """
+    raise NotImplementedError
+
