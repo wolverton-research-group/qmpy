@@ -324,6 +324,14 @@ class Structure(models.Model, object):
         self.natoms = len(atoms)
 
     @property
+    def site_comp_indices(self):
+        """
+        List of site compositions, length equal to number of sites, each
+        unique site composition identified by an integer.
+        """
+        return list(np.unique(self.species_types, return_inverse=True)[-1])
+
+    @property
     def elements(self):
         """List of Elements"""
         return [ Element.get(e) for e in self.comp.keys() ]
