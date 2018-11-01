@@ -8,15 +8,20 @@ import qmpy
 import qmpy.data as data
 from qmpy.utils import *
 
+try:
+    import spglib
+    _FOUND_SPGLIB = True
+except ImportError:
+    _FOUND_SPGLIB = False
+
 logger = logging.getLogger(__name__)
 
 
 def _check_spglib_install():
     """Imports `spglib`, raises :exc:`ImportError` if unsuccessful."""
-    if not qmpy.FOUND_SPGLIB:
+    if not _FOUND_SPGLIB:
         error_message = 'Could not import `spglib`. Is it installed?'
         raise ImportError(error_message)
-    import spglib
 
 
 def _check_spglib_success(cell,
