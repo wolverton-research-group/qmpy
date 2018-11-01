@@ -1208,7 +1208,7 @@ class Structure(models.Model, object):
         self.sites = [ Site() for i in range(n) ]
         self._atoms = None
 
-    def make_conventional(self, in_place=True, tol=1e-5):
+    def make_conventional(self, in_place=True, tol=1e-3):
         """Uses spglib to convert to the conventional cell.
 
         Keyword Arguments:
@@ -1236,7 +1236,7 @@ class Structure(models.Model, object):
 
         refine_cell(self, symprec=tol)
 
-    def make_primitive(self, in_place=True, tol=1e-5):
+    def make_primitive(self, in_place=True, tol=1e-3):
         """Uses spglib to convert to the primitive cell.
 
         Keyword Arguments:
@@ -1303,13 +1303,13 @@ class Structure(models.Model, object):
             if abs(G[0,2]) > abs(G[0,1]) - tol:
                 return False
 
-    def is_niggli_cell(self, tol=1e-5):
+    def is_niggli_cell(self, tol=1e-3):
         """
         Tests whether or not the structure is a Niggli cell.
         """
         if not self.is_grueber_cell():
             return False
-        (a,b,c),(d,e,f) = self.niggli_form
+        (a, b, c), (d, e, f) = self.niggli_form
         if abs(d-b) < tol:
             if f > 2*e - tol:
                 return False
