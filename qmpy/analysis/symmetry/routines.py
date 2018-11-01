@@ -25,8 +25,8 @@ def _check_spglib_install():
 
 
 def _check_spglib_success(cell,
-                         func='standardize_cell',
-                         verbosity=0):
+                          func='standardize_cell',
+                          verbosity=0):
     """
     Checks if `spglib` was successful, log error messages if not.
 
