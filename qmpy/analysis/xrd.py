@@ -2,7 +2,6 @@
 
 import itertools
 import numpy as np
-from symmetry.routines import get_structure_symmetry
 import logging
 
 from qmpy.data import elements
@@ -10,6 +9,7 @@ from qmpy.utils import *
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
+
 
 class Peak(object):
     """
@@ -22,8 +22,14 @@ class Peak(object):
         Number of HKL indices which generate the peak.
 
     """
-    def __init__(self, angle, multiplicity=None, intensity=None, hkl=None,
-                              xrd=None, width=None, measured=False):
+    def __init__(self,
+                 angle,
+                 multiplicity=None,
+                 intensity=None,
+                 hkl=None,
+                 xrd=None,
+                 width=None,
+                 measured=False):
         self.angle = angle
         self.two_theta = angle*360/np.pi
         self.hkl = hkl
@@ -95,6 +101,7 @@ class Peak(object):
         self.imag = imag
         return real*real + imag*imag
 
+
 class XRD(object):
     """
     Container for an X-ray diffraction pattern.
@@ -133,14 +140,14 @@ class XRD(object):
         peak.xrd = self
         self.peaks.append(peak)
 
-    def d_thermal_factor(angle, bfactor):
+    def d_thermal_factor(self, angle, bfactor):
         temp = (np.sin(angle) / self.wavelength)**2
         return -temp * np.exp(-bfactor*temp)
 
     def bragg_angle(self, hkl):
         ratio = np.linalg.norm(self.structure.inv.dot(hkl))/2
         ratio *= self.wavelength
-        if (ratio >=-1 and ratio <= 1):
+        if (ratio >= -1 and ratio <= 1):
             return np.arcsin(ratio)
         elif angle < -1:
             return -np.pi/2
@@ -168,14 +175,11 @@ class XRD(object):
             peak.calculate_intensity(bfactors=bfactors, scale=scale)
 
         if rescale:
-            m = max([ p.intensity for p in self.peaks ])
+            m = max([p.intensity for p in self.peaks])
             for p in self.peaks:
                 p.intensity /= m
 
     def get_peaks(self):
-        """
-        """
-
         max_mag = 2*np.sin(self.max_2th*np.pi/90) / self.wavelength
         self.structure.symmetrize()
         rots = []
@@ -185,17 +189,17 @@ class XRD(object):
             if not any([np.allclose(r, rr) for rr in rots]):
                 rots.append(r)
 
-        im, jm, km = map(lambda x: int(np.ceil(max_mag*x)), 
-                 self.structure.lat_params[:3])
+        im, jm, km = map(lambda x: int(np.ceil(max_mag*x)),
+                         self.structure.lat_params[:3])
 
-        for h,k,l in itertools.product(range(-im, im+1), 
-                                       range(-jm, jm+1),
-                                       range(-km, km+1)):
-            if [h,k,l] == [0,0,0]:
+        for h, k, l in itertools.product(range(-im, im+1),
+                                         range(-jm, jm+1),
+                                         range(-km, km+1)):
+            if [h, k, l] == [0, 0, 0]:
                 continue
 
             mult = 1
-            hkl = np.array([h,k,l])
+            hkl = np.array([h, k, l])
             equiv = [hkl]
             repeat = False
             for rot in rots:
@@ -211,7 +215,7 @@ class XRD(object):
                 if repeat:
                     break
 
-                if not any([ np.allclose(thkl, shkl) for shkl in equiv ]):
+                if not any([np.allclose(thkl, shkl) for shkl in equiv]):
                     equiv.append(thkl)
                     mult += 1
 
