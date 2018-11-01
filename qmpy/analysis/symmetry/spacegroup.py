@@ -222,8 +222,8 @@ class Operation(models.Model):
         elif isinstance(value, tuple):
             rot, trans = value
         else:
-            err_msg = 'Operation needs to be string or'
-                      ' (rotation, translation) tuple'
+            err_msg = ('Operation needs to be string or'
+                       ' (rotation, translation) tuple')
             raise OperationError(err_msg)
         rot = Rotation.get(rot)
         trans = Translation.get(trans)
