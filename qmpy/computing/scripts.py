@@ -4,6 +4,7 @@ import logging
 from qmpy.analysis.vasp import *
 from qmpy.analysis.thermodynamics.space import PhaseSpace
 from qmpy.computing.resources import *
+from qmpy.analysis.symmetry import routines
 
 logger = logging.getLogger(__name__)
 
@@ -339,7 +340,7 @@ def static(entry, xc_func='PBE', **kwargs):
     if not calc.converged:
         return calc
 
-    # Input structure == output structure from relaxation
+    # Input structure = output structure from relaxation
     input_structure = calc.output
 
     # Get path to CHGCAR
@@ -564,5 +565,82 @@ def hse_relaxation(entry, **kwargs):
 def acc_std_relax(entry, xc_func='PBE', **kwargs):
     """
     Performs a very accurate relaxation of the standardized primitive cell.
+
+    If a converged `static` calculation is not found, it is set up.
+    If a converged `static` calculation is found, its output structure is
+    converted into a standardized primitive cell (by default; alternate
+    options can be specified via `kwargs`) using `spglib`, and an
+    accurate relaxation is set up for it.
+    Some parameters for the relaxation are set based on whether the converged
+    `static` calculation finds the compound to have a zero/nonzero band gap,
+    has zero/nonzero magnetization, etc.
+
+    Args:
+        entry:
+            :class:`qmpy.Entry` object with the entry to be calculated.
+
+    Keyword Args:
+        xc_func:
+            String with the xc functional to use. The corresponding PAW
+            potentials are automatically used.
+            Looks for calculation configuration and settings under a key named
+            "acc_std_relax_[xc_func]" in the `qmpy.VASP_SETTINGS` dictionary.
+            If xc functional is PBE, the key in the dictionary is named
+            "acc_std_relax", without a suffix.
+            Defaults to 'PBE'.
+
+        **kwargs:
+            Miscellaneous keyword arguments passed onto the
+            :class:`qmpy.Calculation` object that is queried for/set up.
+
+            The ones used in this function are:
+            to_primitive:
+                Boolean with whether to calculate the primitive unit cell.
+                Defaults to True.
+
+            symprec:
+                Float with the tolerance used in standardizing the unit cell
+                (passed on to `spglib`).
+                Defaults to 1e-3.
+
+    Returns:
+        :class:`qmpy.Calculation` object with the suitable calculation in the
+        workflow.
+
     """
-    pass
+    # Name of the configuration
+    config_name = 'acc_std_relax'
+    if xc_func.lower() != 'pbe':
+        config_name += "_{}".format(xc_func.lower())
+
+    # If the calculation has already been successfully performed for this
+    # entry, return it
+    if entry.calculations.get(config_name, Calculation()).converged:
+        return entry.calculations[config_name]
+
+    # Get the `static` calculation for this entry
+    static_calc = static(entry, xc_func=xc_func, **kwargs)
+
+    # If the `static` calculation has not successfully completed, return it
+    if not static_calc.converged:
+        return static_calc
+
+    # Input structure = output from the converged `static` calculation
+    input_structure = static_calc.output
+
+    # Convert it into a standardized (primitive) cell
+    to_primitive = kwargs.get('to_primitive', True)
+    symprec = kwargs.get('symprec', 1e-3)
+    routines.standardize_cell(input_structure,
+                              to_primitive=to_primitive,
+                              symprec=symprec)
+
+    # Set some parameters based on the results of the `static` calculation
+    # Set ISMEAR to 0 (Gaussian) for semiconductors/insulators,
+    # 1 (Methfessel-Paxton) for metals.
+    ismear = 1 if static_calc.band_gap == 0 else 0
+
+    # Set
+
+
+
