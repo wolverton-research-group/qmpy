@@ -609,14 +609,14 @@ def acc_std_relax(entry, xc_func='PBE', **kwargs):
 
     """
     # Name of the configuration
-    config_name = 'acc_std_relax'
+    configuration = 'acc_std_relax'
     if xc_func.lower() != 'pbe':
-        config_name += "_{}".format(xc_func.lower())
+        configuration += "_{}".format(xc_func.lower())
 
     # If the calculation has already been successfully performed for this
     # entry, return it
-    if entry.calculations.get(config_name, Calculation()).converged:
-        return entry.calculations[config_name]
+    if entry.calculations.get(configuration, Calculation()).converged:
+        return entry.calculations[configuration]
 
     # Get the `static` calculation for this entry
     static_calc = static(entry, xc_func=xc_func, **kwargs)
@@ -626,7 +626,7 @@ def acc_std_relax(entry, xc_func='PBE', **kwargs):
         return static_calc
 
     # Input structure = output from the converged `static` calculation
-    input_structure = static_calc.output
+    input_structure = static_calc.output.copy()
 
     # Convert it into a standardized (primitive) cell
     to_primitive = kwargs.get('to_primitive', True)
@@ -635,12 +635,48 @@ def acc_std_relax(entry, xc_func='PBE', **kwargs):
                               to_primitive=to_primitive,
                               symprec=symprec)
 
-    # Set some parameters based on the results of the `static` calculation
-    # Set ISMEAR to 0 (Gaussian) for semiconductors/insulators,
-    # 1 (Methfessel-Paxton) for metals.
+    # Override some parameters based on the results of the `static` calculation
+    settings_override = {}
+
+    # Use Gaussian smearing (ISMEAR = 0) for semiconductors/insulators,
+    # Methfessel-Paxton of order 1 (ISMEAR = 1) for metals.
     ismear = 1 if static_calc.band_gap == 0 else 0
+    settings_override['ismear'] = ismear
 
-    # Set
+    # Don't do spin-polarized calculation if previous OQMD calculation found
+    # the compound to be non-magnetic.
+    # Especially relevant for 4d/5d transition metal containing compounds
+    # that are not magnetic.
+    magmom_pa = static_calc.magmom_pa
+    if magmom_pa is not None:
+        if abs(magmom_pa) <= 1e-3:
+            settings_override['ispin'] = 1
 
+    # Folder in which to run the calculation
+    path = os.path.join(entry.path, configuration)
+
+    # Setup the calculation; get `qmpy.Calculation` object if already exists
+    calc = Calculation.setup(
+            input_structure,
+            entry=entry,
+            configuration=configuration,
+            path=path,
+            settings_override=settings_override,
+            **kwargs
+    )
+
+    # Add calculation to the entry's calculations dictionary
+    entry.calculations[configuration] = calc
+    # Add the final structure to the entry's structure dictionary
+    entry.structures['acc_std_relaxed'] = calc.output
+    # Save the entry
+    entry.save()
+
+    # If calculation has not converged (new/fixed calculation), write all the
+    # VASP input files
+    if not calc.converged:
+        calc.write()
+
+    return calc
 
 
