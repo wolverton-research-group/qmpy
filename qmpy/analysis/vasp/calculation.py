@@ -2019,9 +2019,12 @@ class Calculation(models.Model):
         calc.set_hubbards(vasp_settings.get('hubbards', hubbard))
         calc.set_magmoms(vasp_settings.get('magnetism', 'ferro'))
 
-        # set ENCUT = 1.3*ENMAX for relaxation calculations
-        if 'relaxation' in configuration:
-            encut = int(max(pot.enmax for pot in calc.potentials)*1.3)
+        # set ENCUT = 1.3*ENMAX for relaxation calculations to the nearest 10th
+        encut = vasp_settings.get('encut', None)
+        scale_encut = vasp_settings.get('scale_encut', 1.3)
+        if encut is None or encut == 0:
+            encut = max(pot.enmax for pot in calc.potentials)*scale_encut
+            encut = int(math.ceil(encut/10.))*10
             if encut > 520:
                 encut = 520
             vasp_settings.update({'encut': encut})
