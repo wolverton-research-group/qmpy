@@ -3,15 +3,12 @@
 """
 qmpy is a package containing many tools for computational materials science.
 """
-import numpy as np
 import logging
 import logging.handlers
 import os
 import yaml
-import stat
 import sys
 import ConfigParser
-import django.core.exceptions as de
 
 
 ##############################################################################
@@ -111,12 +108,10 @@ try:
 except ImportError:
     FOUND_SKLEARN = False
 
-### Kludge to get the django settings module into the path
+# Kludge to get the django settings module into the path
 sys.path.insert(-1, INSTALL_PATH)
 if 'DJANGO_SETTINGS_MODULE' not in os.environ:
     os.environ['DJANGO_SETTINGS_MODULE'] = 'qmpy.db.settings'
-
-
 
 
 ##############################################################################
