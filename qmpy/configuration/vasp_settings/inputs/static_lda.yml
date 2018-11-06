@@ -22,4 +22,3 @@ lwave: false
 potentials: vasp_rec_lda
 hubbards: wang
 magnetism: ferro
-kpoints_gen: TM
