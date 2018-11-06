@@ -26,7 +26,6 @@ config.read(os.path.join(INSTALL_PATH, 'configuration', 'site.cfg'))
 VASP_POTENTIALS = config.get('VASP', 'potential_path')
 
 
-
 ##############################################################################
 # Logging
 # Set path to the default log file, format for the logger, etc.
@@ -63,7 +62,6 @@ logger.addHandler(general)
 logger.addHandler(console)
 
 
-
 ##############################################################################
 # Imports
 # Try importing essential packages and throw suitable warnings/exceptions
@@ -72,12 +70,14 @@ logger.addHandler(console)
 class qmpyBaseError(Exception):
     """Baseclass for qmpy Exceptions"""
 
+
 try:
     import ase
     FOUND_ASE = True
 except ImportError:
     FOUND_ASE = False
     logging.warn('Failed to import ASE')
+
 
 try:
     import pulp
@@ -86,12 +86,14 @@ except ImportError:
     FOUND_PULP = False
     logging.warn('Failed to import PuLP')
 
+
 try:
     import matplotlib
     FOUND_MPL = True
 except ImportError:
     FOUND_MPL = False
     logging.warn('Failed to import matplotlib')
+
 
 # Use spglib versions >1.9.0
 try:
@@ -102,11 +104,13 @@ except ImportError:
                  " (https://atztogo.github.io/spglib/python-spglib.html)")
     FOUND_SPGLIB = False
 
+
 try:
     import sklearn
     FOUND_SKLEARN = True
 except ImportError:
     FOUND_SKLEARN = False
+
 
 # Kludge to get the django settings module into the path
 sys.path.insert(-1, INSTALL_PATH)
@@ -192,6 +196,7 @@ def read_elements():
         elts.append(e)
     Element.objects.bulk_create(elts)
 
+
 def read_hubbards():
     """
     read Hubbard U values to be used for the suitable elements from the file
@@ -217,6 +222,7 @@ def read_hubbards():
             hub.convention = group
             hub.save()
 
+
 def read_potentials():
     """
     read the VASP POTCAR files and store them in the database.
@@ -236,6 +242,7 @@ def read_potentials():
                         pot.save()
                 except Exception:
                     print 'Couldn\'t load:', path
+
 
 def sync_resources():
     for host, data in hosts.items():
@@ -304,6 +311,7 @@ try:
     django.setup()
 except:
     pass
+
 
 # Try to prevent exception when importing before database is set up
 try:
