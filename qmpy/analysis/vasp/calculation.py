@@ -2,7 +2,6 @@
 
 import os
 import copy
-import json
 import gzip
 import numpy as np
 import numpy.linalg
@@ -23,17 +22,15 @@ import qmpy.materials.structure as strx
 import qmpy.io.poscar as poscar
 import potential as pot
 import qmpy.materials.formation_energy as fe
-import qmpy.utils as utils
-import qmpy.db.custom as cdb
 import qmpy.analysis.thermodynamics as thermo
 import qmpy.analysis.griddata as grid
 import dos
 from qmpy.data import chem_pots
-from qmpy.materials.atom import Atom, Site
+from qmpy.materials.atom import Atom
 from qmpy.utils import *
 from qmpy.data.meta_data import MetaData, add_meta_data
 from qmpy.materials.element import Element
-from qmpy.db.custom import DictField, NumpyArrayField
+from qmpy.db.custom import DictField
 from qmpy.configuration.vasp_settings import *
 from qmpy.configuration.vasp_incar_format import *
 
