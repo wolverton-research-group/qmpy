@@ -994,8 +994,8 @@ class Structure(models.Model, object):
             for atom in self.atoms:
                 if atom.element.d_elec > 0 and atom.element.d_elec < 10:
                     atom.magmom = 5
-                elif atom.element.f_elec > 0 and atom.element.f_elec < 14:
-                    atom.magmom = 7
+                # elif atom.element.f_elec > 0 and atom.element.f_elec < 14:
+                #     atom.magmom = 7
                 else:
                     atom.magmom = 0
                 if atom.id is not None:
