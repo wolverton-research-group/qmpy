@@ -1397,11 +1397,11 @@ class Calculation(models.Model):
         if not os.path.exists(self.path):
             return
         for file in os.listdir(self.path):
-            if os.path.isdir(self.path+'/'+file):
+            if os.path.isdir(os.path.join(self.path, file)):
                 continue
             if file in ['INCAR', 'POSCAR', 'KPOINTS', 'POTCAR']:
                 continue
-            os.unlink('%s/%s' % (self.path, file))
+            os.unlink(os.path.join(self.path, file))
 
     def clear_results(self):
         self.energy = None
@@ -1565,14 +1565,13 @@ class Calculation(models.Model):
         Return: None
         """
         if path is None:
-            new_dir = '%s_' % self.attempt
+            new_dir = '{}_'.format(str(self.attempt))
             new_dir += '_'.join(self.errors)
             new_dir = new_dir.replace(' ','')
         else:
             new_dir = path
-        logger.info('backing up %s to %s' % 
-                (self.path.replace(self.entry.path+'/', ''), new_dir))
-        self.move(self.path+'/'+new_dir)
+        logger.info('backing up {} to {}'.format(os.path.basename(self.path), new_dir))
+        self.move(os.path.join(self.path, new_dir))
 
     def clean_start(self):
         depth = self.path.count('/') - self.path.count('..')
@@ -2057,6 +2056,9 @@ class Calculation(models.Model):
                          }
             vasp_settings.update(U_settings)
 
+        # override settings based on keyword arguments
+        settings_override = kwargs.get('settings_override', {})
+        vasp_settings.update(settings_override)
 
         calc.settings = vasp_settings
 
@@ -2094,13 +2096,14 @@ class Calculation(models.Model):
         calc.backup()
         calc.save()
 
-        ##fixed_calc.set_magmoms(calc.settings.get('magnetism', 'ferro'))
         fixed_calc.clear_results()
         fixed_calc.clear_outputs()
+
         try:
             fixed_calc.set_chgcar(calc)
         except VaspError:
             pass
+
         try:
             fixed_calc.set_wavecar(calc)
         except VaspError:
