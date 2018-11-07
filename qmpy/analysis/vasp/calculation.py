@@ -900,6 +900,13 @@ class Calculation(models.Model):
             self.converged = False
             self.add_error('convergence')
 
+    def read_nbands_from_outcar(self):
+        self.get_outcar()
+        for line in self.outcar:
+            if 'NBANDS=' in line:
+                if not 'INCAR' in line:
+                    return int(line.split()[-1])
+
     def read_outcar_settings(self):
         self.get_outcar()
         settings = {'potentials':[]}
@@ -1031,11 +1038,12 @@ class Calculation(models.Model):
         self.settings = settings
 
     def read_stdout(self, filename='stdout.txt'):
-        if not os.path.exists('%s/%s' % (self.path, filename)):
-            print 'stdout file %s not found.' %(filename)
+        stdout_file = os.path.join(self.path, filename)
+        if not os.path.exists(stdout_file):
+            print('VASP stdout file {} not found'.format(stdout_file))
             return []
-        stdout = open('%s/%s' % (self.path, filename)).read()
-        errors = []
+        with open(stdout_file, 'r') as fr:
+            stdout = fr.read()
         if 'Error reading item' in stdout:
             self.add_error('input_error')
         if 'ZPOTRF' in stdout:
@@ -1237,18 +1245,25 @@ class Calculation(models.Model):
 
     def address_errors(self):
         """
-        Attempts to fix any encountered errors. 
+        Attempts to fix any encountered errors.
         """
         errors = self.errors
         if not errors or errors == ['found no errors']:
             logger.info('Calculation {}: Found no errors'.format(self.id))
             return self
-        
+
         new_calc = self.copy()
         new_calc.set_label(self.label)
         self.set_label(self.label + '_%d' % self.attempt)
         new_calc.attempt += 1
-        if new_calc.attempt > 5:
+
+        # if the only error is ionic/basis convergence, try a few more times
+        # than for other errors
+        max_attempts = 5
+        if set(new_calc.errors).issubset(set(['convergence'])):
+            max_attempts = 10
+
+        if new_calc.attempt > max_attempts:
             new_calc.add_error('attempts')
 
         for err in errors:
@@ -1273,7 +1288,7 @@ class Calculation(models.Model):
                 new_calc.fix_brions()
             elif err == 'brmix':
                 new_calc.fix_brmix()
-            elif err in [ 'zpotrf', 'fexcp', 'fexcf']:
+            elif err in ['zpotrf', 'fexcp', 'fexcf']:
                 new_calc.reduce_potim()
             elif err in ['pricel', 'invgrp', 'sgrcon']:
                 new_calc.increase_symprec()
@@ -1385,8 +1400,15 @@ class Calculation(models.Model):
         self.remove_error('convergence')
 
     def fix_bands(self):
-        self.settings['nbands'] = int(np.ceil(self.settings['nbands']*1.5))
-        self.errors = []
+        nbands = self.read_nbands_from_outcar()
+        if nbands is None:
+            logger.info('Failed to read NBANDS from OUTCAR.'
+                        ' Calculation ID: {}'.format(self.id))
+            return
+        # add 20% or 4 more bands, whichever is higher
+        add_bands = max([int(np.ceil(nbands*0.2)), 4])
+        self.settings.update({'nbands': nbands + add_bands})
+        self.remove_error('bands')
 
     def fix_dav(self):
         if self.settings['algo'] == 'fast':
