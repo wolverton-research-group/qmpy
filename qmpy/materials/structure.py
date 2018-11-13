@@ -2126,7 +2126,7 @@ class Structure(models.Model, object):
         sc_uc = np.array([[1, 0, 0],
                           [0, 1, 0],
                           [0, 0, 1]])
-        return self.deviation_from_cell_shape(
+        return self.get_deviation_from_cell_shape(
                 lattice_vectors=self.cell,
                 target_cell_shape=sc_uc
         )
@@ -2140,7 +2140,7 @@ class Structure(models.Model, object):
         fcc_uc = np.array([[0, 0.5, 0.5],
                            [0.5, 0, 0.5],
                            [0, 0.5, 0.5]])
-        return self.deviation_from_cell_shape(
+        return self.get_deviation_from_cell_shape(
                 lattice_vectors=self.cell,
                 target_cell_shape=fcc_uc
         )
@@ -2154,7 +2154,7 @@ class Structure(models.Model, object):
         bcc_uc = np.array([[-0.5, 0.5, 0.5],
                            [0.5, -0.5, 0.5],
                            [0.5, 0.5, -0.5]])
-        return self.deviation_from_cell_shape(
+        return self.get_deviation_from_cell_shape(
                 lattice_vectors=self.cell,
                 target_cell_shape=bcc_uc
         )
@@ -2164,9 +2164,9 @@ class Structure(models.Model, object):
         return self.deviation_from_bcc
 
     @staticmethod
-    def deviation_from_cell_shape(lattice_vectors=None,
-                                  target_cell_shape=None,
-                                  volume_factor=None):
+    def get_deviation_from_cell_shape(lattice_vectors=None,
+                                      target_cell_shape=None,
+                                      volume_factor=None):
         """
         Calculates deviation of the structure's lattice parameters from the
         specified target shape, using the following:
