@@ -2157,12 +2157,42 @@ class Structure(models.Model, object):
     def deviation_from_cell_shape(self,
                                   target_cell_shape=None,
                                   volume_factor=None):
+        """
+        Calculates deviation of the structure's lattice parameters from the
+        specified target shape, using the following:
+
+        \Delta = || volume_factor * self.cell - target_cell_shape ||_2
+
+        where ||x||_2 indicates the L2-norm. If `volume_factor` (VF) is not
+        specified, it is calculated using:
+
+        VF = [DET(self.cell)/DET(target_cell_shape)]^(-1/3)
+
+        where DET indicates determinant. VF, when calculated as above,
+        ensures volume-agnostic comparison of cell shapes (which may or may
+        not be what you intended).
+
+        Args:
+            target_cell_shape:
+                3x3 array of Integers or Float with the target cell shape.
+                E.g., [[1, 0, 1], [0, 1, 1], [1, 1, 1]]
+
+            volume_factor:
+                Float with the factor with which to scale the lattice
+                parameters in `self.cell`.
+
+        Returns:
+            Float quantifying the deviation of the structure from the target
+            cell shape.
+
+        """
         if target_cell_shape is None:
             raise StructureError('Target cell shape not specified')
         if not volume_factor:
             volume_factor = (np.linalg.det(self.cell)/np.linalg.det(
                     target_cell_shape))**(-1./3.)
         return np.linalg.norm(volume_factor*self.cell - target_cell_shape)
+
 
 class Prototype(models.Model):
     """
