@@ -4,6 +4,7 @@ import os
 import six
 import numbers
 import numpy as np
+from collections import defaultdict
 from django.db import models
 
 import phonopy.interface.vasp as phonopy_vasp
@@ -50,7 +51,7 @@ class PhononCalculation(models.Model):
     def _get_default_supercell_matrix(prim_structure,
                                       simple_multiple=False,
                                       max_natoms=512):
-        # if 4x4x4 supercell has less than 512 atoms, use it
+        # if the 4x4x4 supercell has less than `max_natoms` atoms, use it
         smatrix = np.array([[4, 0, 0], [0, 4, 0], [0, 0, 4]])
         if np.linalg.det(smatrix)*prim_structure.natoms <= max_natoms:
             return smatrix
@@ -59,18 +60,42 @@ class PhononCalculation(models.Model):
             while True:
                 if abs(np.linalg.det(smatrix) - 1.) <= 1e-3:
                     break
-                smatrix -= np.identity(3)
+                smatrix -= np.eye(3, dtype='int')
                 if np.linalg.det(smatrix)*prim_structure.natoms <= max_natoms:
                     break
             return smatrix
         # if not, try finding the largest supercell with less than 512 atoms
-        # that is closest to the simple-cubic structure by iteratively
+        # of the form n1xn2xn3 (a more general supercell cannot be handled by
+        # ShengBTE) that is closest to the simple-cubic shape by iteratively
         # decreasing the supercell size. (Larger non-cubic cells preferred over
-        # smaller cubic ones, i.e., not a Pareto solution.)
-        while True:
-            if abs(np.linalg.det(smatrix) - 1.) <= 1e-3:
-                break
-
+        # smaller cubic ones. E.g., a 432-atom supercell with a 0.38
+        # deviation from the cubic shape will be chosen over a 324-atom
+        # supercell with 0.16 deviation from the cubic shape.)
+        sc_shape = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+        supercell_scores = defaultdict(dict)
+        for n1 in range(4, 0, -1):
+            for n2 in range(4, 0, -1):
+                for n3 in range(4, 0, -1):
+                    natoms = n1*n2*n3*prim_structure.natoms
+                    if natoms > max_natoms:
+                        continue
+                    sc_key = 'x'.join(map(str, [n1, n2, n3]))
+                    lat_vec = np.array([[n1, 0, 0],
+                                        [0, n2, 0],
+                                        [0, 0, n3]])*prim_structure.cell
+                    sc_score = Structure.deviation_from_cell_shape(
+                            lattice_vectors=lat_vec,
+                            target_cell_shape=sc_shape
+                    )
+                    supercell_scores[natoms].update({sc_key: sc_score})
+        if not supercell_scores:
+            smatrix = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+            return smatrix
+        best_natoms = sorted(supercell_scores.keys())[-1]
+        n1n2n3, _ = sorted(supercell_scores[best_natoms].items(),
+                           key=lambda x: x[1])[0]
+        smatrix = map(int, n1n2n3.split('x'))*np.eye(3, dtype='int')
+        return smatrix
 
     @classmethod
     def setup(cls,
@@ -132,6 +157,7 @@ class PhononCalculation(models.Model):
                 If not specified, a default value of [4, 4, 4] is used. In
                 case the latter supercell has more than 512 atoms,
                 the largest [N1, N2, N3] supercell with <512 atoms is used.
+                Cubic-like supercells are preferred in the latter step.
 
             max_ifc_order:
                 Integer with the maximum order interatomic force constants (IFC)
@@ -314,7 +340,7 @@ class PhononCalculation(models.Model):
             phonon_calc.supercell_matrix = cls._get_supercell_matrix(
                     input_structure)
         if isinstance(supercell_matrix, numbers.Integral):
-            np.identity(3)*int(supercell_matrix)
+            np.eye(3, dtype='int')*int(supercell_matrix)
 
 
 
