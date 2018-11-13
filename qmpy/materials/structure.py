@@ -2121,6 +2121,49 @@ class Structure(models.Model, object):
         self.get_sites()
         return self
 
+    @property
+    def deviation_from_sc(self):
+        sc_uc = np.array([[1, 0, 0],
+                          [0, 1, 0],
+                          [0, 0, 1]])
+        return self.deviation_from_cell_shape(target_cell_shape=sc_uc)
+
+    @property
+    def deviation_from_simple_cubic(self):
+        return self.deviation_from_sc
+
+    @property
+    def deviation_from_fcc(self):
+        fcc_uc = np.array([[0, 0.5, 0.5],
+                           [0.5, 0, 0.5],
+                           [0, 0.5, 0.5]])
+        return self.deviation_from_cell_shape(target_cell_shape=fcc_uc)
+
+    @property
+    def deviation_from_face_centered_cubic(self):
+        return self.deviation_from_fcc
+
+    @property
+    def deviation_from_bcc(self):
+        bcc_uc = np.array([[-0.5, 0.5, 0.5],
+                           [0.5, -0.5, 0.5],
+                           [0.5, 0.5, -0.5]])
+        return self.deviation_from_cell_shape(target_cell_shape=bcc_uc)
+
+    @property
+    def deviation_from_body_centered_cubic(self):
+        return self.deviation_from_bcc
+
+    def deviation_from_cell_shape(self,
+                                  target_cell_shape=None,
+                                  volume_factor=None):
+        if target_cell_shape is None:
+            raise StructureError('Target cell shape not specified')
+        if not volume_factor:
+            volume_factor = (np.linalg.det(self.cell)/np.linalg.det(
+                    target_cell_shape))**(-1./3.)
+        return np.linalg.norm(volume_factor*self.cell - target_cell_shape)
+
 class Prototype(models.Model):
     """
     Base class for a prototype structure. 
