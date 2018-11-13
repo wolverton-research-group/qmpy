@@ -13,26 +13,8 @@ import phonopy.structure.cells as phonopy_cells
 from qmpy import io
 from qmpy.materials.entry import Entry
 from qmpy.materials.structure import Structure
+from qmpy.analysis.symmetry.routines import get_phonopy_style_supercell
 from qmpy.analysis.vasp.calculation import Calculation
-
-
-def _get_phonopy_supercell(structure, supercell_matrix):
-    """
-    Uses phonopy to construct a supercell of `structure`.
-
-    Args:
-        structure:
-            :class:`qmpy.Structure` object with the crystal structure.
-
-        supercell_matrix:
-            A 3x3 array of Integers with the structure -> supercell
-            tranformation matrix.
-
-    Returns:
-        :class:`qmpy.Structure` object with the supercell.
-
-    """
-    return None
 
 
 class PhononCalculationError(Exception):
@@ -378,9 +360,9 @@ class PhononCalculation(models.Model):
         # Get the pristine supercell structure using Phonopy
         # Phonopy is used here to maintain consistency with the rest of the
         # CSLD machinery (TODO: verify with Yi that Phonopy is required here)
-        phonon_calc.pristine_supercell = _get_phonopy_supercell(
+        phonon_calc.pristine_supercell = get_phonopy_style_supercell(
                 structure=input_structure,
-                supercell_matrix=_smatrix
+                supercell_matrix=_smatrix,
         )
 
         # Up to what order IFCs should be fit?
@@ -415,30 +397,14 @@ class PhononCalculation(models.Model):
             })
         for k in _ccs:
             if _ccs[k] is None:
-                _ccs[k] = PhononCalculation.get_cluster_cutoff(
+                _ccs[k] = PhononCalculation.get_cluster_cutoff_radius(
                         structure=phonon_calc.pristine_supercell,
                         cluster_type=2
                 )
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    def generate_pristine_supercell(self):
-        phonopy_uc = phonopy_vasp.read_vasp()
-
+    @staticmethod
+    def get_cluster_cutoff_radius(structure, cluster_type):
+        return 10.
 
     def generate_csld_ini(self):
         pass
