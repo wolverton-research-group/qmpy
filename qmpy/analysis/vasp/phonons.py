@@ -16,6 +16,25 @@ from qmpy.materials.structure import Structure
 from qmpy.analysis.vasp.calculation import Calculation
 
 
+def _get_phonopy_supercell(structure, supercell_matrix):
+    """
+    Uses phonopy to construct a supercell of `structure`.
+
+    Args:
+        structure:
+            :class:`qmpy.Structure` object with the crystal structure.
+
+        supercell_matrix:
+            A 3x3 array of Integers with the structure -> supercell
+            tranformation matrix.
+
+    Returns:
+        :class:`qmpy.Structure` object with the supercell.
+
+    """
+    return None
+
+
 class PhononCalculationError(Exception):
     """Base class to handle errors associated with phonon calculations."""
 
@@ -60,7 +79,7 @@ class PhononCalculation(models.Model):
             while True:
                 if abs(np.linalg.det(smatrix) - 1.) <= 1e-3:
                     break
-                smatrix -= np.eye(3, dtype='int')
+                smatrix -= np.eye(3, dtype=int)
                 if np.linalg.det(smatrix)*prim_structure.natoms <= max_natoms:
                     break
             return smatrix
@@ -94,7 +113,7 @@ class PhononCalculation(models.Model):
         best_natoms = sorted(supercell_scores.keys())[-1]
         n1n2n3, _ = sorted(supercell_scores[best_natoms].items(),
                            key=lambda x: x[1])[0]
-        smatrix = map(int, n1n2n3.split('x'))*np.eye(3, dtype='int')
+        smatrix = map(int, n1n2n3.split('x'))*np.eye(3, dtype=int)
         return smatrix
 
     @classmethod
@@ -161,17 +180,18 @@ class PhononCalculation(models.Model):
 
             max_ifc_order:
                 Integer with the maximum order interatomic force constants (IFC)
-                to be fit. Alternatively, String inputs "second", "third",
-                "fourth" are recognized as valid inputs.
+                to be fit. Alternatively, String inputs "second" and "third"
+                are recognized as valid inputs.
+
+                **NOTE**: Currently only up to third-order implemented.
 
                 If not specified, a default value of 2 (i.e., only second
                 order IFCs are fit) is used.
 
             cluster_cutoffs:
                 Dictionary with the cutoff radius for determining and including
-                2-body, 3-body clusters. Keys are "2body" and "3body",
-                and the corresponding values are Floats with the radii in nm.
-                *NOTE*: the units are nm for by default, not Angstrom.
+                2-body, 3-body clusters. Keys are Integers, 2 and 3, and the
+                corresponding values are Floats with the radii in Angstrom.
 
                 If not specified, pair correlation distribution in the
                 supercell specified by `input_structure` and `supercell_matrix`
@@ -186,10 +206,10 @@ class PhononCalculation(models.Model):
                 \phi_CS = arg min (|| \phi ||_1) +
                                   + \mu/2 (|| F - A \phi ||_2)^2
                 The first term on the RHS of the above equation is the
-                l1-norm term that drives solutions towards sparsity,
-                while the second term is the l2-norm or the regular
+                L1-norm term that drives solutions towards sparsity,
+                while the second term is the L2-norm or the regular
                 least-squares fitting. The parameter \mu adjusts the relative
-                weights of the l1 and l2 terms. Higher values of \mu are
+                weights of the L1- and L2- terms. Higher values of \mu are
                 prone to overfitting while small values of \mu result in very
                 sparse underfitted IFCs.
 
@@ -300,11 +320,13 @@ class PhononCalculation(models.Model):
         """
 
         # Input crystal structure
+        input_structure_folder = None
         if isinstance(input_structure, six.string_types):
             if not os.path.isfile(input_structure):
                 err_msg = 'Structure file {} not found'.format(input_structure)
                 raise OSError(err_msg)
-            struct_path = os.path.abspath(os.path.dirname(input_structure))
+            input_structure_folder = os.path.abspath(os.path.dirname(
+                    input_structure))
             input_structure = io.poscar.read(input_structure, **kwargs)
 
         # OQMD entry
@@ -314,7 +336,9 @@ class PhononCalculation(models.Model):
 
         # Path to the calculation folder
         if path is None:
-            if entry is None:
+            if input_structure_folder is not None:
+                path = input_structure_folder
+            elif entry is None:
                 path = os.path.abspath(os.getcwd())
             elif entry.path is None:
                 path = os.path.abspath(os.getcwd())
@@ -336,11 +360,72 @@ class PhononCalculation(models.Model):
             phonon_calc.kwargs = kwargs
 
         # What is the primitive -> supercell transformation matrix?
-        if supercell_matrix is None:
-            phonon_calc.supercell_matrix = cls._get_supercell_matrix(
-                    input_structure)
         if isinstance(supercell_matrix, numbers.Integral):
-            np.eye(3, dtype='int')*int(supercell_matrix)
+            _smatrix = np.eye(3, dtype=int)*int(supercell_matrix)
+        elif np.shape(supercell_matrix) == (3, ):
+            _smatrix = map(int, supercell_matrix)*np.eye(3, dtype=int)
+        elif np.shape(supercell_matrix) == (3, 3):
+            _smatrix = np.array(supercell_matrix)
+        elif supercell_matrix is None:
+            _smatrix = PhononCalculation._get_default_supercell_matrix(
+                input_structure)
+        else:
+            err_msg = ('Failed to parse input'
+                       ' `supercell_matrix` = {}').format(supercell_matrix)
+            raise PhononCalculationError(err_msg)
+        phonon_calc.supercell_matrix = _smatrix
+
+        # Get the pristine supercell structure using Phonopy
+        # Phonopy is used here to maintain consistency with the rest of the
+        # CSLD machinery (TODO: verify with Yi that Phonopy is required here)
+        phonon_calc.pristine_supercell = _get_phonopy_supercell(
+                structure=input_structure,
+                supercell_matrix=_smatrix
+        )
+
+        # Up to what order IFCs should be fit?
+        nie_err_msg = 'Only up to 3rd order implemented so far'
+        parse_err_msg = ('Failed to parse input'
+                         ' `max_ifc_order` = {}').format(max_ifc_order)
+        if isinstance(max_ifc_order, six.string_types):
+            if max_ifc_order.lower() == 'second':
+                _mio = 2
+            elif max_ifc_order.lower() == 'third':
+                _mio = 3
+            elif max_ifc_order.lower() == 'fourth':
+                raise NotImplementedError(nie_err_msg)
+            else:
+                raise PhononCalculationError(parse_err_msg)
+        elif isinstance(max_ifc_order, numbers.Integral):
+            if max_ifc_order > 3:
+                raise NotImplementedError(nie_err_msg)
+            _mio = max_ifc_order if max_ifc_order >= 2 else 2
+        elif max_ifc_order is None:
+            _mio = 2
+        else:
+            raise PhononCalculationError(parse_err_msg)
+
+        # What radii cutoffs should be used for identifying symmetrically
+        # unique (and then including for sensing) 2-body and 3-body clusters?
+        _ccs = {2: None, 3: None}
+        if cluster_cutoffs is not None:
+            _ccs.update({
+                2: cluster_cutoffs.get(2, None),
+                3: cluster_cutoffs.get(3, None)
+            })
+        for k in _ccs:
+            if _ccs[k] is None:
+                _ccs[k] = PhononCalculation.get_cluster_cutoff(
+                        structure=phonon_calc.pristine_supercell,
+                        cluster_type=2
+                )
+
+
+
+
+
+
+
 
 
 
