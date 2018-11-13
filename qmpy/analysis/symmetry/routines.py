@@ -1,4 +1,6 @@
-# wrappers for spglib functions | https://atztogo.github.io/spglib/
+# wrappers for some `spglib` functions  | https://atztogo.github.io/spglib/
+# wrappers for some `phonopy` functions | http://atztogo.github.io/phonopy/
+
 import fractions as frac
 import numpy as np
 import logging
@@ -14,8 +16,21 @@ try:
 except ImportError:
     _FOUND_SPGLIB = False
 
+try:
+    import phonopy
+    _FOUND_PHONOPY = True
+except ImportError:
+    _FOUND_PHONOPY = False
+else:
+    from phonopy.interface.vasp import read_vasp_from_strings
+    from phonopy.interface.vasp import sort_positions_by_symbols
+    from phonopy.interface.vasp import _get_scaled_positions_lines
+    import phonopy.structure.cells as _phonopy_cells
+
 logger = logging.getLogger(__name__)
 
+
+# SPGLIB #
 
 def _check_spglib_install():
     """Imports `spglib`, raises :exc:`ImportError` if unsuccessful."""
@@ -62,10 +77,13 @@ def _structure_to_cell(structure):
         `positions`, `atom_types`, `magmoms`) depending on whether any
         `structure.magmoms` is nonzero.
 
-        `lattice` is a 3x3 array of float, `positions` is an Nx3 array of
-        float, `atom_types` in an Nx1 list of integers, `magmoms` (if
-        specified) is an Nx1 array of float, where N is the number of atoms
-        in `structure. `atom_types` has numbers in place of element symbols
+        `lattice` is a 3x3 array of float.
+        `positions` is an Nx3 array of float.
+        `atom_types` in an Nx1 list of integers.
+        `magmoms` (if specified) is an Nx1 array of float, where N is the
+        number of atoms in `structure.
+
+        `atom_types` has numbers in place of element symbols
         (see :func:`qmpy.Structure.species_id_types`).
 
     Raises:
@@ -404,4 +422,91 @@ def delauney_reduce(structure,
     TODO: Get the Delauney reduced cell of the input structure.
     """
     raise NotImplementedError
+
+
+# PHONOPY #
+
+def _check_phonopy_install():
+    """Imports `phonopy`, raises :exc:`ImportError` if unsuccessful."""
+    if not _FOUND_PHONOPY:
+        error_message = 'Could not import `phonopy`. Is it installed?'
+        raise ImportError(error_message)
+
+
+def get_phonopy_style_supercell(structure,
+                                supercell_matrix,
+                                is_old_style=True,
+                                symprec=1e-3,
+                                in_place=False):
+    """
+    Wrapper function that generates a supercell of `structure` using `phonopy`.
+
+    Args:
+        structure:
+            :class:`qmpy.Structure` object with the unit cell.
+
+        supercell_matrix:
+            A 3x3 array of Integers with the primitive -> supercell
+            transformation matrix. Passed
+
+        is_old_style:
+            Phonopy-specific keyword. See notes under `get_supercell()`
+            function in :mod:`phonopy.structure.cells`.
+
+            Defaults to False.
+
+        symprec:
+            Float with the tolerance used to wrap atoms and eliminate
+            overlapping atoms, if any, upon imposing periodic boundary
+            conditions.
+
+            Defaults to 1e-3.
+
+            **NOTE**: The `phonopy` default is 1e-5, not 1e-3.
+
+        in_place:
+            Boolean specifying whether the unit cell in `structure` should be
+            overwritten or not.
+
+            Defaults to False.
+
+    Returns:
+        :class:`qmpy.Structure` object with the supercell.
+
+    """
+    _check_phonopy_install()
+
+    if not in_place:
+        structure_copy = structure.copy()
+        return get_phonopy_style_supercell(
+                structure_copy,
+                supercell_matrix,
+                is_old_style=is_old_style,
+                symprec=symprec,
+                in_place=True
+        )
+
+    phonopy_atoms = read_vasp_from_strings(qmpy.io.poscar.write(structure))
+    phonopy_sc = _phonopy_cells.get_supercell(
+            unitcell=phonopy_atoms,
+            supercell_matrix=supercell_matrix,
+            is_old_style=is_old_style,
+            symprec=symprec
+    )
+    num_atoms, symbols, positions, _ = sort_positions_by_symbols(
+            phonopy_sc.get_chemical_symbols(),
+            phonopy_sc.get_scaled_positions()
+    )
+
+    structure.cell = phonopy_sc.get_cell()
+    structure.set_nsites(sum(num_atoms))
+    site_coords = [[float(c) for c in atom_coord.strip().split()]
+                   for atom_coord in _get_scaled_positions_lines(positions)]
+    structure.site_coords = site_coords
+    site_comps = []
+    for n, s in zip(num_atoms, symbols):
+        site_comps.extend([s]*n)
+    structure.site_compositions = site_comps
+
+    return structure
 
