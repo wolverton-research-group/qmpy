@@ -1956,7 +1956,7 @@ class Calculation(models.Model):
             structure = os.path.abspath(structure)
             if path is None:
                 path = os.path.dirname(structure)
-            structure = io.read(structure, **kwargs)
+            structure = qmpy.io.read(structure, **kwargs)
 
         # Where to do the calculation
         if path is None:
