@@ -2126,7 +2126,10 @@ class Structure(models.Model, object):
         sc_uc = np.array([[1, 0, 0],
                           [0, 1, 0],
                           [0, 0, 1]])
-        return self.deviation_from_cell_shape(target_cell_shape=sc_uc)
+        return self.deviation_from_cell_shape(
+                lattice_vectors=self.cell,
+                target_cell_shape=sc_uc
+        )
 
     @property
     def deviation_from_simple_cubic(self):
@@ -2137,7 +2140,10 @@ class Structure(models.Model, object):
         fcc_uc = np.array([[0, 0.5, 0.5],
                            [0.5, 0, 0.5],
                            [0, 0.5, 0.5]])
-        return self.deviation_from_cell_shape(target_cell_shape=fcc_uc)
+        return self.deviation_from_cell_shape(
+                lattice_vectors=self.cell,
+                target_cell_shape=fcc_uc
+        )
 
     @property
     def deviation_from_face_centered_cubic(self):
@@ -2148,13 +2154,17 @@ class Structure(models.Model, object):
         bcc_uc = np.array([[-0.5, 0.5, 0.5],
                            [0.5, -0.5, 0.5],
                            [0.5, 0.5, -0.5]])
-        return self.deviation_from_cell_shape(target_cell_shape=bcc_uc)
+        return self.deviation_from_cell_shape(
+                lattice_vectors=self.cell,
+                target_cell_shape=bcc_uc
+        )
 
     @property
     def deviation_from_body_centered_cubic(self):
         return self.deviation_from_bcc
 
-    def deviation_from_cell_shape(self,
+    @staticmethod
+    def deviation_from_cell_shape(lattice_vectors=None,
                                   target_cell_shape=None,
                                   volume_factor=None):
         """
@@ -2173,6 +2183,9 @@ class Structure(models.Model, object):
         not be what you intended).
 
         Args:
+            lattice_vectors:
+                3x3 array of Float with the lattice vectors of interest.
+
             target_cell_shape:
                 3x3 array of Integers or Float with the target cell shape.
                 E.g., [[1, 0, 1], [0, 1, 1], [1, 1, 1]]
@@ -2186,12 +2199,14 @@ class Structure(models.Model, object):
             cell shape.
 
         """
+        if lattice_vectors is None:
+            raise StructureError('Cell lattice vectors not specified')
         if target_cell_shape is None:
             raise StructureError('Target cell shape not specified')
         if not volume_factor:
-            volume_factor = (np.linalg.det(self.cell)/np.linalg.det(
+            volume_factor = (np.linalg.det(lattice_vectors)/np.linalg.det(
                     target_cell_shape))**(-1./3.)
-        return np.linalg.norm(volume_factor*self.cell - target_cell_shape)
+        return np.linalg.norm(volume_factor*lattice_vectors - target_cell_shape)
 
 
 class Prototype(models.Model):
