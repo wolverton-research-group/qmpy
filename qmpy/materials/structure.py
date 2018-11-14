@@ -12,6 +12,7 @@ import copy
 import pprint
 import random
 import subprocess
+import numbers
 from collections import defaultdict
 import logging
 
@@ -832,7 +833,7 @@ class Structure(models.Model, object):
     def get_coord(self, vec, wrap=True):
         trans = self.inv.T.dot(vec)
         if wrap:
-            return wrap(trans)
+            return qmpy.utils.wrap(trans)
         else:
             return trans
 
@@ -844,7 +845,7 @@ class Structure(models.Model, object):
             if abs(atom2.dist - atom.dist) > tol:
                 continue
             d = self.get_distance(atom, atom2, limit=1)
-            if d < tol and not d is None:
+            if d < tol and d is not None:
                 return True
         return False
 
@@ -1003,8 +1004,7 @@ class Structure(models.Model, object):
         elif order == 'anti-ferro':
             if not elements:
                 raise NotImplementedError
-            ln = self.get_lattice_network(elements)
-
+        # TODO: get space group for the structure with magmoms
         self.spacegroup = None
 
     @property
@@ -1100,7 +1100,7 @@ class Structure(models.Model, object):
     @forces.setter
     def forces(self, forces):
         for forces, atom in zip(forces, self.atoms):
-            atom.forces = force
+            atom.forces = forces
 
     @property
     def reciprocal_lattice(self):
@@ -2207,6 +2207,86 @@ class Structure(models.Model, object):
             volume_factor = (np.linalg.det(lattice_vectors)/np.linalg.det(
                     target_cell_shape))**(-1./3.)
         return np.linalg.norm(volume_factor*lattice_vectors - target_cell_shape)
+
+    def get_matching_atom(self, atom, tol=0.01):
+        """
+        Get atom belonging to the :class:`qmpy.Structure` object in `self`
+        that is equivalent to `atom`.
+
+        Args:
+            atom:
+                :class:`qmpy.Atom` object with the atom.
+
+            tol:
+                Float with the distance tolerance (in Angstrom) used to
+                determine if two coordinates are equivalent.
+
+        Returns:
+            :class:`qmpy.Atom` object if matching atom found, `None` otherwise.
+
+        """
+        if atom in self.atoms:
+            return atom
+        atom.structure = self
+        for atom2 in self.atoms:
+            if not atom2.element_id == atom.element_id:
+                continue
+            if abs(atom2.dist - atom.dist) > tol:
+                continue
+            d = self.get_distance(atom, atom2, limit=1)
+            if d < tol and d is not None:
+                return atom2
+        return None
+
+    def get_radial_distances(self, atom=None):
+        """
+        Calculates the shortest distance between `atom` and every other atom in
+        the unit cell in `self`.
+
+        Args:
+            atom:
+                :class:`qmpy.Atom` object with the atom.
+
+                Alternatively, if it is an Integer, it is assumed to be the
+                atom index, i.e., the corresponding atom is chosen from the
+                `self.atoms` list.
+
+        Returns:
+            Dictionary (nested) with the atom indices and shortest radial
+            distances from the specified atom. Structure of the dictionary:
+            {
+                'origin_atom_index': n1,
+                'distances': {
+                    0: d1,
+                    1: d2,
+                    2: d3,
+                    ...
+                    n1: 0.0,
+                    ...
+                    ...
+                }
+            }
+
+        """
+        if atom is None:
+            satom = random.choice(self.atoms)
+        elif isinstance(atom, numbers.Integral):
+            satom = self.atoms[atom]
+        elif isinstance(atom, Atom):
+            satom = self.get_matching_atom(atom)
+        else:
+            err_msg = ('Failed to parse input'
+                       ' `atom`= {}').format(atom)
+            raise StructureError(err_msg)
+
+        sa_index = self.atoms.index(satom)
+        rd = {
+            'origin_atom_index': sa_index,
+            'distances': {}
+        }
+        for i, atom2 in enumerate(self.atoms):
+            rd['distances'][i] = self.get_distance(satom, atom2)
+        return rd
 
 
 class Prototype(models.Model):
