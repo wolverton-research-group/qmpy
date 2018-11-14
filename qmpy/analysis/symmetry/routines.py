@@ -22,10 +22,8 @@ try:
 except ImportError:
     _FOUND_PHONOPY = False
 else:
-    from phonopy.interface.vasp import read_vasp_from_strings
-    from phonopy.interface.vasp import sort_positions_by_symbols
-    from phonopy.interface.vasp import _get_scaled_positions_lines
-    import phonopy.structure.cells as _phonopy_cells
+    import phonopy.interface.vasp as phpy_iv
+    import phonopy.structure.cells as phpy_sc
 
 logger = logging.getLogger(__name__)
 
@@ -486,22 +484,23 @@ def get_phonopy_style_supercell(structure,
                 in_place=True
         )
 
-    phonopy_atoms = read_vasp_from_strings(qmpy.io.poscar.write(structure))
-    phonopy_sc = _phonopy_cells.get_supercell(
+    phonopy_atoms = phpy_iv.read_vasp_from_strings(
+            qmpy.io.poscar.write(structure))
+    phonopy_sc = phpy_sc.get_supercell(
             unitcell=phonopy_atoms,
             supercell_matrix=supercell_matrix,
             is_old_style=is_old_style,
             symprec=symprec
     )
-    num_atoms, symbols, positions, _ = sort_positions_by_symbols(
+    num_atoms, symbols, positions, _ = phpy_iv.sort_positions_by_symbols(
             phonopy_sc.get_chemical_symbols(),
             phonopy_sc.get_scaled_positions()
     )
 
     structure.cell = phonopy_sc.get_cell()
     structure.set_nsites(sum(num_atoms))
-    site_coords = [[float(c) for c in atom_coord.strip().split()]
-                   for atom_coord in _get_scaled_positions_lines(positions)]
+    site_coords = [[float(c) for c in ac.strip().split()]
+                   for ac in phpy_iv._get_scaled_positions_lines(positions)]
     structure.site_coords = site_coords
     site_comps = []
     for n, s in zip(num_atoms, symbols):
