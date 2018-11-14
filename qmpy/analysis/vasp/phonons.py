@@ -13,6 +13,7 @@ import phonopy.structure.cells as phonopy_cells
 from qmpy import io
 from qmpy.materials.entry import Entry
 from qmpy.materials.structure import Structure
+from qmpy.materials.structure import StructureError
 from qmpy.analysis.symmetry.routines import get_phonopy_style_supercell
 from qmpy.analysis.vasp.calculation import Calculation
 
@@ -399,12 +400,52 @@ class PhononCalculation(models.Model):
             if _ccs[k] is None:
                 _ccs[k] = PhononCalculation.get_cluster_cutoff_radius(
                         structure=phonon_calc.pristine_supercell,
-                        cluster_type=2
+                        cluster_type=k
                 )
+        phonon_calc.cluster_cutoffs = _ccs
 
     @staticmethod
-    def get_cluster_cutoff_radius(structure, cluster_type):
-        return 10.
+    def get_cluster_cutoff_radius(structure=None, cluster_type=2):
+        """
+        Calculates the default cutoff radii for including and performing
+        symmetry analysis of 2-body and 3-body clusters in `structure`.
+
+        For including clusters in the sensing matrix, if user input is not
+        specified, this method can be used to get some sensible defaults.
+        Note that the input structure to this method should be a supercell
+        with or without atomic displacements that you (plan to) use to
+        calculate interatomic forces, and **NOT** the primitive cell. No
+        periodic images are created to "expand" the input structure in any way.
+        Currently, by default, the radial distribution of an atom chosen at
+        random from `structure` is calculated, and the maximum pair distance
+        is chosen as the cutoff for 2-body clusters, and half of the maximum
+        as the cutoff for 3-body clusters.
+
+        Args:
+            structure:
+                :class:`qmpy.Structure` object with the crystal structure.
+
+            cluster_type:
+                Integer specifying the kind of cluster (2-body, 3-body, etc.)
+
+        Returns:
+            Float with the cluster cutoff radius in Angstrom.
+
+        """
+        if structure is None:
+            return None
+        elif isinstance(structure, six.string_types):
+            if not os.path.isfile(structure):
+                raise OSError('File "{}" not found'.format(structure))
+            structure = io.poscar.read(structure)
+        elif isinstance(structure, Structure):
+            pass
+        else:
+            err_msg = '`structure` must be POSCAR or `qmpy.Structure` object'
+            raise StructureError(err_msg)
+        scale = {2: 1.0, 3: 0.5}.get(cluster_type, 1.)
+        rd = structure.get_radial_distances()
+        return max(rd['distances'].values)*scale
 
     def generate_csld_ini(self):
         pass
