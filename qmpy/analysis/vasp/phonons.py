@@ -18,6 +18,11 @@ from qmpy.analysis.symmetry.routines import get_phonopy_style_supercell
 from qmpy.analysis.vasp.calculation import Calculation
 
 
+def _parsing_err_msg(argument, user_input=None):
+    return ('Failed to parse input'
+            ' `{}` = {}').format(argument, user_input)
+
+
 class PhononCalculationError(Exception):
     """Base class to handle errors associated with phonon calculations."""
 
@@ -107,7 +112,7 @@ class PhononCalculation(models.Model):
               supercell_matrix=None,
               max_ifc_order=None,
               cluster_cutoffs=None,
-              cs_solution_weights=None,
+              fitting_weghts=None,
               holdout_fraction=None,
               n_supercells=None,
               atomic_displacements=None,
@@ -183,9 +188,9 @@ class PhononCalculation(models.Model):
                 3-body clusters, the default cutoff radius is half the size
                 of the largest 2-body cluster.
 
-            cs_solution_weights:
-                List of Integers specifying the various \mu values to use in
-                compressed sensing solution fit of IFCs:
+            fitting_weghts:
+                List of Integers or Float specifying the various \mu values to
+                use in compressed sensing solution fit of IFCs:
                 \phi_CS = arg min (|| \phi ||_1) +
                                   + \mu/2 (|| F - A \phi ||_2)^2
                 The first term on the RHS of the above equation is the
@@ -353,9 +358,9 @@ class PhononCalculation(models.Model):
             _smatrix = PhononCalculation._get_default_supercell_matrix(
                 input_structure)
         else:
-            err_msg = ('Failed to parse input'
-                       ' `supercell_matrix` = {}').format(supercell_matrix)
-            raise PhononCalculationError(err_msg)
+            raise PhononCalculationError(_parsing_err_msg(
+                    'supercell_matrix', supercell_matrix
+            ))
         phonon_calc.supercell_matrix = _smatrix
 
         # Get the pristine supercell structure using Phonopy
@@ -368,8 +373,6 @@ class PhononCalculation(models.Model):
 
         # Up to what order IFCs should be fit?
         nie_err_msg = 'Only up to 3rd order implemented so far'
-        parse_err_msg = ('Failed to parse input'
-                         ' `max_ifc_order` = {}').format(max_ifc_order)
         if isinstance(max_ifc_order, six.string_types):
             if max_ifc_order.lower() == 'second':
                 _mio = 2
@@ -378,7 +381,9 @@ class PhononCalculation(models.Model):
             elif max_ifc_order.lower() == 'fourth':
                 raise NotImplementedError(nie_err_msg)
             else:
-                raise PhononCalculationError(parse_err_msg)
+                raise PhononCalculationError(_parsing_err_msg(
+                        'max_ifc_order', max_ifc_order
+                ))
         elif isinstance(max_ifc_order, numbers.Integral):
             if max_ifc_order > 3:
                 raise NotImplementedError(nie_err_msg)
@@ -386,7 +391,9 @@ class PhononCalculation(models.Model):
         elif max_ifc_order is None:
             _mio = 2
         else:
-            raise PhononCalculationError(parse_err_msg)
+            raise PhononCalculationError(_parsing_err_msg(
+                    'max_ifc_order', max_ifc_order
+            ))
 
         # What radii cutoffs should be used for identifying symmetrically
         # unique (and then including for sensing) 2-body and 3-body clusters?
@@ -403,6 +410,79 @@ class PhononCalculation(models.Model):
                         cluster_type=k
                 )
         phonon_calc.cluster_cutoffs = _ccs
+
+        # What values of \mu (weight of L2-norm, the least-squares residual,
+        # vs the L1-norm, the sparsity of the solution) to use in the
+        # compressed sensing fitting?
+        if fitting_weghts is None:
+            _fw = [1, 10, 25, 50, 100, 250, 500, 1000]
+        elif isinstance(fitting_weghts, numbers.Number):
+            _fw = [fitting_weghts]
+        elif isinstance(fitting_weghts, list):
+            _fw = fitting_weghts
+        else:
+            raise PhononCalculationError(_parsing_err_msg(
+                    'fitting_weights', fitting_weghts
+            ))
+        phonon_calc.fitting_weights = _fw
+
+        # What fraction of the forces must be held back for testing the fit?
+        _hf = 0.25
+        if holdout_fraction is not None:
+            _hf = float(holdout_fraction)
+        phonon_calc.holdout_fraction = _hf
+
+        # How many supercells with displacements must be calculated initially?
+        _ns = 2
+        if n_supercells is not None:
+            _ns = int(n_supercells)
+        phonon_calc.n_supercells = _ns
+
+        # What magnitude of atomic displacement to use for each supercell?
+        _ad = [1, 2, 3, 4]
+        if atomic_displacements is not None:
+            _ad = map(int, atomic_displacements)
+        phonon_calc.atomic_displacements = _ad
+
+        # What is the convergence threshold for the fitted IFCs?
+        _ict = 0.05
+        if ifc_conv_threshold is not None:
+            _ict = float(ifc_conv_threshold)
+        phonon_calc.ifc_conv_threshold = _ict
+
+        # What is the maximum number of supercells that must be used to
+        # calculate/fit the IFCs?
+        _nms = 10
+        if n_max_supercells is not None:
+            _nms = int(n_max_supercells)
+        phonon_calc.n_max_supercells = _nms
+
+        # Any custom DFT settings to use for calculating forces
+        phonon_calc.custom_dft_calculations = custom_dft_settings
+
+        # Standard output verbosity
+        _v = 1
+        if verbosity is not None:
+            _v = int(verbosity)
+            if _v <= 0:
+                _v = 0
+            elif _v >= 2:
+                _v = 2
+        _verbosity = _v
+
+        # Should currently existing calculations, if any, be overwritten?
+        _overwrite = True
+        if overwrite is not None:
+            _overwrite = overwrite
+            if isinstance(overwrite, six.string_types):
+                _overwrite = overwrite.lower()[0] == 't'
+
+        # Should I calculate phonons for this structure from scratch?
+        _from_scratch = False
+        if from_scratch is not None:
+            _from_scratch = from_scratch
+            if isinstance(from_scratch, six.string_types):
+                _from_scratch = from_scratch.lower()[0] == 't'
 
     @staticmethod
     def get_cluster_cutoff_radius(structure=None, cluster_type=2):
