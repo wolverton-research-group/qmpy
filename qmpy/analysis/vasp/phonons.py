@@ -104,6 +104,49 @@ class PhononCalculation(models.Model):
         smatrix = map(int, n1n2n3.split('x'))*np.eye(3, dtype=int)
         return smatrix
 
+    @staticmethod
+    def get_cluster_cutoff_radius(structure=None, cluster_type=2):
+        """
+        Calculates the default cutoff radii for including and performing
+        symmetry analysis of 2-body and 3-body clusters in `structure`.
+
+        For including clusters in the sensing matrix, if user input is not
+        specified, this method can be used to get some sensible defaults.
+        Note that the input structure to this method should be a supercell
+        with or without atomic displacements that you (plan to) use to
+        calculate interatomic forces, and **NOT** the primitive cell. No
+        periodic images are created to "expand" the input structure in any way.
+        Currently, by default, the radial distribution of an atom chosen at
+        random from `structure` is calculated, and the maximum pair distance
+        is chosen as the cutoff for 2-body clusters, and half of the maximum
+        as the cutoff for 3-body clusters.
+
+        Args:
+            structure:
+                :class:`qmpy.Structure` object with the crystal structure.
+
+            cluster_type:
+                Integer specifying the kind of cluster (2-body, 3-body, etc.)
+
+        Returns:
+            Float with the cluster cutoff radius in Angstrom.
+
+        """
+        if structure is None:
+            return None
+        elif isinstance(structure, six.string_types):
+            if not os.path.isfile(structure):
+                raise OSError('File "{}" not found'.format(structure))
+            structure = io.poscar.read(structure)
+        elif isinstance(structure, Structure):
+            pass
+        else:
+            err_msg = '`structure` must be POSCAR or `qmpy.Structure` object'
+            raise StructureError(err_msg)
+        scale = {2: 1.0, 3: 0.5}.get(cluster_type, 1.)
+        rd = structure.get_radial_distances()
+        return max(rd['distances'].values)*scale
+
     @classmethod
     def setup(cls,
               input_structure=None,
@@ -111,6 +154,7 @@ class PhononCalculation(models.Model):
               entry=None,
               supercell_matrix=None,
               max_ifc_order=None,
+              ifc2_from_phonopy=None,
               cluster_cutoffs=None,
               fitting_weghts=None,
               holdout_fraction=None,
@@ -175,6 +219,20 @@ class PhononCalculation(models.Model):
 
                 If not specified, a default value of 2 (i.e., only second
                 order IFCs are fit) is used.
+
+            ifc2_from_phonopy:
+                Boolean specifying whether second order force constants
+                should be calculated using the method of finite-displacements
+                using the `phonopy` package.
+
+                (The higher order force constants, if requested, will still be
+                calculated using CSLD. For complex crystals, especially those
+                with > 20 atoms/unit cell and reasonably high symmetry,
+                (a) calculating 2nd order IFCs with CSLD can be almost as
+                expensive or more than traditional finite-displacements method
+                (b) separately fitting 2-order IFCs using traditional
+                finite-displacements, and then using CSLD only for
+                higher-order IFCs is cheaper *and* more accurate.)
 
             cluster_cutoffs:
                 Dictionary with the cutoff radius for determining and including
@@ -395,6 +453,13 @@ class PhononCalculation(models.Model):
                     'max_ifc_order', max_ifc_order
             ))
 
+        # Should `phonopy` be used to calculate 2-order IFCs?
+        _ifc2_from_phonopy = False
+        if _ifc2_from_phonopy is not None:
+            _ifc2_from_phonopy = ifc2_from_phonopy
+            if isinstance(ifc2_from_phonopy, six.string_types):
+                _ifc2_from_phonopy = ifc2_from_phonopy.lower()[0] == 't'
+
         # What radii cutoffs should be used for identifying symmetrically
         # unique (and then including for sensing) 2-body and 3-body clusters?
         _ccs = {2: None, 3: None}
@@ -484,48 +549,6 @@ class PhononCalculation(models.Model):
             if isinstance(from_scratch, six.string_types):
                 _from_scratch = from_scratch.lower()[0] == 't'
 
-    @staticmethod
-    def get_cluster_cutoff_radius(structure=None, cluster_type=2):
-        """
-        Calculates the default cutoff radii for including and performing
-        symmetry analysis of 2-body and 3-body clusters in `structure`.
-
-        For including clusters in the sensing matrix, if user input is not
-        specified, this method can be used to get some sensible defaults.
-        Note that the input structure to this method should be a supercell
-        with or without atomic displacements that you (plan to) use to
-        calculate interatomic forces, and **NOT** the primitive cell. No
-        periodic images are created to "expand" the input structure in any way.
-        Currently, by default, the radial distribution of an atom chosen at
-        random from `structure` is calculated, and the maximum pair distance
-        is chosen as the cutoff for 2-body clusters, and half of the maximum
-        as the cutoff for 3-body clusters.
-
-        Args:
-            structure:
-                :class:`qmpy.Structure` object with the crystal structure.
-
-            cluster_type:
-                Integer specifying the kind of cluster (2-body, 3-body, etc.)
-
-        Returns:
-            Float with the cluster cutoff radius in Angstrom.
-
-        """
-        if structure is None:
-            return None
-        elif isinstance(structure, six.string_types):
-            if not os.path.isfile(structure):
-                raise OSError('File "{}" not found'.format(structure))
-            structure = io.poscar.read(structure)
-        elif isinstance(structure, Structure):
-            pass
-        else:
-            err_msg = '`structure` must be POSCAR or `qmpy.Structure` object'
-            raise StructureError(err_msg)
-        scale = {2: 1.0, 3: 0.5}.get(cluster_type, 1.)
-        rd = structure.get_radial_distances()
-        return max(rd['distances'].values)*scale
 
     def generate_csld_ini(self):
         pass
