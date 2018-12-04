@@ -6,6 +6,12 @@ import numbers
 import numpy as np
 from collections import defaultdict
 from django.db import models
+# Py2 ConfigParser = Py3 configparser
+try:
+    import configparser
+except (ImportError, ModuleNotFoundError) as err:
+    import ConfigParser as configparser
+
 
 import phonopy.interface.vasp as phonopy_vasp
 import phonopy.structure.cells as phonopy_cells
@@ -136,7 +142,7 @@ class PhononCalculation(models.Model):
             return None
         elif isinstance(structure, six.string_types):
             if not os.path.isfile(structure):
-                raise OSError('File "{}" not found'.format(structure))
+                raise OSError('Structure file "{}" not found'.format(structure))
             structure = io.poscar.read(structure)
         elif isinstance(structure, Structure):
             pass
@@ -152,9 +158,10 @@ class PhononCalculation(models.Model):
               input_structure=None,
               path=None,
               entry=None,
-              supercell_matrix=None,
               max_ifc_order=None,
               ifc2_from_phonopy=None,
+              csld_ini_file=None,
+              supercell_matrix=None,
               cluster_cutoffs=None,
               fitting_weghts=None,
               holdout_fraction=None,
@@ -163,9 +170,9 @@ class PhononCalculation(models.Model):
               ifc_conv_threshold=None,
               n_max_supercells=None,
               custom_dft_settings=None,
-              verbosity=None,
               overwrite=True,
               from_scratch=False,
+              verbosity=None,
               **kwargs):
         """
         Method to create a new phonon calculation.
@@ -178,10 +185,6 @@ class PhononCalculation(models.Model):
                 to be the ground state, i.e., it is not further relaxed using
                 DFT in any manner.
 
-            entry:
-                :class:`qmpy.Entry` object with the OQMD entry corresponding
-                to the structure if the entire OQMD framework is being used.
-
             path:
                 String with the location where the calculations need to be run.
 
@@ -192,23 +195,9 @@ class PhononCalculation(models.Model):
                 "[entry.path]/phonons".
                 3. Current working directory.
 
-            supercell_matrix:
-                3x3 matrix of Integers with the transformation from the
-                input primitive unit cell to the supercells to be used to
-                calculate forces. E.g.: [[2, 2, 1], [2, 3, 4], [4, 3, 3]]
-
-                Alternatively, if the input is 1x3 list of Integers,
-                a diagonal matrix is assumed. E.g.:
-                [3, 2, 2] -> [[3, 0, 0], [0, 2, 0], [0, 0, 2]]
-
-                Alternatively, if the input is an Integer N, the transformation
-                matrix is assumed to be N*I where I is the identity matrix.
-                E.g.: 4 -> [[4, 0, 0], [0, 4, 0], [0, 0, 4]]
-
-                If not specified, a default value of [4, 4, 4] is used. In
-                case the latter supercell has more than 512 atoms,
-                the largest [N1, N2, N3] supercell with <512 atoms is used.
-                Cubic-like supercells are preferred in the latter step.
+            entry:
+                :class:`qmpy.Entry` object with the OQMD entry corresponding
+                to the structure if the entire OQMD framework is being used.
 
             max_ifc_order:
                 Integer with the maximum order interatomic force constants (IFC)
@@ -233,6 +222,39 @@ class PhononCalculation(models.Model):
                 (b) separately fitting 2-order IFCs using traditional
                 finite-displacements, and then using CSLD only for
                 higher-order IFCs is cheaper *and* more accurate.)
+
+                Defaults to False if the number of atoms/primitive cell <= 20,
+                True otherwise.
+
+            csld_ini_file:
+                String specifying the location of the .ini file with settings
+                related to CSLD. See documentation for the
+                `self.write_csld_ini()` function for details.
+
+                If specified, the settings read from the INI file
+                *WILL OVERWRITE!* any overlapping settings passed as
+                arguments (e.g., `supercell_matrix`, `cluster_cutoffs`,
+                `fitting_weights`, `holdout_fraction`, `atomic_displacements`).
+
+                Defaults to None.
+
+            supercell_matrix:
+                3x3 matrix of Integers with the transformation from the
+                input primitive unit cell to the supercells to be used to
+                calculate forces. E.g.: [[2, 2, 1], [2, 3, 4], [4, 3, 3]]
+
+                Alternatively, if the input is 1x3 list of Integers,
+                a diagonal matrix is assumed. E.g.:
+                [3, 2, 2] -> [[3, 0, 0], [0, 2, 0], [0, 0, 2]]
+
+                Alternatively, if the input is an Integer N, the transformation
+                matrix is assumed to be N*I where I is the identity matrix.
+                E.g.: 4 -> [[4, 0, 0], [0, 4, 0], [0, 0, 4]]
+
+                If not specified, a default value of [4, 4, 4] is used. In
+                case the latter supercell has more than 512 atoms,
+                the largest [N1, N2, N3] supercell with <512 atoms is used.
+                Cubic-like supercells are preferred in the latter step.
 
             cluster_cutoffs:
                 Dictionary with the cutoff radius for determining and including
@@ -326,11 +348,6 @@ class PhononCalculation(models.Model):
                 If not specified, defaults to the DFT settings specified in
                 `qmpy.VASP_SETTINGS["sc_forces"]`.
 
-            verbosity:
-                Integer specifying the standard output verbosity.
-                Values of <=0, 1, >=2 corresponding to low, moderate and high
-                verbosity, respectively.
-
             overwrite:
                 Boolean specifying if parameters of an existing
                 :class:`qmpy.PhononCalculation`, if found, should be
@@ -356,6 +373,11 @@ class PhononCalculation(models.Model):
                 specified by `path` *will* be deleted and cannot be recovered!
 
                 If not specified, defaults to False.
+
+            verbosity:
+                Integer specifying the standard output verbosity.
+                Values of <=0, 1, >=2 corresponding to low, moderate and high
+                verbosity, respectively.
 
             **kwargs:
                 Miscellaneous keyword arguments
@@ -405,30 +427,6 @@ class PhononCalculation(models.Model):
             phonon_calc.path = path
             phonon_calc.kwargs = kwargs
 
-        # What is the primitive -> supercell transformation matrix?
-        if isinstance(supercell_matrix, numbers.Integral):
-            _smatrix = np.eye(3, dtype=int)*int(supercell_matrix)
-        elif np.shape(supercell_matrix) == (3, ):
-            _smatrix = map(int, supercell_matrix)*np.eye(3, dtype=int)
-        elif np.shape(supercell_matrix) == (3, 3):
-            _smatrix = np.array(supercell_matrix)
-        elif supercell_matrix is None:
-            _smatrix = PhononCalculation._get_default_supercell_matrix(
-                input_structure)
-        else:
-            raise PhononCalculationError(_parsing_err_msg(
-                    'supercell_matrix', supercell_matrix
-            ))
-        phonon_calc.supercell_matrix = _smatrix
-
-        # Get the pristine supercell structure using Phonopy
-        # Phonopy is used here to maintain consistency with the rest of the
-        # CSLD machinery (TODO: verify with Yi that Phonopy is required here)
-        phonon_calc.pristine_supercell = get_phonopy_style_supercell(
-                structure=input_structure,
-                supercell_matrix=_smatrix,
-        )
-
         # Up to what order IFCs should be fit?
         nie_err_msg = 'Only up to 3rd order implemented so far'
         if isinstance(max_ifc_order, six.string_types):
@@ -452,13 +450,48 @@ class PhononCalculation(models.Model):
             raise PhononCalculationError(_parsing_err_msg(
                     'max_ifc_order', max_ifc_order
             ))
+        phonon_calc.max_ifc_order = _mio
 
-        # Should `phonopy` be used to calculate 2-order IFCs?
-        _ifc2_from_phonopy = False
-        if _ifc2_from_phonopy is not None:
-            _ifc2_from_phonopy = ifc2_from_phonopy
+        # Should I calculate 2-order IFCs via traditional enumerative
+        # finite-diplacements approach (using `phonopy`)?
+        _ifc2_fd = False
+        if _ifc2_fd is not None:
+            _ifc2_fd = ifc2_from_phonopy
             if isinstance(ifc2_from_phonopy, six.string_types):
-                _ifc2_from_phonopy = ifc2_from_phonopy.lower()[0] == 't'
+                _ifc2_fd = ifc2_from_phonopy.lower()[0] == 't'
+        phonon_calc.ifc2_from_phonopy = _ifc2_fd
+
+        # Location of the INI file with related settings
+        phonon_calc.csld_ini_file = None
+        if csld_ini_file is not None:
+            if not os.path.isfile(csld_ini_file):
+                err_msg = 'CSLD INI file "{}" not found'.format(csld_ini_file)
+                raise OSError(err_msg)
+            phonon_calc.csld_ini_file = csld_ini_file
+
+        # What is the primitive -> supercell transformation matrix?
+        if isinstance(supercell_matrix, numbers.Integral):
+            _smatrix = np.eye(3, dtype=int)*int(supercell_matrix)
+        elif np.shape(supercell_matrix) == (3, ):
+            _smatrix = map(int, supercell_matrix)*np.eye(3, dtype=int)
+        elif np.shape(supercell_matrix) == (3, 3):
+            _smatrix = np.array(supercell_matrix)
+        elif supercell_matrix is None:
+            _smatrix = PhononCalculation._get_default_supercell_matrix(
+                input_structure)
+        else:
+            raise PhononCalculationError(_parsing_err_msg(
+                    'supercell_matrix', supercell_matrix
+            ))
+        phonon_calc.supercell_matrix = _smatrix
+
+        # Get the pristine supercell structure using Phonopy
+        # Phonopy is used here to maintain consistency with the rest of the
+        # CSLD machinery (TODO: verify with Yi that Phonopy is required here)
+        phonon_calc.pristine_supercell = get_phonopy_style_supercell(
+                structure=input_structure,
+                supercell_matrix=_smatrix,
+        )
 
         # What radii cutoffs should be used for identifying symmetrically
         # unique (and then including for sensing) 2-body and 3-body clusters?
@@ -525,17 +558,7 @@ class PhononCalculation(models.Model):
         # Any custom DFT settings to use for calculating forces
         phonon_calc.custom_dft_calculations = custom_dft_settings
 
-        # Standard output verbosity
-        _v = 1
-        if verbosity is not None:
-            _v = int(verbosity)
-            if _v <= 0:
-                _v = 0
-            elif _v >= 2:
-                _v = 2
-        _verbosity = _v
-
-        # Should currently existing calculations, if any, be overwritten?
+        # Should I overwrite any currently existing calculations?
         _overwrite = True
         if overwrite is not None:
             _overwrite = overwrite
@@ -548,6 +571,25 @@ class PhononCalculation(models.Model):
             _from_scratch = from_scratch
             if isinstance(from_scratch, six.string_types):
                 _from_scratch = from_scratch.lower()[0] == 't'
+
+        # Standard output verbosity
+        _v = 1
+        if verbosity is not None:
+            _v = int(verbosity)
+            if _v <= 0:
+                _v = 0
+            elif _v >= 2:
+                _v = 2
+        _verbosity = _v
+
+        #
+
+        """TODO:
+        1. Generate csld.ini; read from csld.ini
+        2. Generate rattled supercells
+        3. Generate paraphernalia: CONTROL, sc.txt, info, lat.in
+        
+        """
 
 
     def generate_csld_ini(self):
