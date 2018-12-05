@@ -6,12 +6,6 @@ import numbers
 import numpy as np
 from collections import defaultdict
 from django.db import models
-# Py2 ConfigParser = Py3 configparser
-try:
-    import configparser
-except (ImportError, ModuleNotFoundError) as err:
-    import ConfigParser as configparser
-
 
 import phonopy.interface.vasp as phonopy_vasp
 import phonopy.structure.cells as phonopy_cells
@@ -27,6 +21,21 @@ from qmpy.analysis.vasp.calculation import Calculation
 def _parsing_err_msg(argument, user_input=None):
     return ('Failed to parse input'
             ' `{}` = {}').format(argument, user_input)
+
+
+def _parse_supercell_matrix(supercell_matrix):
+        if isinstance(supercell_matrix, numbers.Integral):
+            _smatrix = np.eye(3, dtype=int)*int(supercell_matrix)
+        elif np.shape(supercell_matrix) == (3, ):
+            _smatrix = map(int, supercell_matrix)*np.eye(3, dtype=int)
+        elif np.shape(supercell_matrix) == (9, ):
+            _smatrix = np.array(supercell_matrix).reshape(3, 3)
+        elif np.shape(supercell_matrix) == (3, 3):
+            _smatrix = np.array(supercell_matrix)
+        else:
+            raise PhononCalculationError(_parsing_err_msg(
+                    'supercell_matrix', supercell_matrix
+            ))
 
 
 class PhononCalculationError(Exception):
@@ -105,6 +114,7 @@ class PhononCalculation(models.Model):
             smatrix = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
             return smatrix
         best_natoms = sorted(supercell_scores.keys())[-1]
+
         n1n2n3, _ = sorted(supercell_scores[best_natoms].items(),
                            key=lambda x: x[1])[0]
         smatrix = map(int, n1n2n3.split('x'))*np.eye(3, dtype=int)
@@ -162,11 +172,11 @@ class PhononCalculation(models.Model):
               ifc2_from_phonopy=None,
               csld_ini_file=None,
               supercell_matrix=None,
+              atomic_displacements=None,
               cluster_cutoffs=None,
               fitting_weghts=None,
               holdout_fraction=None,
               n_supercells=None,
-              atomic_displacements=None,
               ifc_conv_threshold=None,
               n_max_supercells=None,
               custom_dft_settings=None,
@@ -232,8 +242,8 @@ class PhononCalculation(models.Model):
                 `self.write_csld_ini()` function for details.
 
                 If specified, the settings read from the INI file
-                *WILL OVERWRITE!* any overlapping settings passed as
-                arguments (e.g., `supercell_matrix`, `cluster_cutoffs`,
+                *WILL BE OVERWRITEN!* by any overlapping settings passed as
+                arguments later (e.g., `supercell_matrix`, `cluster_cutoffs`,
                 `fitting_weights`, `holdout_fraction`, `atomic_displacements`).
 
                 Defaults to None.
@@ -255,6 +265,22 @@ class PhononCalculation(models.Model):
                 case the latter supercell has more than 512 atoms,
                 the largest [N1, N2, N3] supercell with <512 atoms is used.
                 Cubic-like supercells are preferred in the latter step.
+
+            atomic_displacements:
+                List of Integers with atomic displacements (in 10^-2 Angstrom)
+                to use for each of the supercells specified in `n_supercells`.
+                E.g., [1, 2, 3, 4] for `n_supercells` = 4 would use 0.01,
+                0.02, 0.03, 0.04 Angstrom atomic diplacements in the first,
+                second, third, and fourth supercell respectively.
+
+                If the specified list has fewer elements than the number of
+                supercells specified, displacements from the specified list
+                are used in a round-robin fashion. E.g., if the number of
+                supercells specified is 8, and list of displacements is [1,
+                2, 3], then displacements used for each supercell is
+                [1, 2, 3, 1, 2, 3, 1, 2]*10^-2 Angstrom, respectively.
+
+                If not specified, a default value of [1, 2, 3, 4] is used.
 
             cluster_cutoffs:
                 Dictionary with the cutoff radius for determining and including
@@ -300,22 +326,6 @@ class PhononCalculation(models.Model):
                 interatomic force constants with VASP DFT calculations.
 
                 If not specified, a default value of 2 is used.
-
-            atomic_displacements:
-                List of Integers with atomic displacements (in 10^-2 Angstrom)
-                to use for each of the supercells specified in `n_supercells`.
-                E.g., [1, 2, 3, 4] for `n_supercells` = 4 would use 0.01,
-                0.02, 0.03, 0.04 Angstrom atomic diplacements in the first,
-                second, third, and fourth supercell respectively.
-
-                If the specified list has fewer elements than the number of
-                supercells specified, displacements from the specified list
-                are used in a round-robin fashion. E.g., if the number of
-                supercells specified is 8, and list of displacements is [1,
-                2, 3], then displacements used for each supercell is
-                [1, 2, 3, 1, 2, 3, 1, 2]*10^-2 Angstrom, respectively.
-
-                If not specified, a default value of [1, 2, 3, 4] is used.
 
             ifc_conv_threshold:
                 Float with the threshold root-mean-square-error (RMSE) in
@@ -469,33 +479,55 @@ class PhononCalculation(models.Model):
                 raise OSError(err_msg)
             phonon_calc.csld_ini_file = csld_ini_file
 
-        # What is the primitive -> supercell transformation matrix?
-        if isinstance(supercell_matrix, numbers.Integral):
-            _smatrix = np.eye(3, dtype=int)*int(supercell_matrix)
-        elif np.shape(supercell_matrix) == (3, ):
-            _smatrix = map(int, supercell_matrix)*np.eye(3, dtype=int)
-        elif np.shape(supercell_matrix) == (3, 3):
-            _smatrix = np.array(supercell_matrix)
-        elif supercell_matrix is None:
+        # Read settings from the CSLD INI file, if specified
+        # For now the settings read are: primitive -> supercell
+        # transformation matrix, magnitude of atomic displacements, cluster
+        # cutoff radii, CS fitting weights, holdout-fraction of IFC data
+        _smatrix = None
+        _ad = [1, 2, 3, 4]
+        _ccs = {2: None, 3: None}
+        _fw = [1, 10, 25, 50, 100, 250, 500, 1000]
+        _hf = 0.25
+        csld_ini_dict = io.ini.read(phonon_calc.csld_ini_file)
+        for section, options in csld_ini_dict.items():
+            for option, value in options.items():
+                if section.lower() == 'supercell':
+                    if value.lower() == 'tmatrix':
+                        csld_smatrix = map(int, value.strip().split())
+                        _smatrix = _parse_supercell_matrix(csld_smatrix)
+                    elif value.lower() == 'disp':
+                        _ad = map(int, value.strip().split())
+                elif section.lower() == 'cluster':
+                    if value.lower() == '2body':
+                        _ccs[2] = float(value.strip())
+                    elif value.lower() == '3body':
+                        _ccs[3] = float(value.strip())
+                elif section.lower() == 'csfit':
+                    if value.lower() == 'mu':
+                        _fw = map(int, value.strip().split())
+                    elif value.lower() == 'holdout':
+                        _hf = float(value.strip())
+
+        # *OVERWRITE* values read from the CSLD INI file with input function
+        # arguments, if any overlapping ones are provided.
+
+        # The primitive unit cell -> supercell transformation matrix
+        if supercell_matrix is not None:
+            _smatrix = _parse_supercell_matrix(supercell_matrix)
+        # If CSLD INI and `supercell_matrix` are not input, use sensible
+        # default values
+        if _smatrix is None:
             _smatrix = PhononCalculation._get_default_supercell_matrix(
                 input_structure)
-        else:
-            raise PhononCalculationError(_parsing_err_msg(
-                    'supercell_matrix', supercell_matrix
-            ))
         phonon_calc.supercell_matrix = _smatrix
 
-        # Get the pristine supercell structure using Phonopy
-        # Phonopy is used here to maintain consistency with the rest of the
-        # CSLD machinery (TODO: verify with Yi that Phonopy is required here)
-        phonon_calc.pristine_supercell = get_phonopy_style_supercell(
-                structure=input_structure,
-                supercell_matrix=_smatrix,
-        )
+        # What magnitude of atomic displacement to use for each supercell?
+        if atomic_displacements is not None:
+            _ad = map(int, atomic_displacements)
+        phonon_calc.atomic_displacements = _ad
 
         # What radii cutoffs should be used for identifying symmetrically
         # unique (and then including for sensing) 2-body and 3-body clusters?
-        _ccs = {2: None, 3: None}
         if cluster_cutoffs is not None:
             _ccs.update({
                 2: cluster_cutoffs.get(2, None),
@@ -512,20 +544,18 @@ class PhononCalculation(models.Model):
         # What values of \mu (weight of L2-norm, the least-squares residual,
         # vs the L1-norm, the sparsity of the solution) to use in the
         # compressed sensing fitting?
-        if fitting_weghts is None:
-            _fw = [1, 10, 25, 50, 100, 250, 500, 1000]
-        elif isinstance(fitting_weghts, numbers.Number):
-            _fw = [fitting_weghts]
-        elif isinstance(fitting_weghts, list):
-            _fw = fitting_weghts
-        else:
-            raise PhononCalculationError(_parsing_err_msg(
-                    'fitting_weights', fitting_weghts
-            ))
+        if fitting_weghts is not None:
+            if isinstance(fitting_weghts, numbers.Number):
+                _fw = [fitting_weghts]
+            elif isinstance(fitting_weghts, list):
+                _fw = fitting_weghts
+            else:
+                raise PhononCalculationError(_parsing_err_msg(
+                        'fitting_weights', fitting_weghts
+                ))
         phonon_calc.fitting_weights = _fw
 
         # What fraction of the forces must be held back for testing the fit?
-        _hf = 0.25
         if holdout_fraction is not None:
             _hf = float(holdout_fraction)
         phonon_calc.holdout_fraction = _hf
@@ -535,12 +565,6 @@ class PhononCalculation(models.Model):
         if n_supercells is not None:
             _ns = int(n_supercells)
         phonon_calc.n_supercells = _ns
-
-        # What magnitude of atomic displacement to use for each supercell?
-        _ad = [1, 2, 3, 4]
-        if atomic_displacements is not None:
-            _ad = map(int, atomic_displacements)
-        phonon_calc.atomic_displacements = _ad
 
         # What is the convergence threshold for the fitted IFCs?
         _ict = 0.05
@@ -582,7 +606,13 @@ class PhononCalculation(models.Model):
                 _v = 2
         _verbosity = _v
 
-        #
+        # Get the pristine supercell structure using Phonopy
+        # Phonopy is used here to maintain consistency with the rest of the
+        # CSLD machinery (TODO: verify with Yi that Phonopy is required here)
+        phonon_calc.pristine_supercell = get_phonopy_style_supercell(
+                structure=input_structure,
+                supercell_matrix=_smatrix,
+        )
 
         """TODO:
         1. Generate csld.ini; read from csld.ini
