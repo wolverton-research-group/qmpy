@@ -1,7 +1,5 @@
 # qmpy/io/ini.py
 # Module to handle reading from/writing into .ini (also .cfg) files
-# TODO: `read()` should be able to convert raw data into the correct types
-# TODO: `write()` should be more robust wrt to incomplete input data
 
 # Py2 ConfigParser = Py3 configparser
 try:
@@ -25,6 +23,8 @@ def read(filename=None):
         config_as_dict[section] = {}
         for option in config.options(section):
             value = config.get(section, option, raw=True)
+            if value.strip().lower() == 'none' or value.strip() == '':
+                continue
             config_as_dict[section][option] = value
     return config_as_dict
 
