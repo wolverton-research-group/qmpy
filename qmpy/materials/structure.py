@@ -2288,6 +2288,37 @@ class Structure(models.Model, object):
             rd['distances'][i] = self.get_distance(satom, atom2)
         return rd
 
+    def perturb_structure(self, in_place=True, displacement=0.01):
+        """
+        Displaces all atoms in the structure by the specified distance in a
+        random direction.
+
+        Args:
+            in_place:
+                Boolean specifying whether the input structure is perturbed
+                or a copy of it.
+
+                Defaults to True.
+
+            displacement:
+                Float with distance in Angstrom each atom is to be perturbed.
+
+                Defaults to 0.01 Angstrom.
+
+        Returns:
+            `qmpy.Structure` object with the perturbed crystal.
+
+        """
+        if not in_place:
+            s = self.copy()
+            s.perturb_structure(displacement=displacement)
+            return s
+
+        for atom in self.atoms:
+            c_disp = [random.randint(-1, 1)*displacement for _ in range(3)]
+            f_disp = np.dot(np.linalg.inv(np.transpose(self.cell)), c_disp)
+            atom.coord -= f_disp.tolist()
+
 
 class Prototype(models.Model):
     """
