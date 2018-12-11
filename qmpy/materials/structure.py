@@ -2301,7 +2301,8 @@ class Structure(models.Model, object):
                 Defaults to True.
 
             displacement:
-                Float with distance in Angstrom each atom is to be perturbed.
+                Float with displacement in Angstrom each atom is to be
+                perturbed.
 
                 Defaults to 0.01 Angstrom.
 
@@ -2316,7 +2317,7 @@ class Structure(models.Model, object):
 
         for atom in self.atoms:
             c_disp = [random.randint(-1, 1)*displacement for _ in range(3)]
-            f_disp = np.dot(np.linalg.inv(np.transpose(self.cell)), c_disp)
+            f_disp = np.dot(np.linalg.inv(self.cell.T), c_disp)
             atom.coord -= f_disp.tolist()
 
 
