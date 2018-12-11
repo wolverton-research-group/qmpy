@@ -161,7 +161,7 @@ class PhononCalculation(models.Model):
             raise StructureError(err_msg)
         scale = {2: 1.0, 3: 0.5}.get(cluster_type, 1.)
         rd = structure.get_radial_distances()
-        return max(rd['distances'].values)*scale
+        return max(rd['distances'].values())*scale
 
     @classmethod
     def setup(cls,
@@ -609,10 +609,11 @@ class PhononCalculation(models.Model):
         # Get the pristine supercell structure using Phonopy
         # Phonopy is used here to maintain consistency with the rest of the
         # CSLD machinery (TODO: verify with Yi that Phonopy is required here)
-        phonon_calc.pristine_supercell = get_phonopy_style_supercell(
-                structure=input_structure,
-                supercell_matrix=_smatrix,
-        )
+        if not phonon_calc.pristine_supercell:
+            phonon_calc.pristine_supercell = get_phonopy_style_supercell(
+                    structure=input_structure,
+                    supercell_matrix=_smatrix
+            )
 
         """TODO:
         1. Generate csld.ini; read from csld.ini
