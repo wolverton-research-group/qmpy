@@ -2288,7 +2288,7 @@ class Structure(models.Model, object):
             rd['distances'][i] = self.get_distance(satom, atom2)
         return rd
 
-    def perturb_structure(self, in_place=True, displacement=0.01):
+    def perturb_all_atoms(self, in_place=True, displacement=0.01):
         """
         Displaces all atoms in the structure by the specified distance in a
         random direction.
@@ -2312,7 +2312,7 @@ class Structure(models.Model, object):
         """
         if not in_place:
             s = self.copy()
-            s.perturb_structure(displacement=displacement)
+            s.perturb_all_atoms(displacement=displacement)
             return s
 
         for atom in self.atoms:
