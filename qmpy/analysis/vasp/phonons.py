@@ -72,7 +72,7 @@ class PhononCalculation(models.Model):
     @staticmethod
     def _get_default_supercell_matrix(prim_structure,
                                       simple_multiple=False,
-                                      max_natoms=512):
+                                      max_natoms=200):
         # if the 4x4x4 supercell has less than `max_natoms` atoms, use it
         smatrix = np.array([[4, 0, 0], [0, 4, 0], [0, 0, 4]])
         if np.linalg.det(smatrix)*prim_structure.natoms <= max_natoms:
@@ -86,7 +86,7 @@ class PhononCalculation(models.Model):
                 if np.linalg.det(smatrix)*prim_structure.natoms <= max_natoms:
                     break
             return smatrix
-        # if not, try finding the largest supercell with less than 512 atoms
+        # if not, try finding the largest supercell with less than 200 atoms
         # of the form n1xn2xn3 (a more general supercell cannot be handled by
         # ShengBTE) that is closest to the simple-cubic shape by iteratively
         # decreasing the supercell size. (Larger non-cubic cells preferred over
@@ -134,8 +134,10 @@ class PhononCalculation(models.Model):
         periodic images are created to "expand" the input structure in any way.
         Currently, by default, the radial distribution of an atom chosen at
         random from `structure` is calculated, and the maximum pair distance
-        is chosen as the cutoff for 2-body clusters, and half of the maximum
+        is chosen as the cutoff for 2-body clusters, and 40% of the maximum
         as the cutoff for 3-body clusters.
+
+        TODO: A statistical way to determine 3-body cutoff radius.
 
         Args:
             structure:
@@ -159,7 +161,7 @@ class PhononCalculation(models.Model):
         else:
             err_msg = '`structure` must be POSCAR or `qmpy.Structure` object'
             raise StructureError(err_msg)
-        scale = {2: 1.0, 3: 0.5}.get(cluster_type, 1.)
+        scale = {2: 1.0, 3: 0.4}.get(cluster_type, 1.)
         rd = structure.get_radial_distances()
         return max(rd['distances'].values())*scale
 
@@ -216,8 +218,8 @@ class PhononCalculation(models.Model):
 
                 **NOTE**: Currently only up to third-order implemented.
 
-                If not specified, a default value of 2 (i.e., only second
-                order IFCs are fit) is used.
+                Defaults to a value of 2 (i.e., only second order IFCs are
+                fit) is used.
 
             ifc2_from_phonopy:
                 Boolean specifying whether second order force constants
@@ -262,8 +264,8 @@ class PhononCalculation(models.Model):
                 E.g.: 4 -> [[4, 0, 0], [0, 4, 0], [0, 0, 4]]
 
                 If not specified, a default value of [4, 4, 4] is used. In
-                case the latter supercell has more than 512 atoms,
-                the largest [N1, N2, N3] supercell with <512 atoms is used.
+                case the latter supercell has more than 200 atoms,
+                the largest [N1, N2, N3] supercell with <200 atoms is used.
                 Cubic-like supercells are preferred in the latter step.
 
             atomic_displacements:
@@ -291,7 +293,7 @@ class PhononCalculation(models.Model):
                 supercell specified by `input_structure` and `supercell_matrix`
                 is used to determine cutoffs. For 2-body clusters,
                 the default cutoff radius is the largest 2-body cluster. For
-                3-body clusters, the default cutoff radius is half the size
+                3-body clusters, the default cutoff radius is 40% the size
                 of the largest 2-body cluster.
 
             fitting_weghts:
@@ -311,28 +313,27 @@ class PhononCalculation(models.Model):
                 values, e.g.: [1, 20, 50, 100] and choose the best
                 performing value.
 
-                If not specified, [1, 10, 25, 50, 100, 250, 500, 1000] is
-                used as default.
+                Defaults to [1, 25, 100, 400, 1000].
 
             holdout_fraction:
                 Float with the fraction of the calculated interatomic forces
                 held back while training, and used later for testing the
                 accuracy of the fit.
 
-                If not specified, a default value of 0.25 is used.
+                Defaults to 0.25.
 
             n_supercells:
                 Integer with the number of supercells to use to calculate
                 interatomic force constants with VASP DFT calculations.
 
-                If not specified, a default value of 2 is used.
+                Defaults to 2.
 
             ifc_conv_threshold:
                 Float with the threshold root-mean-square-error (RMSE) in
                 the fitting of IFCs that is to be considered to be converged.
                 No further supercells are calculated unless manually done so.
 
-                If not specified, a default value of 0.05 is used.
+                Defaults to 0.05.
 
             n_max_supercells:
                 Integer with the maximum number of supercells to use for the
@@ -344,7 +345,7 @@ class PhononCalculation(models.Model):
                 `ifc_conv_threshold` parameter above), whichever happens
                 earlier.
 
-                If not specified, a default value of 10 is used.
+                Defaults to 10.
 
             custom_dft_settings:
                 Dictionary of VASP keywords and values to be used for the
@@ -355,7 +356,7 @@ class PhononCalculation(models.Model):
                 See the `setup()` function under :class:`qmpy.Calculation`,
                 and its `settings` attribute.
 
-                If not specified, defaults to the DFT settings specified in
+                Defaults to the DFT settings specified in
                 `qmpy.VASP_SETTINGS["sc_forces"]`.
 
             overwrite:
@@ -372,7 +373,7 @@ class PhononCalculation(models.Model):
                 supercells and consequently nearly all relevant files in the
                 folder specified in `path` will be overwritten.
 
-                If not specified, defaults to True.
+                Defaults to True.
 
             from_scratch:
                 Boolean specifying if phonons for the input structure should
@@ -382,12 +383,14 @@ class PhononCalculation(models.Model):
                 interatomic force constants fitting data in the folder
                 specified by `path` *will* be deleted and cannot be recovered!
 
-                If not specified, defaults to False.
+                Defaults to False.
 
             verbosity:
                 Integer specifying the standard output verbosity.
                 Values of <=0, 1, >=2 corresponding to low, moderate and high
                 verbosity, respectively.
+
+                Defaults to 1.
 
             **kwargs:
                 Miscellaneous keyword arguments
@@ -486,7 +489,7 @@ class PhononCalculation(models.Model):
         _smatrix = None
         _ad = [1, 2, 3, 4]
         _ccs = {2: None, 3: None}
-        _fw = [1, 10, 25, 50, 100, 250, 500, 1000]
+        _fw = [1, 25, 100, 400, 1000]
         _hf = 0.25
         csld_ini_dict = io.ini.read(phonon_calc.csld_ini_file)
         for section, options in csld_ini_dict.items():
@@ -606,14 +609,47 @@ class PhononCalculation(models.Model):
                 _v = 2
         _verbosity = _v
 
+        # Clear any previous variables if `from_scratch`
+        if _from_scratch:
+            phonon_calc.pristine_supercell = None
+            phonon_calc.perturbed_supercells = {}
+            phonon_calc.supercell_calculations = {}
+
         # Get the pristine supercell structure using Phonopy
         # Phonopy is used here to maintain consistency with the rest of the
-        # CSLD machinery (TODO: verify with Yi that Phonopy is required here)
+        # CSLD machinery (TODO: verify that Phonopy is required here)
         if not phonon_calc.pristine_supercell:
             phonon_calc.pristine_supercell = get_phonopy_style_supercell(
                     structure=input_structure,
                     supercell_matrix=_smatrix
             )
+            phonon_calc.pristine_supercell.set_label('pristine_supercell')
+
+        # Generate supercells with all atoms randomly perturbed
+        if not phonon_calc.perturbed_supercells:
+            _nad = len(phonon_calc.atomic_diplacements)
+            for i in range(phonon_calc.n_supercells):
+                atom_disp = phonon_calc.atomic_displacements[i % _nad]
+                sc_label = 'cs_sc-{:04d}-{:02d}'.format(i, atom_disp)
+                sc = phonon_calc.pristine_supercell.perturb_all_atoms(
+                    in_place=False,
+                    displacement=atom_disp*0.01
+                )
+                sc.set_label(sc_label)
+                phonon_calc.perturbed_supercells[sc_label] = sc
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         """TODO:
         1. Generate csld.ini; read from csld.ini
@@ -626,7 +662,7 @@ class PhononCalculation(models.Model):
     def generate_csld_ini(self):
         pass
 
-    def generate_supercells_with_displacements(self):
+    def generate_perturbed_supercells(self):
         pass
 
     def add_supercells(self):
