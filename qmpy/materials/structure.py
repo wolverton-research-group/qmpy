@@ -324,6 +324,14 @@ class Structure(models.Model, object):
         self.natoms = len(atoms)
 
     @property
+    def site_comp_indices(self):
+        """
+        List of site compositions, length equal to number of sites, each
+        unique site composition identified by an integer.
+        """
+        return list(np.unique(self.species_types, return_inverse=True)[-1])
+
+    @property
     def elements(self):
         """List of Elements"""
         return [ Element.get(e) for e in self.comp.keys() ]
@@ -514,7 +522,14 @@ class Structure(models.Model, object):
     @property
     def species_types(self):
         """List of species, length equal to number of atoms."""
-        return np.array([ atom.species_id for atom in self.atoms ])
+        return np.array([ atom.species for atom in self.atoms ])
+
+    @property
+    def species_id_types(self):
+        """List of species, length equal to number of atoms, each unique species
+        identified by an integer.
+        """
+        return np.unique(self.species_types, return_inverse=True)[-1]
 
     def symmetrize(self, tol=1e-3, angle_tol=-1):
         """
@@ -1193,7 +1208,7 @@ class Structure(models.Model, object):
         self.sites = [ Site() for i in range(n) ]
         self._atoms = None
 
-    def make_conventional(self, in_place=True, tol=1e-5):
+    def make_conventional(self, in_place=True, tol=1e-3):
         """Uses spglib to convert to the conventional cell.
 
         Keyword Arguments:
@@ -1221,7 +1236,7 @@ class Structure(models.Model, object):
 
         refine_cell(self, symprec=tol)
 
-    def make_primitive(self, in_place=True, tol=1e-5):
+    def make_primitive(self, in_place=True, tol=1e-3):
         """Uses spglib to convert to the primitive cell.
 
         Keyword Arguments:
@@ -1288,13 +1303,13 @@ class Structure(models.Model, object):
             if abs(G[0,2]) > abs(G[0,1]) - tol:
                 return False
 
-    def is_niggli_cell(self, tol=1e-5):
+    def is_niggli_cell(self, tol=1e-3):
         """
         Tests whether or not the structure is a Niggli cell.
         """
         if not self.is_grueber_cell():
             return False
-        (a,b,c),(d,e,f) = self.niggli_form
+        (a, b, c), (d, e, f) = self.niggli_form
         if abs(d-b) < tol:
             if f > 2*e - tol:
                 return False
