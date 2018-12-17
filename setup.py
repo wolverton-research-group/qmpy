@@ -17,7 +17,7 @@ setup(
     include_package_data=True,
     long_description=long_description,
     install_requires=[
-        "Django <= 2.0",
+        "Django <2, >=1.8",
         "PuLP",
         "numpy",
         "scipy",
