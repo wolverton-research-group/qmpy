@@ -117,19 +117,14 @@ sys.path.insert(-1, INSTALL_PATH)
 if 'DJANGO_SETTINGS_MODULE' not in os.environ:
     os.environ['DJANGO_SETTINGS_MODULE'] = 'qmpy.db.settings'
 
+import django
+django.setup()
 
 ##############################################################################
 # Imports
 # Imports from qmpy subpackages to remove relative imports
 ##############################################################################
-from models import *
-from analysis import *
-from analysis.thermodynamics import *
-from analysis.symmetry import *
-from analysis.vasp import *
-from computing import *
-from data import *
-from configuration.resources import *
+from qmpy.models import *
 
 
 def read_spacegroups(numbers=None, overwrite_existing=True):
@@ -299,18 +294,6 @@ def sync_resources():
             alloc = Allocation.get(allocation)
             alloc.save()
             proj.allocations.add(alloc)
-
-
-##############################################################################
-# Configuration files and pseudopotentials
-##############################################################################
-
-# Load models (Django >= 1.7)
-try:
-    import django
-    django.setup()
-except:
-    pass
 
 
 # Try to prevent exception when importing before database is set up
