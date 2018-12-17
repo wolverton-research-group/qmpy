@@ -17,7 +17,7 @@ install:
   - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy matplotlib scikit-learn lxml pytest
   - "python setup.py install"
 before_script:
-  - mysql -e 'create database qmdb_dev;'
+  - mysql -e 'create database qmdb_v2_dev;'
 script:
   - cd qmpy/db
   - python manage.py makemigrations qmpy
