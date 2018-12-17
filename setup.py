@@ -20,7 +20,7 @@ setup(
         "Django <= 2.0",
         "PuLP",
         "numpy",
-        "scipy >= 1.9.0",
+        "scipy",
         "MySQL-python",
         "matplotlib",
         "networkx",
