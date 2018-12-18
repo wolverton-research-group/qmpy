@@ -238,9 +238,16 @@ class Structure(models.Model, object):
         self.meta_data = self.comment_objects + self.keyword_objects
 
         if not self._sites is None:
-            self.site_set = self.sites
+            for s in self.sites:
+                if not s.id:
+                    s.save()
+                self.site_set.add(s)
         if not self._atoms is None:
-            self.atom_set = self.atoms
+            for a in self.atoms:
+                if not a.id:
+                    a.save()
+                self.atom_set.add(a)
+        super(Structure, self).save(*args, **kwargs)
 
         if not self.spacegroup:
             self.symmetrize()
@@ -329,7 +336,7 @@ class Structure(models.Model, object):
         List of site compositions, length equal to number of sites, each
         unique site composition identified by an integer.
         """
-        return list(np.unique(self.species_types, return_inverse=True)[-1])
+        return np.unique(self.site_compositions, return_inverse=True)[-1]
 
     @property
     def elements(self):
@@ -839,9 +846,10 @@ class Structure(models.Model, object):
     def contains(self, atom, tol=0.01):
         atom.structure = self
         for atom2 in self.atoms:
+            atom2.structure = self
             if not atom2.element_id == atom.element_id:
                 continue
-            if abs(atom2.dist - atom.dist) > tol:
+            if abs(shortest_dist(atom2, self.cell) - shortest_dist(atom, self.cell)) > tol:
                 continue
             d = self.get_distance(atom, atom2, limit=1)
             if d < tol and not d is None:
@@ -876,20 +884,20 @@ class Structure(models.Model, object):
 
         """
         if isinstance(atom1, int):
-            atom1 = self.atoms[atom1].coord
+            a1 = self.atoms[atom1].coord
         elif isinstance(atom1, (Atom,Site)):
-            atom1 = atom1.coord
+            a1 = atom1.coord
         if isinstance(atom2, int):
-            atom2 = self.atoms[atom2].coord
+            a2 = self.atoms[atom2].coord
         elif isinstance(atom2, (Atom,Site)):
-            atom2 = atom2.coord
+            a2 = atom2.coord
 
         x, y, z = self.cell
         xx = self.metrical_matrix[0,0]
         yy = self.metrical_matrix[1,1]
         zz = self.metrical_matrix[2,2]
 
-        vec = atom2 - atom1
+        vec = a2 - a1
         vec -= np.round(vec)
         dist = np.dot(vec, self.cell)
 
@@ -935,21 +943,37 @@ class Structure(models.Model, object):
             self.atoms.append(a)
         self.spacegroup = None
 
+    def atom_on_site(self, atom, site, tol=1e-2):
+        if abs(shortest_dist(atom, self.cell) - shortest_dist(site, self.cell)) < tol:
+            _dist = self.get_distance(atom, site, limit=tol, wrap_self=True)
+            if _dist is None:
+                return False
+        else:
+            return False
+        return _dist < tol
+
     def add_atom(self, atom, tol=0.01):
         """
         Adds `atom` to the structure if it isn't already contained.
         """
-        if self.contains(atom, tol=tol):
-            return
-        atom.structure = self
-        self.atoms.append(atom)
-        for site in self.sites:
-            if atom.is_on(site, tol=tol):
-                site.add_atom(atom)
-                break
-        else:
+        if not self.atoms or not self.sites:
+            atom.structure = self
+            self._atoms = [atom]
             site = atom.get_site()
-            self.sites.append(site)
+            self._sites = [site]
+            return
+        elif self.contains(atom, tol=tol):
+            return
+        self._atoms.append(atom)
+        atom.structure = self
+        for site in self.sites:
+            if self.atom_on_site(atom, site, tol=tol):
+                site.add_atom(atom, tol=tol)
+                break
+            else:
+                site = atom.get_site()
+                if not site in self._sites:
+                    self._sites.append(site)
         self.spacegroup = None
 
     def sort(self):
