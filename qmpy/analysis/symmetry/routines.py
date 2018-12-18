@@ -66,7 +66,7 @@ def _structure_to_cell(structure):
         float, `atom_types` in an Nx1 list of integers, `magmoms` (if
         specified) is an Nx1 array of float, where N is the number of atoms
         in `structure. `atom_types` has numbers in place of element symbols
-        (see :func:`qmpy.Structure.species_id_types`).
+        (see :func:`qmpy.Structure.site_comp_indices`).
 
     Raises:
         :exc:`qmpy.StructureError` if `structure` is not a
@@ -77,7 +77,7 @@ def _structure_to_cell(structure):
         raise qmpy.StructureError('Input is not of type `qmpy.Structure`')
     lattice = structure.cell.copy()
     positions = structure.site_coords.copy()
-    numbers = structure.species_id_types.copy()
+    numbers = structure.site_comp_indices.copy()
     magmoms = structure.magmoms.copy()
     if not any(magmoms):
         return (lattice, positions, numbers)
