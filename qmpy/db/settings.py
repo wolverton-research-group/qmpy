@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
     'django_extensions',
-    'qmpy.apps.BlossomsConfig',
+    'qmpy.apps.qmpyConfig',
 ]
 
 SITE_ID = 1
