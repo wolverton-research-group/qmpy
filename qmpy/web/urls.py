@@ -25,10 +25,7 @@ urlpatterns = [
 
     ## admin
     # TODO: remove code related to admin interface from qmpy
-    url(r'^admin/', admin.site.urls)
-    url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
-    url(r'^accounts/login/.*$', django.contrib.auth.login),
-    url(r'^accounts/logout/.*$', django.contrib.auth.logout),
+    url(r'^admin/', admin.site.urls),
     ]
 
 urlpatterns += [
