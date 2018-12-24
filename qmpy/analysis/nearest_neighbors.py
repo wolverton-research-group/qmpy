@@ -106,7 +106,10 @@ def _heuristic(structure, limit=5, tol=2e-1):
         # map index back into the original cell
         inds %= structure.natoms
         site.neighbors = [ structure.sites[j] for j in inds ]
-        nns[site] = site.neighbors
+        ## nns[site] = site.neighbors
+        ## `qmpy.Site` objects that are not saved are not hashable, and hence
+        ## cannot be used as dictionary keys. Unit tests will fail.
+        nns[i] = site.neighbors
         for atom in site:
             atom.neighbors = []
             for n in site.neighbors:
@@ -142,5 +145,8 @@ def _voronoi(structure, limit=5, tol=1e-2):
             ind = [k for k in tess.ridge_points[j] if k != i ][0]
             # map the atom index back into the original cell. 
             atom.neighbors.append(atom)
-        nns[atom] = atom.neighbors
+        ## nns[atom] = atom.neighbors
+        ## `qmpy.Atom` objects that are not saved are not hashable, and hence
+        ## cannot be used as dictionary keys. Unit tests will fail.
+        nns[i] = atom.neighbors
     return nns

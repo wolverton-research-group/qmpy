@@ -165,12 +165,16 @@ def read_spacegroups(numbers=None, overwrite_existing=True):
 
         wycks = []
         for k, site in sgd['wyckoff_sites'].items():
-            wycks.append(WyckoffSite(symbol=k,
+            wyck = WyckoffSite(symbol=k,
                                x=site['coordinate'].split()[0],
                                y=site['coordinate'].split()[1],
                                z=site['coordinate'].split()[2],
-                               multiplicity=site['multiplicity']))
+                               multiplicity=site['multiplicity'])
+            wyck.spacegroup = sg
+            wyck.save()
+            wycks.append(wyck)
         sg.site_set = wycks
+        sg.save()
 
 
 def read_elements():
