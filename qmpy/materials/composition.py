@@ -166,10 +166,11 @@ class Composition(models.Model):
 
     @property
     def total_energy(self):
-        calcs = self.calculation_set.filter(converged=True, 
-                            label__in=['standard', 'static'])
+        calcs = self.calculation_set.filter(converged=True, label='static')
         if not calcs.exists():
-            return
+            calcs = self.calculation_set.filter(converged=True, label='standard')
+            if not calcs.exists():
+                return
         return min( c.energy_pa for c in calcs )
 
 
