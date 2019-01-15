@@ -54,7 +54,7 @@ def search_data(request):
             suburl_lst = [] # partial url request options 
 
             ## Collect information from django forms 
-            # general paramters
+            # General paramters
             for arg in ['composition', 'calculated', 'band_gap',
                         'ntypes', 'generic',
                         'sort_by', 'desc', 'sort_offset', 'limit']:
@@ -63,7 +63,10 @@ def search_data(request):
                     kwargs[arg] = tmp
                     suburl_lst.append('%s=%s'%(arg, tmp))
 
-            # update 'offset'
+            # Update 'offset'
+            # The django form will store the value of 'offset' input
+            # as 'sort_offset'. If sorting is not needed, this value
+            # should be the offset of total result. 
             if 'sort_by' not in kwargs:
                 if 'sort_offset' in kwargs:
                     kwargs['offset'] = kwargs['sort_offset']
@@ -81,7 +84,9 @@ def search_data(request):
                 
                 if 'sort_by' in kwargs:
                     kwargs.pop('sort_by', None)
-                    kwargs['limit'] = 1
+                    kwargs['limit'] = 1 # To get the count of total result, we
+                                        # need another url request. But this time
+                                        # we only need to output one entry per page.
                     kwargs['offset'] = 0
                     data['count'] = q.get_entries(verbose=False, **kwargs)['count']
                 else:
