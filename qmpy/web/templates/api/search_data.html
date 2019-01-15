@@ -24,7 +24,7 @@ th {
 }
                                                                 
 th, td {
-    text-align: left;
+    text-align: center;
     padding: 16px;
 }
 
@@ -37,6 +37,10 @@ tr {
 tr:nth-child(even) {
     background-color: #f2f2f2
 }
+
+.clickableRow td:hover {
+    cursor: pointer;
+}
 </style>
 <body>
 
@@ -45,28 +49,36 @@ tr:nth-child(even) {
 {% if result %}
 <h1> Results: </h1>
 <div style="margin: 10px">
-    There are {{count}} entries found:
+    <em> There are <b>{{count}}</b> entries found. </em>
+    {% if sort_by %}
+    <i>(Sorted by {{ sort_by }}) </i>
+    {% endif %}
+    <p>
+    Display entries from {{ offset|add:"1"}} to {{ offset|add:limit }} on this page.
+    </p>
 </div>
 <table id="ResultTable">
     <tr>
-        <th onclick="sortTable(0, 'num')"> id </th>
-        <th onclick="sortTable(1, 'str')"> name </th>
-        <th onclick="sortTable(2, 'str')"> generic </th>
-        <th onclick="sortTable(3, 'str')"> spacegroup </th>
-        <th onclick="sortTable(4, 'num')"> ntypes </th>
-        <th onclick="sortTable(5, 'num')"> natoms </th>
-        <th onclick="sortTable(6, 'num')"> energy_pa </th>
-        <th onclick="sortTable(7, 'num')"> energy_pa_hse </th>
-        <th onclick="sortTable(8, 'num')"> formation_energy </th>
-        <th onclick="sortTable(9, 'num')"> formation_energy_hse </th>
-        <th onclick="sortTable(10, 'num')"> band_gap </th>
-        <th onclick="sortTable(11, 'num')"> band_gap_hse </th>
-        <th onclick="sortTable(12, 'num')"> stability </th>
+        <th onclick="sortTable(0, 'num')"> rank </th>
+        <th onclick="sortTable(1, 'num')"> oqmd_id </th>
+        <th onclick="sortTable(2, 'str')"> name </th>
+        <th onclick="sortTable(3, 'str')"> generic </th>
+        <th onclick="sortTable(4, 'str')"> spacegroup </th>
+        <th onclick="sortTable(5, 'num')"> ntypes </th>
+        <th onclick="sortTable(6, 'num')"> natoms </th>
+        <th onclick="sortTable(7, 'num')"> energy_pa </th>
+        <th onclick="sortTable(8, 'num')"> energy_pa_hse </th>
+        <th onclick="sortTable(9, 'num')"> formation_energy </th>
+        <th onclick="sortTable(10, 'num')"> formation_energy_hse </th>
+        <th onclick="sortTable(11, 'num')"> band_gap </th>
+        <th onclick="sortTable(12, 'num')"> band_gap_hse </th>
+        <th onclick="sortTable(13, 'num')"> stability </th>
     </tr>
     {% for e in result %}
-        <tr class=clickableRow href="/materials/entry/{{e.id}}">
+        <tr class=clickableRow">
+        <td width="60"> {{ forloop.counter|add:offset}} </td>
         <td width="60"> {{ e.id }} </td>
-        <td width="90"> {{ e.name }} </td>
+        <td width="90"> <a href="/materials/entry/{{e.id}}">{{ e.name }}</a> </td>
         <td> {{ e.composition_generic }} </td>
         <td width="80"> {{ e.spacegroup }} </td>
         <td> {{ e.ntypes }} </td>
