@@ -55,6 +55,9 @@ def search_data(request):
 
             ## Collect information from django forms 
             # General paramters
+            # These parameters are from django forms. Only 'sort_offest'
+            # can be passed from django forms and 'offset' cannot be 
+            # initialiated from django forms.
             for arg in ['composition', 'calculated', 'band_gap',
                         'ntypes', 'generic',
                         'sort_by', 'desc', 'sort_offset', 'limit']:
@@ -81,6 +84,9 @@ def search_data(request):
             with qmpy_rester.QMPYRester() as q:
                 d = q.get_entries(verbose=False, **kwargs)
                 data['result'] = d['results']
+                data['limit'] = kwargs.get('limit', 100) # default of limit is 100
+                data['offset'] = kwargs.get('sort_offset', 0) 
+                data['sort_by'] = kwargs.get('sort_by', None) 
                 
                 if 'sort_by' in kwargs:
                     kwargs.pop('sort_by', None)
