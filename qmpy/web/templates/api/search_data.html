@@ -41,6 +41,39 @@ tr:nth-child(even) {
 .clickableRow td:hover {
     cursor: pointer;
 }
+
+button {
+    text-decoration: none;
+    display: inline-block;
+    padding: 4px 8px;
+}
+
+button:hover:not([disabled]) {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.prev {
+    background-color: #f1f1f1;
+    color: black;
+}
+
+.next {
+    background-color: #f1f1f1;
+    color: black;
+}
+
+.clear {
+    background-color: #f1f1f1;
+    color: black;
+}
+
+.disabled {
+    background-color: #f1f1f1;
+    color: grey;
+}
+
+
 </style>
 <body>
 
@@ -49,24 +82,43 @@ tr:nth-child(even) {
 {% if result %}
 <h1> Results: </h1>
 <div style="margin: 10px">
-    <em> There are <b>{{count}}</b> entries found. </em>
+    <p>
+    <font size="3">
+    There are <b>{{count}}</b> entries found.
+    </font>
     {% if sort_by %}
     <i>(Sorted by {{ sort_by }}) </i>
     {% endif %}
-    <p>
-    Display entries from {{ start }} to {{ end }} on this page.
     </p>
     <form action="" method="POST">{% csrf_token %}
+        <button class="prev" type="submit" value="{{request_post}}" name="front">
+            &lt;&lt;
+        </button>
         {% if prev %}
-        <button type="submit" value="{{request_post}}" name="prev">
-            Previous Page
+        <button class="prev" type="submit" value="{{request_post}}" name="prev">
+            &lt;
+        </button>
+        {% else %} 
+        <button class="prev" type="button" disabled>
+            &lt;
         </button>
         {% endif %}
+        {{ start }} - {{ end }}
         {% if next %}
-        <button type="submit" value="{{request_post}}" name="next">
-            Next Page
+        <button class="next" type="submit" value="{{request_post}}" name="next">
+            &gt;
+        </button>
+        {% else %} 
+        <button class="next" type="button" disabled>
+            &gt;
         </button>
         {% endif %}
+        <button class="next" type="submit" value="{{request_post}}" name="end">
+            &gt;&gt;
+        </button>
+        <button class="clear" type="submit" name="clear">
+            Clear 
+        </button>
     </form>
 </div>
 <table id="ResultTable">

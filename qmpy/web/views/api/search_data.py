@@ -47,7 +47,6 @@ def search_data(request):
     data = {}
     if request.method == 'POST':
         p = request.POST
-        #print p
         if 'next' in p:
             request_post = p.get('next')
             rp = QueryDict(request_post, mutable=True)
@@ -58,10 +57,28 @@ def search_data(request):
         elif 'prev' in p:
             request_post = p.get('prev')
             rp = QueryDict(request_post, mutable=True)
-            prevoffset = int(rp.get('sort_offset')) - int(rp.get('limit'))
+            prevoffset = max(0, 
+                             int(rp.get('sort_offset')) - \
+                             int(rp.get('limit'))
+                            )
             rp.update({'sort_offset': prevoffset})
             form = DataFilterForm(rp)
             data['request_post'] = rp.urlencode()
+        elif 'front' in p:
+            request_post = p.get('front')
+            rp = QueryDict(request_post, mutable=True)
+            rp.update({'sort_offset': 0})
+            form = DataFilterForm(rp)
+            data['request_post'] = rp.urlencode()
+        elif 'end' in p:
+            request_post = p.get('end')
+            rp = QueryDict(request_post, mutable=True)
+            endoffset = int(rp.get('count')) - int(rp.get('limit'))
+            rp.update({'sort_offset': endoffset})
+            form = DataFilterForm(rp)
+            data['request_post'] = rp.urlencode()
+        elif 'clear' in p:
+            form = DataFilterForm()
         else:
             form = DataFilterForm(p)
             data['request_post'] = p.urlencode()
@@ -102,7 +119,7 @@ def search_data(request):
             with qmpy_rester.QMPYRester() as q:
                 d = q.get_entries(verbose=False, **kwargs)
                 data['result'] = d['results']
-                data['limit'] = kwargs.get('limit', 100) # default of limit is 100
+                data['limit'] = kwargs.get('limit', 50) # default of limit is 50
                 data['offset'] = kwargs.get('sort_offset', 0) 
                 data['sort_by'] = kwargs.get('sort_by', None) 
 
@@ -123,6 +140,10 @@ def search_data(request):
                 data['start'] = data['offset'] + 1
                 data['end'] = min(data['count'], 
                                   data['offset'] + data['limit'])
+
+                if 'count=' not in data['request_post']:
+                    data['request_post'] += '&count=' +\
+                                             str(data['count'])
     else:
         form = DataFilterForm()
         data['form'] = form
