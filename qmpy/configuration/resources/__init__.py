@@ -1,8 +1,18 @@
+import os
 import yaml
-import os, os.path
-loc = os.path.dirname(os.path.abspath(__file__))
 
-hosts = yaml.load(open(loc+'/hosts.yml'))
-projects = yaml.load(open(loc+'/projects.yml'))
-allocations = yaml.load(open(loc+'/allocations.yml'))
-users = yaml.load(open(loc+'/users.yml'))
+
+this_dir = os.path.dirname(os.path.abspath(__file__))
+
+
+with open(os.path.join(this_dir, 'hosts.yml'), 'r') as fr:
+    hosts = yaml.load(fr)
+
+with open(os.path.join(this_dir, 'projects.yml'), 'r') as fr:
+    projects = yaml.load(fr)
+
+with open(os.path.join(this_dir, 'allocations.yml'), 'r') as fr:
+    allocations = yaml.load(fr)
+
+with open(os.path.join(this_dir, 'users.yml'), 'r') as fr:
+    users = yaml.load(fr)

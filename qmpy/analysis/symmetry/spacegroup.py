@@ -1,6 +1,7 @@
 # qmpy/analysis/symmetry/spacegroup.py
 
 import os
+import six
 import fractions as frac
 import numpy as np
 import logging
@@ -12,20 +13,26 @@ from routines import *
 
 logger = logging.getLogger(__name__)
 
+
 class TranslationError(Exception):
     pass
+
 
 class RotationError(Exception):
     pass
 
+
 class OperationError(Exception):
     pass
+
 
 class WyckoffSiteError(Exception):
     pass
 
+
 class SpacegroupError(Exception):
     pass
+
 
 class Translation(models.Model):
     """
@@ -41,10 +48,11 @@ class Translation(models.Model):
 
     Examples::
         
-        >>> op = Operation.get('x', 'x+y', 'z-x+1/2')
-        >>> print op.translsation
+        >>> trans = Translation.get([0, 0, 0.5])
         <Translation: 0,0,+1/2>
-        >>> print op.translation.vector
+        >>> print(trans)
+        0,0,+1/2
+        >>> print(trans.vector)
         array([ 0. ,  0. ,  0.5])
 
     """
@@ -79,11 +87,12 @@ class Translation(models.Model):
             if t == 0:
                 s = '0'
             elif t < 0:
-                s = '%s' % (frac.Fraction(str(t)))
+                s = '{}'.format(frac.Fraction(str(t)))
             else:
-                s = '+%s' % (frac.Fraction(str(t)))
+                s = '+{}'.format(frac.Fraction(str(t)))
             ops.append(s)
         return ','.join(ops)
+
 
 class Rotation(models.Model):
     """
@@ -101,13 +110,14 @@ class Rotation(models.Model):
 
     Examples::
 
-        >>> op = Operation.get('x', 'x+y', 'z-x+1/2')
-        >>> print op.rotation
-        <Rotation: x,x+y,-x+z>
-        >>> print op.rotation.matrix
+        >>> rot = Rotation.get([[1, 0, 0], [-1, -1, 0], [0, 1, -1]])
+        <Rotation: +x,-x-y,+y-z>
+        >>> print(rot)
+        +x,-y,-z
+        >>> print rot.matrix
         array([[ 1.,  0.,  0.],
-               [ 1.,  1.,  0.],
-               [-1.,  0.,  1.]])
+               [ -1.,  1.,  0.],
+               [0.,  1.,  -1.]])
 
 
     """
@@ -128,9 +138,9 @@ class Rotation(models.Model):
     @property 
     def matrix(self):
         return np.array([ 
-            [ self.a11, self.a12, self.a13 ],
-            [ self.a21, self.a22, self.a23 ],
-            [ self.a31, self.a32, self.a33 ]])
+            [self.a11, self.a12, self.a13],
+            [self.a21, self.a22, self.a23],
+            [self.a31, self.a32, self.a33]])
 
     @matrix.setter
     def matrix(self, matrix):
@@ -140,9 +150,9 @@ class Rotation(models.Model):
 
     @classmethod
     def get(cls, matrix):
-        fields = [ 'a11', 'a12', 'a13',
-                   'a21', 'a22', 'a23',
-                   'a31', 'a32', 'a33']
+        fields = ['a11', 'a12', 'a13',
+                  'a21', 'a22', 'a23',
+                  'a31', 'a32', 'a33']
         matrix = np.ravel(matrix)
         mat_dict = dict(zip(fields, matrix))
         obj, new = cls.objects.get_or_create(**mat_dict)
@@ -152,21 +162,23 @@ class Rotation(models.Model):
 
     def __str__(self):
         ops = []
-        indict = {0:'x', 1:'y', 2:'z'}
+        indict = {0: 'x', 1: 'y', 2: 'z'}
         for r in self.matrix:
             s = ''
             for i, x in enumerate(r):
                 if x == 0:
                     continue
                 elif x == 1:
-                    s += '+'+indict[i]
+                    s += '+{}'.format(indict[i])
                 elif x == -1:
-                    s += '-'+indict[i]
+                    s += '-{}'.format(indict[i])
+                elif x > 0:
+                    s += '+{}{}'.format(frac.Fraction(str(x)), indict[i])
                 else:
-                    f = frac.Fraction(str(x))
-                    s += '%s%s' % (f, indict[i])
+                    s += '{}{}'.format(frac.Fraction(str(x)), indict[i])
             ops.append(s)
         return ','.join(ops)
+
 
 class Operation(models.Model):
     """ A symmetry operation (rotation + translation).
@@ -180,7 +192,7 @@ class Operation(models.Model):
         | id
 
     Examples::
-        
+
         >>> op = Operation.get('x+y-1/2,-z-y+1/2,x-z+1/2')
         >>> print op
         <Operation: +x+y+1/2,-y-z+1/2,+x-z+1/2>
@@ -205,10 +217,14 @@ class Operation(models.Model):
             >>> Operation.get(( rot, trans ))
 
         """
-        if isinstance(value, basestring):
-            rot, trans = parse_sitesym(value)
+        if isinstance(value, six.string_types):
+            rot, trans = utils.parse_sitesym(value)
         elif isinstance(value, tuple):
             rot, trans = value
+        else:
+            err_msg = ('Operation needs to be string or'
+                       ' (rotation, translation) tuple')
+            raise OperationError(err_msg)
         rot = Rotation.get(rot)
         trans = Translation.get(trans)
         op, new = cls.objects.get_or_create(rotation=rot, translation=trans)
@@ -218,28 +234,27 @@ class Operation(models.Model):
 
     def __str__(self):
         ops = []
-        indict = {0:'x', 1:'y', 2:'z'}
-        for r,t in zip(self.rotation.matrix, 
-                       self.translation.vector):
-
+        indict = {0: 'x', 1: 'y', 2: 'z'}
+        for r, t in zip(self.rotation.matrix,
+                        self.translation.vector):
             s = ''
             for i, x in enumerate(r):
                 if x == 0:
                     continue
                 elif x == 1:
-                    s += '+'+indict[i]
+                    s += '+{}'.format(indict[i])
                 elif x == -1:
-                    s += '-'+indict[i]
+                    s += '-{}'.format(indict[i])
+                elif x > 0:
+                    s += '+{}{}'.format(frac.Fraction(str(x)), indict[i])
                 else:
-                    f = frac.Fraction(str(x)).limit_denominator(1000)
-                    s += '%s%s' % (f, indict[i])
-
+                    s += '{}{}'.format(frac.Fraction(str(x)), indict[i])
             if t == 0:
                 pass
             elif t < 0:
-                s += '-%s' % (frac.Fraction('%08f' % t))
+                s += '-{}'.format(frac.Fraction('%08f' % t))
             else:
-                s += '+%s' % (frac.Fraction('%08f' % t))
+                s += '+{}'.format(frac.Fraction('%08f' % t))
             ops.append(s)
         return ','.join(ops)
 
@@ -281,6 +296,7 @@ class WyckoffSite(models.Model):
         if new:
             site.save()
         return site
+
 
 class Spacegroup(models.Model):
     """
@@ -373,7 +389,7 @@ class Spacegroup(models.Model):
         equiv = []
         for rot, trans in zip(self.rotations, self.translations):
             new = utils.wrap(np.dot(rot, point) + trans)
-            if not any([ all([ abs(o-n) < tol for o,n in zip(old, new)])
+            if not any([ all([ abs(o-n) < tol for o, n in zip(old, new)])
                                               for old in equiv]):
                 equiv.append(new)
         return equiv
@@ -388,5 +404,5 @@ class Spacegroup(models.Model):
 
     def get_site(self, symbol):
         """Gets WyckoffSite by symbol."""
-        symol = symbol.strip('0123456789')
+        symbol = symbol.strip('0123456789')
         return self.site_set.get(symbol__exact=symbol)

@@ -3,31 +3,35 @@
 """
 qmpy is a package containing many tools for computational materials science.
 """
-import numpy as np
-try:
-    import pyximport; pyximport.install()
-except ImportError:
-    pass
 import logging
 import logging.handlers
-import os, os.path
-import stat
+import os
+import yaml
 import sys
 import ConfigParser
 
-import django.core.exceptions as de
+
+##############################################################################
+# Config files
+# Try reading in the base config file and path to VASP pseudopotentials
+##############################################################################
 
 INSTALL_PATH = os.path.abspath(os.path.dirname(__file__))
 sys.path = [os.path.join(INSTALL_PATH, 'qmpy', 'db')] + sys.path
 
-LOG_PATH = os.path.join(INSTALL_PATH, 'logs')
-
 config = ConfigParser.ConfigParser()
-config.read(os.path.join(INSTALL_PATH,'configuration','site.cfg'))
+config.read(os.path.join(INSTALL_PATH, 'configuration', 'site.cfg'))
 
 # read in the location of the VASP Potential on the OQMD server
 VASP_POTENTIALS = config.get('VASP', 'potential_path')
 
+
+##############################################################################
+# Logging
+# Set path to the default log file, format for the logger, etc.
+##############################################################################
+
+LOG_PATH = os.path.join(INSTALL_PATH, 'logs')
 if not os.path.exists(LOG_PATH):
     oldmask = os.umask(666)
     os.mkdir(LOG_PATH)
@@ -57,16 +61,23 @@ general.setFormatter(formatter)
 logger.addHandler(general)
 logger.addHandler(console)
 
+
+##############################################################################
+# Imports
+# Try importing essential packages and throw suitable warnings/exceptions
+##############################################################################
+
 class qmpyBaseError(Exception):
     """Baseclass for qmpy Exceptions"""
 
-# try importing essential python packages and throw suitable warnings/exceptions
+
 try:
     import ase
     FOUND_ASE = True
 except ImportError:
     FOUND_ASE = False
     logging.warn('Failed to import ASE')
+
 
 try:
     import pulp
@@ -75,6 +86,7 @@ except ImportError:
     FOUND_PULP = False
     logging.warn('Failed to import PuLP')
 
+
 try:
     import matplotlib
     FOUND_MPL = True
@@ -82,19 +94,16 @@ except ImportError:
     FOUND_MPL = False
     logging.warn('Failed to import matplotlib')
 
-# pyspglib -> spglib in the later versions
+
+# Use spglib versions >1.9.0
 try:
-    import pyspglib
+    import spglib
     FOUND_SPGLIB = True
 except ImportError:
-    try:
-        import spglib
-        FOUND_SPGLIB = True
-    except ImportError:
-        logging.warn("Failed to import spglib/pyspglib."
-                     'Download at: http://sourceforge.net/projects/spglib/ and'
-                     'follow instructions for installing python API')
-        FOUND_SPGLIB = False
+    logging.warn("Failed to import spglib"
+                 " (https://atztogo.github.io/spglib/python-spglib.html)")
+    FOUND_SPGLIB = False
+
 
 try:
     import sklearn
@@ -102,24 +111,23 @@ try:
 except ImportError:
     FOUND_SKLEARN = False
 
-### Kludge to get the django settings module into the path
+
+# Kludge to get the django settings module into the path
 sys.path.insert(-1, INSTALL_PATH)
 if 'DJANGO_SETTINGS_MODULE' not in os.environ:
     os.environ['DJANGO_SETTINGS_MODULE'] = 'qmpy.db.settings'
 
-from models import *
-from analysis import *
-from analysis.thermodynamics import *
-from analysis.symmetry import *
-from analysis.vasp import *
-from computing import *
-from data import *
-from configuration.resources import *
+import django
+django.setup()
 
-import yaml
-import os
+##############################################################################
+# Imports
+# Imports from qmpy subpackages to remove relative imports
+##############################################################################
+from qmpy.models import *
 
-def read_spacegroups(numbers=None):
+
+def read_spacegroups(numbers=None, overwrite_existing=True):
     """
     read space group data: number, Hermann-Maguin notation, Hall number,
     Schonflies number, lattice system, symmetry operators, Wyckoff positions,
@@ -127,11 +135,13 @@ def read_spacegroups(numbers=None):
     """
     spg_datafile = os.path.join(INSTALL_PATH, 'data', 'spacegroups.yml')
     if not os.path.exists(spg_datafile):
-        sys.stdout.write('Space groups data not found.\n')
+        print('Space groups data file {} not found.'.format(spg_datafile))
         return
-    data = open(spg_datafile).read()
+
     Spacegroup.objects.all().delete()
-    spacegroups = yaml.load(data)
+    with open(spg_datafile, 'r') as fr:
+        spacegroups = yaml.load(fr)
+
     for sgd in spacegroups.values():
         if numbers:
             if sgd['number'] not in numbers:
@@ -155,17 +165,22 @@ def read_spacegroups(numbers=None):
 
         wycks = []
         for k, site in sgd['wyckoff_sites'].items():
-            wycks.append(WyckoffSite(symbol=k,
+            wyck = WyckoffSite(symbol=k,
                                x=site['coordinate'].split()[0],
                                y=site['coordinate'].split()[1],
                                z=site['coordinate'].split()[2],
-                               multiplicity=site['multiplicity']))
+                               multiplicity=site['multiplicity'])
+            wyck.spacegroup = sg
+            wyck.save()
+            wycks.append(wyck)
         sg.site_set = wycks
+        sg.save()
+
 
 def read_elements():
     """
     read elemental properties: atomic number, atomic weight, electronegativity,
-    HHI index, etc. for all the elements from 'INSTALL_PATH/data/elements.yml'. 
+    HHI index, etc. for all the elements from 'INSTALL_PATH/data/elements.yml'.
     """
     elem_datafile = os.path.join(INSTALL_PATH, 'data', 'elements', 'data.yml')
     if not os.path.exists(elem_datafile):
@@ -179,6 +194,7 @@ def read_elements():
         e.__dict__.update(data)
         elts.append(e)
     Element.objects.bulk_create(elts)
+
 
 def read_hubbards():
     """
@@ -205,6 +221,7 @@ def read_hubbards():
             hub.convention = group
             hub.save()
 
+
 def read_potentials():
     """
     read the VASP POTCAR files and store them in the database.
@@ -224,6 +241,7 @@ def read_potentials():
                         pot.save()
                 except Exception:
                     print 'Couldn\'t load:', path
+
 
 def sync_resources():
     for host, data in hosts.items():
@@ -281,13 +299,6 @@ def sync_resources():
             alloc.save()
             proj.allocations.add(alloc)
 
-
-# Load models (Django >= 1.7)
-try:
-    import django
-    django.setup()
-except:
-    pass
 
 # Try to prevent exception when importing before database is set up
 try:

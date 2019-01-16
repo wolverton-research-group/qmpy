@@ -12,6 +12,7 @@ from materials.formation_energy import *
 from analysis.vasp.calculation import *
 from analysis.vasp.dos import *
 from analysis.vasp.potential import *
+from analysis.thermodynamics import *
 
 #= Local resources and computing =#
 from computing.queue import *
