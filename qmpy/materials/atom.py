@@ -49,11 +49,11 @@ class Atom(models.Model):
         | volume: Volume occupied by the atom
 
     """
-    structure = models.ForeignKey('Structure', related_name='atom_set', null=True)
+    structure = models.ForeignKey('qmpy.Structure', related_name='atom_set', null=True)
     site = models.ForeignKey('Site', related_name='atom_set', null=True)
 
     # species
-    element = models.ForeignKey('Element', blank=True, null=True)
+    element = models.ForeignKey('qmpy.Element', blank=True, null=True)
     ox = models.IntegerField(default=None, blank=True, null=True)
 
     # position
@@ -236,6 +236,7 @@ class Atom(models.Model):
 
         if self.structure is not None:
             for site in self.structure.sites:
+                site.structure = self.structure
                 if self.is_on(site):
                     site.add_atom(self, tol=tol)
                     return site
@@ -268,9 +269,8 @@ class Atom(models.Model):
             True
 
         """
-        if self.dist - site.dist < tol:
-            dist = self.structure.get_distance(self.coord, site.coord, 
-                    limit=tol, wrap_self=True)
+        if abs(self.dist - site.dist) < tol:
+            dist = self.structure.get_distance(self, site, limit=tol, wrap_self=True)
             if dist is None:
                 return False
         else:
@@ -293,7 +293,7 @@ class Site(models.Model):
         | x, y, z: Coordinate of the Site
 
     """
-    structure = models.ForeignKey('Structure', related_name='site_set', blank=True, null=True)
+    structure = models.ForeignKey('qmpy.Structure', related_name='site_set', blank=True, null=True)
     wyckoff = models.ForeignKey(WyckoffSite, blank=True, null=True)
     x = models.FloatField()
     y = models.FloatField()
@@ -348,7 +348,10 @@ class Site(models.Model):
     def save(self,*args, **kwargs):
         super(Site, self).save(*args, **kwargs)
         if not self._atoms is None:
-            self.atom_set = self.atoms
+            for a in self.atoms:
+                if not a.id:
+                    a.save()
+                self.atom_set.add(a)
 
     _atoms = None
     @property
@@ -593,10 +596,10 @@ class Site(models.Model):
                     raise SiteError("%s is too far from %s to add" % (atom, self))
                 else:
                     if not atom in self.atoms:
-                        self.atoms.append(atom)
+                        self._atoms.append(atom)
         else:
             self.coord = atom.coord
-            self.atoms = [atom]
+            self._atoms = [atom]
 
     @property
     def magmom(self):

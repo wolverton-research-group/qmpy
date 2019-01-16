@@ -1,11 +1,15 @@
 import yaml
-import os, os.path
+import os
 from inputs import *
-from qmpy import INSTALL_PATH
 
-vs_path = os.path.dirname(os.path.abspath(__file__))
 
-thubbards = yaml.load(open(vs_path+'/hubbards.yml').read())
+this_dir = os.path.dirname(os.path.abspath(__file__))
+
+
+# Read in Hubbard-U values
+with open(os.path.join(this_dir, 'hubbards.yml'), 'r') as fr:
+    thubbards = yaml.load(fr)
+
 hubbards = {}
 for setting, data in thubbards.items():
     hubbards[setting] = {}
@@ -15,7 +19,10 @@ for setting, data in thubbards.items():
             hubbards[setting][(elt, lig, None)] = v
         else:
             hubbards[setting][(elt, lig, float(ox))] = v
-
 HUBBARDS = hubbards
-POTENTIALS = yaml.load(open(vs_path+'/potentials.yml').read())
+
+
+# Read in VASP pseudopotentials choices/labels
+with open(os.path.join(this_dir, 'potentials.yml'), 'r') as fr:
+    POTENTIALS = yaml.load(fr)
 

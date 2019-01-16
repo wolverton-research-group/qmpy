@@ -17,7 +17,7 @@ setup(
     include_package_data=True,
     long_description=long_description,
     install_requires=[
-        "Django == 1.8.18",
+        "Django <2, >=1.8",
         "PuLP",
         "numpy",
         "scipy",
@@ -27,12 +27,11 @@ setup(
         "pytest",
         "python-memcached",
         "ase",
-        "django-extensions < 1.6.8",
+        "django-extensions",
         "lxml",
-        "pyspglib == 1.8.3.1",
+        "spglib",
         "PyCifRW >= 4.3",
         "pexpect",
-        "pyparsing",
         "PyYAML",
         "scikit-learn",
         "bokeh == 0.12.15"

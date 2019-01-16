@@ -1,6 +1,6 @@
 from django.template import RequestContext
 from django.http import HttpResponse
-from django.core.context_processors import csrf
+from django.template.context_processors import csrf
 from django.shortcuts import render_to_response
 from django.forms.models import modelform_factory
 
