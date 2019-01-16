@@ -35,10 +35,8 @@ urlpatterns = [
     ## api
 #    url(r'^api_login/', include(router.urls)),
 #    url(r'^api_auth/', include('rest_framework.urls', namespace='rest_framework'))
-=======
     # TODO: remove code related to admin interface from qmpy
     url(r'^admin/', admin.site.urls),
->>>>>>> v2_0_0
     ]
 
 urlpatterns += [
