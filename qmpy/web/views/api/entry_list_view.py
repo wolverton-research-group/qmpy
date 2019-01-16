@@ -7,6 +7,8 @@ from qmpy.analysis.vasp import Calculation
 from api_perm import *
 from qmpy.utils import Token, parse_formula_regex
 
+DEFAULT_LIMIT = 50
+
 class EntryDetail(generics.RetrieveAPIView):
     queryset = Entry.objects.all()
     serializer_class = EntrySerializer
@@ -34,7 +36,7 @@ class EntryList(generics.ListAPIView):
             try:
                 limit = int(limit)
             except:
-                limit = 100
+                limit = DEFAULT_LIMIT
             try:
                 sort_offset = int(sort_offset)
             except:
@@ -155,7 +157,7 @@ class EntryList(generics.ListAPIView):
 
         return entries
 
-    def sort_by_bandgap(self, entries, limit=100, sort_offset=0, desc=False):
+    def sort_by_bandgap(self, entries, limit=DEFAULT_LIMIT, sort_offset=0, desc=False):
         es_id = [e.id for e in entries]
 
         cs = Calculation.objects.filter(entry__id__in=es_id, 
@@ -167,7 +169,7 @@ class EntryList(generics.ListAPIView):
             ordered_cs = cs.order_by('band_gap')
         return [c.entry for c in ordered_cs[sort_offset:sort_offset+limit]]
 
-    def sort_by_energyperatom(self, entries, limit=100, sort_offset=0, desc=False):
+    def sort_by_energyperatom(self, entries, limit=DEFAULT_LIMIT, sort_offset=0, desc=False):
         es_id = [e.id for e in entries]
 
         cs = Calculation.objects.filter(entry__id__in=es_id, 
@@ -180,7 +182,7 @@ class EntryList(generics.ListAPIView):
             ordered_cs = cs.order_by('energy_pa')
         return [c.entry for c in ordered_cs[sort_offset:sort_offset+limit]]
 
-    def sort_by_formationenergy(self, entries, limit=100, sort_offset=0, desc=False):
+    def sort_by_formationenergy(self, entries, limit=DEFAULT_LIMIT, sort_offset=0, desc=False):
         es_id = [e.id for e in entries]
 
         cs = Calculation.objects.filter(entry__id__in=es_id, 

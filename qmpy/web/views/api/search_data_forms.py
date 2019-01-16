@@ -22,7 +22,7 @@ class DataFilterForm(forms.Form):
     band_gap = forms.CharField(required=False)
     ntypes = forms.CharField(required=False)
     generic = forms.CharField(required=False)
-    limit = forms.IntegerField(required=False, label='limit', initial=100)
+    limit = forms.IntegerField(required=False, label='limit', initial=50)
     sort_offset = forms.IntegerField(required=False, label='offset', initial=0)
 
     sort_by = forms.TypedChoiceField(
