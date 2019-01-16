@@ -34,6 +34,11 @@ setup(
         "pexpect",
         "PyYAML",
         "scikit-learn",
-        "bokeh == 0.12.15"
+        "bokeh == 0.12.15",
+        "requests",
+        "markdown",
+        "django-filter",
+        "djangorestframework",
+        "django-crispy-forms"
     ],
 )
