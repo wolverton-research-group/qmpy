@@ -88,11 +88,11 @@ WSGI_APPLICATION = 'qmpy.db.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'oqmd_api_test',
-        'USER': 'oqmd',
-        'PASSWORD': 'oqmdpass@123!',
-        'HOST': '127.0.0.1',
-        'PORT': '5721'
+        'NAME': 'oqmd_v2_dev',
+        'USER': 'root',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': ''
     }
 }
 
