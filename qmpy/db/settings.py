@@ -88,7 +88,7 @@ WSGI_APPLICATION = 'qmpy.db.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'oqmd_v2_dev',
+        'NAME': 'qmdb_v2_dev',
         'USER': 'root',
         'PASSWORD': '',
         'HOST': '',
