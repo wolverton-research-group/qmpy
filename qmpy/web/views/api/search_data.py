@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, QueryDict
 from django.template import RequestContext
 from django.shortcuts import render
 from django.core.context_processors import csrf
@@ -46,7 +46,25 @@ def search_data(request):
     """
     data = {}
     if request.method == 'POST':
-        form = DataFilterForm(request.POST)
+        p = request.POST
+        #print p
+        if 'next' in p:
+            request_post = p.get('next')
+            rp = QueryDict(request_post, mutable=True)
+            nextoffset = int(rp.get('sort_offset')) + int(rp.get('limit'))
+            rp.update({'sort_offset': nextoffset})
+            form = DataFilterForm(rp)
+            data['request_post'] = rp.urlencode()
+        elif 'prev' in p:
+            request_post = p.get('prev')
+            rp = QueryDict(request_post, mutable=True)
+            prevoffset = int(rp.get('sort_offset')) - int(rp.get('limit'))
+            rp.update({'sort_offset': prevoffset})
+            form = DataFilterForm(rp)
+            data['request_post'] = rp.urlencode()
+        else:
+            form = DataFilterForm(p)
+            data['request_post'] = p.urlencode()
         data['form'] = form
 
         if form.is_valid():
@@ -87,7 +105,7 @@ def search_data(request):
                 data['limit'] = kwargs.get('limit', 100) # default of limit is 100
                 data['offset'] = kwargs.get('sort_offset', 0) 
                 data['sort_by'] = kwargs.get('sort_by', None) 
-                
+
                 if 'sort_by' in kwargs:
                     kwargs.pop('sort_by', None)
                     kwargs['limit'] = 1 # To get the count of total result, we
@@ -97,6 +115,14 @@ def search_data(request):
                     data['count'] = q.get_entries(verbose=False, **kwargs)['count']
                 else:
                     data['count'] = d['count']
+
+                if data['offset'] > 0:
+                    data['prev'] = True
+                if data['offset'] + data['limit'] < data['count']:
+                    data['next'] = True
+                data['start'] = data['offset'] + 1
+                data['end'] = min(data['count'], 
+                                  data['offset'] + data['limit'])
     else:
         form = DataFilterForm()
         data['form'] = form

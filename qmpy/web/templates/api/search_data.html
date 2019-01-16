@@ -54,8 +54,20 @@ tr:nth-child(even) {
     <i>(Sorted by {{ sort_by }}) </i>
     {% endif %}
     <p>
-    Display entries from {{ offset|add:"1"}} to {{ offset|add:limit }} on this page.
+    Display entries from {{ start }} to {{ end }} on this page.
     </p>
+    <form action="" method="POST">{% csrf_token %}
+        {% if prev %}
+        <button type="submit" value="{{request_post}}" name="prev">
+            Previous Page
+        </button>
+        {% endif %}
+        {% if next %}
+        <button type="submit" value="{{request_post}}" name="next">
+            Next Page
+        </button>
+        {% endif %}
+    </form>
 </div>
 <table id="ResultTable">
     <tr>
