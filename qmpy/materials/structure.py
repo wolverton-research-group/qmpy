@@ -360,6 +360,13 @@ class Structure(models.Model, object):
         self.volume_pa = value/self.natoms
         self.volume = value
 
+    def get_volume_sum_of_elements(self):
+        volume = 0
+        for atom in self:
+            volume += atom.element.volume*atom.occupancy
+	return volume
+
+
     def set_volume_to_sum_of_elements(self):
         volume = 0
         for atom in self:
@@ -1708,11 +1715,14 @@ class Structure(models.Model, object):
             return new
 
         volume = self.get_volume()
+	volume_sum_atom = self.get_volume_sum_of_elements()
         for atom in self:
             if atom.element_id in replace:
-                volume -= atom.element.volume
+                volume -= atom.element.volume*volume/volume_sum_atom
+		volume_sum_atom -= atom.element.volume
                 atom.element = Element.get(replace[atom.element_id])
-                volume += atom.element.volume
+                volume += atom.element.volume*volume/volume_sum_atom
+		volume_sum_atom += atom.element.volume
         if rescale and rescale_method == "relative":
             self.set_volume(volume)
         elif rescale and rescale_method == "absolute":
