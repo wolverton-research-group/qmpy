@@ -144,7 +144,10 @@ class Entry(models.Model):
 
         # Step 2
         entry = Entry(**kwargs)
-        structure = io.read(source_file)
+        try:
+            structure = io.poscar.read(source_file)
+        except ValueError:
+            structure = io.cif.read(source_file)
         structure.make_primitive()
         entry.source_file = source_file
         entry.path = os.path.dirname(source_file)
@@ -444,7 +447,7 @@ class Entry(models.Model):
         forms = forms.exclude(stability=None)
         if not forms.exists():
             return None
-        return any([ f.stability < 0 for f in forms ])
+        return any([ f.stability <= 1E-3 for f in forms ])
         
 
     _history = None

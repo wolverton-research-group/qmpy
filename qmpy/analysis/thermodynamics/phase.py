@@ -8,8 +8,8 @@ import StringIO
 import fractions as frac
 import logging
 
-import qmpy
 from qmpy.utils import *
+from django.db.models import F
 
 logger = logging.getLogger(__name__)
 
@@ -178,6 +178,7 @@ class PhaseData(object):
         from qmpy.materials.element import Element
         logger.debug('Loading Phases from the OQMD')
         data = FormationEnergy.objects.all()
+        ##data = data.filter(entry__id=F('entry__duplicate_of__id'))
 
         if fit:
             data = data.filter(fit=fit)
@@ -213,17 +214,18 @@ class PhaseData(object):
                 energy = row['calculation__energy_pa']
             else:
                 energy = row['delta_e']
-            ##try:
-            phase = Phase(energy=energy,
-                    composition=parse_comp(row['composition_id']),
-                    description=row['calculation__input__spacegroup'],
-                    stability=row['stability'],
-                    per_atom=True,
-                    total=total)
-            phase.id = row['id']
-            self.add_phase(phase)
-            ##except TypeError:
-            ##    print row['composition_id'], row['id']
+            try:
+                phase = Phase(energy=energy,
+                        composition=parse_comp(row['composition_id']),
+                        description=row['calculation__input__spacegroup'],
+                        stability=row['stability'],
+                        per_atom=True,
+                        total=total)
+                phase.id = row['id']
+                self.add_phase(phase)
+            except TypeError:
+                raise PhaseError('Something went wrong with Formation object\
+                                 {}. No composition?'.format(row['id']))
 
     def read_file(self, filename, per_atom=True):
         """

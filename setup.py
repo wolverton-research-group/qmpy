@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='qmpy',
-    version='1.1.0.post1',
+    version='1.2.0',
     author='S. Kirklin',
     author_email='scott.kirklin@gmail.com',
     license='LICENSE.txt',
