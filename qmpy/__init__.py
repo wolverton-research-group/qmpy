@@ -3,17 +3,17 @@
 """
 qmpy is a package containing many tools for computational materials science. 
 """
-# Load models (Django >= 1.7)
-try:
-    import django
-    django.setup()
-except:
-    pass
-import numpy as np
-try:
-    import pyximport; pyximport.install()
-except ImportError:
-    pass
+## Load models (Django >= 1.7)
+#try:
+#    import django
+#    django.setup()
+#except:
+#    pass
+#import numpy as np
+#try:
+#    import pyximport; pyximport.install()
+#except ImportError:
+#    pass
 import logging
 import logging.handlers
 import os, os.path
