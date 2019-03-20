@@ -141,6 +141,7 @@ class Calculation(models.Model):
     nsteps = models.IntegerField(blank=True, null=True)
     converged = models.NullBooleanField(null=True)
     runtime = models.FloatField(blank=True, null=True)
+    finaltag = models.NullBooleanField(default=False, null=True)
 
     #= Non-stored values =#
     outcar = None
@@ -896,6 +897,8 @@ class Calculation(models.Model):
         if (sc_converged and ((forces_converged and check_ionic) or not check_ionic) and
             basis_converged):
             self.converged = True
+            if self.label == 'static':
+                self.finaltag = True
         else:
             self.converged = False
             self.add_error('convergence')
