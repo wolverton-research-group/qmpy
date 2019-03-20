@@ -78,25 +78,25 @@ class EntrySerializer(serializers.ModelSerializer):
 
     def get_energy_per_atom(self, entry):
         try:
-            if entry.calculations['static'].converged:
-                return entry.calculations['static'].energy_pa
-            elif entry.calculations['standard'].converged:
-                return entry.calculations['standard'].energy_pa
-            else:
-                return
+            return entry.calculation_set.get(label='static', \
+                                             converged=True).energy_pa
         except:
-            return 
+            try:
+                return entry.calculation_set.get(label='standard', \
+                                                 converged=True).energy_pa
+            except:
+                return 
 
     def get_band_gap(self, entry):
         try:
-            if entry.calculations['static'].converged:
-                return entry.calculations['static'].band_gap
-            elif entry.calculations['standard'].converged:
-                return entry.calculations['standard'].band_gap
-            else:
-                return
+            return entry.calculation_set.get(label='static', \
+                                             converged=True).band_gap
         except:
-            return 
+            try:
+                return entry.calculation_set.get(label='standard', \
+                                                 converged=True).band_gap
+            except:
+                return 
 
     def get_formation_energy(self, entry):
         try:
