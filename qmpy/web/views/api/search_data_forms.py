@@ -10,15 +10,15 @@ filter_choices = [
     #('natoms', 'natoms'),
     #('ntypes', 'ntypes'),
     (None, 'oqmd_id'),
-    ('energyperatom', 'energy_per_atom'),
-    ('bandgap', 'band_gap'),
+    #('energyperatom', 'energy_per_atom'),
+    #('bandgap', 'band_gap'),
     ('formationenergy', 'formation_energy'),
-    #('stability', 'stability'),
+    ('stability', 'stability'),
 ]
 
 class DataFilterForm(forms.Form):
     composition = forms.CharField(required=False)
-    calculated = forms.CharField(required=False)
+    icsd = forms.CharField(required=False)
     band_gap = forms.CharField(required=False)
     ntypes = forms.CharField(required=False)
     generic = forms.CharField(required=False)
@@ -60,7 +60,7 @@ class DataFilterForm(forms.Form):
                         Div('generic', css_class="span4"),
                         css_class='row-fluid'
                     ),
-                    Field('calculated', css_class="input-sm"),
+                    Field('icsd', css_class="input-sm"),
                    ),
                 Tab('Limit',
                     Field('limit', css_class="input-sm"),

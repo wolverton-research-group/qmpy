@@ -125,25 +125,44 @@ button:hover:not([disabled]) {
     <tr>
         <th onclick="sortTable(0, 'num')"> rank </th>
         <th onclick="sortTable(1, 'num')"> oqmd_id </th>
-        <th onclick="sortTable(2, 'str')"> name </th>
-        <th onclick="sortTable(3, 'str')"> generic </th>
-        <th onclick="sortTable(4, 'str')"> spacegroup </th>
-        <th onclick="sortTable(5, 'num')"> ntypes </th>
-        <th onclick="sortTable(6, 'num')"> natoms </th>
-        <th onclick="sortTable(7, 'num')"> energy_pa </th>
-        <th onclick="sortTable(8, 'num')"> formation_energy </th>
-        <th onclick="sortTable(9, 'num')"> band_gap </th>
-        <th onclick="sortTable(10, 'num')"> stability </th>
+        <th onclick="sortTable(2, 'num')"> icsd_id </th>
+        <th onclick="sortTable(3, 'link')"> name </th>
+        <th onclick="sortTable(4, 'str')"> generic </th>
+        <th onclick="sortTable(5, 'str')"> spacegroup </th>
+        <th onclick="sortTable(6, 'num')"> ntypes </th>
+        <th onclick="sortTable(7, 'num')"> natoms </th>
+        <th onclick="sortTable(8, 'num')"> energy_pa </th>
+        <th onclick="sortTable(9, 'num')"> formation_energy </th>
+        <th onclick="sortTable(10, 'num')"> band_gap </th>
+        <th onclick="sortTable(11, 'num')"> stability </th>
     </tr>
     {% for e in result %}
         <tr class=clickableRow">
         <td width="60"> {{ forloop.counter|add:offset}} </td>
         <td width="60"> {{ e.id }} </td>
-        <td width="90"> <a href="/materials/entry/{{e.id}}">{{ e.name }}</a> </td>
+
+        {% if e.icsd_id %}
+            <td width="60"> {{ e.icsd_id }} </td>
+        {% else %}
+            <td width="60">  </td>
+        {% endif %}
+
+        <td width="90"> <a href="/materials/entry/{{e.id}}">{{ e.name }}</a></td>
         <td width="80"> {{ e.composition_generic }} </td>
         <td width="80"> {{ e.spacegroup }} </td>
-        <td width="80"> {{ e.ntypes }} </td>
-        <td width="80"> {{ e.natoms}} </td>
+
+        {% if e.ntypes %}
+            <td width="80"> {{ e.ntypes }} </td>
+        {% else %}
+            <td width="80"> </td>
+        {% endif %}
+
+        {% if e.natoms %}
+            <td width="80"> {{ e.natoms }} </td>
+        {% else %}
+            <td width="80"> </td>
+        {% endif %}
+        
         <td width="80"> {{ e.energy_per_atom | floatformat:-3 }} </td>
         <td width="80"> {{ e.formation_energy | floatformat:-3 }} </td>
         <td width="80"> {{ e.band_gap | floatformat:-3 }} </td>
@@ -185,6 +204,9 @@ function sortTable(n, type) {
             } else if (type == 'str') {
                 xc = x.innerHTML.toLowerCase()
                 yc = y.innerHTML.toLowerCase()
+            } else if (type == 'link') {
+                xc = x.innerText.toLowerCase()
+                yc = y.innerText.toLowerCase()
             }
 
 

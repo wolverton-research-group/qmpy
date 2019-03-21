@@ -93,7 +93,7 @@ def search_data(request):
             # These parameters are from django forms. Only 'sort_offest'
             # can be passed from django forms and 'offset' cannot be 
             # initialiated from django forms.
-            for arg in ['composition', 'calculated', 'band_gap',
+            for arg in ['composition', 'icsd', 'band_gap',
                         'ntypes', 'generic',
                         'sort_by', 'desc', 'sort_offset', 'limit']:
                 tmp = form.cleaned_data.get(arg)

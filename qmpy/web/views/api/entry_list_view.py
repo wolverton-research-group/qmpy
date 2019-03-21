@@ -20,10 +20,11 @@ class EntryList(generics.ListAPIView):
 
     def get_queryset(self):
         entries = Entry.objects.all()
-        entries = self.composition_filter(entries)
         entries = self.calculated_filter(entries)
-        entries = self.bandgap_filter(entries)
+        entries = self.icsd_filter(entries)
         entries = self.ntypes_filter(entries)
+        entries = self.composition_filter(entries)
+        entries = self.bandgap_filter(entries)
         entries = self.generic_filter(entries)
 
         sort_entries = self.request.GET.get('sort_by', False)
@@ -47,6 +48,8 @@ class EntryList(generics.ListAPIView):
             entries = self.sort_by_bandgap(entries, limit, sort_offset, desc)
         elif sort_entries == 'formationenergy':
             entries = self.sort_by_formationenergy(entries, limit, sort_offset, desc)
+        elif sort_entries == 'stability':
+            entries = self.sort_by_stability(entries, limit, sort_offset, desc)
         elif sort_entries == 'energyperatom':
             entries = self.sort_by_energyperatom(entries, limit, sort_offset, desc)
 
@@ -109,6 +112,19 @@ class EntryList(generics.ListAPIView):
             return entries
 
         return entries.exclude(formationenergy=None)
+
+    def icsd_filter(self, entries):
+        request = self.request
+        ificsd = request.GET.get('icsd', None)
+        
+        if ificsd == None:
+            return entries
+        elif ificsd in ['False', 'false', 'F', 'f']:
+            return entries.exclude(path__contains='/icsd/')
+        elif ificsd in ['True', 'true', 'T', 't']:
+            return entries.filter(path__contains='/icsd/')
+
+        return entries
 
     def bandgap_filter(self, entries):
         """
@@ -185,17 +201,21 @@ class EntryList(generics.ListAPIView):
     def sort_by_formationenergy(self, entries, limit=DEFAULT_LIMIT, sort_offset=0, desc=False):
         es_id = [e.id for e in entries]
 
-        cs = Calculation.objects.filter(entry__id__in=es_id, 
-                                        label='static')
+        fes = FormationEnergy.objects.filter(entry_id__in=es_id, fit_id='standard')
 
-        cs_id = [c.id for c in cs]
-
-        fes = FormationEnergy.objects.filter(calculation_id__in=cs_id)
-
-        
         if desc in ['T', 't', 'True', 'true']:
             ordered_fes = fes.order_by('-delta_e')
         else:
             ordered_fes = fes.order_by('delta_e')
         return [fe.entry for fe in ordered_fes[sort_offset:sort_offset+limit]]
 
+    def sort_by_stability(self, entries, limit=DEFAULT_LIMIT, sort_offset=0, desc=False):
+        es_id = [e.id for e in entries]
+
+        fes = FormationEnergy.objects.filter(entry_id__in=es_id, fit_id='standard')
+        
+        if desc in ['T', 't', 'True', 'true']:
+            ordered_fes = fes.order_by('-stability')
+        else:
+            ordered_fes = fes.order_by('stability')
+        return [fe.entry for fe in ordered_fes[sort_offset:sort_offset+limit]]

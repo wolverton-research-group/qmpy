@@ -32,6 +32,7 @@ class QMPYRester(object):
             **kwargs: dict
                 :composition
                 :calculated
+                :icsd
                 :band_gap
                 :ntypes
                 :generic
@@ -44,7 +45,7 @@ class QMPYRester(object):
             dict
         """
         url_args = []
-        kwargs_list = ['composition', 'calculated',
+        kwargs_list = ['composition', 'calculated', 'icsd',
                        'band_gap', 'ntypes', 'generic',
                        'sort_by', 'desc', 'sort_offset',
                        'limit', 'offset']

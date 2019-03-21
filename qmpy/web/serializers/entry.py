@@ -9,10 +9,13 @@ from qmpy.analysis.vasp import Calculation
 from calculation import CalculationRawSerializer
 
 class EntrySerializer(serializers.ModelSerializer):
+    icsd_id = serializers.SerializerMethodField()
+
     composition = serializers.SerializerMethodField()
     composition_generic = serializers.SerializerMethodField()
     spacegroup = serializers.SerializerMethodField()
     volume = serializers.SerializerMethodField()
+
 
     unit_cell = serializers.SerializerMethodField()
     sites = serializers.SerializerMethodField()
@@ -24,6 +27,14 @@ class EntrySerializer(serializers.ModelSerializer):
     stability = serializers.SerializerMethodField()
 
     calculations = serializers.SerializerMethodField('get_calc')
+
+    def get_icsd_id(self, entry):
+        if 'icsd' in entry.keywords:
+            try:
+                assert 'icsd' in entry.path
+                return entry.path.split('/')[-1]
+            except:
+                pass
 
     def get_composition(self, entry):
         return entry.composition.formula
@@ -118,8 +129,9 @@ class EntrySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Entry
-        fields = ('id', 'name', 'path', 'composition', 'composition_generic', 
-                  'prototype', 'spacegroup', 'volume',
+        fields = ('id', 'name', 'path', 'icsd_id',
+                  'composition', 'composition_generic', 
+                  'prototype', 'spacegroup', 'volume', 
                   'ntypes', 'natoms', 
                   'unit_cell', 'sites',
                   'energy_per_atom', 'band_gap', 
