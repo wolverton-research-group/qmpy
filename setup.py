@@ -18,7 +18,7 @@ setup(
         "PuLP",
         "numpy",
         "scipy",
-        "MySQL-python",
+        # "MySQL-python",
         "matplotlib",
         "networkx",
         "pytest",
