@@ -109,6 +109,9 @@ urlpatterns += [
     url(r'^serializer/calculation$', views.CalculationList.as_view()),
     url(r'^serializer/calculation/(?P<pk>[0-9]+)/$', views.CalculationDetail.as_view()),
 
+    ## optimade
+    url(r'^optimade/$', 'qmpy.web.views.optimade_home'),
+
     ## download
     url(r'^download/', 'qmpy.web.views.download_home'),
 
