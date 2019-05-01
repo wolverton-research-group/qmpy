@@ -22,6 +22,17 @@ class Token(object):
         self.tokens = tokens
 
     def filter_formationenergy(self, expr):
+        """
+        Function to convert expression into Q model
+        Input: 
+            :str expr: format should be 'attribute=value' e.g. 'element=Fe'
+                list of valid attributes:
+                    element, generic, prototype, spacegroup,
+                    volume, natoms, ntypes, stability,
+                    delta_e, band_gap
+        Output:
+            :Q
+        """
         if type(expr) == Q:
             return expr
         else:
@@ -102,6 +113,13 @@ class Token(object):
         return reduce(operator.or_, q_lst)
 
     def evaluate_filter(self, origin='formationenergy'):
+        """
+        Evaluate the token and parse it to django Q operation
+        Input:
+            :str origin: formationenergy, etc
+        Output:
+            :Q 
+        """
         value_stack = []
         operator_stack = []
 
