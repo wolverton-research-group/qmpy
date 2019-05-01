@@ -108,6 +108,8 @@ urlpatterns += [
     url(r'^serializer/entry/(?P<pk>[0-9]+)/$', views.EntryDetail.as_view()),
     url(r'^serializer/calculation$', views.CalculationList.as_view()),
     url(r'^serializer/calculation/(?P<pk>[0-9]+)/$', views.CalculationDetail.as_view()),
+    url(r'^serializer/formationenergy$', views.FormationEnergyList.as_view()),
+    url(r'^serializer/formationenergy/(?P<pk>[0-9]+)/$', views.FormationEnergyDetail.as_view()),
 
     ## optimade
     url(r'^optimade/$', 'qmpy.web.views.optimade_home'),
