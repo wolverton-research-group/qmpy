@@ -54,14 +54,7 @@ class FormationEnergySerializer(serializers.ModelSerializer):
         return formationenergy.composition.generic
     
     def get_spacegroup(self, formationenergy):
-        entry = formationenergy.entry
-        try:
-            if 'static' in entry.structures:
-                return entry.structures['static'].spacegroup.hm
-            else:
-                return entry.structures['input'].spacegroup.hm
-        except:
-            return 
+        return formationenergy.calculation.output.spacegroup.hm
 
     def get_prototype(self, formationenergy):
         try:
@@ -70,22 +63,11 @@ class FormationEnergySerializer(serializers.ModelSerializer):
             return
 
     def get_volume(self, formationenergy):
-        entry = formationenergy.entry
-        try:
-            if 'static' in entry.structures:
-                return entry.structures['static'].volume
-            else:
-                return entry.structures['input'].volume
-        except:
-            return 
+        return formationenergy.calculation.output.volume
 
     def get_unit_cell(self, formationenergy):
-        entry = formationenergy.entry
         try:
-            if 'static' in entry.structures:
-                strct = entry.structures['static']
-            else:
-                strct = entry.structures['input']
+            strct = formationenergy.calculation.output
 
             return [[strct.x1, strct.x2, strct.x3],
                     [strct.y1, strct.y2, strct.y3],
@@ -94,13 +76,8 @@ class FormationEnergySerializer(serializers.ModelSerializer):
             return
 
     def get_sites(self, formationenergy):
-        entry = formationenergy.entry
         try:
-            if 'static' in entry.structures:
-                strct = entry.structures['static']
-            else:
-                strct = entry.structures['input']
-
+            strct = formationenergy.calculation.output
             sites = [str(s) for s in strct.sites]
 
             return sites
