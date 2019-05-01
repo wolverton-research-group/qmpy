@@ -40,7 +40,7 @@ class FormationEnergySerializer(serializers.ModelSerializer):
         if 'icsd' in entry.keywords:
             try:
                 assert 'icsd' in entry.path
-                return entry.path.split('/')[-1]
+                return int(entry.path.split('/')[-1])
             except:
                 pass
 
