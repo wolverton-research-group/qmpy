@@ -23,7 +23,7 @@ class EntryList(generics.ListAPIView):
         entries = self.calculated_filter(entries)
         entries = self.icsd_filter(entries)
         entries = self.ntypes_filter(entries)
-        entries = self.composition_filter(entries)
+        #entries = self.composition_filter(entries) # Deprecated
         entries = self.bandgap_filter(entries)
         entries = self.generic_filter(entries)
 
