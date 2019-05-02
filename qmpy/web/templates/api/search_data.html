@@ -129,12 +129,13 @@ button:hover:not([disabled]) {
         <th onclick="sortTable(3, 'link')"> name </th>
         <th onclick="sortTable(4, 'str')"> generic </th>
         <th onclick="sortTable(5, 'str')"> spacegroup </th>
-        <th onclick="sortTable(6, 'num')"> ntypes </th>
-        <th onclick="sortTable(7, 'num')"> natoms </th>
-        <th onclick="sortTable(8, 'num')"> volume </th>
-        <th onclick="sortTable(9, 'num')"> formation_energy </th>
-        <th onclick="sortTable(10, 'num')"> band_gap </th>
-        <th onclick="sortTable(11, 'num')"> stability </th>
+        <th onclick="sortTable(6, 'str')"> prototype </th>
+        <th onclick="sortTable(7, 'num')"> ntypes </th>
+        <th onclick="sortTable(8, 'num')"> natoms </th>
+        <th onclick="sortTable(9, 'num')"> volume </th>
+        <th onclick="sortTable(10, 'num')"> formation_energy </th>
+        <th onclick="sortTable(11, 'num')"> band_gap </th>
+        <th onclick="sortTable(12, 'num')"> stability </th>
     </tr>
     {% for e in result %}
         <tr class=clickableRow">
@@ -150,6 +151,7 @@ button:hover:not([disabled]) {
         <td width="90"> <a href="/materials/entry/{{e.id}}">{{ e.name }}</a></td>
         <td width="80"> {{ e.composition_generic }} </td>
         <td width="80"> {{ e.spacegroup }} </td>
+        <td width="80"> {{ e.prototype }} </td>
 
         {% if e.ntypes %}
             <td width="80"> {{ e.ntypes }} </td>
