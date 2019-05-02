@@ -23,6 +23,59 @@ class QMPYRester(object):
                 data = json.loads(response.text)
                 return data
 
+    def get_oqmd_phases(self, verbose=True, **kwargs):
+        """
+        Input:
+            verbose: boolean
+            **kwargs: dict
+        Output:
+            dict
+        """
+
+        # URL paramters
+        url_args = []
+        kwargs_list = ['composition', 'filters',
+                       'sort_by', 'desc', 'sort_offset',
+                       'limit', 'offset']
+
+        # Attributes for filters
+        filter_args = []
+        filter_list = ['element_set', 'element',
+                       'prototype', 'generic', 'volume',
+                       'natoms', 'ntypes', 'stability',
+                       'delta_e', 'band_gap', 'filters']
+
+        for k in kwargs.keys():
+            if k in kwargs_list:
+                url_args.append('%s=%s' %(k, kwargs[k]))
+            elif k in filter_list:
+                if '>' in kwargs[k] or '<' in kwargs[k]:
+                    filter_args.append('%s%s' %(k, kwargs[k]))
+                else:
+                    filter_args.append('%s=%s' %(k, kwargs[k]))
+
+
+        if filter_args != []:
+            filters_tag = ' AND '.join(filter_args)
+            url_args.append('filters='+filters_tag)
+            
+        if verbose:
+            print "Your filters are:"
+            if url_args == []:
+                print "   No filters?"
+            else:
+                for arg in url_args:
+                    print "   ", arg
+
+            ans = raw_input('Proceed? [Y/n]:')
+
+            if ans not in ['Y', 'y', 'Yes', 'yes']:
+                return
+
+        _url = '&'.join(url_args)
+
+        return self._make_requests('/formationenergy?%s'%_url)
+
     def get_entries(self, verbose=True, all_data=False, **kwargs):
         """
         Input:
