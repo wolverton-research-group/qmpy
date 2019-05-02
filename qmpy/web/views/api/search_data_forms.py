@@ -17,17 +17,39 @@ filter_choices = [
 ]
 
 class DataFilterForm(forms.Form):
-    composition = forms.CharField(required=False)
-    element_set = forms.CharField(required=False)
-    prototype = forms.CharField(required=False)
-    spacegroup = forms.CharField(required=False)
-    generic = forms.CharField(required=False)
-    icsd = forms.CharField(required=False)
-    band_gap = forms.CharField(required=False)
-    delta_e = forms.CharField(required=False)
-    stability = forms.CharField(required=False)
-    natoms = forms.CharField(required=False)
-    ntypes = forms.CharField(required=False)
+    composition = forms.CharField(required=False,
+                                  widget=forms.TextInput(attrs={'placeholder': 'e.g. Al2O3, Fe-O, {3d}O'}, )
+                                 )
+    element_set = forms.CharField(required=False, label='Element Set',
+                                  widget=forms.TextInput(attrs={'placeholder': 'e.g. S, (Mn,Fe)-O'}, )
+                                 )
+    prototype = forms.CharField(required=False, 
+                                widget=forms.TextInput(attrs={'placeholder': 'e.g. Cu, CsCl'}, )
+                               )
+    spacegroup = forms.CharField(required=False,
+                                 widget=forms.TextInput(attrs={'placeholder': 'e.g. Fm-3m, P4/mmm'})
+                                )
+    generic = forms.CharField(required=False, 
+                              widget=forms.TextInput(attrs={'placeholder': 'e.g. AB, AB2'})
+                             )
+    icsd = forms.CharField(required=False, label='ICSD tag',
+                                widget=forms.TextInput(attrs={'placeholder': 'e.g. True, T, False, F'}),
+                          )
+    band_gap = forms.CharField(required=False,
+                               widget=forms.TextInput(attrs={'placeholder': 'e.g. 0, >0.3'}),
+                              )
+    delta_e = forms.CharField(required=False, label='Formation Energy',
+                              widget=forms.TextInput(attrs={'placeholder': 'e.g. <-0.5'})
+                             )
+    stability = forms.CharField(required=False, 
+                                widget=forms.TextInput(attrs={'placeholder': 'e.g. <-0.5'}),
+                               )
+    natoms = forms.CharField(required=False, label='# of atoms', 
+                             widget=forms.TextInput(attrs={'placeholder': 'e.g. 2, >3'})
+                            )
+    ntypes = forms.CharField(required=False, label='# of element types',
+                             widget=forms.TextInput(attrs={'placeholder': 'e.g. 2, >3'}),
+                             )
     volume = forms.CharField(required=False)
     filters = forms.CharField(required=False)
     limit = forms.IntegerField(required=False, label='limit', initial=50)
