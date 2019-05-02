@@ -34,7 +34,7 @@ class QMPYRester(object):
 
         # URL paramters
         url_args = []
-        kwargs_list = ['composition', 'filters',
+        kwargs_list = ['composition', 'icsd', 'filters',
                        'sort_by', 'desc', 'sort_offset',
                        'limit', 'offset']
 
@@ -73,6 +73,7 @@ class QMPYRester(object):
                 return
 
         _url = '&'.join(url_args)
+        q.suburl = _url
 
         return self._make_requests('/formationenergy?%s'%_url)
 
