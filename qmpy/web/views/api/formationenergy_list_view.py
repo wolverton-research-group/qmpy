@@ -16,6 +16,7 @@ class FormationEnergyList(generics.ListAPIView):
 
     def get_queryset(self):
         fes = FormationEnergy.objects.filter(fit="standard")
+        fes = self.icsd_filter(fes)
         fes = self.composition_filter(fes)
         fes = self.filter(fes)
 
@@ -38,6 +39,19 @@ class FormationEnergyList(generics.ListAPIView):
 
         if sort_fes == 'stability':
             fes = self.sort_by_stability(fes, limit, sort_offset, desc)
+
+        return fes
+
+    def icsd_filter(self, fes):
+        request = self.request
+        ificsd = request.GET.get('icsd', None)
+        
+        if ificsd == None:
+            return fes
+        elif ificsd in ['False', 'false', 'F', 'f']:
+            return fes.exclude(entry__path__contains='/icsd/')
+        elif ificsd in ['True', 'true', 'T', 't']:
+            return fes.filter(entry__path__contains='/icsd/')
 
         return fes
 
