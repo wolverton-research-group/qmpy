@@ -77,7 +77,7 @@ button:hover:not([disabled]) {
 </style>
 <body>
 
-<h1> Search Entries through OQMD </h1>
+<h1> Search OQMD Phases</h1>
 {% crispy form %}
 {% if result %}
 <h1> Results: </h1>
@@ -131,7 +131,7 @@ button:hover:not([disabled]) {
         <th onclick="sortTable(5, 'str')"> spacegroup </th>
         <th onclick="sortTable(6, 'num')"> ntypes </th>
         <th onclick="sortTable(7, 'num')"> natoms </th>
-        <th onclick="sortTable(8, 'num')"> energy_pa </th>
+        <th onclick="sortTable(8, 'num')"> volume </th>
         <th onclick="sortTable(9, 'num')"> formation_energy </th>
         <th onclick="sortTable(10, 'num')"> band_gap </th>
         <th onclick="sortTable(11, 'num')"> stability </th>
@@ -139,7 +139,7 @@ button:hover:not([disabled]) {
     {% for e in result %}
         <tr class=clickableRow">
         <td width="60"> {{ forloop.counter|add:offset}} </td>
-        <td width="60"> {{ e.id }} </td>
+        <td width="60"> {{ e.entry_id }} </td>
 
         {% if e.icsd_id %}
             <td width="60"> {{ e.icsd_id }} </td>
@@ -163,15 +163,15 @@ button:hover:not([disabled]) {
             <td width="80"> </td>
         {% endif %}
         
-        <td width="80"> {{ e.energy_per_atom | floatformat:-3 }} </td>
-        <td width="80"> {{ e.formation_energy | floatformat:-3 }} </td>
+        <td width="80"> {{ e.volume | floatformat:-3 }} </td>
+        <td width="80"> {{ e.delta_e | floatformat:-3 }} </td>
         <td width="80"> {{ e.band_gap | floatformat:-3 }} </td>
         <td width="80"> {{ e.stability | floatformat:-3 }} </td>
         </tr>
     {% endfor %}
 </table>
 <div style="margin: 10px">
-    <a href="/serializer/entry?{{suburl}}&format=json" class="button">Output Result in JSON format</a>
+    <a href="/serializer/formationenergy?{{suburl}}&format=json" class="button">Output Result in JSON format</a>
 </div>
 {% endif %}
 

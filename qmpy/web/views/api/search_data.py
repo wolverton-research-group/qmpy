@@ -86,38 +86,32 @@ def search_data(request):
 
         if form.is_valid():
             kwargs = {} # input kwargs for QMPYRester()
-            suburl_lst = [] # partial url request options 
 
             ## Collect information from django forms 
             # General paramters
             # These parameters are from django forms. Only 'sort_offest'
             # can be passed from django forms and 'offset' cannot be 
             # initialiated from django forms.
-            for arg in ['composition', 'icsd', 'band_gap',
-                        'ntypes', 'generic',
+            for arg in ['composition', 'icsd', 'filters',
+                        'element_set', 'prototype', 'generic',
+                        'volume', 'natoms', 'ntypes', 'stability',
+                        'delta_e', 'band_gap',
                         'sort_by', 'desc', 'sort_offset', 'limit']:
                 tmp = form.cleaned_data.get(arg)
                 if tmp != '' and tmp != None:
                     kwargs[arg] = tmp
-                    suburl_lst.append('%s=%s'%(arg, tmp))
 
             # Update 'offset'
             # The django form will store the value of 'offset' input
             # as 'sort_offset'. If sorting is not needed, this value
             # should be the offset of total result. 
-            if 'sort_by' not in kwargs:
-                if 'sort_offset' in kwargs:
-                    kwargs['offset'] = kwargs['sort_offset']
-                    suburl_lst.append('%s=%s'%('offset', kwargs['offset']))
-                    suburl_lst.remove('%s=%s'
-                                      %('sort_offset', kwargs['sort_offset']))
-
-            suburl = '&'.join(suburl_lst)
-            data['suburl'] = suburl
+            if 'sort_by' not in kwargs and 'sort_offset' in kwargs:
+                kwargs['offset'] = kwargs['sort_offset']
 
             # Call QMPYRester() to collect data
             with qmpy_rester.QMPYRester() as q:
-                d = q.get_entries(verbose=False, **kwargs)
+                d = q.get_oqmd_phases(verbose=False, **kwargs)
+                data['suburl'] = q.suburl
                 data['result'] = d['results']
                 data['limit'] = kwargs.get('limit', 50) # default of limit is 50
                 data['offset'] = kwargs.get('sort_offset', 0) 

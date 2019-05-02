@@ -9,19 +9,27 @@ filter_choices = [
     #('name', 'name'),
     #('natoms', 'natoms'),
     #('ntypes', 'ntypes'),
-    (None, 'oqmd_id'),
+    (None, 'none'),
     #('energyperatom', 'energy_per_atom'),
     #('bandgap', 'band_gap'),
-    ('formationenergy', 'formation_energy'),
+    #('formationenergy', 'formation_energy'),
     ('stability', 'stability'),
 ]
 
 class DataFilterForm(forms.Form):
     composition = forms.CharField(required=False)
+    element_set = forms.CharField(required=False)
+    prototype = forms.CharField(required=False)
+    spacegroup = forms.CharField(required=False)
+    generic = forms.CharField(required=False)
     icsd = forms.CharField(required=False)
     band_gap = forms.CharField(required=False)
+    delta_e = forms.CharField(required=False)
+    stability = forms.CharField(required=False)
+    natoms = forms.CharField(required=False)
     ntypes = forms.CharField(required=False)
-    generic = forms.CharField(required=False)
+    volume = forms.CharField(required=False)
+    filters = forms.CharField(required=False)
     limit = forms.IntegerField(required=False, label='limit', initial=50)
     sort_offset = forms.IntegerField(required=False, label='offset', initial=0)
 
@@ -52,25 +60,49 @@ class DataFilterForm(forms.Form):
                 Tab('Materials properties',
                     Div(
                         Div('composition', css_class="span4"),
-                        Div('band_gap', css_class="span4"),
+                        Div('element_set', css_class="span4"),
+                        css_class='row-fluid'
+                    ),
+                    Div(
+                        Div('icsd', css_class="span4"),
+                        Div('spacegroup', css_class="span4"),
                         css_class='row-fluid'
                     ),
                     Div(
                         Div('ntypes', css_class="span4"),
+                        Div('natoms', css_class="span4"),
+                        css_class='row-fluid'
+                    ),
+                    Div(
+                        Div('prototype', css_class="span4"),
                         Div('generic', css_class="span4"),
                         css_class='row-fluid'
                     ),
-                    Field('icsd', css_class="input-sm"),
+                    Div(
+                        Div('stability', css_class="span4"),
+                        Div('delta_e', css_class="span4"),
+                        css_class='row-fluid'
+                    ),
+                    Div(
+                        Div('band_gap', css_class="span4"),
+                        css_class='row-fluid'
+                    ),
                    ),
-                Tab('Limit',
-                    Field('limit', css_class="input-sm"),
-                    Field('sort_offset', css_class="input-sm"),
+                Tab('Input Filters',
+                    Div(
+                        Div('filters', css_class="span12"),
+                        css_class='row-fluid'
+                    ),
                    ),
             ),
             TabHolder(
                 Tab('Order of Results',
                     Field('sort_by', css_class="input-sm"),
                     Field('desc', css_class="input-sm"),
+                   ),
+                Tab('Limit',
+                    Field('limit', css_class="input-sm"),
+                    Field('sort_offset', css_class="input-sm"),
                    ),
             ),
         )
