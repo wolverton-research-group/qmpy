@@ -84,10 +84,10 @@ class Token(object):
                 space is not allowed.
                     Valid examples:
                         'element=Mn & band_gap>1'
-                        '( element=O or element=S ) & natoms<3'
+                        '( element=O | element=S ) & natoms<3'
                     Invalid examples:
                         'element = Fe'
-                        '( element=Fe and element=O)'
+                        '( element=Fe & element=O)'
         Output:
             :Q : django Q model
         """
