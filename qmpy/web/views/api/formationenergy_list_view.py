@@ -2,7 +2,7 @@ from rest_framework import generics
 import django_filters.rest_framework
 from qmpy.web.serializers.formationenergy import FormationEnergySerializer
 from qmpy.materials.formation_energy import FormationEnergy
-from api_perm import *
+from qmpy.materials.entry import Composition
 from qmpy.utils import Token, parse_formula_regex
 
 DEFAULT_LIMIT = 50
@@ -12,12 +12,11 @@ class FormationEnergyDetail(generics.RetrieveAPIView):
     serializer_class = FormationEnergySerializer
 
 class FormationEnergyList(generics.ListAPIView):
-    #permission_classes = (OnlyAPIPermission, )
     serializer_class = FormationEnergySerializer
-    #filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
 
     def get_queryset(self):
         fes = FormationEnergy.objects.filter(fit="standard")
+        fes = self.composition_filter(fes)
         fes = self.filter(fes)
 
         sort_fes = self.request.GET.get('sort_by', False)
@@ -42,58 +41,86 @@ class FormationEnergyList(generics.ListAPIView):
 
         return fes
 
-    def filter(self, fes):
-        request = self.request
-        return fes
-
-    def composition_filter(self, entries):
+    def composition_filter(self, fes):
         """
         Valid url parameter inputs:
             1. ?composition=Fe2O3
             2. ?composition=Fe-O
             3. ?composition={Fe,Ni}O
             4. ?composition={3d}2O3
-            5. ?composition=include_(Fe,Mn)-O : (Fe OR Mn) AND O
-            6. ?composition=include_Cl,O-H : Cl OR O AND H 
-            6. ?composition=include_H-{3d} : 3d elements AND H
         """
         request = self.request
 
         comp = request.GET.get('composition', False)
         if not comp:
-            return entries
+            return fes
 
-        if not 'include_' in comp:
-            if '{' and '}' in comp:
-                c_dict_lst = parse_formula_regex(comp)
-                f_lst = []
-                for cd in c_dict_lst:
-                    f = ' '.join(['%s%g' % (k, cd[k]) for k in sorted(cd.keys())])
-                    f_lst.append(f)
-                entries = entries.filter(composition__formula__in=f_lst)
-            else:
-                c_lst = comp.strip().split('-')
-                cs = Composition.get_list(c_lst)
-                if len(cs) == 1:
-                    c = cs[0]
-                else:
-                    c = cs
-                entries = entries.filter(composition=c)
-
+        if '{' and '}' in comp:
+            c_dict_lst = parse_formula_regex(comp)
+            f_lst = []
+            for cd in c_dict_lst:
+                f = ' '.join(['%s%g' % (k, cd[k]) for k in sorted(cd.keys())])
+                f_lst.append(f)
+            fes = fes.filter(composition__formula__in=f_lst)
         else:
-            comp_in = comp.replace('include_', '')
-            t = Token(comp_in)
-            q = t.evaluate()
-            entries = entries.filter(q)
+            c_lst = comp.strip().split('-')
+            cs = Composition.get_list(c_lst)
+            if len(cs) == 1:
+                c = cs[0]
+            else:
+                c = cs
+            fes = fes.filter(composition=c)
 
-        #comp_ex = request.GET.get('composition_exclude', False)
-        #if comp_ex:
-        #    cex_lst = Composition.get(comp_ex).comp.keys()
-        #    while cex_lst:
-        #        tmp_ex = cex_lst.pop()
-        #        entries = entries.exclude(composition__element_set=tmp_ex)
+        return fes
 
-        return entries
+
+    def filter(self, fes):
+        """
+        Valid attributes:
+            element, generic, prototype, spacegroup,
+            volume, natoms, ntypes, stability,
+            delta_e, band_gap
+
+        Requirments:
+            1. Space padding is required between expression. 
+            2. For each epression, space is not allowed.
+            3. Operators include: 'AND', 'OR'
+            4. '(' and ')' can be used to change precedence
+            5. For numerical attributes, we can have '>' or '<' conditions.
+            Valid examples:
+                'element=Mn AND band_gap>1'
+                '( element=O OR element=S ) AND natoms<3'
+            Invalid examples:
+                'element = Fe'
+                '( element=Fe And element=O)'
+
+        Additionally, instead of multiple 'element' expressions, we can use
+        'element_set' expression to combine elements in the filter.
+
+        Format of element_set expression:
+            '-': AND operator
+            ',': OR operator
+            '(', ')': to change precedence
+            Examples:
+                element_set=Al,O-H
+                element_set=(Mn,Fe)-O
+        """
+        request = self.request
+
+        filters = request.GET.get('filters', False)
+
+        if not filters:
+            return fes
+
+        # replace 'AND' and 'OR' to '&' and '|', respectively
+        filters = filters.replace('AND', '&')
+        filters = filters.replace('OR', '|')
+
+        t = Token(filters)
+        q = t.evaluate_filter(origin='formationenergy')
+        fes = fes.filter(q)
+
+        return fes
 
     def sort_by_stability(self, fes, limit=DEFAULT_LIMIT, sort_offset=0, desc=False):
         if desc in ['T', 't', 'True', 'true']:
