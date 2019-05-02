@@ -4,6 +4,12 @@ import re
 import qmpy.data as data
 
 def precedence(op):
+    """ 
+    Input:
+        :str op: operator string
+    Output:
+        :int : priority of the operator
+    """
     if op == '&':
         return 2
     elif op == '|':
@@ -12,14 +18,58 @@ def precedence(op):
         return 0
 
 def applyOP(q1, q2, op):
+    """
+    Function to apply operation
+    Input:
+        :Q q1: first django Q model
+        :Q q2: seconde django Q model
+        :str op: operator, '&' or '|' 
+    Output:
+        :Q : reduced django Q model
+    """
     if op == '&':
         return reduce(operator.and_, [q1, q2])
     elif op == '|':
         return reduce(operator.or_, [q1, q2])
 
+def element_set_conversion(filter_expr):
+    """
+    Convert element_set filter to multiple element filters
+    Input:
+        :str filter_expr: raw filter expression w/ element_set parameter
+            Valid element_set expression:
+                '-': AND operator
+                ',': OR operator
+                '(', ')': to change precedence
+            Examples:
+                element_set=Al,O-H
+                element_set=(Mn,Fe)-O
+    Output:
+        :str : converted filter expression
+    """
+    filter_expr_out = filter_expr
+
+    for els in re.findall('element_set=[\S]*', filter_expr):
+        els_out = els.replace('element_set=', '')
+
+        for el in re.findall('[A-Z][a-z]*', els):
+            els_out = els_out.replace(el, ' element='+el+' ')
+
+        els_out = els_out.replace('-', '&')
+        els_out = els_out.replace(',', '|')
+
+        filter_expr_out = filter_expr.replace(els, '('+els_out+')')
+
+    return filter_expr_out
+
 class Token(object):
     def __init__(self, tokens):
+        # preprocess token if 'element_set' included
+        if 'element_set' in tokens:
+            tokens = element_set_conversion(tokens)
+
         self.tokens = tokens
+        
 
     def filter_formationenergy(self, expr):
         """
@@ -30,8 +80,16 @@ class Token(object):
                     element, generic, prototype, spacegroup,
                     volume, natoms, ntypes, stability,
                     delta_e, band_gap
+                Space padding is required between expression. For each epression,
+                space is not allowed.
+                    Valid examples:
+                        'element=Mn & band_gap>1'
+                        '( element=O or element=S ) & natoms<3'
+                    Invalid examples:
+                        'element = Fe'
+                        '( element=Fe and element=O)'
         Output:
-            :Q
+            :Q : django Q model
         """
         if type(expr) == Q:
             return expr
@@ -112,7 +170,7 @@ class Token(object):
         Input:
             :str origin: formationenergy, etc
         Output:
-            :Q 
+            :Q : django Q model
         """
         value_stack = []
         operator_stack = []
