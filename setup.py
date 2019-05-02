@@ -14,7 +14,7 @@ setup(
     include_package_data=True,
     long_description=open('README.md').read(),
     install_requires=[
-        "Django >=1.6.2, <1.7",
+        "Django >=1.8, <1.9",
         "PuLP",
         "numpy",
         "scipy",
@@ -32,6 +32,9 @@ setup(
         "pyparsing",
         "PyYAML",
         "scikit-learn",
-        "bokeh == 0.12.15"
+        "bokeh == 0.12.15",
+        "djangorestframework == 3.6.4",
+        "requests",
+        "django-crispy-forms"
     ],
 )
