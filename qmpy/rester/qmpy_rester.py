@@ -73,7 +73,7 @@ class QMPYRester(object):
                 return
 
         _url = '&'.join(url_args)
-        q.suburl = _url
+        self.suburl = _url
 
         return self._make_requests('/formationenergy?%s'%_url)
 
