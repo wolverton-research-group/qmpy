@@ -16,12 +16,24 @@ filter_choices = [
     ('stability', 'stability'),
 ]
 
+def popover_html(label, content):
+    OUT = label + ' <a tabindex="0" role="button" data-toggle="popover" data-html="true"' +\
+         'data-trigger="hover" data-placement="auto"' +\
+         'data-content="' + content + '">' +\
+         '<span class="glyphicon glyphicon-info-sign"></span></a>'
+    return OUT
+
+
+
 class DataFilterForm(forms.Form):
     composition = forms.CharField(required=False,
                                   widget=forms.TextInput(attrs={'placeholder': 'e.g. Al2O3, Fe-O, {3d}O'}, )
                                  )
     element_set = forms.CharField(required=False, label='Element Set',
-                                  widget=forms.TextInput(attrs={'placeholder': 'e.g. S, (Mn,Fe)-O'}, )
+                                  widget=forms.TextInput(attrs={'placeholder': 'e.g. S, (Mn,Fe)-O'},
+                                                        ),
+                                  help_text="""Use '-' as AND operator and ',' as OR operator. 
+                                  Use '(' and ')' to change priority.""",
                                  )
     prototype = forms.CharField(required=False, 
                                 widget=forms.TextInput(attrs={'placeholder': 'e.g. Cu, CsCl'}, )
@@ -79,17 +91,20 @@ class DataFilterForm(forms.Form):
 
         self.helper.layout = Layout(
             TabHolder(
-                Tab('Materials properties',
+                Tab('Filters',
+                    HTML('<p style="margin-left: 10px; margin-bottom: 20px; font-size: 15px; font-weight:\
+                         600">General properties</p>'),
                     Div(
-                        Div('composition', css_class="span4"),
                         Div('element_set', css_class="span4"),
                         css_class='row-fluid'
                     ),
                     Div(
+                        Div('composition', css_class="span4"),
                         Div('icsd', css_class="span4"),
-                        Div('spacegroup', css_class="span4"),
                         css_class='row-fluid'
                     ),
+                    HTML('<br><p style="margin-left: 10px; margin-bottom: 20px; font-size: 15px; font-weight:\
+                         600">Structural properties</p>'),
                     Div(
                         Div('ntypes', css_class="span4"),
                         Div('natoms', css_class="span4"),
@@ -100,19 +115,21 @@ class DataFilterForm(forms.Form):
                         Div('generic', css_class="span4"),
                         css_class='row-fluid'
                     ),
+                    HTML('<br><p style="margin-left: 10px; margin-bottom: 20px; font-size: 15px; font-weight:\
+                         600">DFT calculated properties</p>'),
                     Div(
                         Div('stability', css_class="span4"),
-                        Div('delta_e', css_class="span4"),
-                        css_class='row-fluid'
-                    ),
-                    Div(
                         Div('band_gap', css_class="span4"),
                         css_class='row-fluid'
                     ),
-                   ),
-                Tab('Input Filters',
                     Div(
-                        Div('filters', css_class="span12"),
+                        Div('delta_e', css_class="span4"),
+                        css_class='row-fluid'
+                    ),
+                   ),
+                Tab('Manual Input Filters',
+                    Div(
+                        Field('filters', css_class="span8"),
                         css_class='row-fluid'
                     ),
                    ),
