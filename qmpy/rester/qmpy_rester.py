@@ -1,7 +1,7 @@
 import json
 
 class QMPYRester(object):
-    def __init__(self, endpoint='http://larue.northwestern.edu:9000/serializer'):
+    def __init__(self, endpoint='http://larue.northwestern.edu:9000/oqmdapi'):
         self.preamble = endpoint
         import requests
         self.session = requests.Session()

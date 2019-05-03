@@ -104,15 +104,17 @@ urlpatterns += [
     url(r'^api/search', 'qmpy.web.views.search_data'),
 
     ## serializer
-    url(r'^serializer/entry$', views.EntryList.as_view()),
-    url(r'^serializer/entry/(?P<pk>[0-9]+)/$', views.EntryDetail.as_view()),
-    url(r'^serializer/calculation$', views.CalculationList.as_view()),
-    url(r'^serializer/calculation/(?P<pk>[0-9]+)/$', views.CalculationDetail.as_view()),
-    url(r'^serializer/formationenergy$', views.FormationEnergyList.as_view()),
-    url(r'^serializer/formationenergy/(?P<pk>[0-9]+)/$', views.FormationEnergyDetail.as_view()),
+    url(r'^oqmdapi/entry$', views.EntryList.as_view()),
+    url(r'^oqmdapi/entry/(?P<pk>[0-9]+)/$', views.EntryDetail.as_view()),
+    url(r'^oqmdapi/calculation$', views.CalculationList.as_view()),
+    url(r'^oqmdapi/calculation/(?P<pk>[0-9]+)/$', views.CalculationDetail.as_view()),
+    url(r'^oqmdapi/formationenergy$', views.FormationEnergyList.as_view()),
+    url(r'^oqmdapi/formationenergy/(?P<pk>[0-9]+)/$', views.FormationEnergyDetail.as_view()),
 
     ## optimade
     url(r'^optimade/$', 'qmpy.web.views.optimade_home'),
+    url(r'^optimade/composition/([A-Za-z0-9\-]+)/$', 'qmpy.web.views.optimade_composition'),
+    url(r'^optimade/structures$', views.OptimadeStructureList.as_view()),
 
     ## download
     url(r'^download/', 'qmpy.web.views.download_home'),
