@@ -38,12 +38,12 @@ def element_set_conversion(filter_expr):
     Input:
         :str filter_expr: raw filter expression w/ element_set parameter
             Valid element_set expression:
-                '-': AND operator
-                ',': OR operator
+                ',': AND operator
+                ';': OR operator
                 '(', ')': to change precedence
             Examples:
-                element_set=Al,O-H
-                element_set=(Mn,Fe)-O
+                element_set=Al;O,H
+                element_set=(Mn;Fe),O
     Output:
         :str : converted filter expression
     """
@@ -55,8 +55,8 @@ def element_set_conversion(filter_expr):
         for el in re.findall('[A-Z][a-z]*', els):
             els_out = els_out.replace(el, ' element='+el+' ')
 
-        els_out = els_out.replace('-', '&')
-        els_out = els_out.replace(',', '|')
+        els_out = els_out.replace(',', '&')
+        els_out = els_out.replace(';', '|')
 
         filter_expr_out = filter_expr.replace(els, '('+els_out+')')
 

@@ -112,12 +112,12 @@ class FormationEnergyList(generics.ListAPIView):
         'element_set' expression to combine elements in the filter.
 
         Format of element_set expression:
-            '-': AND operator
-            ',': OR operator
+            ',': AND operator
+            ';': OR operator
             '(', ')': to change precedence
             Examples:
-                element_set=Al,O-H
-                element_set=(Mn,Fe)-O
+                element_set=Al;O,H
+                element_set=(Mn;Fe),O
         """
         request = self.request
 
