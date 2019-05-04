@@ -2,6 +2,7 @@ from django.db.models import Q
 import operator
 import re
 import qmpy.data as data
+from strings import parse_formula_regex
 
 def precedence(op):
     """ 
@@ -39,7 +40,7 @@ def element_set_conversion(filter_expr):
         :str filter_expr: raw filter expression w/ element_set parameter
             Valid element_set expression:
                 ',': AND operator
-                ';': OR operator
+                '-': OR operator
                 '(', ')': to change precedence
             Examples:
                 element_set=Al;O,H
@@ -56,20 +57,52 @@ def element_set_conversion(filter_expr):
             els_out = els_out.replace(el, ' element='+el+' ')
 
         els_out = els_out.replace(',', '&')
-        els_out = els_out.replace(';', '|')
+        els_out = els_out.replace('-', '|')
 
-        filter_expr_out = filter_expr.replace(els, '('+els_out+')')
+        filter_expr_out = filter_expr_out.replace(els, '('+els_out+')')
+
+    return filter_expr_out
+
+def optimade_filter_conversion(filter_expr):
+    """
+    Convert optimade filters to oqmdap formationenergy filters
+    Input:
+        :str : original filter expression
+    Output:
+        :str : converted filter expression
+    """
+    filter_expr_out = filter_expr
+
+    # General conversion
+    filter_expr_out = filter_expr_out.replace('formula_prototype', 'generic')
+    filter_expr_out = filter_expr_out.replace('nelements', 'ntypes')
+    filter_expr_out = filter_expr_out.replace('_oqmd_', '')
+
+    # Convert 'elements=' into mutiple 'element=' filters
+    for els in re.findall('elements=[\S]*', filter_expr):
+        els_out = els.replace('elements=', '')
+
+        els_lst = [' element='+e+' ' for e in els_out.split(',')]
+
+        els_out = ' & '.join(els_lst)
+
+        filter_expr_out = filter_expr_out.replace(els, '('+els_out+')')
+
 
     return filter_expr_out
 
 class Token(object):
-    def __init__(self, tokens):
-        # preprocess token if 'element_set' included
+    def __init__(self, tokens, optimade=False):
+        # preprocess token if 'element_set' include 
+
+        # For oqmdapi
         if 'element_set' in tokens:
             tokens = element_set_conversion(tokens)
 
+        if optimade:
+            tokens = optimade_filter_conversion(tokens)
+
         self.tokens = tokens
-        
 
     def filter_formationenergy(self, expr):
         """
@@ -79,7 +112,7 @@ class Token(object):
                 list of valid attributes:
                     element, generic, prototype, spacegroup,
                     volume, natoms, ntypes, stability,
-                    delta_e, band_gap
+                    delta_e, band_gap, chemical_formula
                 Space padding is required between expression. For each epression,
                 space is not allowed.
                     Valid examples:
@@ -99,6 +132,14 @@ class Token(object):
 
             if attr == "element":
                 return Q(composition__element_list__contains=val+'_')
+
+            elif attr == "chemical_formula":
+                c_dict_lst = parse_formula_regex(val)
+                f_lst = []
+                for cd in c_dict_lst:
+                    f = ' '.join(['%s%g' % (k, cd[k]) for k in sorted(cd.keys())])
+                    f_lst.append(f)
+                return Q(composition__formula__in=f_lst)
 
             elif attr == "generic":
                 return Q(composition__generic=val)
