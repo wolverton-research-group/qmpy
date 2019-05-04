@@ -30,9 +30,9 @@ class DataFilterForm(forms.Form):
                                   widget=forms.TextInput(attrs={'placeholder': 'e.g. Al2O3, Fe-O, {3d}O'}, )
                                  )
     element_set = forms.CharField(required=False, label='Element Set',
-                                  widget=forms.TextInput(attrs={'placeholder': 'e.g. S, (Mn;Fe),O'},
+                                  widget=forms.TextInput(attrs={'placeholder': 'e.g. S, (Mn-Fe),O'},
                                                         ),
-                                  help_text="""Use ',' as AND operator and ';' as OR operator. 
+                                  help_text="""Use ',' as AND operator and '-' as OR operator. 
                                   Use '(' and ')' to change priority.""",
                                  )
     prototype = forms.CharField(required=False, 

@@ -113,7 +113,7 @@ class FormationEnergyList(generics.ListAPIView):
 
         Format of element_set expression:
             ',': AND operator
-            ';': OR operator
+            '-': OR operator
             '(', ')': to change precedence
             Examples:
                 element_set=Al;O,H
