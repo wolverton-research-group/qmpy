@@ -8,7 +8,6 @@ from download import *
 from home import *
 from computing import *
 from api import *
-from optimade import *
 
 from documentation import *
 
