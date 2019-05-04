@@ -87,6 +87,6 @@ class OptimadeStructureSerializer(serializers.ModelSerializer):
                   'nelements', 'elements', 
                   'chemical_formula', 'formula_prototype', 
                   '_oqmd_entry_id', '_oqmd_calculation_id',
-                  '_oqmd_prototype', '_oqmd_spacegroup', 
-                  '_oqmd_unit_cell', '_oqmd_sites', '_oqmd_natoms',
-                  '_oqmd_band_gap', '_oqmd_delta_e', '_oqmd_stability')
+                  '_oqmd_band_gap', '_oqmd_delta_e', '_oqmd_stability',
+                  '_oqmd_prototype', '_oqmd_spacegroup', '_oqmd_natoms',
+                  '_oqmd_unit_cell', '_oqmd_sites')
