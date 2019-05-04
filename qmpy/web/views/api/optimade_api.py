@@ -32,6 +32,7 @@ class OptimadePagination(LimitOffsetPagination):
         return Response(OrderedDict([
             ('links', 
              OrderedDict([('next', self.get_next_link()),
+                          ('previous', self.get_previous_link()),
               ('base_url', {
                   "href": BASE_URL,
                   "meta":{'_oqmd_version': "1.0"}
@@ -47,7 +48,8 @@ class OptimadePagination(LimitOffsetPagination):
                  ("time_stamp", time_stamp), 
                  ("data_returned", min(self.get_limit(request), self.count)),
                  ("data_available", self.count),
-                 ("more_data_available", (self.get_next_link() != None))
+                 ("more_data_available", (self.get_next_link() != None) or \
+                                         (self.get_previous_link() != None))
              ])
             ),
             ("response_message", "OK")
