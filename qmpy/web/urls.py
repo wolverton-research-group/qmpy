@@ -112,8 +112,6 @@ urlpatterns += [
     url(r'^oqmdapi/formationenergy/(?P<pk>[0-9]+)/$', views.FormationEnergyDetail.as_view()),
 
     ## optimade
-    url(r'^optimade/$', 'qmpy.web.views.optimade_home'),
-    url(r'^optimade/composition/([A-Za-z0-9\-]+)/$', 'qmpy.web.views.optimade_composition'),
     url(r'^optimade/structures$', views.OptimadeStructureList.as_view()),
 
     ## download
