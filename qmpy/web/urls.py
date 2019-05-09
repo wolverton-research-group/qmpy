@@ -113,6 +113,7 @@ urlpatterns += [
 
     ## optimade
     url(r'^optimade/structures$', views.OptimadeStructureList.as_view()),
+    url(r'^optimade/structures/(?P<pk>[0-9]+)/$', views.OptimadeStructureDetail.as_view()),
 
     ## download
     url(r'^download/', 'qmpy.web.views.download_home'),

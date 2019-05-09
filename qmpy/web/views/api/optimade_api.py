@@ -16,6 +16,10 @@ import datetime
 
 BASE_URL = "http://larue.northwestern.edu:9000/optimade"
 
+class OptimadeStructureDetail(generics.RetrieveAPIView):
+    queryset = FormationEnergy.objects.filter(fit='standard')
+    serializer_class = OptimadeStructureSerializer
+
 class OptimadePagination(LimitOffsetPagination):
     def get_paginated_response(self, page_data):
         data = page_data["data"]
