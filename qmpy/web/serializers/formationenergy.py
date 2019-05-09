@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from qmpy.materials.formation_energy import FormationEnergy
+from drf_queryfields import QueryFieldsMixin
 
-class FormationEnergySerializer(serializers.ModelSerializer):
+class FormationEnergySerializer(QueryFieldsMixin, serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
     entry_id = serializers.SerializerMethodField()
     calculation_id = serializers.SerializerMethodField()

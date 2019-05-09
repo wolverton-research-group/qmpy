@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from qmpy.materials.formation_energy import FormationEnergy
+from drf_queryfields import QueryFieldsMixin
 
-class OptimadeStructureSerializer(serializers.ModelSerializer):
+class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer):
     chemical_formula = serializers.SerializerMethodField()
     formula_prototype = serializers.SerializerMethodField()
     elements = serializers.SerializerMethodField()

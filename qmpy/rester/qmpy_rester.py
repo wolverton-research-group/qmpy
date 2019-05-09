@@ -36,11 +36,11 @@ class QMPYRester(object):
         url_args = []
         kwargs_list = ['composition', 'icsd', 'filters',
                        'sort_by', 'desc', 'sort_offset',
-                       'limit', 'offset']
+                       'limit', 'offset', 'fields']
 
         # Attributes for filters
         filter_args = []
-        filter_list = ['element_set', 'element',
+        filter_list = ['element_set', 'element', 'spacegroup',
                        'prototype', 'generic', 'volume',
                        'natoms', 'ntypes', 'stability',
                        'delta_e', 'band_gap', 'filters']
