@@ -18,8 +18,8 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'qmdb_dev',
-        'USER': 'root',
+        'NAME': '',
+        'USER': '',
         'PASSWORD': '',
         'HOST': '',
         'PORT': ''
@@ -87,7 +87,7 @@ STATICFILES_FINDERS = (
 )
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = 'h23o7ac@^_upzx*zzs%1t1bn6#*(7@b3$kp*v9)6hbf%rkr!%z'
+SECRET_KEY = ''
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -125,6 +125,10 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.admindocs',
     'qmpy',
+    'rest_framework',
+    'rest_framework_xml',
+    'rest_framework_yaml',
+    'crispy_forms',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -166,6 +170,24 @@ TEMPLATE_CONTEXT_PROCESSORS = (
         "django.core.context_processors.request",
         )
 
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKEND': ('django_filters.rest_framework.DjangoFilterBackend',),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 100,
+    'DEFAULT_PARSER_CLASSES':(
+        'rest_framework_xml.parsers.XMLParser',
+        'rest_framework_yaml.parsers.YAMLParser',
+    ),
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+        'rest_framework_xml.renderers.XMLRenderer',
+        'rest_framework_yaml.renderers.YAMLRenderer',
+    ),
+}
+
+CRIPSY_TEMPLATE_PACK = 'bootstrap'
+                              
 #CACHES = {
 #        'default': {
 #            'BACKEND':
