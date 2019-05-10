@@ -11,7 +11,9 @@ def precedence(op):
     Output:
         :int : priority of the operator
     """
-    if op == '&':
+    if op == '~':
+        return 3
+    elif op == '&':
         return 2
     elif op == '|':
         return 1
@@ -23,12 +25,14 @@ def applyOP(q1, q2, op):
     Function to apply operation
     Input:
         :Q q1: first django Q model
-        :Q q2: seconde django Q model
-        :str op: operator, '&' or '|' 
+        :Q q2: seconde django Q model (not used in NOT)
+        :str op: operator, '~' or '&' or '|' 
     Output:
         :Q : reduced django Q model
     """
-    if op == '&':
+    if op == '~':
+        return ~q1
+    elif op == '&':
         return reduce(operator.and_, [q1, q2])
     elif op == '|':
         return reduce(operator.or_, [q1, q2])
@@ -41,6 +45,7 @@ def element_set_conversion(filter_expr):
             Valid element_set expression:
                 ',': AND operator
                 '-': OR operator
+                '~': NOT operator
                 '(', ')': to change precedence
             Examples:
                 element_set=Al;O,H
@@ -220,14 +225,13 @@ class Token(object):
         it = 0
         while it < len(tokens):
             t = tokens[it]
-
             if t == ' ':
                 it += 1
                 continue
 
             elif t.isalpha():
                 expr = ''
-                while t != ' ' and it < len(tokens):
+                while t != ' ' and t != '(' and t!= ')' and it < len(tokens):
                     expr += t
                     it += 1
                     if it < len(tokens):
@@ -241,8 +245,10 @@ class Token(object):
             elif t == ')':
                 while operator_stack[-1] != '(':
                     op = operator_stack.pop()
-    
-                    q2 = getattr(self, 'filter_'+origin)(value_stack.pop())
+                    if op=='~':
+                        q2 = None
+                    else:
+                        q2 = getattr(self, 'filter_'+origin)(value_stack.pop())
                     q1 = getattr(self, 'filter_'+origin)(value_stack.pop())
     
                     val = applyOP(q1, q2, op)
@@ -252,13 +258,16 @@ class Token(object):
                 operator_stack.pop()
                 it += 1
 
-            elif t in ['&', '|']:
+            elif t in ['&', '|', '~']:
                 thisop = t
                 while operator_stack:
                     if not precedence(operator_stack[-1]) < precedence(thisop):
                         op = operator_stack.pop()
     
-                        q2 = getattr(self, 'filter_'+origin)(value_stack.pop())
+                        if op=='~':
+                            q2 = None
+                        else:
+                            q2 = getattr(self, 'filter_'+origin)(value_stack.pop())
                         q1 = getattr(self, 'filter_'+origin)(value_stack.pop())
     
                         val = applyOP(q1, q2, op)
@@ -272,7 +281,7 @@ class Token(object):
     
             else:
                 raise
-    
+
         while operator_stack:
             op = operator_stack.pop()
 
@@ -282,5 +291,5 @@ class Token(object):
             val = applyOP(q1, q2, op)
             
             value_stack.append(val)
-    
+
         return getattr(self, 'filter_'+origin)(value_stack.pop())

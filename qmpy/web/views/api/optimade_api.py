@@ -89,9 +89,10 @@ class OptimadeStructureList(generics.ListAPIView):
         if not filters:
             return fes
 
-        # replace 'AND' and 'OR' to '&' and '|', respectively
+        # replace 'AND', 'OR' and 'NOT' to '&', '|' and '~', respectively
         filters = filters.replace('AND', '&')
         filters = filters.replace('OR', '|')
+        filters = filters.replace('NOT', '~')
 
         t = Token(filters, optimade=True)
         q = t.evaluate_filter(origin='formationenergy')
