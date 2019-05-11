@@ -63,7 +63,7 @@ class DataFilterForm(forms.Form):
                              widget=forms.TextInput(attrs={'placeholder': 'e.g. 2, >3'}),
                              )
     volume = forms.CharField(required=False)
-    filters = forms.CharField(required=False)
+    filter = forms.CharField(required=False)
     limit = forms.IntegerField(required=False, label='limit', initial=50)
     sort_offset = forms.IntegerField(required=False, label='offset', initial=0)
 
@@ -129,7 +129,7 @@ class DataFilterForm(forms.Form):
                    ),
                 Tab('Manual Input Filters',
                     Div(
-                        Field('filters', css_class="span8"),
+                        Field('filter', css_class="span8"),
                         css_class='row-fluid'
                     ),
                    ),

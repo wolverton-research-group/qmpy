@@ -121,7 +121,7 @@ class FormationEnergyList(generics.ListAPIView):
         """
         request = self.request
 
-        filters = request.GET.get('filters', False)
+        filters = request.GET.get('filter', False)
 
         if not filters:
             return fes

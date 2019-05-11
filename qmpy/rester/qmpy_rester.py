@@ -34,7 +34,7 @@ class QMPYRester(object):
 
         # URL paramters
         url_args = []
-        kwargs_list = ['composition', 'icsd', 'filters',
+        kwargs_list = ['composition', 'icsd', 'filter',
                        'sort_by', 'desc', 'sort_offset',
                        'limit', 'offset', 'fields']
 
@@ -43,7 +43,7 @@ class QMPYRester(object):
         filter_list = ['element_set', 'element', 'spacegroup',
                        'prototype', 'generic', 'volume',
                        'natoms', 'ntypes', 'stability',
-                       'delta_e', 'band_gap', 'filters']
+                       'delta_e', 'band_gap']
 
         for k in kwargs.keys():
             if k in kwargs_list:
@@ -57,7 +57,7 @@ class QMPYRester(object):
 
         if filter_args != []:
             filters_tag = ' AND '.join(filter_args)
-            url_args.append('filters='+filters_tag)
+            url_args.append('filter='+filters_tag)
             
         if verbose:
             print "Your filters are:"
