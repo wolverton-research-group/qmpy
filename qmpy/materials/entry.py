@@ -606,7 +606,7 @@ class Entry(models.Model):
 
         for dir in os.listdir(self.path):
             if os.path.isdir(self.path+'/'+dir):
-                logger.debug('rm -rf %s/%s &> /dev/null', self.path, dir)
+                logger.debug('rm -rf %s/%s &> /dev/null' % (self.path, dir))
                 os.system('rm -rf %s/%s &> /dev/null' % (self.path, dir))
 
     def visualize(self, structure='source'):
