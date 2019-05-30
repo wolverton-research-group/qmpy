@@ -93,6 +93,11 @@ def project_view(request, project_id):
                     t.state = 0
                     t.save()
                     logger.info("Web reset: Task {}".format(t.id))
+        elif 'reset_entry' in p:
+            task_id = p.get('reset_entry')
+            task = Task.objects.get(id=task_id)
+            task.entry.reset()
+            logger.info("Web reset: Entry {}".format(task.entry.id))
         else:
             if not 'active' in p:
                 proj.state = -2
