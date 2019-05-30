@@ -1461,28 +1461,30 @@ class Calculation(models.Model):
     def estimate(self):
         return 72*8*3600
 
+    _instruction = {}
     @property
     def instructions(self):
         if self.converged:
             return {}
 
-        instruction = {
-                'path':self.path,
-                'walltime':self.estimate,
-                'header':'\n'.join(['gunzip -f CHGCAR.gz &> /dev/null',
-                    'date +%s',
-                    'ulimit -s unlimited']),
-                'mpi':'mpirun -machinefile $PBS_NODEFILE -np $NPROCS',
-                'binary':'vasp_53', 
-                'pipes':' > stdout.txt 2> stderr.txt',
-                'footer':'\n'.join(['gzip -f CHGCAR OUTCAR PROCAR ELFCAR',
-                    'rm -f WAVECAR CHG',
-                    'date +%s'])}
+        if not self._instruction:
+            self._instruction = {
+                    'path':self.path,
+                    'walltime':self.estimate,
+                    'header':'\n'.join(['gunzip -f CHGCAR.gz &> /dev/null',
+                        'date +%s',
+                        'ulimit -s unlimited']),
+                    'mpi':'mpirun -machinefile $PBS_NODEFILE -np $NPROCS',
+                    'binary':'vasp_53', 
+                    'pipes':' > stdout.txt 2> stderr.txt',
+                    'footer':'\n'.join(['gzip -f CHGCAR OUTCAR PROCAR ELFCAR',
+                        'rm -f WAVECAR CHG',
+                        'date +%s'])}
 
-        if self.input.natoms <= 4:
-            instruction.update({'mpi':'','binary':'vasp_53_serial',
-                'serial':True})
-        return instruction
+            if self.input.natoms <= 4:
+                self._instruction.update({'mpi':'','binary':'vasp_53_serial',
+                    'serial':True})
+        return self._instruction
 
     def set_label(self, label):
         self.label = label
