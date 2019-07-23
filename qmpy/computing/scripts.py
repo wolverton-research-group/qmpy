@@ -304,6 +304,7 @@ def static(entry, xc_func='PBE', **kwargs):
     Output:
         Calculation:
             results of calculation object
+    BB
     '''
 
     # Get name of static run
