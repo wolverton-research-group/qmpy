@@ -222,7 +222,7 @@ def relaxation(entry, xc_func='PBE', **kwargs):
                                                  **kwargs)
 
         entry.calculations[cnfg_name] = calc
-        entry.Co_lowspin = False
+        calc.Co_lowspin = False
 
         # If converged, write results to disk and return calculation
         if not calc.converged:
@@ -256,7 +256,7 @@ def relaxation(entry, xc_func='PBE', **kwargs):
                     atom.magmom = 0.01
 
             entry.calculations[low_name] = calc
-            entry.Co_lowspin = True
+            calc.Co_lowspin = True
             if not calc.converged:
                 calc.write()
                 return calc
@@ -304,21 +304,28 @@ def static(entry, xc_func='PBE', **kwargs):
     Output:
         Calculation:
             results of calculation object
-    BB
     '''
 
-    # Get name of static run
+    # Get name of static run and relaxation runs for Co
     cnfg_name = 'static'
+    low_name = 'Co_lowspin_static'
+    low_relax_name = 'Co_lowspin'
+    high_name = 'Co_highspin_static'
+    high_relax_name = 'relaxation'
     if xc_func.lower() != 'pbe':
         cnfg_name += "_%s"%(xc_func.lower())
+	low_relax_name += "_%s"%(xc_func.lower())
+	high_relax_name += "_%s"%(xc_func.lower())
+	low_name += "_%s"%(xc_func.lower())
+        high_name += "_%s"%(xc_func.lower())
 
     # Get the calculation directory
     calc_dir = os.path.join(entry.path, cnfg_name)
 
-    # Check if this calculation has converged
+    # If static calculation has converged, return that calculation
     if entry.calculations.get(cnfg_name, Calculation()).converged:
-        return entry.calculations[cnfg_name]
-
+	return entry.calculations[cnfg_name]
+   	
     # Get the relaxation calculation
     calc = relaxation(entry, xc_func=xc_func, **kwargs)
 
@@ -330,6 +337,62 @@ def static(entry, xc_func='PBE', **kwargs):
 
     if not calc.converged:
         return calc
+
+    # Special case: also perform the static for the higher energy spin configuration
+    if 'Co' in entry.comp:
+                                                                                 
+        # If the lower energy relaxation was high spin, perform now the low spin 
+        if not use_lowspin:
+            
+            # Update / start the low spin calculation
+            if not entry.calculations.get(low_name, Calculation()).converged and entry.calculations.get(low_relax_name, Calculation()).converged:
+            
+                # Get the low_spin calculation directory
+                lowspin_dir = os.path.join(entry.path, low_name)
+            
+                # Get input structure
+                input = entry.calculations[low_relax_name].output
+            
+                calc = Calculation.setup(input,  entry=entry,
+                                                 configuration=cnfg_name,
+                                                 path=lowspin_dir,
+                                                 **kwargs)
+            
+                # Return atoms to the low-spin configuration
+                for atom in calc.input:
+                    if atom.element.symbol == 'Co':
+                        atom.magmom = 0.01
+            
+                entry.calculations[low_name] = calc
+                
+                if not calc.converged:
+                    calc.write()
+        									
+        else:
+            
+            # Update / start the high spin calculation
+            if not entry.calculations.get(high_name, Calculation()).converged and entry.calculations.get(high_relax_name, Calculation()).convergedd:
+            
+                # Get the high_spin calculation directory
+                highspin_dir = os.path.join(entry.path, high_name)
+            
+                # Get input structure
+                input = entry.calculations[highspin_name].output
+            
+                calc = Calculation.setup(input,  entry=entry,
+                                                 configuration=cnfg_name,
+                                                 path=highspin_dir,
+                                                 **kwargs)
+            
+                # Return atoms to the low-spin configuration
+                for atom in calc.input:
+                    if atom.element.symbol == 'Co':
+                        atom.magmom = 5
+            
+                entry.calculations[high_name] = calc
+                
+                if not calc.converged:
+                    calc.write()
 
     # Input structure == output structure from relaxation
     input = calc.output
@@ -363,7 +426,7 @@ def static(entry, xc_func='PBE', **kwargs):
     else:
         calc.write()
     return calc
-
+                                                                                         
 def static_lda(entry, **kwargs):
     '''
     Run a static calculation with LDA XC functionals
