@@ -1714,17 +1714,18 @@ class Structure(models.Model, object):
             new.substitute(replace, rescale=rescale, in_place=True)
             return new
 
-        volume = self.get_volume()
+        init_vol = self.get_volume()
+	final_vol = init_vol
 	volume_sum_atom = self.get_volume_sum_of_elements()
         for atom in self:
             if atom.element_id in replace:
-                volume -= atom.element.volume*volume/volume_sum_atom
+                final_vol -= atom.element.volume/volume_sum_atom*init_vol
 		volume_sum_atom -= atom.element.volume
                 atom.element = Element.get(replace[atom.element_id])
-                volume += atom.element.volume*volume/volume_sum_atom
 		volume_sum_atom += atom.element.volume
+                final_vol += atom.element.volume/volume_sum_atom*init_vol
         if rescale and rescale_method == "relative":
-            self.set_volume(volume)
+            self.set_volume(final_vol)
         elif rescale and rescale_method == "absolute":
             self.set_volume_to_sum_of_elements()
         self.set_composition()
