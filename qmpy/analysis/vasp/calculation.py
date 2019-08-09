@@ -63,6 +63,7 @@ class VaspError(Exception):
 
 @add_meta_data('error')
 @add_meta_data('warning')
+@add_meta_data('Co_spin')
 class Calculation(models.Model):
     """
     Base class for storing a VASP calculation.

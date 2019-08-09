@@ -223,6 +223,8 @@ def relaxation(entry, xc_func='PBE', **kwargs):
 
         entry.calculations[cnfg_name] = calc
         calc.Co_lowspin = False
+	if 'Co' in entry.comp:
+	calc.add_Co_spin('Co_highspin')
 
         # If converged, write results to disk and return calculation
         if not calc.converged:
@@ -257,6 +259,7 @@ def relaxation(entry, xc_func='PBE', **kwargs):
 
             entry.calculations[low_name] = calc
             calc.Co_lowspin = True
+	    calc.add_Co_spin('Co_lowspin')
             if not calc.converged:
                 calc.write()
                 return calc
@@ -332,8 +335,11 @@ def static(entry, xc_func='PBE', **kwargs):
     # Special Case: Check whether relaxation is low-spin
     if hasattr(calc, 'Co_lowspin'):
         use_lowspin = ( calc.Co_lowspin is True )
+	calc.add_Co_spin('Co_lowspin')
     else:
         use_lowspin = False
+	if Co in entry.composition:
+            calc.add_Co_spin('Co_highspin')
 
     if not calc.converged:
         return calc
@@ -364,14 +370,15 @@ def static(entry, xc_func='PBE', **kwargs):
                         atom.magmom = 0.01
             
                 entry.calculations[low_name] = calc
-                
+                calc.add_Co_spin('Co_lowspin')
+
                 if not calc.converged:
                     calc.write()
         									
         else:
             
             # Update / start the high spin calculation
-            if not entry.calculations.get(high_name, Calculation()).converged and entry.calculations.get(high_relax_name, Calculation()).convergedd:
+            if not entry.calculations.get(high_name, Calculation()).converged and entry.calculations.get(high_relax_name, Calculation()).converged:
             
                 # Get the high_spin calculation directory
                 highspin_dir = os.path.join(entry.path, high_name)
@@ -390,7 +397,8 @@ def static(entry, xc_func='PBE', **kwargs):
                         atom.magmom = 5
             
                 entry.calculations[high_name] = calc
-                
+                calc.add_Co_spin('Co_highspin')
+
                 if not calc.converged:
                     calc.write()
 
