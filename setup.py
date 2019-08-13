@@ -23,7 +23,7 @@ setup(
         "networkx",
         "pytest",
         "python-memcached",
-        "ase",
+        "ase < 3.18.0",
         "django-extensions < 1.6.8",
         "lxml",
         "pyspglib == 1.8.3.1",
