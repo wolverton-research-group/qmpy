@@ -20,7 +20,7 @@ setup(
         "scipy",
         "MySQL-python",
         "matplotlib",
-        "networkx",
+        "networkx==2.2",
         "pytest",
         "python-memcached",
         "ase < 3.18.0",
