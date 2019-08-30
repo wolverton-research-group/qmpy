@@ -18,14 +18,11 @@ urlpatterns = [
     url(r'^$', 'qmpy.web.views.home_page'),
 
     ## admin
-#    url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
-#    url(r'^accounts/login/.*$', 'django.contrib.auth.views.login'),
-#    url(r'^accounts/logout/.*$', 'django.contrib.auth.views.logout'),
-#    url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
+    url(r'^accounts/login/.*$', 'django.contrib.auth.views.login'),
+    url(r'^accounts/logout/.*$', 'django.contrib.auth.views.logout'),
+    url(r'^admin/', include(admin.site.urls)),
 
-    ## api
-#    url(r'^api_login/', include(router.urls)),
-#    url(r'^api_auth/', include('rest_framework.urls', namespace='rest_framework'))
     ]
 
 urlpatterns += [
@@ -61,24 +58,24 @@ urlpatterns += [
     url(r'^analysis/calculation/(?P<calculation_id>.*)$', 'qmpy.web.views.calculation_view'),
 
     ## computing
-#    url(r'^computing/$', 'qmpy.web.views.computing_view'),
-#    url(r'^computing/projects$', 'qmpy.web.views.projects_view'),
-#    url(r'^computing/hosts$', 'qmpy.web.views.hosts_view'),
-#    url(r'^computing/queue$', 'qmpy.web.views.queue_view'),
+    url(r'^computing/$', 'qmpy.web.views.computing_view'),
+    url(r'^computing/projects$', 'qmpy.web.views.projects_view'),
+    url(r'^computing/hosts$', 'qmpy.web.views.hosts_view'),
+    url(r'^computing/queue$', 'qmpy.web.views.queue_view'),
 
-#    url(r'^computing/create/host$', 'qmpy.web.views.new_host_view'),
+    url(r'^computing/create/host$', 'qmpy.web.views.new_host_view'),
     #url(r'^computing/create/project', 'qmpy.web.views.new_project_view'),
     #url(r'^computing/create/user', 'qmpy.web.views.new_user_view'),
     #url(r'^computing/create/', 'qmpy.web.views.new_user_view'),
 
-#    url(r'^computing/project/(?P<state>.*)/(?P<project_id>.*)$', 'qmpy.web.views.project_state_view'),
-#    url(r'^computing/project/(?P<project_id>.*)$', 'qmpy.web.views.project_view'),
-#    url(r'^computing/host/(?P<host_id>.*)$', 'qmpy.web.views.host_view'),
-#    url(r'^computing/user/(?P<user_id>.*)$', 'qmpy.web.views.user_view'),
-#    url(r'^computing/allocation/(?P<allocation_id>.*)$', 'qmpy.web.views.allocation_view'),
+    url(r'^computing/project/(?P<state>.*)/(?P<project_id>.*)$', 'qmpy.web.views.project_state_view'),
+    url(r'^computing/project/(?P<project_id>.*)$', 'qmpy.web.views.project_view'),
+    url(r'^computing/host/(?P<host_id>.*)$', 'qmpy.web.views.host_view'),
+    url(r'^computing/user/(?P<user_id>.*)$', 'qmpy.web.views.user_view'),
+    url(r'^computing/allocation/(?P<allocation_id>.*)$', 'qmpy.web.views.allocation_view'),
 
-#    url(r'^computing/task/(?P<task_id>.*)$', 'qmpy.web.views.task_view'),
-#    url(r'^computing/job/(?P<job_id>.*)$', 'qmpy.web.views.job_view'),
+    url(r'^computing/task/(?P<task_id>.*)$', 'qmpy.web.views.task_view'),
+    url(r'^computing/job/(?P<job_id>.*)$', 'qmpy.web.views.job_view'),
 
     ## analysis
     url(r'^analysis/$', 'qmpy.web.views.analysis_view'),
@@ -100,7 +97,6 @@ urlpatterns += [
 
     ## api
     url(r'^api/$', 'qmpy.web.views.api_view'),
-#    url(r'^api/register', 'qmpy.web.views.api_key_gen'),
     url(r'^api/search', 'qmpy.web.views.search_data'),
 
     ## serializer
