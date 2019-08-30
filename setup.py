@@ -14,13 +14,13 @@ setup(
     include_package_data=True,
     long_description=open('README.md').read(),
     install_requires=[
-        "Django >=1.6.2, <1.7",
+        "Django == 1.8.18",
         "PuLP",
         "numpy",
         "scipy",
         "MySQL-python",
         "matplotlib",
-        "networkx",
+        "networkx < 2.3",
         "pytest",
         "python-memcached",
         "ase",
@@ -32,6 +32,8 @@ setup(
         "pyparsing",
         "PyYAML",
         "scikit-learn",
-        "bokeh == 0.12.15"
+        "bokeh == 0.12.15",
+        "djangorestframework == 3.6.4",
+        "django-crispy-forms"
     ],
 )

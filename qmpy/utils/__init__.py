@@ -6,6 +6,7 @@ from math import *
 from strings import *
 from rendering import *
 from daemon import Daemon
+from rest_query_parser import *
 
 def mkdir(path):
     """
@@ -79,3 +80,4 @@ def get_docstring(model):
 
 def get_field_list(model):
     print ', '.join(model._meta.get_all_field_names())
+

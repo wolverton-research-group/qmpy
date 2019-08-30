@@ -125,6 +125,10 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.admindocs',
     'qmpy',
+    'rest_framework',
+    'rest_framework_xml',
+    'rest_framework_yaml',
+    'crispy_forms',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -165,6 +169,26 @@ TEMPLATE_CONTEXT_PROCESSORS = (
         "django.contrib.messages.context_processors.messages",
         "django.core.context_processors.request",
         )
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKEND': ('django_filters.rest_framework.DjangoFilterBackend',),
+#    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+#    'PAGE_SIZE': 100,
+    'DEFAULT_PARSER_CLASSES':(
+        'rest_framework_xml.parsers.XMLParser',
+        'rest_framework_yaml.parsers.YAMLParser',
+    ),
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+        'rest_framework_xml.renderers.XMLRenderer',
+        'rest_framework_yaml.renderers.YAMLRenderer',
+    ),
+}
+
+CRIPSY_TEMPLATE_PACK = 'bootstrap'
+
 
 #CACHES = {
 #        'default': {
