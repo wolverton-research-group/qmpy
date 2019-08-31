@@ -41,7 +41,8 @@ class LarkParser:
             self.filter = filter_
             return self.tree
         except Exception as e:
-            raise ParserError(e)
+            print(e)
+            return
 
     def __repr__(self):
         if isinstance(self.tree, Tree):
@@ -137,4 +138,4 @@ class Lark2Django:
         else:
             error_msg = "Not a Lark Tree or Token. Check the parser implementation"
             print(error_msg)
-            return(error_msg)
+            return #(error_msg)

@@ -254,11 +254,14 @@ class Composition(models.Model):
             return
         return min(expts.values_list('delta_e', flat=True))
 
-    @property
-    def relative_stability_plot(self):
+    def relative_stability_plot(self,data=data):
         if not self.energy:
             return Renderer()
-        ps = thermo.PhaseSpace(self.name)
+
+        if data:
+            ps = thermo.PhaseSpace(self.name,data=data)
+        else:
+            ps = thermo.PhaseSpace(self.name)
         return ps.phase_diagram
 
     def get_mass(self):
