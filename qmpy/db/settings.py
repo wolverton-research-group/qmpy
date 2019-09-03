@@ -18,11 +18,11 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'qmdb_dev',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': ''
+        'NAME': 'qmdb_v1_api',
+        'USER': 'msandbox',
+        'PASSWORD': 'msandbox',
+        'HOST': '127.0.0.1',
+        'PORT': '5725'
     }
 }
 
@@ -170,11 +170,10 @@ TEMPLATE_CONTEXT_PROCESSORS = (
         "django.core.context_processors.request",
         )
 
-
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKEND': ('django_filters.rest_framework.DjangoFilterBackend',),
-#    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-#    'PAGE_SIZE': 100,
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 100,
     'DEFAULT_PARSER_CLASSES':(
         'rest_framework_xml.parsers.XMLParser',
         'rest_framework_yaml.parsers.YAMLParser',
@@ -188,8 +187,7 @@ REST_FRAMEWORK = {
 }
 
 CRIPSY_TEMPLATE_PACK = 'bootstrap'
-
-
+                              
 #CACHES = {
 #        'default': {
 #            'BACKEND':
@@ -201,4 +199,3 @@ CRIPSY_TEMPLATE_PACK = 'bootstrap'
 AUTH_USER_MODEL = 'qmpy.User'
 
 GOOGLE_ANALYTICS_MODEL = True
-

@@ -17,7 +17,6 @@ import time
 import datetime
 
 BASE_URL = qmpy_rester.REST_OPTIMADE
-#BASE_URL = "http://amglab.ms.northwestern.edu:8000/optimade"
 
 class OptimadeStructureDetail(generics.RetrieveAPIView):
     queryset = FormationEnergy.objects.filter(fit='standard')

@@ -17,8 +17,6 @@ import datetime
 DEFAULT_LIMIT = 50
 BASE_URL = qmpy_rester.REST_OQMDAPI
 
-#BASE_URL = "http://amglab.ms.northwestern.edu:8000/oqmdapi/"
-
 class QmpyPagination(LimitOffsetPagination):
     default_limit = 50
     def get_paginated_response(self, page_data):
