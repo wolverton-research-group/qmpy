@@ -41,7 +41,7 @@ class LarkParser:
             self.filter = filter_
             return self.tree
         except Exception as e:
-            print(e)
+            #print(e)
             return
 
     def __repr__(self):
@@ -119,7 +119,7 @@ class Lark2Django:
                             return op_fn(self.db_keys[db_prop],self.evaluate(children[2]))
                         else:
                             error_msg = "Unknown property is queried : "+(db_prop)
-                            print(error_msg)
+                            #print(error_msg)
                             return None
                         
                 else:
@@ -127,7 +127,7 @@ class Lark2Django:
                     return op_fn(self.evaluate(children[0]),self.evaluate(children[2]))
             else:
                 error_msg = "Not compatible format. Tree has >3 children"
-                print(error_msg)
+                #print(error_msg)
                 return(error_msg)
             
         elif isinstance(parse_Tree,Token):
@@ -137,5 +137,5 @@ class Lark2Django:
                 return self.opers[parse_Tree.value]
         else:
             error_msg = "Not a Lark Tree or Token. Check the parser implementation"
-            print(error_msg)
+            #print(error_msg)
             return #(error_msg)
