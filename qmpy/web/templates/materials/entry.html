@@ -63,10 +63,11 @@
 
   <li> Path: {{entry.path}} </li>
 
-	{% if entry.holds %}
-  <!-- <li> Holds: {% for hold in entry.holds %} <a href="/materials/hold/{{hold}}">{{hold}}</a> -->
+  <!--	{% if entry.holds %}
+  <li> Holds: {% for hold in entry.holds %} <a href="/materials/hold/{{hold}}">{{hold}}</a>
   {% endfor %}
-	</li> {% endif %}
+	</li> {% endif %} 
+  -->
 
 	{% if entry.keywords %}
   <li> Associated keywords: {% for kw in entry.keywords %} <a href="/materials/keyword/{{kw}}">{{kw}}</a>
@@ -138,7 +139,7 @@
 
   <form action="" method="post">{% csrf_token %}
     Add keyword: <input type="text" name="add_keyword"><br>
-    Add hold: <input type="text" name="add_hold"><br>
+    <!-- Add hold: <input type="text" name="add_hold"><br> -->
     <input type="submit">
   </form>
 
