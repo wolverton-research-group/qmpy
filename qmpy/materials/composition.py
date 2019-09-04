@@ -33,6 +33,7 @@ class Composition(models.Model):
     """
     formula = models.CharField(primary_key=True, max_length=255)
     generic = models.CharField(max_length=255, blank=True, null=True)
+    element_list = models.CharField(max_length=255, blank=True, null=True)
     meta_data = models.ManyToManyField('MetaData')
 
     element_set = models.ManyToManyField('Element', null=True)
@@ -92,6 +93,7 @@ class Composition(models.Model):
             comp = Composition(formula=f)
             comp.ntypes = len(comp.comp)
             comp.generic = format_generic_comp(comp.comp)
+            comp.element_list = '_'.join(comp.comp.keys())+'_'
             comp.save()
             comp.element_set = comp.comp.keys()
             return comp
@@ -252,11 +254,14 @@ class Composition(models.Model):
             return
         return min(expts.values_list('delta_e', flat=True))
 
-    @property
-    def relative_stability_plot(self):
+    def relative_stability_plot(self,data=data):
         if not self.energy:
             return Renderer()
-        ps = thermo.PhaseSpace(self.name)
+
+        if data:
+            ps = thermo.PhaseSpace(self.name,data=data)
+        else:
+            ps = thermo.PhaseSpace(self.name)
         return ps.phase_diagram
 
     def get_mass(self):

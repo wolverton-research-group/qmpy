@@ -531,6 +531,12 @@ class Structure(models.Model, object):
             site.structure = self
         counts = defaultdict(int)
         orbits = defaultdict(list)
+
+        """
+        # from django.forms.models import model_to_dict
+        # print("Debug: Printing the model instance keysto check if site primary key is set or not")
+        # print(model_to_dict(self.sites[dataset['equivalent_atoms'][0]]))
+        """
         origins = {}
         for i, e in enumerate(dataset['equivalent_atoms']):
             counts[e] += 1
@@ -1147,6 +1153,12 @@ class Structure(models.Model, object):
         """Sets self.sites to n blank Sites."""
         self.sites = [ Site() for i in range(n) ]
         self._atoms = None
+
+    def set_nsites_manager(self, coords):
+        """Sets self.sites using site manager - for Django >1.8 compatibility to be used as dict keys."""
+        self.sites = [ Site.managerobject.create_site(coord) for coord in coords ]
+        self._atoms = None
+
 
     def make_conventional(self, in_place=True, tol=1e-5):
         """Uses spglib to convert to the conventional cell.

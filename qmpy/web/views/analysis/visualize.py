@@ -76,4 +76,4 @@ def jsmol(request):
     global custom_data
     f = cStringIO.StringIO()
     f.write(custom_data)
-    return HttpResponse(f.getvalue(), mimetype="plain/text")
+    return HttpResponse(f.getvalue(), content_type="plain/text")

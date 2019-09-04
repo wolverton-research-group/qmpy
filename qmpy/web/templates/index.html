@@ -1,49 +1,65 @@
 {% extends "base_site.html" %}
 {% load admin_static %}
-
 {% block title %}
 OQMD
 {% endblock %}
 
-{% block content_title %}
-<h1> Welcome to the Open Quantum Materials Database </h1>
-{% endblock %}
 
 {% block extrahead %}
 {% endblock %}
 
 {% block content %}
 
-<p> The OQMD is a database DFT calculated thermodynamic and structural properties. We are providing this online interface for convenient, small scale access; however for more powerful utilization we recommend downloading the entire database and the API for interfacing with it, detailed in the link below.</p>
-
-<h2> You can...</h2>
-
-<ul>
-	<li><b><a href="/materials/">Search</a></b> for materials by composition, </li>
-	<li><b><a href="/analysis/phase_diagram">Create</a></b> phase diagrams using database thermochemical data,</li>
-	<li><b><a href="/analysis/gclp">Determine</a></b> ground state compositions, </li>
-	<li><b><a href="/analysis/visualize">Visualize</a></b> crystal structures, or </li>
-	<li><b> <a href="/download">Download</a></b> the entire database for your own use! </li>
-</ul>
-
-<h2>Tweet @TheOQMD to ask what is stable at a composition, or to get a simple phase diagram!</h2>
-<div style="float:left;">
-<img src="{% static "img/twitter_pd.png" %}" width=490 alt="Example of asking @TheOQMD about a phase diagram"> 
+<div style="min-height:30px;width:500px;box-shadow:none;border-color:rgba(2, 128, 144, 1);border-width:5px;" class="box">
+    <p> The OQMD is a database of DFT calculated thermodynamic and structural 
+        properties of more than 600,000 materials, created in 
+        <a href="http://wolverton.northwestern.edu">Chris Wolverton's</a> 
+        group at Northwestern University.
+    </p>
 </div>
+
 <div>
-<img src="{% static "img/twitter_composition.png" %}" width=490 alt="Example of asking @TheOQMD about a composition">
+<img src="{% static "img/NiTiAl_pd.png" %}" width=450 alt="Example of asking @TheOQMD about a composition">
 </div>
 
-<div style="width:900px; float:left">
-<p> The OQMD was created in <a href="http://wolverton.northwestern.edu">Chris Wolverton's</a> group at Northwestern University.</p>
-</div>
-{% endblock %} 
+{% endblock %}
 
-{% block sidebar %} 
-<div id="sidebar" class="box">
-  <h1> Current status </h1>
-  Database contains DFT calculations for <b>{{ done.count }}</b> compounds. In addition, calculations are constantly on-going, there are {{ running.count }} new structures currently being run!
-  <br>
-  Recently completed compounds include: {% for calc in recent %} <a href="/materials/entry/{{calc.entry_id}}">{{calc.input.name}}</a> {% endfor %}
+{% block sidebar %}
+<br /> 
+<div id="sidebar" style="background:rgba(2, 128, 144, 1);border-width:0px;box-shadow:none;" class="box">
+  <h1 style="text-align:center"> <font color="white"> Shortcuts </font> </h1>
+
+  <div style="width:40%;box-shadow:none;border-color:white;border-width:5px" class="box">
+    <a style="color:white;" href="/materials/composition"><h2>Search</h2>
+    Material Phases </a>
+  </div>
+
+  <div style="width:40%;box-shadow:none;border-color:white;border-width:5px;" class="box">
+    <a style="color:white;" href="/api/search"><h2>Browse</h2> 
+    Material Properties </a>
+  </div>
+
+  <div style="width:40%;box-shadow:none;border-color:white;border-width:5px;" class="box">
+    <a style="color:white;" href="/analysis/phase_diagram"><h2>Create</h2> 
+    Phase Diagrams </a>
+  </div>
+
+  <div style="width:40%;box-shadow:none;border-color:white;border-width:5px;" class="box">
+    <a style="color:white;" href="/analysis/gclp"><h2>Determine</h2>
+    Ground State Compositions </a>
+  </div>
+
+  <div style="width:40%;box-shadow:none;border-color:white;border-width:5px;" class="box">
+    <a style="color:white;" href="/analysis/visualize"><h2>Visualize</h2>
+    Crystal Structures </a>
+  </div>
+
+  <div style="width:40%;box-shadow:none;border-color:white;border-width:5px;" class="box">
+      <a style="color:white;" href="/api"><h2>API</h2></a>
+      <a style="color:white;" href="/api/oqmdapi"> OQMD API</a>
+      <br>
+      <a style="color:white;" href="/api/optimade"> Optimade API</a>
+  </div>
+
 </div>
 {% endblock %}
