@@ -341,6 +341,8 @@ class Job(models.Model):
         else:
             nodes = 1
             ppn = job.account.host.ppn
+            if job.allocation.name == 'b1004':
+                ppn = 4
             walltime = job.account.host.walltime
             
         binary = job.account.host.get_binary(binary)
