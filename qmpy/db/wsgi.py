@@ -21,4 +21,18 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "qmpy.db.settings")
 #application = get_wsgi_application()
 import django.core.handlers.wsgi
 
-application = django.core.handlers.wsgi.WSGIHandler()
+import time
+import traceback
+import signal
+
+try:
+    application = django.core.handlers.wsgi.WSGIHandler()
+    print 'WSGI without exception'
+except Exception:
+    print 'handling WSGI exception'
+    # Error loading applications
+    if 'mod_wsgi' in sys.modules:
+        traceback.print_exc()
+        os.kill(os.getpid(), signal.SIGINT)
+        time.sleep(2.5)
+# application = django.core.handlers.wsgi.WSGIHandler()
