@@ -817,7 +817,7 @@ demonstrate these and other tasks.
 +------------------------------+----------------------------------------------+
 | database/discovery_rate.py   | Using reference information from the ICSD    |
 |                              | and measures of structural uniqueness find   |
-|                              | the nominal year of `discovery' for all ICSD |
+|                              | the nominal year of 'discovery' for all ICSD |
 |                              | structures.                                  |
 +------------------------------+----------------------------------------------+
 | database/precipitates.py     | Screen for good precipitate strengtheners.   |
