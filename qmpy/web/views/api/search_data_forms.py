@@ -88,6 +88,7 @@ class DataFilterForm(forms.Form):
         self.helper.form_class = 'form-horizontal'
         self.helper.label_class = 'col-sm-2'
         self.helper.field_class = 'col-sm-4'
+        self.helper.form_action = '#apisearchresult'
 
         self.helper.layout = Layout(
             TabHolder(
