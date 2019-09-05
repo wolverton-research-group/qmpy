@@ -18,11 +18,11 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get('qmdb_v1_api_name'),
-        'USER': os.environ.get('qmdb_v1_api_user'),
-        'PASSWORD': os.environ.get('qmdb_v1_api_pswd'),
-        'HOST': os.environ.get('qmdb_v1_api_host'),
-        'PORT': os.environ.get('qmdb_v1_api_port') 
+        'NAME': os.environ.get('qmdb_v1_1_name'),
+        'USER': os.environ.get('qmdb_v1_1_user'),
+        'PASSWORD': os.environ.get('qmdb_v1_1_pswd'),
+        'HOST': os.environ.get('qmdb_v1_1_host'),
+        'PORT': os.environ.get('qmdb_v1_1_port') 
     }
 }
 

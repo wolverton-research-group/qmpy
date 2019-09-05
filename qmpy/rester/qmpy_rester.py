@@ -1,7 +1,10 @@
 import json
+import os
 
-REST_OPTIMADE  = 'http://larue.northwestern.edu:4850/optimade'
-REST_OQMDAPI   = 'http://larue.northwestern.edu:4850/oqmdapi'
+WEBPORT = os.environ.get('web_port')
+
+REST_OPTIMADE  = 'http://larue.northwestern.edu:'+WEBPORT+'/optimade'
+REST_OQMDAPI   = 'http://larue.northwestern.edu:'+WEBPORT+'/oqmdapi'
 REST_END_POINT = REST_OQMDAPI
 
 class QMPYRester(object):
