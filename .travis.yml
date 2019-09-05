@@ -27,8 +27,7 @@ before_script:
   - mysql -e 'create database qmdb_dev;'
 script:
   - cd qmpy/db
-  - python manage.py makemigrations qmpy auth
-  - python manage.py migrate --fake auth
-  - python manage.py migrate --fake qmpy
+  - python manage.py makemigrations qmpy
+  - python manage.py migrate qmpy
   - python manage.py syncdb --noinput
   - python manage.py test qmpy
