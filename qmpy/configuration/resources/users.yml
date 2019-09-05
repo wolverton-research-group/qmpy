@@ -8,138 +8,108 @@
     # user2:
     #   hostname1: ...
     
-aae109:
-  byrd:
-    run_path: /home/aae109/autorun
-    username: aae109
+alz6518:
   josquin:
-    run_path: /home/aae109/autorun
-    username: aae109
+    run_path: /home/alz6518/oqmd_autorun
+    username: alz6518
   palestrina:
-    run_path: /home/aae109/autorun
-    username: aae109
+    run_path: /home/alz6518/oqmd_autorun
+    username: alz6518
   quest:
-    run_path: /home/aae109/auto_run
-    username: aae109
-  victoria:
-    run_path: /home/aae109/autorun
-    username: aae109
-dhs751:
-  byrd:
-    run_path: /home/dhs751/oqmd_run/
-    username: dhs751
+    run_path: /home/alz6518/oqmd_autorun
+    username: alz6518
+amg4008: {}
+bbh2050:
   josquin:
-    run_path: /home/dhs751/oqmd_run
-    username: dhs751
+    run_path: /home/bbh2050/oqmd_autorun
+    username: bbh2050
   palestrina:
-    run_path: /home/dhs751/oqmd_run
-    username: dhs751
+    run_path: /home/bbh2050/oqmd_autorun
+    username: bbh2050
+  quest:
+    run_path: /home/bbh2050/oqmd_autorun
+    username: bbh2050
   victoria:
-    run_path: /home/dhs751/oqmd_run
-    username: dhs751
-dwh485:
-  byrd:
-    run_path: /home/dwh485/autorun/
-    username: dwh485
+    run_path: /home/bbh2050/oqmd_autorun
+    username: bbh2050
+cwp710:
   josquin:
-    run_path: /home/dwh485/autorun/
-    username: dwh485
+    run_path: /home/cwp710/oqmd_autorun
+    username: cwp710
   palestrina:
-    run_path: /home/dwh485/autorun
-    username: dwh485
+    run_path: /home/cwp710/oqmd_autorun
+    username: cwp710
+  quest:
+    run_path: /home/cwp710/oqmd_autorun
+    username: cwp710
   victoria:
-    run_path: /home/dwh485/autorun/
-    username: dwh485
+    run_path: /home/cwp710/oqmd_autorun
+    username: cwp710
 jhc585:
   byrd:
-    run_path: /home/jhc585/oqmd_autorun
+    run_path: /home/jhc585/oqmd_autorun/
     username: jhc585
   josquin:
-    run_path: /home/jhc585/oqmd_autorun
+    run_path: /home/jhc585/oqmd_autorun/
     username: jhc585
   palestrina:
-    run_path: /home/jhc585/oqmd_autorun
+    run_path: /home/jhc585/oqmd_autorun/
     username: jhc585
   quest:
-    run_path: /home/jhc585/oqmd_autorun
+    run_path: /home/jhc585/oqmd_autorun/
     username: jhc585
-  stampede:
-    run_path: /scratch/03780/jh2336
-    username: jh2336
   victoria:
-    run_path: /home/jhc585/oqmd_run
+    run_path: /home/jhc585/oqmd_autorun/
     username: jhc585
-kmb366:
+jsm1683:
   byrd:
-    run_path: /home/kmb366/autorun
-    username: kmb366
+    run_path: /home/jsm1683/oqmd_autorun
+    username: jsm1683
   josquin:
-    run_path: /home/kmb366/autorun
-    username: kmb366
+    run_path: /home/jsm1683/oqmd_autorun
+    username: jsm1683
   palestrina:
-    run_path: /home/kmb366/autorun
-    username: kmb366
-  victoria:
-    run_path: /home/kmb366/autorun
-    username: kmb366
-ltw578:
-  babbage:
-    run_path: /home/ltw578/auto_run
-    username: ltw578
-  byrd:
-    run_path: /home/ltw578/auto_run
-    username: ltw578
-  josquin:
-    run_path: /home/ltw578/auto_run
-    username: ltw578
-  palestrina:
-    run_path: /home/ltw578/auto_run
-    username: ltw578
-  victoria:
-    run_path: /home/ltw578/auto_run
-    username: ltw578
-mka721:
-  byrd:
-    run_path: /home/mka721/autorun
-    username: mka721
-  josquin:
-    run_path: /home/mka721/autorun
-    username: mka721
-  palestrina:
-    run_path: /home/mka721/autorun
-    username: mka721
+    run_path: /home/jsm1683/oqmd_autorun
+    username: jsm1683
   quest:
-    run_path: /home/mka721/autorun
-    username: mka721
+    run_path: /projects/p30578/autorun
+    username: jsm1683
   victoria:
-    run_path: /home/mka721/autorun
-    username: mka721
+    run_path: /home/jsm1683/oqmd_autorun
+    username: jsm1683
+kpq6413:
+  josquin:
+    run_path: /home/kpq6413/oqmd_autorun
+    username: kpq6413
+  palestrina:
+    run_path: /home/kpq6413/oqmd_autorun
+    username: kpq6413
+  quest:
+    run_path: /projects/p30436/oqmd_autorun
+    username: kpq6413
 mlc152:
-  byrd:
-    run_path: /home/mlc152
-    username: mlc152
   josquin:
-    run_path: /home/mlc152
+    run_path: /home/mlc152/autorun
     username: mlc152
   palestrina:
-    run_path: /home/mlc152
+    run_path: /home/mlc152/autorun
     username: mlc152
-sss749:
-  byrd:
-    run_path: /home/sss749/autorun
-    username: sss749
-  josquin:
-    run_path: /home/sss749/autorun
-    username: sss749
-  palestrina:
-    run_path: /home/sss749/autorun
-    username: sss749
   quest:
-    run_path: /home/sss749/autorun
-    username: sss749
+    run_path: /home/mlc152/autorun
+    username: mlc152
+sdg0032:
+  josquin:
+    run_path: /home/sdg0032/oqmd_autorun
+    username: sdg0032
+  palestrina:
+    run_path: /home/sdg0032/oqmd_autorun
+    username: sdg0032
+  quest:
+    run_path: /home/sdg0032/oqmd_autorun
+    username: sdg0032
   victoria:
-    run_path: /home/sss749/autorun
-    username: sss749
+    run_path: ''
+    username: ''
 vih173:
   byrd:
     run_path: /home/vih173/Work/oqmd
@@ -156,48 +126,3 @@ vih173:
   victoria:
     run_path: /home/vih173/Work/oqmd
     username: vih173
-vky561:
-  byrd:
-    run_path: oqmd_autorun
-    username: vky561
-  josquin:
-    run_path: oqmd_autorun
-    username: vky561
-  palestrina:
-    run_path: /home/vky561/oqmd_autorun
-    username: vky561
-  quest:
-    run_path: /home/vky561/oqmd_autorun
-    username: vky561
-  victoria:
-    run_path: /home/vky561/oqmd_autorun
-    username: vky561
-zlb066:
-  byrd:
-    run_path: /home/zlb066/oqmd/
-    username: zlb066
-  josquin:
-    run_path: /home/zlb066/oqmd
-    username: zlb066
-  palestrina:
-    run_path: /home/zlb066/oqmd
-    username: zlb066
-  quest:
-    run_path: /home/zlb066/oqmd
-    username: zlb066
-  victoria:
-    run_path: /home/zlb066/oqmd
-    username: zlb066
-zyu584:
-  byrd:
-    run_path: /home/zyu584/auto_run/
-    username: zyu584
-  josquin:
-    run_path: /home/zyu584/auto_run/
-    username: zyu584
-  palestrina:
-    run_path: /home/zyu584/auto_run/
-    username: zyu584
-  victoria:
-    run_path: /home/zyu584/auto_run/
-    username: zyu584

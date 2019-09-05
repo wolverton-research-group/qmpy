@@ -847,7 +847,8 @@ class Calculation(models.Model):
             if 'NELM ' in line:
                 sett_nelm = int(line.strip().split()[2].strip(';'))
                 break
-        if sett_nsw > 0:
+        # fails for damaged OUTCARs
+        if 'relaxation' in self.configuration or sett_nsw > 0:
             check_ionic = True
         else:
             check_ionic = False
@@ -1299,7 +1300,7 @@ class Calculation(models.Model):
         return new_calc
 
     def compress(self, files=['OUTCAR', 'CHGCAR', 'CHG', 
-                                'PROCAR', 'LOCPOT', 'ELFCAR']):
+                                'PROCAR', 'LOCPOT', 'ELFCAR', 'vasprun.xml']):
         """
         gzip every file in `files`
 
@@ -1309,7 +1310,7 @@ class Calculation(models.Model):
         Return: None
         """
         for file in os.listdir(self.path):
-            if file in ['OUTCAR', 'CHGCAR', 'CHG', 'PROCAR', 'LOCPOT', 'ELFCAR']:
+            if file in ['OUTCAR', 'CHGCAR', 'CHG', 'PROCAR', 'LOCPOT', 'ELFCAR', 'vasprun.xml']:
                 os.system('gzip -f %s' % self.path+'/'+file)
 
     def copy(self):
@@ -1477,7 +1478,7 @@ class Calculation(models.Model):
                     'mpi':'mpirun -machinefile $PBS_NODEFILE -np $NPROCS',
                     'binary':'vasp_53', 
                     'pipes':' > stdout.txt 2> stderr.txt',
-                    'footer':'\n'.join(['gzip -f CHGCAR OUTCAR PROCAR ELFCAR',
+                    'footer':'\n'.join(['gzip -f CHGCAR OUTCAR PROCAR ELFCAR vasprun.xml',
                         'rm -f WAVECAR CHG',
                         'date +%s'])}
 
