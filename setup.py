@@ -34,6 +34,8 @@ setup(
         "scikit-learn",
         "bokeh == 0.12.15",
         "djangorestframework == 3.6.4",
+        "djangorestframework-xml==1.4.0",
+        "djangorestframework-yaml==1.0.3",
         "django-crispy-forms",
         "lark-parser ==0.7.1"
     ],
