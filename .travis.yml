@@ -25,9 +25,9 @@ before_script:
   - export qmdb_v1_1_host=""
   - export qmdb_v1_1_port=""
   - mysql -e 'create database qmdb_dev;'
-  - python qmpy/db/manage.py migrate
 script:
   - cd qmpy/db
+  - python manage.py migrate
   - python manage.py makemigrations auth qmpy
   - python manage.py migrate auth
   - python manage.py migrate qmpy
