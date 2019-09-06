@@ -28,7 +28,7 @@ before_script:
 script:
   - cd qmpy/db
   - python manage.py makemigrations
-  - python manage.py --fake migrate
+  - python manage.py migrate --fake
   - python manage.py makemigrations sites qmpy auth
   - python manage.py migrate auth
   - python manage.py migrate sites
