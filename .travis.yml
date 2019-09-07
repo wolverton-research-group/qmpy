@@ -16,7 +16,7 @@ before_install:
   - export PATH=/home/travis/miniconda2/bin:$PATH
   - conda update --yes conda
 install: 
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy matplotlib scikit-learn lxml pytest
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas
   - "python setup.py install"
 before_script:
   - export qmdb_v1_1_name="qmdb_dev"
