@@ -21,7 +21,7 @@ setup(
         "MySQL-python",
         "matplotlib < 3.0",
         "networkx < 2.3",
-        "pytest",
+        "pytest < 5.0",
         "python-memcached",
         "ase < 3.18",
         "django-extensions < 1.6.8",
