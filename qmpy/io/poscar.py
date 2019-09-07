@@ -197,8 +197,6 @@ def read(poscar, species=None):
     atoms = []
     inv = np.linalg.inv(cell).T
     for i in range(struct.natoms):
-        #atom = st.Atom.managerobject.create_atom()
-        #atom.element_id = atom_types[i]
         if direct:
             atomic_coords = [ float(v) for v in poscar.readline().strip().split()[0:3] ]
         else:
