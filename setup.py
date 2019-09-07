@@ -31,7 +31,7 @@ setup(
         "pexpect",
         "pyparsing",
         "PyYAML",
-        "scikit-learn",
+        "scikit-learn < 0.21",
         "bokeh == 0.12.15",
         "djangorestframework == 3.6.4",
         "djangorestframework-xml",
