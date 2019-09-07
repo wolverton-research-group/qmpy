@@ -1,7 +1,7 @@
 qmpy
 ====
 
-[ ![Build Status](https://travis-ci.com/tachyontraveler/qmpy.svg?branch=master) ](https://travis-ci.org/wolverton-research-group/qmpy)
+[ ![Build Status](https://api.travis-ci.org/wolverton-research-group/qmpy.svg?branch=master) ](https://travis-ci.org/wolverton-research-group/qmpy)
 [ ![PyPI version](https://badge.fury.io/py/qmpy.svg) ](https://badge.fury.io/py/qmpy)
 
 A toolkit for storing crystal structure data, automating calculations, handling computational resources and performing thermodynamic analysis.
