@@ -1,0 +1,39 @@
+/** Overriding some theme defaults **/
+
+@import url('https://fonts.googleapis.com/css?family=IBM+Plex+Mono:400,600|IBM+Plex+Sans:400,400i,600,600i|IBM+Plex+Serif:600&display=swap&subset=latin-ext');
+
+
+div.body h1,
+div.body h2,
+div.body h3,
+div.body h4,
+div.body h5,
+div.body h6 {
+    font-family: {{ theme_head_font_family }};
+    font-weight: 600;
+    margin: 30px 0px 10px 0px;
+    padding: 0;
+}
+
+
+div.body h1 { margin-top: 0; padding-top: 0; font-size: 166%; }
+div.body h2 { font-size: 133%; }
+div.body h3 { font-size: 110%; }
+div.body h4 { font-size: 100%; }
+div.body h5 { font-size: 95%; }
+div.body h6 { font-size: 90%; }
+
+
+pre {
+    padding: 7px 10px;
+}
+
+
+div.admonition {
+    padding: 10px 10px;
+}
+
+
+div.body p, div.body dd, div.body li {
+        line-height: 1.45em;
+}

@@ -182,8 +182,9 @@ def refine_cell(structure, symprec=1e-5, angle_tolerance=-1.0):
     comps = [ comps[i] for i in numbers ]
     if num_atom_bravais > 0:
         structure.cell = cell.T
-        structure.set_nsites(num_atom_bravais)
-        structure.site_coords = coords[:num_atom_bravais]
+        structure.set_nsites_manager(coords[:num_atom_bravais])
+        #structure.set_nsites(num_atom_bravais)
+        #structure.site_coords = coords[:num_atom_bravais]
         structure.site_compositions = comps[:num_atom_bravais]
         return structure
     else:
@@ -212,8 +213,9 @@ def find_primitive(structure, symprec=1e-4, angle_tolerance=-1.0):
     comps = [ comps[i] for i in numbers ]
     if num_atom_prim > 0:
         structure.cell = cell.T
-        structure.set_nsites(num_atom_prim)
-        structure.site_coords = coords[:num_atom_prim]
+        structure.set_nsites_manager(coords[:num_atom_prim])
+        #structure.set_nsites(num_atom_prim)
+        #structure.site_coords = coords[:num_atom_prim]
         structure.site_compositions = comps[:num_atom_prim]
         return structure
     else:

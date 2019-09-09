@@ -10,88 +10,67 @@ b1004:
   host: quest
   key: b1004
   users:
-  - aae109
-  - vih173
-  - zlb066
+  - jsm1683
   - jhc585
-  - mka721
-  - dwh485
 babbage:
   host: babbage
   key: ''
-  users:
-  - ltw578
+  users: []
 byrd:
   host: byrd
   key: ''
-  users:
-  - aae109
-  - vih173
-  - zlb066
-  - jhc585
-  - mka721
-  - dwh485
-d20829:
-  host: quest
-  key: d20829
-  users:
-  - sss749
-e20438:
-  host: quest
-  key: e20438
   users: []
 josquin:
   host: josquin
   key: ''
-  users:
-  - aae109
-  - vih173
-  - zlb066
-  - jhc585
-  - mka721
-  - dwh485
-  - ltw578
-p20477:
-  host: quest
-  key: p20477
-  users:
-  - zlb066
-p20746:
-  host: quest
-  key: p20746
-  users:
-  - jhc585
-p20747:
-  host: quest
-  key: p20747
-  users:
-  - jhc585
-p30072:
-  host: quest
-  key: p30072
   users: []
+p30140:
+  host: quest
+  key: p30140
+  users: []
+p30239:
+  host: quest
+  key: p30239
+  users:
+  - jhc585
+p30436:
+  host: quest
+  key: p30436
+  users:
+  - kpq6413
+p30475:
+  host: quest
+  key: p30475
+  users:
+  - sdg0032
+p30563:
+  host: quest
+  key: p30563
+  users:
+  - jhc585
+p30578:
+  host: quest
+  key: p30578
+  users: []
+p30649:
+  host: quest
+  key: p30649
+  users:
+  - bbh2050
+p30919:
+  host: quest
+  key: ''
+  users:
+  - alz6518
 palestrina:
   host: palestrina
   key: ''
-  users:
-  - aae109
-  - vih173
-  - zlb066
-  - jhc585
-  - mka721
-  - dwh485
+  users: []
 stampede:
   host: stampede
   key: ''
-  users:
-  - jhc585
+  users: []
 victoria:
   host: victoria
   key: ''
-  users:
-  - aae109
-  - vih173
-  - zlb066
-  - jhc585
-  - mka721
-  - dwh485
+  users: []

@@ -28,6 +28,15 @@ class AtomError(qmpy.qmpyBaseError):
 class SiteError(qmpy.qmpyBaseError):
     pass
 
+
+# New in Django>1.8. Model instance has to be saved before they can be used as dict keys
+# The recommended method is to use a class manager: 
+# https://docs.djangoproject.com/en/2.2/ref/models/instances/
+class AtomManager(models.Manager):
+    def create_atom(self,coord):
+        site = self.create(coord=coord)
+        return site
+
 class Atom(models.Model):
     """
     Model for an Atom.
@@ -78,6 +87,8 @@ class Atom(models.Model):
 
     dist = None
     copy_of = None
+    
+    managerobject = AtomManager()
     class Meta:
         app_label = 'qmpy'
         db_table = 'atoms'
@@ -241,9 +252,9 @@ class Atom(models.Model):
                     site.add_atom(self, tol=tol)
                     return site
 
-        s = Site()
+        s = Site.managerobject.create_site(self.coord)
         s.structure = self.structure
-        s.coord = self.coord
+        #s.coord = self.coord
         s.atoms = [self]
         self.site = s
         return s
@@ -278,6 +289,16 @@ class Atom(models.Model):
             return False
         return dist < tol
 
+
+# New in Django>1.8. Model instance has to be saved before they can be used as dict keys
+# The recommended method is to use a class manager: 
+# https://docs.djangoproject.com/en/2.2/ref/models/instances/
+class SiteManager(models.Manager):
+    def create_site(self,coord):
+        site = self.create(coord=coord)
+        return site
+
+
 class Site(models.Model):
     """
     A lattice site. 
@@ -299,7 +320,7 @@ class Site(models.Model):
     x = models.FloatField()
     y = models.FloatField()
     z = models.FloatField()
-
+    managerobject = SiteManager()
     class Meta:
         app_label = 'qmpy'
         db_table = 'sites'

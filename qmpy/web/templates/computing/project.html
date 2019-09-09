@@ -116,11 +116,11 @@
         <th>Module</th>
         <th>Status</th>
         <th>Extra arguments</th>
-        <th>Action</th>
+        <th colspan="2">Action</th>
       </tr>
     </thead>
     <tbody>
-      {% for j in project.running %}
+      {% for j in project.running|slice:":100" %}
       <tr>
       <td width="80" class=clickableRow href="/computing/task/{{j.id}}">{{j.entry.id}}</td>
       <td class=clickableRow href="/computing/task/{{j.id}}">{{j.entry.name}}</td>
@@ -129,12 +129,17 @@
       <td class=clickableRow href="/computing/task/{{j.id}}">{{j.last_job_state}}</td>
       <td class=clickableRow href="/computing/task/{{j.id}}">{{j.kwargs}}</td>
       {% if j.last_job_state != 1 %}
-       <td>
+        <td>
            <form action="" method="POST">{% csrf_token %}
                <button type="submit" value="{{j.id}}" name="reset" style="float:right">Reset</button>
-            </form>
-       </td>
-       {% endif %}
+           </form>
+        </td>
+        <td>
+           <form action="" method="POST">{% csrf_token %}
+               <button type="submit" value="{{j.id}}" name="reset_entry" style="float:right">Reset Entry</button>
+           </form>
+        </td>
+      {% endif %}
       </tr>
       {% endfor %}
     </tbody>
@@ -142,7 +147,9 @@
 </div>
 <div style="margin-top:5px;margin-bottom:4px;width:50%;float:left">
   <p>Note: "status=1" means tasks are running successfully. Otherwise, it is highly recommended to
-  reset the tasks (Press the 'Reset' or 'Restart ALL' button).</p>
+  reset the tasks (Press the "Reset" or "Restart ALL" button). If on repeated resets, the task still
+  keeps returning to "state=0", try the "Reset Entry" button (Note: this will recompute the
+  entry from scratch).</p>
 </div>
 {% endblock %}
 

@@ -13,6 +13,9 @@
 {% block content %}
 <h1> Queue Status: </h1>
 
+<h2> Total number of jobs running: {{count}} </h2>
+
+<h2> Last 20 jobs submitted: </h2>
 <table>
   <thead>
     <th>ID</th>
@@ -20,7 +23,7 @@
     <th>Submission time</th>
   </thead>
   <tbody>
-    {% for job in running %}
+    {% for job in running%}
     <tr class=clickableRow href="/computing/job/{{job.id}}">
       <td>{{job.id}}</td>
       <td>{{job.account.host}}</td>
@@ -29,6 +32,7 @@
     {% endfor %}
   </tbody>
 </table>
+
 
 {% endblock %}
 

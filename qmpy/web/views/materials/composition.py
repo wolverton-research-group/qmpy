@@ -51,7 +51,7 @@ def composition_view(request, search=None):
         data['pd'] = ps.phase_diagram.get_flot_script("phasediagram")
         data['search'] = composition
         data['composition'] = comp
-        data['plot'] = comp.relative_stability_plot.get_flot_script()
+        data['plot'] = comp.relative_stability_plot(data=ps.data).get_flot_script()
         data['results'] = comp.entries
         energy, gs = ps.gclp(comp.name)
         data['gs'] = Phase.from_phases(gs)

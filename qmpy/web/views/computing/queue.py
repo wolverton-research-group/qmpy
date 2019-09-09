@@ -41,7 +41,8 @@ def job_view(request, job_id):
 
 def queue_view(request):
     upcoming = {}
-    running = Job.objects.filter(state=1)
+    running = Job.objects.filter(state=1).order_by('-created')
+    count = running.count()
     for p in Project.objects.all():
         uc = p.task_set.filter(state=0).order_by('priority').select_related()[:20]
         if uc.exists():
@@ -50,8 +51,11 @@ def queue_view(request):
 
         for job in running:
             job.collect()
-    data = {'running':running,
+
+    data = {'running':running[:20],
+            'count':count,
             'upcoming':upcoming}
+
     data.update(csrf(request))
     return render_to_response('computing/queue.html', 
             data, 
