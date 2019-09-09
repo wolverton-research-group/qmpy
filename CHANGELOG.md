@@ -13,7 +13,7 @@ qmpy changelog
     - [Lark Parser](https://lark-parser.readthedocs.io/en/latest/) to convert raw queries to logical Django Queries
     - Pagination is implemented while retreiving RESTful query results
 - Change in UI of the landing page
-    - Rremoved the on-the-fly calculations of # of entries while loading the oqmd.org main page
+    - Removed the on-the-fly calculations of # of entries while loading the oqmd.org main page
     - Removed the twitter based phase lookup instructions since it's no longer operational
 - Optimized the phase diagram and stability plot generation for compounds
     - Stability plot is now generated from the PhaseData that was already collected for generating phase diagram, instead of performing a second database lookup
