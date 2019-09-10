@@ -16,11 +16,18 @@ before_install:
   - export PATH=/home/travis/miniconda2/bin:$PATH
   - conda update --yes conda
 install: 
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy matplotlib scikit-learn lxml pytest
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy
   - "python setup.py install"
 before_script:
+  - export qmdb_v1_1_name="qmdb_dev"
+  - export qmdb_v1_1_user="root"
+  - export qmdb_v1_1_pswd=""
+  - export qmdb_v1_1_host=""
+  - export qmdb_v1_1_port=""
   - mysql -e 'create database qmdb_dev;'
 script:
   - cd qmpy/db
+  - python manage.py makemigrations auth qmpy contenttypes sites
+  - python manage.py migrate
   - python manage.py syncdb --noinput
   - python manage.py test qmpy

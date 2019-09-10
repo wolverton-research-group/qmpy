@@ -28,6 +28,15 @@ class AtomError(qmpy.qmpyBaseError):
 class SiteError(qmpy.qmpyBaseError):
     pass
 
+
+# New in Django>1.8. Model instance has to be saved before they can be used as dict keys
+# The recommended method is to use a class manager: 
+# https://docs.djangoproject.com/en/2.2/ref/models/instances/
+class AtomManager(models.Manager):
+    def create_atom(self,coord):
+        site = self.create(coord=coord)
+        return site
+
 class Atom(models.Model):
     """
     Model for an Atom.
@@ -78,6 +87,8 @@ class Atom(models.Model):
 
     dist = None
     copy_of = None
+    
+    managerobject = AtomManager()
     class Meta:
         app_label = 'qmpy'
         db_table = 'atoms'
