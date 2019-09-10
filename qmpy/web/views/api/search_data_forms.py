@@ -1,6 +1,6 @@
 from django import forms
 #from django.core.urlresolvers import reverse
-from crispy_forms.bootstrap import Field, TabHolder, Tab, FormActions, InlineField
+from crispy_forms.bootstrap import Field, TabHolder, Tab, FormActions, InlineField, InlineRadios
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Layout, Div, Fieldset, ButtonHolder, HTML, Row, Column, Reset
 
@@ -44,12 +44,20 @@ class DataFilterForm(forms.Form):
     generic = forms.CharField(required=False, 
                               widget=forms.TextInput(attrs={'placeholder': 'e.g. AB, AB2'})
                              )
-    icsd = forms.CharField(required=False, label='ICSD tag',
-                                widget=forms.TextInput(attrs={'placeholder': 'e.g. True, T, False, F'}),
-                          )
-    noduplicate = forms.CharField(required=False, label='Exclude duplicate',
-                                widget=forms.TextInput(attrs={'placeholder': 'e.g. True, T, False, F'}),
-                          )
+    icsd = forms.TypedChoiceField(
+                    required=False,
+                    choices=[(None, 'All'), ('True', 'Include'), ('False', 'Exclude')],
+                    label='ICSD tag',
+                    widget=forms.Select,
+                    initial='None',
+    )
+    noduplicate = forms.TypedChoiceField(
+                    required=False,
+                    choices=[('True', 'Yes'), ('False', 'No')],
+                    label='Exclude duplicate',
+                    widget=forms.Select,
+                    initial='False',
+    )
     band_gap = forms.CharField(required=False,
                                widget=forms.TextInput(attrs={'placeholder': 'e.g. 0, >0.3'}),
                               )
@@ -105,7 +113,10 @@ class DataFilterForm(forms.Form):
                     ),
                     Div(
                         Div('icsd', css_class="span4"),
-                        Div('noduplicate', css_class="span4"),
+                        Div(
+                            InlineRadios('noduplicate'),
+                            css_class="span4"
+                        ),
                         css_class='row-fluid'
                     ),
                     HTML('<br><p style="margin-left: 10px; margin-bottom: 20px; font-size: 15px; font-weight:\
