@@ -47,6 +47,9 @@ class DataFilterForm(forms.Form):
     icsd = forms.CharField(required=False, label='ICSD tag',
                                 widget=forms.TextInput(attrs={'placeholder': 'e.g. True, T, False, F'}),
                           )
+    noduplicate = forms.CharField(required=False, label='Exclude duplicate',
+                                widget=forms.TextInput(attrs={'placeholder': 'e.g. True, T, False, F'}),
+                          )
     band_gap = forms.CharField(required=False,
                                widget=forms.TextInput(attrs={'placeholder': 'e.g. 0, >0.3'}),
                               )
@@ -97,11 +100,12 @@ class DataFilterForm(forms.Form):
                          600">General properties</p>'),
                     Div(
                         Div('element_set', css_class="span4"),
+                        Div('composition', css_class="span4"),
                         css_class='row-fluid'
                     ),
                     Div(
-                        Div('composition', css_class="span4"),
                         Div('icsd', css_class="span4"),
+                        Div('noduplicate', css_class="span4"),
                         css_class='row-fluid'
                     ),
                     HTML('<br><p style="margin-left: 10px; margin-bottom: 20px; font-size: 15px; font-weight:\
