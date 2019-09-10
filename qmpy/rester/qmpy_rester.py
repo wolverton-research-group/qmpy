@@ -42,7 +42,7 @@ class QMPYRester(object):
 
         # URL paramters
         url_args = []
-        kwargs_list = ['composition', 'icsd', #'filter',
+        kwargs_list = ['composition', 'icsd', 'noduplicate',#'filter',
                        'sort_by', 'desc', 'sort_offset',
                        'limit', 'offset', 'fields']
 
