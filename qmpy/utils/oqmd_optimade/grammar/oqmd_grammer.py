@@ -1,10 +1,13 @@
+# This function is used only to generate grammer files. It is not called directly anywhere in Django
+# models or functions
+
 import json
 
 db_grammer_data = {'band_gap':'calculation__band_gap',
                    'natoms':'entry__natoms',
                    'volume':'calculation__output__volume',
-                   'nytpes':'entry__ntypes',
-                   'nelements':'entry__ntypes',
+                   'nytpes':'entry__composition__ntypes',
+                   'nelements':'entry__composition__ntypes',
                    'stability':'stability',
                    'delta_e':'delta_e',
                    'prototype':'entry__prototype',

@@ -131,7 +131,7 @@ button:hover:not([disabled]) {
         <th onclick="sortTable(0, 'num')"> rank </th>
         <th onclick="sortTable(1, 'num')"> oqmd_id </th>
         <th onclick="sortTable(2, 'num')"> icsd_id </th>
-        <th onclick="sortTable(3, 'link')"> name </th>
+        <th onclick="sortTable(3, 'str')"> name </th>
         <th onclick="sortTable(4, 'str')"> generic </th>
         <th onclick="sortTable(5, 'str')"> spacegroup </th>
         <th onclick="sortTable(6, 'str')"> prototype </th>
@@ -141,6 +141,7 @@ button:hover:not([disabled]) {
         <th onclick="sortTable(10, 'num')"> formation_energy </th>
         <th onclick="sortTable(11, 'num')"> band_gap </th>
         <th onclick="sortTable(12, 'num')"> stability </th>
+        <th> oqmd_link </th>
     </tr>
     {% for e in result %}
         <tr class=clickableRow">
@@ -153,7 +154,7 @@ button:hover:not([disabled]) {
             <td width="60">  </td>
         {% endif %}
 
-        <td width="90"> <a href="/materials/entry/{{e.entry_id}}">{{ e.name }}</a></td>
+        <td width="90"> {{ e.name }}</td>
         <td width="80"> {{ e.composition_generic }} </td>
         <td width="80"> {{ e.spacegroup }} </td>
         <td width="80"> {{ e.prototype }} </td>
@@ -174,6 +175,7 @@ button:hover:not([disabled]) {
         <td width="80"> {{ e.delta_e | floatformat:-3 }} </td>
         <td width="80"> {{ e.band_gap | floatformat:-3 }} </td>
         <td width="80"> {{ e.stability | floatformat:-3 }} </td>
+        <td width="50"> <a href="/materials/entry/{{e.entry_id}}"> link </a></td>
         </tr>
     {% endfor %}
 </table>
@@ -230,7 +232,7 @@ function sortTable(n, type) {
             }
         }
 
-        if (shouldSwitch) {
+        if (shouldSwitch && i < rows.length-1) {
             rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
             switching = true;
             switchcount ++;

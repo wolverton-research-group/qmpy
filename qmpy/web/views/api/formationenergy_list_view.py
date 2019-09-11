@@ -7,6 +7,7 @@ from qmpy.utils import query_to_Q, parse_formula_regex
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer
+from django.db.models import F
 
 from qmpy.rester import qmpy_rester
 from collections import OrderedDict
@@ -70,6 +71,7 @@ class FormationEnergyList(generics.ListAPIView):
         fes = FormationEnergy.objects.filter(fit="standard")
         fes = self.icsd_filter(fes)
         fes = self.composition_filter(fes)
+        fes = self.duplicate_filter(fes)
         fes = self.filter(fes)
 
         sort_fes = self.request.GET.get('sort_by', False)
@@ -155,6 +157,19 @@ class FormationEnergyList(generics.ListAPIView):
 
         return fes
 
+    def duplicate_filter(self, fes):
+        """
+        Valid url parameter inputs:
+            ?noduplicate=True
+        """
+        request = self.request
+
+        dup = request.GET.get('noduplicate', False)
+
+        if dup in ['T', 'True', 'true', 'TRUE', 't']:
+            fes = fes.filter(entry__id=F("entry__duplicate_of__id"))
+
+        return fes
 
     def filter(self, fes):
         """

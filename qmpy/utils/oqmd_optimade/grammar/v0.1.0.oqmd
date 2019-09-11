@@ -1,1 +1,5 @@
-{"formula_prototype": "composition__generic", "natoms": "entry__natoms", "volume": "calculation__output__volume", "delta_e": "delta_e", "chemical_formula": "composition__formula__in", "stability": "stability", "band_gap": "calculation__band_gap", "generic": "composition__generic", "element": "composition__element_list__contains", "nelements": "entry__ntypes", "ntypes": "entry__ntypes", "spacegroup": "calculation__output__spacegroup__hm", "prototype": "entry__prototype"}
+{"formula_prototype": "composition__generic", "natoms": "entry__natoms", "volume":
+"calculation__output__volume", "delta_e": "delta_e", "chemical_formula": "composition__formula__in",
+"stability": "stability", "band_gap": "calculation__band_gap", "generic": "composition__generic",
+"element": "composition__element_list__contains", "nelements": "entry__composition__ntypes",
+"ntypes": "entry__composition__ntypes", "spacegroup": "calculation__output__spacegroup__hm", "prototype": "entry__prototype"}

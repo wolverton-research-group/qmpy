@@ -9,6 +9,7 @@ class FormationEnergySerializer(QueryFieldsMixin, serializers.ModelSerializer):
     calculation_label = serializers.SerializerMethodField()
     formationenergy_id = serializers.SerializerMethodField()
     icsd_id = serializers.SerializerMethodField()
+    duplicate_entry_id = serializers.SerializerMethodField()
 
     composition = serializers.SerializerMethodField()
     composition_generic = serializers.SerializerMethodField()
@@ -29,6 +30,9 @@ class FormationEnergySerializer(QueryFieldsMixin, serializers.ModelSerializer):
 
     def get_entry_id(self, formationenergy):
         return formationenergy.entry.id
+
+    def get_duplicate_entry_id(self, formationenergy):
+        return formationenergy.entry.duplicate_of.id
 
     def get_calculation_id(self, formationenergy):
         return formationenergy.calculation.id
@@ -86,7 +90,7 @@ class FormationEnergySerializer(QueryFieldsMixin, serializers.ModelSerializer):
             return
 
     def get_ntypes(self, formationenergy):
-        return formationenergy.entry.ntypes
+        return formationenergy.composition.ntypes
 
     def get_natoms(self, formationenergy):
         return formationenergy.entry.natoms
@@ -97,7 +101,7 @@ class FormationEnergySerializer(QueryFieldsMixin, serializers.ModelSerializer):
     class Meta:
         model = FormationEnergy
         fields = ('name', 'entry_id', 'calculation_id', 
-                  'icsd_id', 'formationenergy_id',
+                  'icsd_id', 'formationenergy_id', 'duplicate_entry_id',
                   'composition', 'composition_generic', 
                   'prototype', 'spacegroup', 'volume', 
                   'ntypes', 'natoms', 
