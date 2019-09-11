@@ -112,11 +112,11 @@ class DataFilterForm(forms.Form):
                         css_class='row-fluid'
                     ),
                     Div(
-                        Div('icsd', css_class="span4"),
                         Div(
                             InlineRadios('noduplicate'),
                             css_class="span4"
                         ),
+                        Div('icsd', css_class="span4"),
                         css_class='row-fluid'
                     ),
                     HTML('<br><p style="margin-left: 10px; margin-bottom: 20px; font-size: 15px; font-weight:\
