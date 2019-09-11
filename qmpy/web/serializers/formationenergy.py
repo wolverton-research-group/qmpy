@@ -90,7 +90,7 @@ class FormationEnergySerializer(QueryFieldsMixin, serializers.ModelSerializer):
             return
 
     def get_ntypes(self, formationenergy):
-        return formationenergy.entry.ntypes
+        return formationenergy.composition.ntypes
 
     def get_natoms(self, formationenergy):
         return formationenergy.entry.natoms
