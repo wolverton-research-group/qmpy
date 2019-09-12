@@ -9,7 +9,8 @@ import fractions as frac
 import logging
 
 from qmpy.utils import *
-from django.db.models import F
+from django.db.models import F, Q
+import operator
 
 logger = logging.getLogger(__name__)
 
@@ -195,9 +196,23 @@ class PhaseData(object):
             data = data.exclude(**exclude)
 
         if space:
-            space_qs = Element.objects.exclude(symbol__in=space)
-            data = data.filter(composition__element_set__in=space)
-            data = data.exclude(composition__element_set__in=space_qs)
+            ## Query phase space using element_list
+            dim = len(space)+1
+
+            element_q_lst = [Q(composition__element_list__contains=s+'_') for s in space]
+            combined_q = reduce(operator.or_, element_q_lst)
+            combined_q = reduce(operator.and_, [combined_q, Q(composition__ntypes__lt=dim)])
+
+            exclude_element_q_lst = [Q(composition__element_list__contains=e.symbol+'_') 
+                                        for e in Element.objects.exclude(symbol__in=space)]
+            combined_q_not = reduce(operator.or_, exclude_element_q_lst)
+
+            data = data.filter(combined_q).exclude(combined_q_not)
+
+            ## The following is old method (will be removed in future)
+            #space_qs = Element.objects.exclude(symbol__in=space)
+            #data = data.filter(composition__element_set__in=space)
+            #data = data.exclude(composition__element_set__in=space_qs)
 
         data = data.distinct()
         columns = [ 'id', 'composition_id', 'stability',
