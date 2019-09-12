@@ -217,7 +217,6 @@ class Task(models.Model):
                     calc.instructions['mpi'] = 'mpirun -np $NPROCS -machinefile $PBS_NODEFILE -tmpdir /scratch'
 
         jobs = []
-        #for calc in calcs:
         if calc.instructions:
             self.state = 1
             new_job = Job.create(
