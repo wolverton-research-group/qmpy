@@ -78,10 +78,22 @@ def composition_view(request, search=None):
         ##    data['stable'].append(p.formation.energy)
         ## Fe-Ti-Sb: what's the problem?
         data['stable'] = [ p.formation.entry for p in ps.stable ]
-        comps = Composition.get_list(space)
+
+        
+        ## The following step is really slow. Will be removed in future! 
+        ## < Mohan
+        # results = defaultdict(list)
+        # comps = Composition.get_list(space) 
+        # for c in comps:
+        #     results['-'.join(sorted(c.space))] += c.entries
+
+        ## Updated code to get entries in a phase space
         results = defaultdict(list)
-        for c in comps:
-            results['-'.join(sorted(c.space))] += c.entries
+        for p in ps.phases:
+            c = p.formation.composition
+            results['-'.join(sorted(c.space))] += [p.formation.entry]
+        ## Mohan >
+
         for k,v in results.items():
             results[k] = sorted(v, key=lambda x:
                     1000 if x.energy is None else x.energy)
