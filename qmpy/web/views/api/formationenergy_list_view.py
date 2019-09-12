@@ -3,11 +3,13 @@ import django_filters.rest_framework
 from qmpy.web.serializers.formationenergy import FormationEnergySerializer
 from qmpy.materials.formation_energy import FormationEnergy
 from qmpy.materials.entry import Composition
+from qmpy.materials.element import Element
 from qmpy.utils import query_to_Q, parse_formula_regex
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer
-from django.db.models import F
+from django.db.models import F, Q
+import operator
 
 from qmpy.rester import qmpy_rester
 from collections import OrderedDict
@@ -148,12 +150,22 @@ class FormationEnergyList(generics.ListAPIView):
             fes = fes.filter(composition__formula__in=f_lst)
         else:
             c_lst = comp.strip().split('-')
-            cs = Composition.get_list(c_lst)
-            if len(cs) == 1:
-                c = cs[0]
-            else:
-                c = cs
-            fes = fes.filter(composition=c)
+            dim = len(c_lst)
+            q_lst = [Q(composition__element_list__contains=s+'_') 
+                     for s in c_lst]
+            combined_q = reduce(operator.or_, q_lst)
+            combined_q = reduce(operator.and_, 
+                                [
+                                    combined_q, 
+                                    Q(composition__ntypes__lte=dim)
+                                ]
+                                )
+
+            ex_q_lst = [Q(composition__element_list__contains=e.symbol+'_')
+                        for e in Element.objects.exclude(symbol__in=c_lst)]
+            combined_q_not = reduce(operator.or_, ex_q_lst)
+
+            fes = fes.filter(combined_q).exclude(combined_q_not)
 
         return fes
 
