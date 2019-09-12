@@ -10,8 +10,7 @@
     <script src="http://code.jquery.com/ui/1.11.0/jquery-ui.js">
     </script>
     <script type="text/javascript" src="{% static "js/bootstrap-tab.js" %}"></script>
-</head>
-
+</head> 
 <style>
 table {
     border-spacing: 0;
@@ -175,7 +174,7 @@ button:hover:not([disabled]) {
         <td width="80"> {{ e.delta_e | floatformat:-3 }} </td>
         <td width="80"> {{ e.band_gap | floatformat:-3 }} </td>
         <td width="80"> {{ e.stability | floatformat:-3 }} </td>
-        <td width="50"> <a href="/materials/entry/{{e.entry_id}}"> link </a></td>
+        <td width="50"> <a href="/materials/entry/{{e.entry_id}}" target="_blank"> link </a></td>
         </tr>
     {% endfor %}
 </table>
