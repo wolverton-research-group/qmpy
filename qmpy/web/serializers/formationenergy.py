@@ -65,7 +65,7 @@ class FormationEnergySerializer(QueryFieldsMixin, serializers.ModelSerializer):
             return 
 
     def get_prototype(self, formationenergy):
-        if formationenergy.calculation.output: 
+        if formationenergy.entry.prototype: 
             return formationenergy.entry.prototype.name
         else:
             return
