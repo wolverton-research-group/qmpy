@@ -2,7 +2,7 @@ from rest_framework import generics
 import django_filters.rest_framework
 from qmpy.web.serializers.formationenergy import FormationEnergySerializer
 from qmpy.materials.formation_energy import FormationEnergy
-from qmpy.materials.entry import Composition
+from qmpy.materials.composition import Composition
 from qmpy.materials.element import Element
 from qmpy.utils import query_to_Q, parse_formula_regex
 from rest_framework.pagination import LimitOffsetPagination
@@ -148,7 +148,7 @@ class FormationEnergyList(generics.ListAPIView):
                 f = ' '.join(['%s%g' % (k, cd[k]) for k in sorted(cd.keys())])
                 f_lst.append(f)
             fes = fes.filter(composition__formula__in=f_lst)
-        else:
+        elif '-' in comp:
             c_lst = comp.strip().split('-')
             dim = len(c_lst)
             q_lst = [Q(composition__element_list__contains=s+'_') 
@@ -166,6 +166,9 @@ class FormationEnergyList(generics.ListAPIView):
             combined_q_not = reduce(operator.or_, ex_q_lst)
 
             fes = fes.filter(combined_q).exclude(combined_q_not)
+        else:
+            c = Composition.get(comp)
+            fes = fes.filter(composition=c)
 
         return fes
 
