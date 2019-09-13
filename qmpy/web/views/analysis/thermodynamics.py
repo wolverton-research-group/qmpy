@@ -107,6 +107,8 @@ def phase_diagram_view(request):
                         phase.show_label = False
 
         data['flotscript'] = ps.phase_diagram.get_flot_script()
+        if ps.shape == (3, 0):
+            data['plotlyjs'] = ps.phase_diagram.get_plotly_script_3d()
         data['renderer'] = ps.renderer
     return render_to_response('analysis/phase_diagram.html',
             get_globals(data),
