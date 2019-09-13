@@ -48,6 +48,8 @@ def composition_view(request, search=None):
         comp = Composition.get(composition)
         ps = PhaseSpace('-'.join(comp.comp.keys()))
         ps.infer_formation_energies()
+        if ps.shape == (3, 0):
+            data['pd3d'] = ps.phase_diagram.get_plotly_script_3d("phasediagram")
         data['pd'] = ps.phase_diagram.get_flot_script("phasediagram")
         data['search'] = composition
         data['composition'] = comp
@@ -70,6 +72,8 @@ def composition_view(request, search=None):
         ps = PhaseSpace(space)
         ps.infer_formation_energies()
         data['search'] = space
+        if ps.shape == (3, 0):
+            data['pd3d'] = ps.phase_diagram.get_plotly_script_3d("phasediagram")
         data['pd'] = ps.phase_diagram.get_flot_script("phasediagram")
         ##data['stable'] = []
         ##for p in ps.stable:
