@@ -173,7 +173,10 @@ class Renderer(object):
 
         cmd += "showlegend: false, margin: {l:1, r:1, t:1, b:1}};"
 
-        cmd += 'Plotly.newPlot("%s", data, layout, {displayModeBar: true});' %div
+        cmd += 'Plotly.newPlot("%s", data, layout,' %div
+        cmd += '{displayModeBar: true, displaylogo: false,'
+        cmd += 'modeBarButtonsToRemove:["resetCameraDefault3d","hoverClosest3d"]' 
+        cmd += '});'
 
         return cmd
 
