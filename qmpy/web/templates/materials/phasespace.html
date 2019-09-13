@@ -14,12 +14,22 @@
       {{ plot | safe }}
       });
     </script>
-
-    <script language="javascript" type="text/javascript">
-      $(function() {
-          {{ pd | safe }}
-          });
-        </script>
+    
+{% if pd3d %}
+<script type="text/javascript" src="https://cdn.plot.ly/plotly-1.49.4.min.js">
+</script>
+<script language="javascript" type="text/javascript">
+$(function() {
+    {{ pd3d | safe }}
+    });
+</script>
+{% else %}
+<script language="javascript" type="text/javascript">
+$(function() {
+    {{ pd | safe }}
+    });
+</script>
+{% endif %}
 
         <script type='text/javascript'>//<![CDATA[ 
           window.onload=function(){
@@ -40,7 +50,11 @@
 {% block content %}
 
 <div class="box">
+  {% if pd3d %}
+  <div style="width:600px;height:500px;padding:1px;">
+  {% else %}
   <div style="width:450px;height:400px;padding:30px;">
+  {% endif %}
     <div id="phasediagram" class="flot-placeholder"></div>
   </div>
 </div>

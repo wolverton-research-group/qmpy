@@ -39,11 +39,21 @@ $(function() {
     });
 </script>
 
+{% if pd3d %}
+<script type="text/javascript" src="https://cdn.plot.ly/plotly-1.49.4.min.js">
+</script>
+<script language="javascript" type="text/javascript">
+$(function() {
+    {{ pd3d | safe }}
+    });
+</script>
+{% else %}
 <script language="javascript" type="text/javascript">
 $(function() {
     {{ pd | safe }}
     });
 </script>
+{% endif %}
 
 <script type='text/javascript'>//<![CDATA[ 
 window.onload=function(){
@@ -83,6 +93,15 @@ theForm.onsubmit = function(e) {
 <div class="box">
   This composition appears in the {{ space }} region of phase space. It's relative stability is shown in the {{ space }} phase diagram (left). The relative stability of all other phases at this composition (and the combination of other stable phases, if no compound at this composition is stable) is shown in the relative stability plot (right).
   <div>
+    {% if pd3d %}
+    <div style="width:600px;height:500px;margin:1px;float:left">
+      <div id="phasediagram" class="flot-placeholder"></div>
+    </div>
+
+    <div style="width:200px;height:500px;margin:1px;margin-left:10px;float:left">
+      <div id="placeholder" class="flot-placeholder"></div>
+    </div>
+    {% else %}
     <div style="width:500px;height:400px;margin:40px;float:left">
       <div id="phasediagram" class="flot-placeholder"></div>
     </div>
@@ -90,6 +109,7 @@ theForm.onsubmit = function(e) {
     <div style="width:200px;height:400px;margin:40px;float:left">
       <div id="placeholder" class="flot-placeholder"></div>
     </div>
+    {% endif %}
   </div>
 </div>
 {% endif %}
