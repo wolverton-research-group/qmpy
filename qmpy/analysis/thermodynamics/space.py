@@ -1466,19 +1466,21 @@ class PhaseSpace(object):
                 continue
             pt = Point(coord_to_gtet(self.coord(p)), label=p.name)
             points.append(pt)
-        self.renderer.add(PointCollection(points, color='red'))
+        self.renderer.add(PointCollection(points, 
+                                          color='red', label='Unstable'))
 
         points = []
         for p in self.stable:
             if not self.in_bounds(p):
                 continue
-            label = '%s:<br>-' % p.name
+            label = '%s:<br>- ' % p.name
             label += ' <br>- '.join(o.name for o in self.graph[p].keys())
             pt = Point(coord_to_gtet(self.coord(p)), label=label)
             points.append(pt)
             if p.show_label:
                 self.renderer.add(Text(pt, p.name))
-        self.renderer.add(PointCollection(points, color='green'))
+        self.renderer.add(PointCollection(points, 
+                                          color='green', label='Stable'))
 
         self.renderer.options['grid']['hoverable'] = True, 
         self.renderer.options['grid']['borderWidth'] = 0
