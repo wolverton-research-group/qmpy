@@ -85,6 +85,98 @@ class Renderer(object):
             cmd += '\n' + text.get_flot_series()
         return cmd
 
+    def get_plotly_script_3d(self, div="plotlyjs", **kwargs):
+        """
+        Return javascript of plotly.js to plot phase diagram
+        """
+
+        dim = 3
+        if dim == 3:
+            plot_type = 'scatter3d'
+        else:
+            plot_type = 'scatter'
+
+        cmd = 'var line_type = {width: 2, color: "grey"};'
+        cmd += 'var stable_marker_type = '
+        cmd += '{size: 5, color: "teal", opacity: 0.8};'
+        cmd += 'var unstable_marker_type = '
+        cmd += '{size: 4, color: "#af5f00", opacity: 0.5};'
+        cmd += 'var axis_type = {title: "", showbackground: false, '
+        cmd += 'zeroline: false, showgrid:false, ticks: "", showlabels: false,'
+        cmd += 'showticklabels: false, showspikes: false};'
+
+        # Prepare data
+        cmd += 'var data = ['
+
+        # Plot tie lines
+        for line in self.lines:
+            cmd += "{"
+            p1, p2 = line.points
+            cmd += "x: [%f, %f]," %(p1.coord[0], p2.coord[0])
+            cmd += "y: [%f, %f]," %(p1.coord[1], p2.coord[1])
+            if dim == 3:
+                cmd += "z: [%f, %f]," %(p1.coord[2], p2.coord[2])
+            cmd += 'type: "%s",' %plot_type
+            cmd += 'mode: "lines",'
+            cmd += 'text: ["",""],'
+            cmd += 'hoverinfo: "text",'
+            cmd += 'line: line_type,'
+            cmd += 'showlegend: false,'
+            cmd += '},'
+
+        # Plot phases
+        for pc in self.point_collections:
+            label = pc.label
+            cmd += "{"
+            cmd += "x: %s," % json.dumps(list(
+                map(lambda p: p.coord[0], pc.points)))
+            cmd += "y: %s," % json.dumps(list(
+                map(lambda p: p.coord[1], pc.points)))
+            if dim == 3:
+                cmd += "z: %s," % json.dumps(list(
+                    map(lambda p: p.coord[2], pc.points)))
+            cmd += "text: %s," % json.dumps(list(
+                map(lambda p: p.label, pc.points)))
+            cmd += 'type: "%s",' %plot_type
+            cmd += 'mode: "markers",'
+            cmd += 'hoverinfo: "text",'
+            cmd += 'marker: %s_marker_type,' %label.lower()
+            cmd += 'name: "%s",' %label
+            cmd += '},'
+
+        cmd += "];"
+
+        # Prepare Layout
+        cmd += "var layout = {"
+        if dim == 3:
+            cmd += "scene: {camera: {eye: {x:1.6, y:0.1, z:0.1}},"
+            cmd += "xaxis: axis_type, yaxis: axis_type, zaxis: axis_type,"
+
+        # Write annotations
+        cmd += "annotations: ["
+        for text in self.text:
+            cmd += "{"
+            cmd += "showarrow: false,"
+            cmd += "x: " + str(text.point.coord[0]) + ","
+            cmd += "y: " + str(text.point.coord[1]) + ","
+            if dim == 3:
+                cmd += "z: " + str(text.point.coord[2]) + ","
+
+            cmd += "text: %s," %json.dumps(text.text)
+            cmd += 'xanchor: "left",'
+            cmd += 'font: {color: "black", size: 11}},'
+
+        cmd += "],"
+
+        if dim == 3:
+            cmd += "},"
+
+        cmd += "showlegend: false, margin: {l:1, r:1, t:1, b:1}};"
+
+        cmd += 'Plotly.newPlot("%s", data, layout, {displayModeBar: true});' %div
+
+        return cmd
+
     def plot_in_matplotlib(self, **kwargs):
         if 'axes' in kwargs:
             axes = kwargs['axes']
