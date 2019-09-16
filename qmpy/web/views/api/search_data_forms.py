@@ -1,19 +1,12 @@
 from django import forms
-#from django.core.urlresolvers import reverse
 from crispy_forms.bootstrap import Field, TabHolder, Tab, FormActions, InlineField, InlineRadios
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Layout, Div, Fieldset, ButtonHolder, HTML, Row, Column, Reset
 
 filter_choices = [
-    #('id', 'id'),
-    #('name', 'name'),
-    #('natoms', 'natoms'),
-    #('ntypes', 'ntypes'),
-    (None, 'none'),
-    #('energyperatom', 'energy_per_atom'),
-    #('bandgap', 'band_gap'),
-    #('formationenergy', 'formation_energy'),
-    ('stability', 'stability'),
+    (None, 'None'),
+    ('delta_e', 'Formation Energy'),
+    ('stability', 'Stability'),
 ]
 
 def popover_html(label, content):
@@ -32,8 +25,9 @@ class DataFilterForm(forms.Form):
     element_set = forms.CharField(required=False, label='Element Set',
                                   widget=forms.TextInput(attrs={'placeholder': 'e.g. S, (Mn-Fe),O'},
                                                         ),
-                                  help_text="""Use ',' as AND operator and '-' as OR operator. 
-                                  Use '(' and ')' to change priority.""",
+                                  help_text="<html>Use <code>,</code> as AND and\
+                                  <code>-</code> as OR <br>\
+                                  Use <code>(</code> and <code>)</code> to change priority</html>",
                                  )
     prototype = forms.CharField(required=False, 
                                 widget=forms.TextInput(attrs={'placeholder': 'e.g. Cu, CsCl'}, )
@@ -74,20 +68,27 @@ class DataFilterForm(forms.Form):
                              widget=forms.TextInput(attrs={'placeholder': 'e.g. 2, >3'}),
                              )
     volume = forms.CharField(required=False)
-    filter = forms.CharField(required=False)
-    limit = forms.IntegerField(required=False, label='limit', initial=50)
-    sort_offset = forms.IntegerField(required=False, label='offset', initial=0)
+    filter = forms.CharField(required=False, label='Filter', help_text="<html>Available Filters:\
+                             <i>element_set</i>, <i>element</i>, <i>spacegroup</i>, <i>prototype</i>,\
+                             <i>generic</i>, <i>volume</i>, <i>natoms</i>, <i>ntypes</i>,\
+                             <i>stability</i>, <i>delta_e</i>, <i>band_gap</i><br>\
+                             Logical Operations: <code>AND</code>, <code>OR</code>, <code>NOT</code>\
+                             </html>",
+                             widget=forms.TextInput(attrs={'placeholder': 'e.g. (NOT element=O) AND (ntypes=2 OR natoms<5) AND stability<0.01'}),
+                            )
+    limit = forms.IntegerField(required=False, label='Limit', initial=50)
+    sort_offset = forms.IntegerField(required=False, label='Offset', initial=0)
 
     sort_by = forms.TypedChoiceField(
                     required=False,
                     choices=filter_choices,
-                    label='Sort results by:',
+                    label='Sort results by',
                     widget=forms.Select,
     )
     desc = forms.TypedChoiceField(
                     required=False,
-                    choices=[('False', 'Ascending'), ('True', 'Descending')],
-                    label='Order:',
+                    choices=[('False', 'Asc'), ('True', 'Desc')],
+                    label='Order',
                     widget=forms.RadioSelect,
                     initial='False',
     )
@@ -102,66 +103,61 @@ class DataFilterForm(forms.Form):
         self.helper.form_action = '#apisearchresult'
 
         self.helper.layout = Layout(
-            TabHolder(
-                Tab('Filters',
-                    HTML('<p style="margin-left: 10px; margin-bottom: 20px; font-size: 15px; font-weight:\
-                         600">General properties</p>'),
-                    Div(
-                        Div('element_set', css_class="span4"),
-                        Div('composition', css_class="span4"),
-                        css_class='row-fluid'
-                    ),
-                    Div(
-                        Div(
-                            InlineRadios('noduplicate'),
-                            css_class="span4"
-                        ),
-                        Div('icsd', css_class="span4"),
-                        css_class='row-fluid'
-                    ),
-                    HTML('<br><p style="margin-left: 10px; margin-bottom: 20px; font-size: 15px; font-weight:\
-                         600">Structural properties</p>'),
-                    Div(
-                        Div('ntypes', css_class="span4"),
-                        Div('natoms', css_class="span4"),
-                        css_class='row-fluid'
-                    ),
-                    Div(
-                        Div('prototype', css_class="span4"),
-                        Div('generic', css_class="span4"),
-                        css_class='row-fluid'
-                    ),
-                    HTML('<br><p style="margin-left: 10px; margin-bottom: 20px; font-size: 15px; font-weight:\
-                         600">DFT calculated properties</p>'),
-                    Div(
-                        Div('stability', css_class="span4"),
-                        Div('band_gap', css_class="span4"),
-                        css_class='row-fluid'
-                    ),
-                    Div(
-                        Div('delta_e', css_class="span4"),
-                        css_class='row-fluid'
-                    ),
-                    HTML('<br><p style="margin-left: 10px; margin-bottom: 20px; font-size: 15px; font-weight:\
-                         600">Manual Input Filters</p>'),
-                    Div(
-                        Field('filter', css_class="span8"),
-                        css_class='row-fluid'
-                    ),
-                   ),
-        
-                Tab('Order of Results',
-                    Field('sort_by', css_class="input-sm"),
-                    Field('desc', css_class="input-sm"),
-                    Field('limit', css_class="input-sm"),
-                    Field('sort_offset', css_class="input-sm"),
-                   ),
+            HTML('<p style="margin-left: 10px; margin-bottom: 20px; font-size: 17px; font-weight:\
+                 600">General Properties</p>'),
+            Div(
+                Div('element_set', css_class="span4"),
+                Div('composition', css_class="span4"),
+                css_class='row-fluid'
             ),
-        
-       #     ButtonHolder(
-       #         Submit('search', 'Search',css_class='btn-primary'),
-       #         Reset('clear', 'Clear'),
-       #     ),
+            Div(
+                Div(
+                    InlineRadios('noduplicate'),
+                    css_class="span4"
+                ),
+                Div('icsd', css_class="span4"),
+                css_class='row-fluid'
+            ),
+            Div(
+                Div('ntypes', css_class="span4"),
+                Div('natoms', css_class="span4"),
+                css_class='row-fluid'
+            ),
+            Div(
+                Div('prototype', css_class="span4"),
+                Div('generic', css_class="span4"),
+                css_class='row-fluid'
+            ),
+            HTML('<br><p style="margin-left: 10px; margin-bottom: 20px; font-size: 17px; font-weight:\
+                 600">DFT Calculated Properties</p>'),
+            Div(
+                Div('stability', css_class="span4"),
+                Div('band_gap', css_class="span4"),
+                css_class='row-fluid'
+            ),
+            Div(
+                Div('delta_e', css_class="span4"),
+                css_class='row-fluid'
+            ),
+            HTML('<br><p style="margin-left: 10px; margin-bottom: 20px; font-size: 17px; font-weight:\
+                 600">Sorting and Pagination</p>'),
+            Div(
+                Div('sort_by', css_class="span4"),
+                Div(InlineRadios('desc'), css_class="span4"),
+                css_class='row-fluid'
+            ),
+            Div(
+                Div('limit', css_class="span4"),
+                Div('sort_offset', css_class="span4"),
+                css_class='row-fluid'
+            ),
+            HTML('<br><p style="margin-left: 10px; margin-bottom: 20px; font-size: 17px; font-weight:\
+                 600">Manual Input Filters</p>'),
+            Div(
+                Field('filter', css_class="span8"),
+                css_class='row-fluid'
+            ),
         )
         self.helper.add_input(Submit('search', 'Search', css_class='btn-primary'))
-        self.helper.add_input(Reset('clear', 'Reset input fields', css_class='btn-warning'))
+        self.helper.add_input(Submit('clear', 'Reset input fields', css_class='btn-success clear'))
+        self.helper.disable_csrf = False
