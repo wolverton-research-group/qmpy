@@ -14,7 +14,10 @@ logger = logging.getLogger(__name__)
 __all__ = ['Miedema']
 # data rows: 
 # Element_name Phi Rho Vol Z Valence TM? RtoP Htrans
-params = yaml.load(open(qmpy.INSTALL_PATH+'/data/miedema.yml').read(), Loader=yaml.FullLoader)
+try:
+    params = yaml.load(open(qmpy.INSTALL_PATH+'/data/miedema.yml').read(), Loader=yaml.FullLoader)
+except:
+    params = yaml.load(open(qmpy.INSTALL_PATH+'/data/miedema.yml').read())
 
 class Miedema(object):
 

@@ -6,5 +6,8 @@ VASP_SETTINGS = {}
 for f in os.listdir(vs_path):
     if not 'yml' in f:
         continue
-    settings =  yaml.load(open('%s/%s' % (vs_path, f)).read(),Loader=yaml.FullLoader)
+    try:
+        settings =  yaml.load(open('%s/%s' % (vs_path, f)).read(),Loader=yaml.FullLoader)
+    except:
+        settings =  yaml.load(open('%s/%s' % (vs_path, f)).read())
     VASP_SETTINGS[f.replace('.yml','')] = settings

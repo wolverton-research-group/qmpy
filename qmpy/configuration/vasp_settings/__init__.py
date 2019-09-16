@@ -4,8 +4,10 @@ from inputs import *
 from qmpy import INSTALL_PATH
 
 vs_path = os.path.dirname(os.path.abspath(__file__))
-
-thubbards = yaml.load(open(vs_path+'/hubbards.yml').read(),Loader=yaml.FullLoader)
+try:
+    thubbards = yaml.load(open(vs_path+'/hubbards.yml').read(),Loader=yaml.FullLoader)
+except:
+    thubbards = yaml.load(open(vs_path+'/hubbards.yml').read())
 hubbards = {}
 for setting, data in thubbards.items():
     hubbards[setting] = {}
@@ -17,5 +19,7 @@ for setting, data in thubbards.items():
             hubbards[setting][(elt, lig, float(ox))] = v
 
 HUBBARDS = hubbards
-POTENTIALS = yaml.load(open(vs_path+'/potentials.yml').read(),Loader=yaml.FullLoader)
-
+try:
+    POTENTIALS = yaml.load(open(vs_path+'/potentials.yml').read(),Loader=yaml.FullLoader)
+except:
+    POTENTIALS = yaml.load(open(vs_path+'/potentials.yml').read())
