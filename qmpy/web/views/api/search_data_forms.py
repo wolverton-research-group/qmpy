@@ -24,7 +24,7 @@ class DataFilterForm(forms.Form):
                                  )
     element_set = forms.CharField(required=False, label='Element Set',
                                   widget=forms.TextInput(attrs={'placeholder': 'e.g. S, (Mn-Fe),O'},
-                                                        ),
+     ),
                                   help_text="<html>Use <code>,</code> as AND and\
                                   <code>-</code> as OR <br>\
                                   Use <code>(</code> and <code>)</code> to change priority</html>",
@@ -41,18 +41,18 @@ class DataFilterForm(forms.Form):
     icsd = forms.TypedChoiceField(
                     required=False,
                     choices=[(None, 'All'), ('True', 'Include'), ('False', 'Exclude')],
-                    label='ICSD tag',
+                    label='ICSD Tag',
                     widget=forms.Select,
                     initial='None',
     )
     noduplicate = forms.TypedChoiceField(
                     required=False,
                     choices=[('True', 'Yes'), ('False', 'No')],
-                    label='Exclude duplicate',
+                    label='Exclude Duplicate',
                     widget=forms.Select,
                     initial='False',
     )
-    band_gap = forms.CharField(required=False,
+    band_gap = forms.CharField(required=False, label='Band Gap',
                                widget=forms.TextInput(attrs={'placeholder': 'e.g. 0, >0.3'}),
                               )
     delta_e = forms.CharField(required=False, label='Formation Energy',
@@ -61,10 +61,10 @@ class DataFilterForm(forms.Form):
     stability = forms.CharField(required=False, 
                                 widget=forms.TextInput(attrs={'placeholder': 'e.g. <-0.5'}),
                                )
-    natoms = forms.CharField(required=False, label='# of atoms', 
+    natoms = forms.CharField(required=False, label='# of Atoms', 
                              widget=forms.TextInput(attrs={'placeholder': 'e.g. 2, >3'})
                             )
-    ntypes = forms.CharField(required=False, label='# of element types',
+    ntypes = forms.CharField(required=False, label='# of Element Types',
                              widget=forms.TextInput(attrs={'placeholder': 'e.g. 2, >3'}),
                              )
     volume = forms.CharField(required=False)
@@ -82,7 +82,7 @@ class DataFilterForm(forms.Form):
     sort_by = forms.TypedChoiceField(
                     required=False,
                     choices=filter_choices,
-                    label='Sort results by',
+                    label='Sort By',
                     widget=forms.Select,
     )
     desc = forms.TypedChoiceField(
@@ -159,5 +159,5 @@ class DataFilterForm(forms.Form):
             ),
         )
         self.helper.add_input(Submit('search', 'Search', css_class='btn-primary'))
-        self.helper.add_input(Submit('clear', 'Reset input fields', css_class='btn-success clear'))
+        self.helper.add_input(Submit('clear', 'Reset', css_class='btn-success clear'))
         self.helper.disable_csrf = False
