@@ -149,7 +149,8 @@ class Renderer(object):
         # Prepare Layout
         cmd += "var layout = {"
         if dim == 3:
-            cmd += "scene: {camera: {eye: {x:1.6, y:0.1, z:0.1}},"
+            cmd += "scene: {camera: {eye: {x:1.5, y:0.1, z:0.1},"
+            cmd += "center: {x:-0.15, y:-0.15, z:-0.1}},"
             cmd += "xaxis: axis_type, yaxis: axis_type, zaxis: axis_type,"
 
         # Write annotations
