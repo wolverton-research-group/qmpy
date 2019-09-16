@@ -1460,14 +1460,32 @@ class PhaseSpace(object):
             self.renderer.add(line)
 
         #plot compounds
+        ### < Mohan
+        # Use phase_dict to collect unstable phases, which will 
+        # return one phase per composition
         points = []
-        for p in self.unstable:
+        for c, p in self.phase_dict.items():
             if not self.in_bounds(p):
                 continue
-            pt = Point(coord_to_gtet(self.coord(p)), label=p.name)
+            if p in self.stable:
+                continue
+            label = '{}<br> hull distance: {:.3f} eV/atom<br> formation energy: {:.3f} eV/atom'.format(
+                p.name, p.stability, p.energy
+            )
+            pt = Point(coord_to_gtet(self.coord(p)), label=label)
             points.append(pt)
         self.renderer.add(PointCollection(points, 
                                           color='red', label='Unstable'))
+
+        ## Older codes:
+        #for p in self.unstable:
+        #    if not self.in_bounds(p):
+        #        continue
+        #    pt = Point(coord_to_gtet(self.coord(p)), label=p.name)
+        #    points.append(pt)
+        #self.renderer.add(PointCollection(points, 
+        #                                  color='red', label='Unstable'))
+        ### Mohan >
 
         points = []
         for p in self.stable:
@@ -1478,7 +1496,7 @@ class PhaseSpace(object):
             pt = Point(coord_to_gtet(self.coord(p)), label=label)
             points.append(pt)
             if p.show_label:
-                self.renderer.add(Text(pt, p.name))
+                self.renderer.add(Text(pt, format_html(p.comp)))
         self.renderer.add(PointCollection(points, 
                                           color='green', label='Stable'))
 
