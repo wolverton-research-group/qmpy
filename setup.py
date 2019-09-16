@@ -36,8 +36,8 @@ setup(
         "djangorestframework == 3.6.4",
         "djangorestframework-xml",
         "djangorestframework-yaml",
-        "djangorestframework-queryfields",
-        "djangorestframework-filters",
+        "djangorestframework-queryfields == 1.0.0",
+        "djangorestframework-filters == 0.11.1",
         "django-crispy-forms",
         "lark-parser",
         "requests"
