@@ -122,10 +122,7 @@ import os
 def read_spacegroups(numbers=None):
     data = open(INSTALL_PATH+'/data/spacegroups.yml').read()
     Spacegroup.objects.all().delete()
-    try:
-        spacegroups = yaml.load(data,Loader=yaml.FullLoader)
-    except:
-        spacegroups = yaml.load(data)
+    spacegroups = yaml.safe_load(data)
     for sgd in spacegroups.values():
         if numbers:
             if sgd['number'] not in numbers:
@@ -160,11 +157,7 @@ def read_elements():
     elements = open(INSTALL_PATH+'/data/elements/data.yml').read()
     Element.objects.all().delete()
     elts = []
-    try:
-        yaml_elem_data = yaml.load(elements,Loader=yaml.FullLoader)
-    except:
-        yaml_elem_data = yaml.load(elements)
-    for elt, data in yaml_elem_data.items():
+    for elt, data in yaml.safe_load(elements).items():
         e = Element()
         e.__dict__.update(data)
         elts.append(e)
@@ -173,11 +166,7 @@ def read_elements():
 def read_hubbards():
     hubs = open(INSTALL_PATH+'/configuration/vasp_settings/hubbards.yml').read()
 
-    try:
-        yaml_hub_data = yaml.load(hubs,Loader=yaml.FullLoader)
-    except:
-        yaml_hub_data = yaml.load(hubs)
-    for group, hubbard in yaml_hub_data.items():
+    for group, hubbard in yaml.safe_load(hubs).items():
         for ident, data in hubbard.items():
             elt, ligand, ox = ident.split('_')
             hub = Hubbard(

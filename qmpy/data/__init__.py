@@ -4,22 +4,13 @@ import os.path
 location = os.path.dirname(__file__)
 
 data = open(location+'/elements/groups.yml').read()
-try:
-    element_groups = yaml.load(data,Loader=yaml.FullLoader)
-except:
-    element_groups = yaml.load(data)
+element_groups = yaml.safe_load(data)
 
 data = open(location+'/elements/data.yml').read()
-try:
-    elements = yaml.load(data,Loader=yaml.FullLoader)
-except:
-    elements = yaml.load(data)
+elements = yaml.safe_load(data)
 
 data = open(location+'/elements/chemical_potentials.yml').read()
-try:
-    chem_pots = yaml.load(data,Loader=yaml.FullLoader)
-except:
-    chem_pots = yaml.load(data)
+chem_pots = yaml.safe_load(data)
 
 def save_chem_pots(chem_pots):
     file = open(location+'/elements/chemical_potentials.yml', 'w')

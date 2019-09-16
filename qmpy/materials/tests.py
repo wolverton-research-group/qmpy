@@ -12,10 +12,7 @@ class ElementTestCase(TestCase):
     def test_get(self):
         fe = Element.get('Fe')
         elements = open(INSTALL_PATH+'/data/elements/data.yml').read()
-        try:
-            elements = yaml.load(elements,Loader=yaml.FullLoader)
-        except:
-            elements = yaml.load(elements)
+        elements = yaml.safe_load(elements)
         for k, v in elements.items():
             elt = Element.get(k)
             self.assertEqual(elt.z, v['z'])
