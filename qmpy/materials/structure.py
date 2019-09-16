@@ -11,6 +11,7 @@ import time
 import copy
 import pprint
 import random
+import subprocess
 from collections import defaultdict
 import logging
 
@@ -18,11 +19,12 @@ from django.db import models
 from django.db import transaction
 
 import qmpy
-from qmpy.utils import *
+import shutil
 from element import Element, Species
 from atom import Atom, Site
 from composition import Composition
 from qmpy.utils import *
+from qmpy.utils.folder_management import change_directory
 from qmpy.data.meta_data import *
 from qmpy.analysis.symmetry import *
 from qmpy.analysis import *
@@ -34,6 +36,9 @@ logger.setLevel(logging.INFO)
 
 class StructureError(Exception):
     """Structure related problem"""
+
+class TMKPointsError(Exception):
+    """Problem with TM k-points generation"""
 
 @add_meta_data('comment')
 @add_meta_data('keyword')
@@ -67,7 +72,7 @@ class Structure(models.Model, object):
         | ntypes: Number of elements.
         | measured: Experimentally measured structure?
         | source: Name for source.
-        | 
+        |
         | **Lattice**
         | x1, x2, x3
         | y1, y2, y3
@@ -86,7 +91,7 @@ class Structure(models.Model, object):
         | syx, szx, szz: Stresses on the cell. Accessed via `stresses`.
 
     Examples::
-        
+
         >>> s = io.read(INSTALL_PATH+'/io/files/POSCAR_FCC')
         >>> s.atoms
         >>> s.cell
@@ -105,7 +110,7 @@ class Structure(models.Model, object):
                                                related_name='+')
     measured = models.BooleanField(default=False)
 
-    composition = models.ForeignKey('Composition', null=True, 
+    composition = models.ForeignKey('Composition', null=True,
                                     related_name='structure_set')
     natoms = models.IntegerField(null=True, blank=True)
     nsites = models.IntegerField(null=True, blank=True)
@@ -181,7 +186,7 @@ class Structure(models.Model, object):
             cell: 3x3 lattice vector array
 
         Keyword Arguments:
-            atoms: List of ``Atom`` creation arguments. Can be a list of 
+            atoms: List of ``Atom`` creation arguments. Can be a list of
             [element, coord], or a list of [element, coord, kwargs].
 
         Examples::
@@ -217,25 +222,36 @@ class Structure(models.Model, object):
         return s
 
     @transaction.atomic
-    def save(self,*args, **kwargs):
+    def save(self, *args, **kwargs):
         if not self.composition:
             self.composition = Composition.get(self.comp)
-
-        if not self.spacegroup:
-            self.symmetrize()
 
         self.natoms = len(self.atoms)
         self.nsites = len(self.sites)
         self.ntypes = len(self.comp.keys())
         self.get_volume()
+
         super(Structure, self).save(*args, **kwargs)
-        if not self._atoms is None:
-            self.atom_set = self.atoms
-        if not self._sites is None:
-            self.site_set = self.sites
+
         self.element_set = self.elements
         self.species_set = self.species
         self.meta_data = self.comment_objects + self.keyword_objects
+
+        if not self._sites is None:
+            for s in self.sites:
+                if not s.id:
+                    s.save()
+                self.site_set.add(s)
+        if not self._atoms is None:
+            for a in self.atoms:
+                if not a.id:
+                    a.save()
+                self.atom_set.add(a)
+        super(Structure, self).save(*args, **kwargs)
+
+        if not self.spacegroup:
+            self.symmetrize()
+
 
     _atoms = None
     @property
@@ -253,7 +269,7 @@ class Structure(models.Model, object):
 
     @atoms.setter
     def atoms(self, atoms):
-        self._atoms =  []# list(atoms)
+        self._atoms = []
         self._sites = []
         for a in atoms:
             self.add_atom(a)
@@ -315,6 +331,14 @@ class Structure(models.Model, object):
         self.natoms = len(atoms)
 
     @property
+    def site_comp_indices(self):
+        """
+        List of site compositions, length equal to number of sites, each
+        unique site composition identified by an integer.
+        """
+        return np.unique(self.site_compositions, return_inverse=True)[-1]
+
+    @property
     def elements(self):
         """List of Elements"""
         return [ Element.get(e) for e in self.comp.keys() ]
@@ -329,7 +353,7 @@ class Structure(models.Model, object):
         """Calculated stresses, a numpy.ndarray of shape (6,)"""
         return np.array([self.sxx, self.syy, self.szz,
             self.sxy, self.syz, self.szx ])
-        
+
     @stresses.setter
     def stresses(self, vector):
         self.sxx, self.syy, self.szz = vector[0:3]
@@ -505,12 +529,19 @@ class Structure(models.Model, object):
     @property
     def species_types(self):
         """List of species, length equal to number of atoms."""
-        return np.array([ atom.species_id for atom in self.atoms ])
+        return np.array([ atom.species for atom in self.atoms ])
+
+    @property
+    def species_id_types(self):
+        """List of species, length equal to number of atoms, each unique species
+        identified by an integer.
+        """
+        return np.unique(self.species_types, return_inverse=True)[-1]
 
     def symmetrize(self, tol=1e-3, angle_tol=-1):
         """
         Analyze the symmetry of the structure. Uses spglib to find the
-        symmetry. 
+        symmetry.
 
         symmetrize sets:
          * spacegroup -> Spacegroup
@@ -526,21 +557,19 @@ class Structure(models.Model, object):
         self.get_sites()
         dataset = get_symmetry_dataset(self, symprec=tol)
         self.spacegroup = Spacegroup.objects.get(pk=dataset['number'])
-        for i, site in enumerate(self.sites):    
+        for i, site in enumerate(self.sites):
             site.wyckoff = self.spacegroup.get_site(dataset['wyckoffs'][i])
             site.structure = self
         counts = defaultdict(int)
         orbits = defaultdict(list)
-
-        """
-        # from django.forms.models import model_to_dict
-        # print("Debug: Printing the model instance keysto check if site primary key is set or not")
-        # print(model_to_dict(self.sites[dataset['equivalent_atoms'][0]]))
-        """
         origins = {}
         for i, e in enumerate(dataset['equivalent_atoms']):
             counts[e] += 1
-            origins[self.sites[i]] = self.sites[e]
+            ##origins[self.sites[i]] = self.sites[e]
+            ## Dictionary keys cannot be objects that are not stored (only
+            ## models saved can be hashed). So, changing it to include only
+            ## the indices of the sites instead of the sites themselves.
+            origins[i] = e
             orbits[e].append(self.sites[i])
         self.origins = origins
         self.operations = zip(dataset['rotations'], dataset['translations'])
@@ -555,12 +584,16 @@ class Structure(models.Model, object):
                 trans.append(t)
         self.translations = trans
         self.orbits = orbits.values()
-        self.duplicates = dict((self.sites[e], v) for e, v in orbits.items())
+        ##self.duplicates = dict((self.sites[e], v) for e, v in orbits.items())
+        ## See comment about hashes and Dictionary keys
+        self.duplicates = dict((e, v) for e, v in orbits.items())
         self._uniq_sites = []
         self._uniq_atoms = []
         for ind, mult in counts.items():
             site = self.sites[ind]
-            for site2 in self.duplicates[site]:
+            ##for site2 in self.duplicates[site]:
+            ## See comment about hashes and Dictionary keys
+            for site2 in self.duplicates[ind]:
                 site2.multiplicity = mult
             site.index = ind
             site.multiplicity = mult
@@ -629,7 +662,7 @@ class Structure(models.Model, object):
         [[-1, 0, 0], [0, -1, 0], [0, 0, 1]].
 
         7. Check that the cell internal angles are the same in both reduced
-        cells. 
+        cells.
 
         8. Check that the ratios of reduced cell basis lengths are the same. ie
         a1/b1 = a2/b2, a1/c1 = a2/c2, and b1/c1 = b2/c2 where a1, b1, c1, are
@@ -813,9 +846,10 @@ class Structure(models.Model, object):
     def contains(self, atom, tol=0.01):
         atom.structure = self
         for atom2 in self.atoms:
+            atom2.structure = self
             if not atom2.element_id == atom.element_id:
                 continue
-            if abs(atom2.dist - atom.dist) > tol:
+            if abs(shortest_dist(atom2, self.cell) - shortest_dist(atom, self.cell)) > tol:
                 continue
             d = self.get_distance(atom, atom2, limit=1)
             if d < tol and not d is None:
@@ -850,20 +884,20 @@ class Structure(models.Model, object):
 
         """
         if isinstance(atom1, int):
-            atom1 = self.atoms[atom1].coord
+            a1 = self.atoms[atom1].coord
         elif isinstance(atom1, (Atom,Site)):
-            atom1 = atom1.coord
+            a1 = atom1.coord
         if isinstance(atom2, int):
-            atom2 = self.atoms[atom2].coord
+            a2 = self.atoms[atom2].coord
         elif isinstance(atom2, (Atom,Site)):
-            atom2 = atom2.coord
+            a2 = atom2.coord
 
         x, y, z = self.cell
         xx = self.metrical_matrix[0,0]
         yy = self.metrical_matrix[1,1]
         zz = self.metrical_matrix[2,2]
 
-        vec = atom2 - atom1
+        vec = a2 - a1
         vec -= np.round(vec)
         dist = np.dot(vec, self.cell)
 
@@ -909,25 +943,41 @@ class Structure(models.Model, object):
             self.atoms.append(a)
         self.spacegroup = None
 
+    def atom_on_site(self, atom, site, tol=1e-2):
+        if abs(shortest_dist(atom, self.cell) - shortest_dist(site, self.cell)) < tol:
+            _dist = self.get_distance(atom, site, limit=tol, wrap_self=True)
+            if _dist is None:
+                return False
+        else:
+            return False
+        return _dist < tol
+
     def add_atom(self, atom, tol=0.01):
         """
         Adds `atom` to the structure if it isn't already contained.
         """
-        if self.contains(atom, tol=tol):
-            return
-        atom.structure = self
-        self.atoms.append(atom)
-        for site in self.sites:
-            if atom.is_on(site, tol=tol):
-                site.add_atom(atom)
-                break
-        else:
+        if not self.atoms or not self.sites:
+            atom.structure = self
+            self._atoms = [atom]
             site = atom.get_site()
-            self.sites.append(site)
+            self._sites = [site]
+            return
+        elif self.contains(atom, tol=tol):
+            return
+        self._atoms.append(atom)
+        atom.structure = self
+        for site in self.sites:
+            if self.atom_on_site(atom, site, tol=tol):
+                site.add_atom(atom, tol=tol)
+                break
+            else:
+                site = atom.get_site()
+                if not site in self._sites:
+                    self._sites.append(site)
         self.spacegroup = None
 
     def sort(self):
-        self.atoms = sorted(self.atoms) 
+        self.atoms = sorted(self.atoms)
 
     def set_composition(self, value=None):
         if value is None:
@@ -1021,7 +1071,7 @@ class Structure(models.Model, object):
     @property
     def site_coords(self):
         """numpy.ndarray of site coordinates."""
-        return np.array([ site.coord for site in self.sites ]) 
+        return np.array([ site.coord for site in self.sites ])
 
     @site_coords.setter
     def site_coords(self, coords):
@@ -1056,7 +1106,7 @@ class Structure(models.Model, object):
     @property
     def cartesian_coords(self):
         """Return atomic positions in cartesian coordinates."""
-        return np.array([ atom.cart_coord for atom in self.atoms ]) 
+        return np.array([ atom.cart_coord for atom in self.atoms ])
 
     @cartesian_coords.setter
     def cartesian_coords(self, cc):
@@ -1089,7 +1139,6 @@ class Structure(models.Model, object):
         """
         Precalculates the inverse of the lattice, for faster conversion
         between cartesian and direct coordinates.
-        
         """
         if self._inv is None:
             self._inv = la.inv(self.cell)
@@ -1102,7 +1151,36 @@ class Structure(models.Model, object):
         r0 = min(rec_mags)
         return np.array([ np.round(r/r0, 4) for r in rec_mags ])
 
-    def get_kpoint_mesh(self, kppra):
+    def get_TM_kpoint_mesh(self, configuration=None):
+        poscar = os.path.join('/tmp', 'POSCAR')
+        try:
+            qmpy.io.poscar.write(self, poscar)
+        except:
+            raise TMKPointsError('Failed to write structure into /tmp/POSCAR')
+        if configuration in ['wavefunction', 'hse06']:
+            TM_script = os.path.join(qmpy.INSTALL_PATH, 'analysis', 'vasp','getKPoints_HSE')
+        else:
+            TM_script = os.path.join(qmpy.INSTALL_PATH, 'analysis', 'vasp', 'getKPoints')
+        with change_directory('/tmp'):
+            TM_stdout = subprocess.check_output(TM_script)
+        if 'error' in TM_stdout.lower():
+            raise TMKPointsError('Failed to get KPOINTS from the TM server')
+        TM_KPOINTS = os.path.join('/tmp', 'KPOINTS')
+        with open(TM_KPOINTS, 'r') as fr:
+            return fr.read()
+
+    def get_kpoint_mesh_with_sympy(self, kppra):
+        """
+        Generate the k-point mesh for a given KPPRA; requires sympy to be installed
+        """
+        raise NotImplementedError
+
+    def get_kpoint_mesh_by_increment(self, kppra):
+        """
+        DEPRECATED: Sometimes results in k-point meshes incommensurate with
+        lattice symmetry. Use either get_TM_kpoint_mesh() or (if you have
+        sympy installed) get_kpoint_mesh_with_sympy(kppra) instead.
+        """
         recs = self.reciprocal_lattice
         rec_mags = [ norm(recs[0]), norm(recs[1]), norm(recs[2])]
         r0 = max(rec_mags)
@@ -1149,6 +1227,11 @@ class Structure(models.Model, object):
         self.atoms = [ Atom() for i in range(n) ]
         self._sites = None
 
+    def set_natoms_manager(self, coords):
+        """Sets self.atoms using atom manager - for Django >1.8 compatibility to be used as dict keys."""
+        self.atoms = [ Atom.managerobject.create_atom(coord) for coord in coords ]
+        self._sites = None
+
     def set_nsites(self, n):
         """Sets self.sites to n blank Sites."""
         self.sites = [ Site() for i in range(n) ]
@@ -1160,7 +1243,7 @@ class Structure(models.Model, object):
         self._atoms = None
 
 
-    def make_conventional(self, in_place=True, tol=1e-5):
+    def make_conventional(self, in_place=True, tol=1e-3):
         """Uses spglib to convert to the conventional cell.
 
         Keyword Arguments:
@@ -1188,7 +1271,7 @@ class Structure(models.Model, object):
 
         refine_cell(self, symprec=tol)
 
-    def make_primitive(self, in_place=True, tol=1e-5):
+    def make_primitive(self, in_place=True, tol=1e-3):
         """Uses spglib to convert to the primitive cell.
 
         Keyword Arguments:
@@ -1233,7 +1316,7 @@ class Structure(models.Model, object):
             if not any([ site is site2 for site2 in _sites ]):
                 _sites.append(site)
         self._sites = _sites
-        return self.sites
+        return self._sites
 
     def group_atoms_by_symmetry(self):
         """Sort self.atoms according to the site they occupy."""
@@ -1255,13 +1338,13 @@ class Structure(models.Model, object):
             if abs(G[0,2]) > abs(G[0,1]) - tol:
                 return False
 
-    def is_niggli_cell(self, tol=1e-5):
+    def is_niggli_cell(self, tol=1e-3):
         """
         Tests whether or not the structure is a Niggli cell.
         """
         if not self.is_grueber_cell():
             return False
-        (a,b,c),(d,e,f) = self.niggli_form
+        (a, b, c), (d, e, f) = self.niggli_form
         if abs(d-b) < tol:
             if f > 2*e - tol:
                 return False
@@ -2029,7 +2112,7 @@ class Structure(models.Model, object):
         hopeless = False
 
         for s1, s2 in itertools.combinations(self.sites, r=2):
-            d = self.get_distance(s1, s2, limit=1, wrap_self=True) 
+            d = self.get_distance(s1, s2, limit=1, wrap_self=True)
             if d is None:
                 continue
             if d < 0.8:
@@ -2064,12 +2147,12 @@ class Structure(models.Model, object):
                     hopeless = True
                     break
             self.composition = Composition.get(self.comp)
-            
+
             if not hopeless:
                 return self
 
         self._sites = []
-        self.atoms = init_atoms 
+        self.atoms = init_atoms
         self.get_sites()
         return self
 
@@ -2088,7 +2171,7 @@ class Prototype(models.Model):
     """
 
     name = models.CharField(max_length=63, primary_key=True)
-    structure = models.ForeignKey(Structure, related_name='+', 
+    structure = models.ForeignKey(Structure, related_name='+',
                                   blank=True, null=True)
     composition = models.ForeignKey('Composition', blank=True, null=True)
 
