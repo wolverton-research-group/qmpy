@@ -94,6 +94,8 @@ class FormationEnergyList(generics.ListAPIView):
 
         if sort_fes == 'stability':
             fes = self.sort_by_stability(fes, limit, sort_offset, desc)
+        elif sort_fes == 'delta_e':
+            fes = self.sort_by_delta_e(fes, limit, sort_offset, desc)
 
         return fes
 
@@ -239,4 +241,11 @@ class FormationEnergyList(generics.ListAPIView):
             ordered_fes = fes.order_by('-stability')
         else:
             ordered_fes = fes.order_by('stability')
+        return ordered_fes[sort_offset:sort_offset+limit]
+
+    def sort_by_delta_e(self, fes, limit=DEFAULT_LIMIT, sort_offset=0, desc=False):
+        if desc in ['T', 't', 'True', 'true']:
+            ordered_fes = fes.order_by('-delta_e')
+        else:
+            ordered_fes = fes.order_by('delta_e')
         return ordered_fes[sort_offset:sort_offset+limit]
