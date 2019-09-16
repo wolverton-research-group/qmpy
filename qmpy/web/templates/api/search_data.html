@@ -268,6 +268,12 @@ function sortTable(n, type) {
         }
     }
     document.getElementById("header"+n).innerHTML = dir_symbol;
+    for (i=0; i<13; i++)
+    {
+        if (i != n){
+            document.getElementById("header"+i).innerHTML = '&#8645;';
+        }
+    }
 }
 </script>
 
