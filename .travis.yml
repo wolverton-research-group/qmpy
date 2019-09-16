@@ -29,5 +29,4 @@ script:
   - cd qmpy/db
   - python manage.py makemigrations auth qmpy contenttypes sites
   - python manage.py migrate
-  - python manage.py syncdb --noinput
   - python manage.py test qmpy

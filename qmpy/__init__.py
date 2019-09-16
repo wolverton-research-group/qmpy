@@ -82,7 +82,7 @@ except ImportError:
     logging.warn('Failed to import matplotlib')
 
 try:
-    import pyspglib 
+    import spglib 
     FOUND_SPGLIB = True
 except ImportError:
     logging.warn("Failed to import pyspglib."
@@ -122,7 +122,7 @@ import os
 def read_spacegroups(numbers=None):
     data = open(INSTALL_PATH+'/data/spacegroups.yml').read()
     Spacegroup.objects.all().delete()
-    spacegroups = yaml.load(data)
+    spacegroups = yaml.safe_load(data)
     for sgd in spacegroups.values():
         if numbers:
             if sgd['number'] not in numbers:
@@ -157,7 +157,7 @@ def read_elements():
     elements = open(INSTALL_PATH+'/data/elements/data.yml').read()
     Element.objects.all().delete()
     elts = []
-    for elt, data in yaml.load(elements).items():
+    for elt, data in yaml.safe_load(elements).items():
         e = Element()
         e.__dict__.update(data)
         elts.append(e)
@@ -166,7 +166,7 @@ def read_elements():
 def read_hubbards():
     hubs = open(INSTALL_PATH+'/configuration/vasp_settings/hubbards.yml').read()
 
-    for group, hubbard in yaml.load(hubs).items():
+    for group, hubbard in yaml.safe_load(hubs).items():
         for ident, data in hubbard.items():
             elt, ligand, ox = ident.split('_')
             hub = Hubbard(

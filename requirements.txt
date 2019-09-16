@@ -36,11 +36,11 @@ pyparsing==2.4.2
 python-dateutil==2.2
 python-memcached==1.53
 pytz==2016.7
-PyYAML==3.10
+PyYAML==5.1.2
 requests==2.21.0
 scipy==0.13.3
 six==1.10.0
-spglib==1.12.2
+spglib==1.14.0.post23
 Sphinx==1.2.2
 tornado==5.1.1
 wsgiref==0.1.2
