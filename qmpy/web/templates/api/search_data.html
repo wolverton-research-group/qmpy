@@ -77,6 +77,22 @@ button:hover:not([disabled]) {
     color: grey;
 }
 
+div#pagination {
+    margin-left: 10px;
+    width: 30%;
+    float: left;
+    height: 50px;
+}
+
+div#output {
+    margin-left: 50%;
+    float: right;
+    width: 50%;
+    height: 30px;
+    text-align: right;
+    margin-right: 10px;
+}
+
 
 </style>
 <body>
@@ -92,7 +108,8 @@ button:hover:not([disabled]) {
 <a name='apisearchresult'></a>
 {% if result %}
 <h1> Results: </h1>
-<div style="margin: 10px">
+<section style="width:100%;margin-bottom:10px">
+<div id='pagination'>
     <p>
     <font size="3">
     There are <b>{{count}}</b> entries found.
@@ -132,6 +149,22 @@ button:hover:not([disabled]) {
         </button>
     </form>
 </div>
+<div id='output'>
+    View results as
+    <a href="/oqmdapi/formationenergy?{{suburl}}" class="button"
+        target="_blank">API</a>,
+    <a href="/oqmdapi/formationenergy?{{suburl}}&format=json" class="button"
+        target="_blank">JSON</a>,
+    <a href="/oqmdapi/formationenergy?{{suburl}}&format=xml" class="button"
+        target="_blank">XML</a>. Download results as
+    <a href="/oqmdapi/formationenergy?{{suburl}}&format=json" class="button"
+        target="_blank" download>JSON</a>,
+    <a href="/oqmdapi/formationenergy?{{suburl}}&format=xml" class="button"
+        target="_blank" download>XML</a>,
+    <a href="/oqmdapi/formationenergy?{{suburl}}&format=yaml" class="button"
+        target="_blank">YAML</a>.
+</div>
+</section>
 <table id="ResultTable">
     <tr>
         <th onclick="sortTable(0, 'num')">Rank<span id="header0">&#8645;</span></th>
@@ -191,19 +224,6 @@ button:hover:not([disabled]) {
         </tr>
     {% endfor %}
 </table>
-<div style="margin: 10px">
-    Open results in 
-    <a href="/oqmdapi/formationenergy?{{suburl}}&format=json" class="button"
-        target="_blank">JSON</a>,
-    <a href="/oqmdapi/formationenergy?{{suburl}}&format=xml" class="button"
-        target="_blank">XML</a>. Download results as
-    <a href="/oqmdapi/formationenergy?{{suburl}}&format=json" class="button"
-        target="_blank" download>JSON</a>,
-    <a href="/oqmdapi/formationenergy?{{suburl}}&format=xml" class="button"
-        target="_blank" download>XML</a>,
-    <a href="/oqmdapi/formationenergy?{{suburl}}&format=yaml" class="button"
-        target="_blank">YAML</a>.
-</div>
 {% endif %}
 
 
