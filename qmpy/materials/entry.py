@@ -91,6 +91,9 @@ class Entry(models.Model):
                 self.reference.save()
                 self.reference = self.reference
         super(Entry, self).save(*args, **kwargs)
+        if not self.duplicate_of:
+            self.duplicate_of = self
+            super(Entry, self).save(*args, **kwargs)
         if self._structures:
             for k, v in self.structures.items():
                 v.label = k
@@ -173,7 +176,7 @@ class Entry(models.Model):
         # check for perfect crystals
         if not any([ s.partial for s in structure.sites ]):
             dup = Entry.get(structure)
-            if not dup is None:
+            if dup is not None:
                 entry.duplicate_of = dup
                 entry.add_hold('duplicate')
             return entry

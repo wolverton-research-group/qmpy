@@ -12,7 +12,7 @@ class ElementTestCase(TestCase):
     def test_get(self):
         fe = Element.get('Fe')
         elements = open(INSTALL_PATH+'/data/elements/data.yml').read()
-        elements = yaml.load(elements)
+        elements = yaml.load(elements,Loader=yaml.FullLoader)
         for k, v in elements.items():
             elt = Element.get(k)
             self.assertEqual(elt.z, v['z'])
@@ -186,17 +186,16 @@ class EntryTestCase(TestCase):
         entry.save()
 
         # duplicate
-        ##entry = Entry.create(self.dirs['POSCAR_FCC2']+'/POSCAR_FCC2')
-        ##self.assertEqual(entry.holds, ['duplicate'])
-        ##self.assertEqual(entry.keywords, [])
-        ##entry.save()
-        #TODO: hegdevinayi@gmail.com. Fix the issue of duplicate_of
+        entry = Entry.create(self.dirs['POSCAR_FCC2']+'/POSCAR_FCC2')
+        self.assertEqual(entry.holds, ['duplicate'])
+        self.assertEqual(entry.keywords, [])
+        entry.save()
 
         # solid solution
         entry = Entry.create(self.dirs['partial.cif']+'/partial.cif')
-        self.assertEqual(set(entry.holds), set(['partial occupancy', 
+        self.assertEqual(set(entry.holds), set(['partial occupancy',
                                        'composition mismatch in cif']))
-        self.assertEqual(entry.keywords, [])
+        self.assertEqual(entry.keywords, ['solid solution'])
         entry.save()
 
         # perfect reference structure
@@ -215,5 +214,5 @@ class EntryTestCase(TestCase):
         # anti-site defects
         entry = Entry.create(self.dirs['partial_mix.cif']+'/partial_mix.cif')
         self.assertEqual(set(entry.holds), set(['partial occupancy']))
-        #self.assertEqual(entry.keywords, ['solid solution'])
+        self.assertEqual(entry.keywords, ['solid solution'])
         #self.assertEqual(entry.duplicate_of.id, perfect.id)
