@@ -1,8 +1,12 @@
+import os
 from setuptools import setup, find_packages
+
+with open(os.path.join(os.path.dirname(__file__), 'qmpy', 'VERSION.txt')) as fr:
+    version = fr.read().strip()
 
 setup(
     name='qmpy',
-    version='1.2.0',
+    version=version,
     author='S. Kirklin',
     author_email='scott.kirklin@gmail.com',
     license='LICENSE.txt',
@@ -26,7 +30,7 @@ setup(
         "ase < 3.18",
         "django-extensions < 1.6.8",
         "lxml",
-        "pyspglib > 1.8.3",
+        "spglib > 1.10",
         "PyCifRW >= 4.3",
         "pexpect",
         "pyparsing",
@@ -36,7 +40,10 @@ setup(
         "djangorestframework == 3.6.4",
         "djangorestframework-xml",
         "djangorestframework-yaml",
+        "djangorestframework-queryfields == 1.0.0",
+        "djangorestframework-filters == 0.11.1",
         "django-crispy-forms",
-        "lark-parser"
+        "lark-parser",
+        "requests"
     ],
 )

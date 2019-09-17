@@ -92,7 +92,7 @@ def search_data(request):
             # These parameters are from django forms. Only 'sort_offest'
             # can be passed from django forms and 'offset' cannot be 
             # initialiated from django forms.
-            for arg in ['composition', 'icsd', 'filter',
+            for arg in ['composition', 'icsd', 'filter', 'noduplicate',
                         'element_set', 'prototype', 'generic',
                         'volume', 'natoms', 'ntypes', 'stability',
                         'delta_e', 'band_gap',
@@ -107,6 +107,13 @@ def search_data(request):
             # should be the offset of total result. 
             if 'sort_by' not in kwargs and 'sort_offset' in kwargs:
                 kwargs['offset'] = kwargs['sort_offset']
+
+            # Include necessary info
+            output_fields_list = ['name', 'entry_id', 'icsd_id', 'composition_generic',
+                                 'spacegroup', 'prototype', 'ntypes', 'natoms',
+                                 'volume', 'delta_e', 'band_gap', 'stability']
+            kwargs['fields'] = ','.join(output_fields_list)
+
             # Call QMPYRester() to collect data
             with qmpy_rester.QMPYRester() as q:
                 d = q.get_oqmd_phases(verbose=False, **kwargs)
@@ -122,9 +129,9 @@ def search_data(request):
                                         # need another url request. But this time
                                         # we only need to output one entry per page.
                     kwargs['offset'] = 0
-                    data['count'] = q.get_entries(verbose=False, **kwargs)['count']
+                    data['count'] = q.get_oqmd_phases(verbose=False, **kwargs)['meta']['data_available']
                 else:
-                    data['count'] =  d['meta']['data_available']#d['count']
+                    data['count'] =  d['meta']['data_available']
 
                 if data['offset'] > 0:
                     data['prev'] = True

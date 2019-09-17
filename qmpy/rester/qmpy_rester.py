@@ -24,7 +24,6 @@ class QMPYRester(object):
         url = self.preamble + sub_url
 
         if method == 'GET':
-            print (url)
             response = self.session.get(url, params=payload, verify=True)
             
             if response.status_code in [200, 400]:
@@ -42,7 +41,7 @@ class QMPYRester(object):
 
         # URL paramters
         url_args = []
-        kwargs_list = ['composition', 'icsd', #'filter',
+        kwargs_list = ['composition', 'icsd', 'noduplicate',#'filter',
                        'sort_by', 'desc', 'sort_offset',
                        'limit', 'offset', 'fields']
 
@@ -57,7 +56,7 @@ class QMPYRester(object):
             if k in kwargs_list:
                 url_args.append('%s=%s' %(k, kwargs[k]))
             elif k in filter_list:
-                if '>' in kwargs[k] or '<' in kwargs[k]:
+                if '>' in kwargs[k] or '<' in kwargs[k] or '!' in kwargs[k]:
                     filter_args.append('%s%s' %(k, kwargs[k]))
                 else:
                     filter_args.append('%s=%s' %(k, kwargs[k]))

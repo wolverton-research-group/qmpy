@@ -10,8 +10,7 @@
     <script src="http://code.jquery.com/ui/1.11.0/jquery-ui.js">
     </script>
     <script type="text/javascript" src="{% static "js/bootstrap-tab.js" %}"></script>
-</head>
-
+</head> 
 <style>
 table {
     border-spacing: 0;
@@ -25,11 +24,14 @@ th {
                                                                 
 th, td {
     text-align: center;
-    padding: 16px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+    padding-left: 6px;
+    padding-right: 6px;
 }
 
 tr {
-    line-height: 5px;
+    line-height: 10px;
     min-height: 5px;
     height: 5px;
 }
@@ -40,6 +42,11 @@ tr:nth-child(even) {
 
 .clickableRow td:hover {
     cursor: pointer;
+}
+
+span {
+    margin-left: 4px;
+    color: #08c;
 }
 
 button {
@@ -73,6 +80,22 @@ button:hover:not([disabled]) {
     color: grey;
 }
 
+div#pagination {
+    margin-left: 10px;
+    width: 30%;
+    float: left;
+    height: 50px;
+}
+
+div#output {
+    margin-left: 50%;
+    float: right;
+    width: 50%;
+    height: 30px;
+    text-align: right;
+    margin-right: 10px;
+}
+
 
 </style>
 <body>
@@ -82,11 +105,14 @@ button:hover:not([disabled]) {
     <a href="/" class="button">Return to OQMD Home</a>
 </div>
 
+<hr>
+
 {% crispy form %}
 <a name='apisearchresult'></a>
 {% if result %}
 <h1> Results: </h1>
-<div style="margin: 10px">
+<section style="width:100%;margin-bottom:10px">
+<div id='pagination'>
     <p>
     <font size="3">
     There are <b>{{count}}</b> entries found.
@@ -121,65 +147,83 @@ button:hover:not([disabled]) {
         <button class="next" type="submit" value="{{request_post}}" name="end">
             &gt;&gt;
         </button>
-        <button class="clear" type="submit" name="clear">
-            Clear Results
-        </button>
     </form>
 </div>
+<div id='output'>
+    View results as
+    <a href="/oqmdapi/formationenergy?{{suburl}}" class="button"
+        target="_blank">API</a>,
+    <a href="/oqmdapi/formationenergy?{{suburl}}&format=json" class="button"
+        target="_blank">JSON</a>,
+    <a href="/oqmdapi/formationenergy?{{suburl}}&format=xml" class="button"
+        target="_blank">XML</a>. Download results as
+    <a href="/oqmdapi/formationenergy?{{suburl}}&format=json" class="button"
+        target="_blank" download>JSON</a>,
+    <a href="/oqmdapi/formationenergy?{{suburl}}&format=xml" class="button"
+        target="_blank" download>XML</a>,
+    <a href="/oqmdapi/formationenergy?{{suburl}}&format=yaml" class="button"
+        target="_blank">YAML</a>.
+</div>
+</section>
 <table id="ResultTable">
     <tr>
-        <th onclick="sortTable(0, 'num')"> rank </th>
-        <th onclick="sortTable(1, 'num')"> oqmd_id </th>
-        <th onclick="sortTable(2, 'num')"> icsd_id </th>
-        <th onclick="sortTable(3, 'link')"> name </th>
-        <th onclick="sortTable(4, 'str')"> generic </th>
-        <th onclick="sortTable(5, 'str')"> spacegroup </th>
-        <th onclick="sortTable(6, 'str')"> prototype </th>
-        <th onclick="sortTable(7, 'num')"> ntypes </th>
-        <th onclick="sortTable(8, 'num')"> natoms </th>
-        <th onclick="sortTable(9, 'num')"> volume </th>
-        <th onclick="sortTable(10, 'num')"> formation_energy </th>
-        <th onclick="sortTable(11, 'num')"> band_gap </th>
-        <th onclick="sortTable(12, 'num')"> stability </th>
+        <th onclick="sortTable(0, 'num')">Rank<span id="header0">&#8645;</span></th>
+        <th onclick="sortTable(1, 'num')">OQMD&nbsp;ID<span id="header1">&#8645;</span></th>
+        <th onclick="sortTable(2, 'num')">ICSD&nbsp;ID<span id="header2">&#8645;</span></th>
+        <th onclick="sortTable(3, 'str')">Name<span id="header3">&#8645;</span></th>
+        <th onclick="sortTable(4, 'str')">Generic<span id="header4">&#8645;</span></th>
+        <th onclick="sortTable(5, 'str')">Spacegroup<span id="header5">&#8645;</span></th>
+        <th onclick="sortTable(6, 'str')">Prototype<span id="header6">&#8645;</span></th>
+        <th onclick="sortTable(7, 'num')"><div>#&nbsp;of&nbsp;Element</div>
+                    <div style="margin-top:10px">Types<span id="header7">&#8645;</span></div></th>
+        <th onclick="sortTable(8, 'num')"><div>#&nbsp;of</div>
+                    <div style="margin-top:10px">Atoms<span id="header8">&#8645;</span><div></th>
+        <th onclick="sortTable(9, 'num')"><div>Volume<span id="header9">&#8645;</span></div> 
+            <div style="margin-top:10px">[&Aring;<sup>3</sup>]</div></th>
+        <th onclick="sortTable(10, 'num')"><div>Formation&nbsp;Energy<span id="header10">&#8645;</span></div>
+                    <div style="margin-top:10px">[eV/atom]</div></th>
+        <th onclick="sortTable(11, 'num')"><div>Band&nbsp;Gap<span id="header11">&#8645;</span></div>
+                    <div style="margin-top:10px">[eV]</div></th>
+        <th onclick="sortTable(12, 'num')"><div>Stability<span id="header12">&#8645;</span></div>
+                    <div style="margin-top:10px">[eV/atom]</div></th>
+        <th> Link </th>
     </tr>
     {% for e in result %}
         <tr class=clickableRow">
-        <td width="60"> {{ forloop.counter|add:offset}} </td>
-        <td width="60"> {{ e.entry_id }} </td>
+        <td width="20"> {{ forloop.counter|add:offset}} </td>
+        <td width="50"> {{ e.entry_id }} </td>
 
         {% if e.icsd_id %}
-            <td width="60"> {{ e.icsd_id }} </td>
+            <td width="50"> {{ e.icsd_id }} </td>
         {% else %}
-            <td width="60">  </td>
+            <td width="50">  </td>
         {% endif %}
 
-        <td width="90"> <a href="/materials/entry/{{e.entry_id}}">{{ e.name }}</a></td>
-        <td width="80"> {{ e.composition_generic }} </td>
-        <td width="80"> {{ e.spacegroup }} </td>
+        <td width="60"> {{ e.name }}</td>
+        <td width="50"> {{ e.composition_generic }} </td>
+        <td width="50"> {{ e.spacegroup }} </td>
         <td width="80"> {{ e.prototype }} </td>
 
         {% if e.ntypes %}
-            <td width="80"> {{ e.ntypes }} </td>
+            <td width="40"> {{ e.ntypes }} </td>
         {% else %}
-            <td width="80"> </td>
+            <td width="40"> </td>
         {% endif %}
 
         {% if e.natoms %}
-            <td width="80"> {{ e.natoms }} </td>
+            <td width="40"> {{ e.natoms }} </td>
         {% else %}
-            <td width="80"> </td>
+            <td width="40"> </td>
         {% endif %}
         
         <td width="80"> {{ e.volume | floatformat:-3 }} </td>
-        <td width="80"> {{ e.delta_e | floatformat:-3 }} </td>
-        <td width="80"> {{ e.band_gap | floatformat:-3 }} </td>
-        <td width="80"> {{ e.stability | floatformat:-3 }} </td>
+        <td width="50"> {{ e.delta_e | floatformat:-3 }} </td>
+        <td width="50"> {{ e.band_gap | floatformat:-3 }} </td>
+        <td width="50"> {{ e.stability | floatformat:-3 }} </td>
+        <td width="30"> <a href="/materials/entry/{{e.entry_id}}" target="_blank"> link </a></td>
         </tr>
     {% endfor %}
 </table>
-<div style="margin: 10px">
-    <a href="/oqmdapi/formationenergy?{{suburl}}&format=json" class="button">Output Result in JSON format</a>
-</div>
 {% endif %}
 
 
@@ -194,6 +238,7 @@ function sortTable(n, type) {
     switching = true;
 
     dir = "asc";
+    var dir_symbol = '&#8607;'
 
     while (switching) {
         switching = false;
@@ -230,15 +275,23 @@ function sortTable(n, type) {
             }
         }
 
-        if (shouldSwitch) {
+        if (shouldSwitch && i < rows.length-1) {
             rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
             switching = true;
             switchcount ++;
         } else {
             if (switchcount == 0 && dir == "asc") {
                 dir = "desc";
+                dir_symbol = '&#8609;';
                 switching = true;
             }
+        }
+    }
+    document.getElementById("header"+n).innerHTML = dir_symbol;
+    for (i=0; i<13; i++)
+    {
+        if (i != n){
+            document.getElementById("header"+i).innerHTML = '&#8645;';
         }
     }
 }

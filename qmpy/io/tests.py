@@ -32,7 +32,7 @@ class POSCARTestCase(TestCase):
         ans = open(INSTALL_PATH+'/io/files/POSCAR_vasp5').read()
         self.assertEqual(io.poscar.write(self.struct), ans)
 
-    def test_write_vasp5(self):
+    def test_write_vasp4(self):
         ans = open(INSTALL_PATH+'/io/files/POSCAR_vasp4').read()
         self.assertEqual(io.poscar.write(self.struct, vasp4=True), ans)
 
@@ -54,3 +54,4 @@ class CifTestCase(TestCase):
         s = io.poscar.read(INSTALL_PATH+'/io/files/POSCAR_vasp4')
         with open(INSTALL_PATH+'/io/files/test.cif') as fr:
             self.assertEqual(io.cif.write(s), fr.read())
+

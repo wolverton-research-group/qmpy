@@ -41,7 +41,7 @@ class LarkParser:
             self.filter = filter_
             return self.tree
         except Exception as e:
-            #print(e)
+        #    print(e)
             return
 
     def __repr__(self):
@@ -70,16 +70,16 @@ class Lark2Django:
         return Q(**{a+'__gt':b})
     
     def ge(self,a,b):
-        return Q(**{a+'__ge':b})
+        return Q(**{a+'__gte':b})
     
     def lt(self,a,b):
         return Q(**{a+'__lt':b})
     
     def le(self,a,b):
-        return Q(**{a+'__le':b})
+        return Q(**{a+'__lte':b})
     
     def ne(self,a,b):
-        return Q(**{a+'__ne':b})
+        return ~Q(**{a:b})
     
     def not_(self,a):
         return ~a

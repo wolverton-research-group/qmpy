@@ -10,23 +10,26 @@ OQMD
 
 {% block content %}
 
-<div style="min-height:30px;width:500px;box-shadow:none;border-color:rgba(2, 128, 144, 1);border-width:5px;" class="box">
+<div style="width:500px;box-shadow:none;border-color:rgba(2, 128, 144,
+    1);min-height:30px;border-width:5px;" class="box">
     <p> The OQMD is a database of DFT calculated thermodynamic and structural 
-        properties of more than 600,000 materials, created in 
+        properties of more than 700,000 materials, created in 
         <a href="http://wolverton.northwestern.edu">Chris Wolverton's</a> 
         group at Northwestern University.
     </p>
 </div>
 
-<div>
-<img src="{% static "img/NiTiAl_pd.png" %}" width=450 alt="Example of asking @TheOQMD about a composition">
+<div id='pdgraph' class="flot-container" style="width:500px;margin-top:15%">
+    <script type="text/javascript" src="https://cdn.plot.ly/plotly-1.49.4.min.js"></script>
+    <script type="text/javascript" src="{% static 'js/phasediagram_home.js' %}"></script>
 </div>
 
 {% endblock %}
 
 {% block sidebar %}
 <br /> 
-<div id="sidebar" style="background:rgba(2, 128, 144, 1);border-width:0px;box-shadow:none;" class="box">
+<div id="sidebar" style="background:rgba(2, 128, 144,
+    1);border-width:0px;box-shadow:none" class="box">
   <h1 style="text-align:center"> <font color="white"> Shortcuts </font> </h1>
 
   <div style="width:40%;box-shadow:none;border-color:white;border-width:5px" class="box">
@@ -56,10 +59,13 @@ OQMD
 
   <div style="width:40%;box-shadow:none;border-color:white;border-width:5px;" class="box">
       <a style="color:white;" href="/api"><h2>API</h2></a>
-      <a style="color:white;" href="/api/oqmdapi"> OQMD API</a>
+      <a style="color:white;" href="/oqmdapi/formationenergy"> OQMD API</a>
       <br>
-      <a style="color:white;" href="/api/optimade"> Optimade API</a>
+      <a style="color:white;" href="/optimade/structures"> Optimade API</a>
   </div>
 
 </div>
 {% endblock %}
+
+<footer>
+</footer>

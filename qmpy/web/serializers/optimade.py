@@ -30,7 +30,7 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
         return formationenergy.composition.generic
 
     def get_nelements(self, formationenergy):
-        return formationenergy.entry.ntypes
+        return formationenergy.composition.ntypes
 
     def get_elements(self, formationenergy):
         elst = formationenergy.composition.element_list.split('_')

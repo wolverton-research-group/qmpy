@@ -48,6 +48,8 @@ def composition_view(request, search=None):
         comp = Composition.get(composition)
         ps = PhaseSpace('-'.join(comp.comp.keys()))
         ps.infer_formation_energies()
+        if ps.shape == (3, 0):
+            data['pd3d'] = ps.phase_diagram.get_plotly_script_3d("phasediagram")
         data['pd'] = ps.phase_diagram.get_flot_script("phasediagram")
         data['search'] = composition
         data['composition'] = comp
@@ -70,6 +72,8 @@ def composition_view(request, search=None):
         ps = PhaseSpace(space)
         ps.infer_formation_energies()
         data['search'] = space
+        if ps.shape == (3, 0):
+            data['pd3d'] = ps.phase_diagram.get_plotly_script_3d("phasediagram")
         data['pd'] = ps.phase_diagram.get_flot_script("phasediagram")
         ##data['stable'] = []
         ##for p in ps.stable:
@@ -78,10 +82,22 @@ def composition_view(request, search=None):
         ##    data['stable'].append(p.formation.energy)
         ## Fe-Ti-Sb: what's the problem?
         data['stable'] = [ p.formation.entry for p in ps.stable ]
-        comps = Composition.get_list(space)
+
+        
+        ## The following step is really slow. Will be removed in future! 
+        ## < Mohan
+        # results = defaultdict(list)
+        # comps = Composition.get_list(space) 
+        # for c in comps:
+        #     results['-'.join(sorted(c.space))] += c.entries
+
+        ## Updated code to get entries in a phase space
         results = defaultdict(list)
-        for c in comps:
-            results['-'.join(sorted(c.space))] += c.entries
+        for p in ps.phases:
+            c = p.formation.composition
+            results['-'.join(sorted(c.space))] += [p.formation.entry]
+        ## Mohan >
+
         for k,v in results.items():
             results[k] = sorted(v, key=lambda x:
                     1000 if x.energy is None else x.energy)
