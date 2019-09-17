@@ -1592,6 +1592,9 @@ class Structure(models.Model, object):
 
         coords = self.coords + cv
         self.coords = wrap(coords)
+
+        coords = self.site_coords + cv
+        self.site_coords = coords
         return self
 
     def find_lattice_points_within_distance(self, distance, tol=1e-6):
