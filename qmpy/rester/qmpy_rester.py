@@ -24,7 +24,6 @@ class QMPYRester(object):
         url = self.preamble + sub_url
 
         if method == 'GET':
-            print (url)
             response = self.session.get(url, params=payload, verify=True)
             
             if response.status_code in [200, 400]:
