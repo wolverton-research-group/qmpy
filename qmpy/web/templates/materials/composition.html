@@ -11,6 +11,7 @@
 {% block extrascript %}
 <script language="javascript" type="text/javascript" src={% static "js/jquery.flot.pie.js" %}></script>
 
+{% if phase_comp %}
 <script language="javascript" type="text/javascript">
   function labelFormatter(label, series) {
         return "<div style='font-size:12pt; text-align:center; padding:2px; color:black;'>" + label + "<br/>" + Math.round(series.percent) + "%</div>";
@@ -31,7 +32,8 @@
         }
       });
     });
-  </script>
+</script>
+{% endif %}
 
 <script language="javascript" type="text/javascript">
 $(function() {
