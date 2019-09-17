@@ -1,8 +1,11 @@
 from setuptools import setup, find_packages
 
+from qmpy import __version__
+
+
 setup(
     name='qmpy',
-    version='1.2.0',
+    version=__version__,
     author='S. Kirklin',
     author_email='scott.kirklin@gmail.com',
     license='LICENSE.txt',
