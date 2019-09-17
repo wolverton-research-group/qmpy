@@ -18,6 +18,8 @@ import ConfigParser
 
 import django.core.exceptions as de
 
+__version__ = 'qmpy version = 1.3'
+
 INSTALL_PATH = os.path.abspath(os.path.dirname(__file__))
 sys.path = [os.path.join(INSTALL_PATH, 'qmpy', 'db')] + sys.path
 
