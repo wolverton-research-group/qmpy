@@ -12,6 +12,11 @@ qmpy changelog
     - Serialized DFT data availability with both default [OQMD](http://oqmd.org/static/docs/models.html) and [OPTiMaDe](http://www.optimade.org/) specified keyword-sets. 
     - [Lark Parser](https://lark-parser.readthedocs.io/en/latest/) to convert raw queries to logical Django Queries
     - Pagination is implemented while retreiving RESTful query results
+- Spglib upgraded to >1.9
+    - Removed dependency on pyspglib since it is no longer maintained by its developer(s)
+    - Significant changes to the internal implementation of Structure model, even though it's not expected to be affect the end-user
+- More unit tests
+    - duplicate entry detection, structure transformations
 - Change in UI of the landing page
     - Removed the on-the-fly calculations of # of entries while loading the oqmd.org main page
     - Removed the twitter based phase lookup instructions since it's no longer operational
