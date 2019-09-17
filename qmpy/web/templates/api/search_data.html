@@ -24,7 +24,10 @@ th {
                                                                 
 th, td {
     text-align: center;
-    padding: 16px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+    padding-left: 6px;
+    padding-right: 6px;
 }
 
 tr {
@@ -183,22 +186,22 @@ div#output {
                     <div style="margin-top:10px">[eV]</div></th>
         <th onclick="sortTable(12, 'num')"><div>Stability<span id="header12">&#8645;</span></div>
                     <div style="margin-top:10px">[eV/atom]</div></th>
-        <th> OQMD&nbsp;Link </th>
+        <th> Link </th>
     </tr>
     {% for e in result %}
         <tr class=clickableRow">
-        <td width="80"> {{ forloop.counter|add:offset}} </td>
-        <td width="80"> {{ e.entry_id }} </td>
+        <td width="20"> {{ forloop.counter|add:offset}} </td>
+        <td width="50"> {{ e.entry_id }} </td>
 
         {% if e.icsd_id %}
-            <td width="60"> {{ e.icsd_id }} </td>
+            <td width="50"> {{ e.icsd_id }} </td>
         {% else %}
-            <td width="60">  </td>
+            <td width="50">  </td>
         {% endif %}
 
-        <td width="90"> {{ e.name }}</td>
-        <td width="80"> {{ e.composition_generic }} </td>
-        <td width="80"> {{ e.spacegroup }} </td>
+        <td width="60"> {{ e.name }}</td>
+        <td width="50"> {{ e.composition_generic }} </td>
+        <td width="50"> {{ e.spacegroup }} </td>
         <td width="80"> {{ e.prototype }} </td>
 
         {% if e.ntypes %}
@@ -214,10 +217,10 @@ div#output {
         {% endif %}
         
         <td width="80"> {{ e.volume | floatformat:-3 }} </td>
-        <td width="80"> {{ e.delta_e | floatformat:-3 }} </td>
-        <td width="80"> {{ e.band_gap | floatformat:-3 }} </td>
-        <td width="80"> {{ e.stability | floatformat:-3 }} </td>
-        <td width="50"> <a href="/materials/entry/{{e.entry_id}}" target="_blank"> link </a></td>
+        <td width="50"> {{ e.delta_e | floatformat:-3 }} </td>
+        <td width="50"> {{ e.band_gap | floatformat:-3 }} </td>
+        <td width="50"> {{ e.stability | floatformat:-3 }} </td>
+        <td width="30"> <a href="/materials/entry/{{e.entry_id}}" target="_blank"> link </a></td>
         </tr>
     {% endfor %}
 </table>
