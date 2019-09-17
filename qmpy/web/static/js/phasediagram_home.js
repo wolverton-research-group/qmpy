@@ -348,7 +348,8 @@ var layout = {
 
     scene:{
         camera: {
-                    eye: {x: 1.8, y: 0.1, z: 0.1}
+                    eye: {x: 1.6, y: 0.1, z: 0.1},
+                    center: {x: -0.2, y: -0.2, z: -0.2}
         },
         xaxis: axis_type,
         yaxis: axis_type,

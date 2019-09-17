@@ -59,34 +59,40 @@ class FormationEnergySerializer(QueryFieldsMixin, serializers.ModelSerializer):
         return formationenergy.composition.generic
     
     def get_spacegroup(self, formationenergy):
-        return formationenergy.calculation.output.spacegroup.hm
+        if formationenergy.calculation.output: 
+            return formationenergy.calculation.output.spacegroup.hm
+        else:
+            return 
 
     def get_prototype(self, formationenergy):
-        try:
+        if formationenergy.entry.prototype: 
             return formationenergy.entry.prototype.name
-        except:
+        else:
             return
 
     def get_volume(self, formationenergy):
-        return formationenergy.calculation.output.volume
+        if formationenergy.calculation.output: 
+            return formationenergy.calculation.output.volume
+        else:
+            return
 
     def get_unit_cell(self, formationenergy):
-        try:
+        if formationenergy.calculation.output: 
             strct = formationenergy.calculation.output
 
             return [[strct.x1, strct.x2, strct.x3],
                     [strct.y1, strct.y2, strct.y3],
                     [strct.z1, strct.z2, strct.z3]]
-        except:
+        else:
             return
 
     def get_sites(self, formationenergy):
-        try:
+        if formationenergy.calculation.output: 
             strct = formationenergy.calculation.output
             sites = [str(s) for s in strct.sites]
 
             return sites
-        except:
+        else:
             return
 
     def get_ntypes(self, formationenergy):

@@ -2,12 +2,14 @@ from rest_framework import generics
 import django_filters.rest_framework
 from qmpy.web.serializers.formationenergy import FormationEnergySerializer
 from qmpy.materials.formation_energy import FormationEnergy
-from qmpy.materials.entry import Composition
+from qmpy.materials.composition import Composition
+from qmpy.materials.element import Element
 from qmpy.utils import query_to_Q, parse_formula_regex
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer
-from django.db.models import F
+from django.db.models import F, Q
+import operator
 
 from qmpy.rester import qmpy_rester
 from collections import OrderedDict
@@ -92,6 +94,8 @@ class FormationEnergyList(generics.ListAPIView):
 
         if sort_fes == 'stability':
             fes = self.sort_by_stability(fes, limit, sort_offset, desc)
+        elif sort_fes == 'delta_e':
+            fes = self.sort_by_delta_e(fes, limit, sort_offset, desc)
 
         return fes
 
@@ -146,13 +150,26 @@ class FormationEnergyList(generics.ListAPIView):
                 f = ' '.join(['%s%g' % (k, cd[k]) for k in sorted(cd.keys())])
                 f_lst.append(f)
             fes = fes.filter(composition__formula__in=f_lst)
-        else:
+        elif '-' in comp:
             c_lst = comp.strip().split('-')
-            cs = Composition.get_list(c_lst)
-            if len(cs) == 1:
-                c = cs[0]
-            else:
-                c = cs
+            dim = len(c_lst)
+            q_lst = [Q(composition__element_list__contains=s+'_') 
+                     for s in c_lst]
+            combined_q = reduce(operator.or_, q_lst)
+            combined_q = reduce(operator.and_, 
+                                [
+                                    combined_q, 
+                                    Q(composition__ntypes__lte=dim)
+                                ]
+                                )
+
+            ex_q_lst = [Q(composition__element_list__contains=e.symbol+'_')
+                        for e in Element.objects.exclude(symbol__in=c_lst)]
+            combined_q_not = reduce(operator.or_, ex_q_lst)
+
+            fes = fes.filter(combined_q).exclude(combined_q_not)
+        else:
+            c = Composition.get(comp)
             fes = fes.filter(composition=c)
 
         return fes
@@ -224,4 +241,11 @@ class FormationEnergyList(generics.ListAPIView):
             ordered_fes = fes.order_by('-stability')
         else:
             ordered_fes = fes.order_by('stability')
+        return ordered_fes[sort_offset:sort_offset+limit]
+
+    def sort_by_delta_e(self, fes, limit=DEFAULT_LIMIT, sort_offset=0, desc=False):
+        if desc in ['T', 't', 'True', 'true']:
+            ordered_fes = fes.order_by('-delta_e')
+        else:
+            ordered_fes = fes.order_by('delta_e')
         return ordered_fes[sort_offset:sort_offset+limit]
