@@ -1,11 +1,12 @@
+import os
 from setuptools import setup, find_packages
 
-from qmpy import __version__
-
+with open(os.path.join(os.path.dirname(__file__), 'qmpy', 'VERSION.txt')) as fr:
+    version = fr.read().strip()
 
 setup(
     name='qmpy',
-    version=__version__,
+    version=version,
     author='S. Kirklin',
     author_email='scott.kirklin@gmail.com',
     license='LICENSE.txt',
