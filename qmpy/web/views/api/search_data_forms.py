@@ -20,13 +20,17 @@ def popover_html(label, content):
 
 class DataFilterForm(forms.Form):
     composition = forms.CharField(required=False,
-                                  widget=forms.TextInput(attrs={'placeholder': 'e.g. Al2O3, Fe-O, {3d}O'}, )
+                                  widget=forms.TextInput(
+                                      attrs={'placeholder': 'e.g. Al2O3, Fe-O, {3d}2O3'} 
+                                  ),
+                                  help_text="<html><a href='/materials/element_groups'\
+                                  target='_blank'>Available element groups</a>"
                                  )
     element_set = forms.CharField(required=False, label='Element Set',
                                   widget=forms.TextInput(attrs={'placeholder': 'e.g. S, (Mn-Fe),O'},
      ),
-                                  help_text="<html>Use <code>,</code> as AND and\
-                                  <code>-</code> as OR <br>\
+                                  help_text="<html>Use <code>,</code> as <b>AND</b> and\
+                                  <code>-</code> as <b>OR</b> <br>\
                                   Use <code>(</code> and <code>)</code> to change priority</html>",
                                  )
     prototype = forms.CharField(required=False, 
@@ -72,7 +76,7 @@ class DataFilterForm(forms.Form):
                              <i>element_set</i>, <i>element</i>, <i>spacegroup</i>, <i>prototype</i>,\
                              <i>generic</i>, <i>volume</i>, <i>natoms</i>, <i>ntypes</i>,\
                              <i>stability</i>, <i>delta_e</i>, <i>band_gap</i><br>\
-                             Logical Operations: <code>AND</code>, <code>OR</code>, <code>NOT</code>\
+                             Logical Operators: <code>AND</code>, <code>OR</code>, <code>NOT</code>\
                              </html>",
                              widget=forms.TextInput(attrs={'placeholder': 'e.g. (NOT element=O) AND (ntypes=2 OR natoms<5) AND stability<0.01'}),
                             )
