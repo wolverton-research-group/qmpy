@@ -426,7 +426,10 @@ class Calculation(models.Model):
         self.settings = settings
 
     def get_kpoints(self):
-        kpts = self.input.get_kpoint_mesh(self.settings.get('kppra', 8000))
+        ## Mohan
+        # get_kpoint_mesh_by_increment() will be deprecated. However, for existing calculation 
+        # data, we will keep using this function to display KPOINTS.
+        kpts = self.input.get_kpoint_mesh_by_increment(self.settings.get('kppra', 8000))
         if self.settings.get('gamma', True):
             kpoints = 'KPOINTS \n0 \nGamma\n'
         else:

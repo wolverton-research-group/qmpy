@@ -124,15 +124,14 @@ def search_data(request):
                 data['sort_by'] = kwargs.get('sort_by', None) 
 
                 if 'sort_by' in kwargs:
-                    raise NotImplementedError
                     kwargs.pop('sort_by', None)
                     kwargs['limit'] = 1 # To get the count of total result, we
                                         # need another url request. But this time
                                         # we only need to output one entry per page.
                     kwargs['offset'] = 0
-                    data['count'] = q.get_entries(verbose=False, **kwargs)['count']
+                    data['count'] = q.get_oqmd_phases(verbose=False, **kwargs)['meta']['data_available']
                 else:
-                    data['count'] =  d['meta']['data_available']#d['count']
+                    data['count'] =  d['meta']['data_available']
 
                 if data['offset'] > 0:
                     data['prev'] = True

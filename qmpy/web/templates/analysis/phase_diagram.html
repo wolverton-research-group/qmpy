@@ -13,11 +13,21 @@
 
 {% block content %}
 
+{% if plotlyjs %}
+<script language="javascript" type="text/javascript" src="https://cdn.plot.ly/plotly-1.49.4.min.js">
+</script>
+<script id="source" language="javascript" type="text/javascript">
+    $(function() {
+        {{ plotlyjs | safe}}
+        });
+</script>
+{% else %}
 <script id="source" language="javascript" type="text/javascript">
     $(function() {
         {{ flotscript | safe}}
         });
-  </script>
+</script>
+{% endif %}
 
 <div class="flot-container" style="width:500px;height:400px;float:left">
   <div id="placeholder" class="flot-placeholder"></div>

@@ -32,6 +32,7 @@ ptyprocess==0.5.1
 PuLP==1.6.10
 PyCifRW==4.3
 Pygments==1.6
+pygraphviz==1.5
 pyparsing==2.4.2
 python-dateutil==2.2
 python-memcached==1.53
