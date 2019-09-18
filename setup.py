@@ -44,6 +44,7 @@ setup(
         "djangorestframework-filters == 0.11.1",
         "django-crispy-forms",
         "lark-parser",
-        "requests"
+        "requests",
+        "pygraphviz"
     ],
 )

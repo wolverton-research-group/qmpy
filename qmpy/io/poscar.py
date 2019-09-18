@@ -197,15 +197,13 @@ def read(poscar, species=None):
     atoms = []
     inv = np.linalg.inv(cell).T
     for i in range(struct.natoms):
-        #atom = st.Atom.managerobject.create_atom()
-        #atom.element_id = atom_types[i]
+        atom = st.Atom()
+        atom.element_id = atom_types[i]
         if direct:
-            atomic_coord = [ float(v) for v in poscar.readline().split()[0:3] ]
+            atom.coord = [ float(v) for v in poscar.readline().split()[0:3] ]
         else:
             cart = [ float(v) for v in poscar.readline().split()[0:3] ]
-            atomic_coord = np.dot(inv, cart)
-        atom = st.Atom.managerobject.create_atom(coord=atomic_coord)
-        atom.element_id = atom_types[i]
+            atom.coord = np.dot(inv, cart)
         struct.add_atom(atom)
     struct.get_volume()
     struct.set_composition()

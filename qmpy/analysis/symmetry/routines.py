@@ -103,7 +103,8 @@ def _cell_to_structure(cell, structure, rev_lookup):
         raise qmpy.StructureError('Input is not of type `qmpy.Structure`')
     structure.cell = cell[0]
     nsites = len(cell[1])
-    structure.set_nsites_manager(cell[1])
+    structure.set_nsites(nsites)
+    structure.site_coords = cell[1]
     site_comps = [rev_lookup[k] for k in cell[2]]
     structure.site_compositions = site_comps
 
