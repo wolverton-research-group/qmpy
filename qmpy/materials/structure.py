@@ -388,8 +388,7 @@ class Structure(models.Model, object):
         volume = 0
         for atom in self:
             volume += atom.element.volume*atom.occupancy
-	return volume
-
+        return volume
 
     def set_volume_to_sum_of_elements(self):
         volume = 0
@@ -1234,10 +1233,21 @@ class Structure(models.Model, object):
         self.atoms = [ Atom() for i in range(n) ]
         self._sites = None
 
+    def set_natoms_manager(self, coords):
+        """Sets self.atoms using atom manager - for Django >1.8 compatibility to be used as dict keys."""
+        self.atoms = [ Atom.managerobject.create_atom(coord) for coord in coords ]
+        self._sites = None
+
     def set_nsites(self, n):
         """Sets self.sites to n blank Sites."""
         self.sites = [ Site() for i in range(n) ]
         self._atoms = None
+
+    def set_nsites_manager(self, coords):
+        """Sets self.sites using site manager - for Django >1.8 compatibility to be used as dict keys."""
+        self.sites = [ Site.managerobject.create_site(coord) for coord in coords ]
+        self._atoms = None
+
 
     def make_conventional(self, in_place=True, tol=1e-3):
         """Uses spglib to convert to the conventional cell.
@@ -1802,14 +1812,14 @@ class Structure(models.Model, object):
             return new
 
         init_vol = self.get_volume()
-	final_vol = init_vol
-	volume_sum_atom = self.get_volume_sum_of_elements()
+        final_vol = init_vol
+        volume_sum_atom = self.get_volume_sum_of_elements()
         for atom in self:
             if atom.element_id in replace:
                 final_vol -= atom.element.volume/volume_sum_atom*init_vol
-		volume_sum_atom -= atom.element.volume
+                volume_sum_atom -= atom.element.volume
                 atom.element = Element.get(replace[atom.element_id])
-		volume_sum_atom += atom.element.volume
+                volume_sum_atom += atom.element.volume
                 final_vol += atom.element.volume/volume_sum_atom*init_vol
         if rescale and rescale_method == "relative":
             self.set_volume(final_vol)
