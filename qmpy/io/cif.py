@@ -63,7 +63,8 @@ def _get_b_factor(atom):
 
 def _get_atom(cba):
     """Convert a _atom loop to an Atom"""
-    atom = strx.Atom.managerobject.create_atom(_get_atom_coord(cba))
+    atom = strx.Atom()
+    atom.coord =_get_atom_coord(cba)
     atom.element_id = _get_element(cba)
     if atom.element_id == 'D' or atom.element_id == 'T':
         atom.element_id = 'H'
