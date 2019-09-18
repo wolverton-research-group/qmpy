@@ -1233,21 +1233,10 @@ class Structure(models.Model, object):
         self.atoms = [ Atom() for i in range(n) ]
         self._sites = None
 
-    def set_natoms_manager(self, coords):
-        """Sets self.atoms using atom manager - for Django >1.8 compatibility to be used as dict keys."""
-        self.atoms = [ Atom.managerobject.create_atom(coord) for coord in coords ]
-        self._sites = None
-
     def set_nsites(self, n):
         """Sets self.sites to n blank Sites."""
         self.sites = [ Site() for i in range(n) ]
         self._atoms = None
-
-    def set_nsites_manager(self, coords):
-        """Sets self.sites using site manager - for Django >1.8 compatibility to be used as dict keys."""
-        self.sites = [ Site.managerobject.create_site(coord) for coord in coords ]
-        self._atoms = None
-
 
     def make_conventional(self, in_place=True, tol=1e-3):
         """Uses spglib to convert to the conventional cell.
