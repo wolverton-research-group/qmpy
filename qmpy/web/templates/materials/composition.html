@@ -2,7 +2,14 @@
 {% load admin_static %}
 {% load i18n %}
 
-{% block title %}{{ s.name }}{% endblock %}
+
+{% block title %}
+{% if search %}
+{{search}}
+{% else %}
+OQMD | Search Phases
+{% endif %}
+{% endblock %}
 
 {% block extrastyle %}
 <link rel="stylesheet" type="text/css" href="{% static "css/flot.css" %}"/>
