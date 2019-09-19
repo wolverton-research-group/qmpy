@@ -64,7 +64,7 @@ direct
         f = StringIO.StringIO()
         f.write(custom_data)
         s = io.read(f)
-        #s.symmetrize()
+        s.symmetrize()
         data['structure'] = s
     data.update(csrf(request))
     custom_data = data['crystal_data']
