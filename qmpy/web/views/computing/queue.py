@@ -5,6 +5,7 @@ from django.core.context_processors import csrf
 
 from qmpy import INSTALL_PATH
 from qmpy.models import *
+from qmpy.utils import *
 
 import datetime
 import os
@@ -42,19 +43,24 @@ def job_view(request, job_id):
 def queue_view(request):
     upcoming = {}
     running = Job.objects.filter(state=1).order_by('-created')
-    count = running.count()
-    for p in Project.objects.all():
-        uc = p.task_set.filter(state=0).order_by('priority').select_related()[:20]
-        if uc.exists():
-            upcoming[p.name] = list(uc)
-    if request.method == 'POST':
 
-        for job in running:
-            job.collect()
+    recent_ = Calculation.objects.filter(label='static',converged=True).order_by('-id')[:25]
+
+    recent_name_dict = dict([(str(c.entry.id), format_html(c.comp)) for c in recent_])
+    recent_finished_dict = dict([(str(c.entry.id), c.entry.task_set.order_by('-finished')[0].finished) for c in recent_])
+    recent_project_dict = dict([(str(c.entry.id), ', '.join(p.name for p in c.entry.projects)) for c in recent_])
+
+    recent_ids = list(map(lambda x: x[0], sorted(recent_finished_dict.items(), key=lambda x: x[1],
+                                                 reverse=True)))
+    count = running.count()
 
     data = {'running':running[:20],
             'count':count,
-            'upcoming':upcoming}
+            'recent_name_dict': recent_name_dict,
+            'recent_finished_dict': recent_finished_dict,
+            'recent_project_dict': recent_project_dict,
+            'recent_ids':recent_ids,
+           }
 
     data.update(csrf(request))
     return render_to_response('computing/queue.html', 

@@ -53,7 +53,8 @@ class OptimadePagination(LimitOffsetPagination):
                  ("query", {"representation": representation}),
                  ("api_version", "1.0"),
                  ("time_stamp", time_stamp), 
-                 ("data_returned", min(self.get_limit(request), self.count)),
+                 ("data_returned", min(self.get_limit(request), 
+                                       self.count-self.get_offset(request))),
                  ("data_available", self.count),
                  ("more_data_available", (self.get_next_link() != None) or \
                                          (self.get_previous_link() != None))

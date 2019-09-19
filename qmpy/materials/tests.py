@@ -86,6 +86,8 @@ class StructureTestCase(TestCase):
         self.nacl = io.read(INSTALL_PATH+'/io/files/POSCAR_NaCl')
         self.cscl = io.read(INSTALL_PATH+'/io/files/POSCAR_CsCl')
         self.zns = io.read(INSTALL_PATH+'/io/files/POSCAR_ZnS')
+        self.kcl = io.read(INSTALL_PATH+'/io/files/POSCAR_KCl')
+        self.becl = io.read(INSTALL_PATH+'/io/files/POSCAR_BeCl')
 
     def test_name(self):
         self.assertEqual(str(self.bcc), 'Cu')
@@ -152,6 +154,19 @@ class StructureTestCase(TestCase):
         self.assertFalse(self.cscl.compare(s2, volume=True))
         self.assertTrue(self.cscl.compare(s3, volume=True))
         self.assertTrue(self.cscl.compare(s4, volume=True))
+
+        s5 = self.kcl.substitute({'K': 'Be'}, rescale=False)
+        s6 = self.kcl.sub({'K': 'Be'}, rescale=True,
+                                       rescale_method="relative")
+        s7 = self.kcl.replace({'K': 'Be'}, rescale=True,
+                                             rescale_method="absolute")
+        self.assertEqual(str(s5), 'BeCl')
+        self.assertEqual(str(s6), 'BeCl')
+        self.assertEqual(str(s7), 'BeCl')
+
+        self.assertFalse(self.becl.compare(s5, volume=True))
+        self.assertTrue(self.becl.compare(s6, volume=True))
+        self.assertTrue(self.becl.compare(s7, volume=True))
 
     def test_compare(self):
         zns2 = self.zns.copy()
