@@ -152,10 +152,13 @@ class StructureTestCase(TestCase):
                        [[0.32390055, 0.1728972 , 0.80627553],
                         [0.82390055, 0.6728972 , 0.80627553]]
                        ))
-        self.assertTrue(np.allclose(self.artial.site_coords.shape,
+        self.assertTrue(np.allclose(self.partial.site_coords.shape,
                                     new.site_coords.shape))
         self.assertTrue(np.allclose(self.partial.coords.shape,
                                     new.coords.shape))
+        self.partial.symmetrize()
+        new.symmetrize()
+        self.assertTrue(self.partial.spacegroup == new.spacegroup)
         
         # Translate - Structure with partial mixing
         new = self.partial_mix.translate([1e-4,1+1e-3,-5876.0], in_place=False)
@@ -169,8 +172,12 @@ class StructureTestCase(TestCase):
                        ))
         self.assertTrue(np.allclose(self.partial_mix.site_coords.shape,
                                     new.site_coords.shape))
-        self.assertTrue(np.allclose(self.artial_mix.coords.shape,
+        self.assertTrue(np.allclose(self.partial_mix.coords.shape,
                                     new.coords.shape))
+        self.partial_mix.symmetrize()
+        new.symmetrize()
+        self.assertTrue(self.partial_mix.spacegroup == new.spacegroup)
+
 
 
     def test_substitute(self):
