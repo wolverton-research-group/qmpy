@@ -20,6 +20,20 @@ class POSCARTestCase(TestCase):
                          ('Cu', [0.5, 0.5, 0.5])]
         self.struct = Structure.create(cell=cell, atoms=atoms)
 
+    def test_read_poscar_from_streaming(self):
+        f = StringIO.StringIO("""Cu
+3.54
+1.0 0.0 0.0
+0.0 1.0 0.0
+0.0 0.0 1.0
+Cu
+2
+direct
+0.0 0.0 0.0
+0.5 0.5 0.5""")
+        s = io.poscar.read(f)
+        self.assertTrue(simple_equal(self.struct, s))
+
     def test_vasp4(self):
         s = io.poscar.read(INSTALL_PATH+'/io/files/POSCAR_vasp4')
         self.assertTrue(simple_equal(self.struct, s))

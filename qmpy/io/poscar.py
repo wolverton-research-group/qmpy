@@ -7,6 +7,7 @@ import gzip
 import os
 from os.path import exists, isfile, isdir
 import time
+import StringIO
 
 from django.db import models
 import numpy as np
@@ -135,7 +136,10 @@ def read(poscar, species=None):
     struct = st.Structure()
 
     # Read in the title block, and system sell
-    poscar = open(poscar,'r')
+    if isinstance(poscar, StringIO.StringIO):
+        poscar = poscar
+    else:
+        poscar = open(poscar,'r')
     title = poscar.readline().strip()
     scale = float(poscar.readline().strip())
     s = float(scale)

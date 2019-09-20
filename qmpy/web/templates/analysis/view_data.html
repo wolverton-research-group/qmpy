@@ -39,10 +39,10 @@ Copy and paste your own structure data, in any format readable by JSMol into the
 
 {% if structure %}
 <ul>
-	<li>Spacegroup Number: <a href="/analysis/symmetry/spacegroup/{{structure.spacegroup_id}}">
+	<li>Spacegroup Number: <a href="/analysis/spacegroup/{{structure.spacegroup_id}}">
 		{{structure.spacegroup_id}}</a></li>
-	<li>Spacegroup Symbol (Hall): <a href="/analysis/symmetry/spacegroup/{{structure.spacegroup.hall}}">
-		{{structure.spacegroup_id}}</a></li>
+	<li>Spacegroup Symbol (Hall): <a href="/analysis/spacegroup/{{structure.spacegroup_id}}">
+		{{structure.spacegroup.hall}}</a></li>
 
 <h2> Atomic coordinates </h2>
 <table>
