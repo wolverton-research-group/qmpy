@@ -79,7 +79,7 @@ class CompositionTestCase(TestCase):
 class StructureTestCase(TestCase):
     def setUp(self):
         read_elements()
-        read_spacegroups([229, 221, 225, 216, 123, 62, 47])
+        read_spacegroups([229, 221, 225, 216, 123, 62])
 
         self.bcc = io.read(INSTALL_PATH+'/io/files/POSCAR_BCC')
         self.fcc = io.read(INSTALL_PATH+'/io/files/POSCAR_FCC')
@@ -88,8 +88,8 @@ class StructureTestCase(TestCase):
         self.zns = io.read(INSTALL_PATH+'/io/files/POSCAR_ZnS')
         self.kcl = io.read(INSTALL_PATH+'/io/files/POSCAR_KCl')
         self.becl = io.read(INSTALL_PATH+'/io/files/POSCAR_BeCl')
-#        self.partial = io.read(INSTALL_PATH+'/io/files/partial.cif')
-#        self.partial_mix = io.read(INSTALL_PATH+'/io/files/partial_mix.cif')
+        self.partial = io.read(INSTALL_PATH+'/io/files/partial.cif')
+        self.partial_mix = io.read(INSTALL_PATH+'/io/files/partial_mix.cif')
 
     def test_name(self):
         self.assertEqual(str(self.bcc), 'Cu')
@@ -143,8 +143,7 @@ class StructureTestCase(TestCase):
         self.assertEqual(self.fcc, new)
 
         # Translate - Structure with partial occupancies
-        partial = io.read(INSTALL_PATH+'/io/files/partial.cif')
-        new = partial.translate([np.log(4),+2e1,np.pi], in_place=False)
+        new = self.partial.translate([np.log(4),+2e1,np.pi], in_place=False)
         self.assertTrue(np.allclose(new.site_coords[:2],
                         [[0.32390055, 0.6728972 , 0.30627553],
                          [0.32390055, 0.1728972 , 0.80627553]]
@@ -153,15 +152,13 @@ class StructureTestCase(TestCase):
                        [[0.32390055, 0.1728972 , 0.80627553],
                         [0.82390055, 0.6728972 , 0.80627553]]
                        ))
-        self.assertTrue(np.allclose(partial.site_coords.shape,
+        self.assertTrue(np.allclose(self.artial.site_coords.shape,
                                     new.site_coords.shape))
-        self.assertTrue(np.allclose(partial.coords.shape,
+        self.assertTrue(np.allclose(self.partial.coords.shape,
                                     new.coords.shape))
-        self.assertEqual(partial,new)
         
         # Translate - Structure with partial mixing
-        partial_mix = io.read(INSTALL_PATH+'/io/files/partial_mix.cif')
-        new = partial_mix.translate([1e-4,1+1e-3,-5876.0], in_place=False)
+        new = self.partial_mix.translate([1e-4,1+1e-3,-5876.0], in_place=False)
         self.assertTrue(np.allclose(new.site_coords[:2],
                        [[0.50000951, 0.16332191, 0.17115903],
                         [0.        , 0.66332191, 0.67115903]]
@@ -170,11 +167,10 @@ class StructureTestCase(TestCase):
                        [[0.83900951, 0.20032191, 0.95355903],
                         [0.33900951, 0.62632191, 0.88875903]]
                        ))
-        self.assertTrue(np.allclose(partial_mix.site_coords.shape,
+        self.assertTrue(np.allclose(self.partial_mix.site_coords.shape,
                                     new.site_coords.shape))
-        self.assertTrue(np.allclose(partial_mix.coords.shape,
+        self.assertTrue(np.allclose(self.artial_mix.coords.shape,
                                     new.coords.shape))
-        self.assertEqual(partial_mix,new)
 
 
     def test_substitute(self):
