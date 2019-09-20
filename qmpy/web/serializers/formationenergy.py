@@ -32,7 +32,10 @@ class FormationEnergySerializer(QueryFieldsMixin, serializers.ModelSerializer):
         return formationenergy.entry.id
 
     def get_duplicate_entry_id(self, formationenergy):
-        return formationenergy.entry.duplicate_of.id
+        if formationenergy.entry.duplicate_of:
+            return formationenergy.entry.duplicate_of.id
+        else:
+            return
 
     def get_calculation_id(self, formationenergy):
         return formationenergy.calculation.id
