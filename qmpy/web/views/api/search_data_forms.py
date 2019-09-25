@@ -57,19 +57,19 @@ class DataFilterForm(forms.Form):
                     initial='False',
     )
     band_gap = forms.CharField(required=False, label='Band Gap',
-                               widget=forms.TextInput(attrs={'placeholder': 'e.g. 0, >0.3'}),
+                               widget=forms.TextInput(attrs={'placeholder': 'e.g. 0, !=0, >0.3'}),
                               )
     delta_e = forms.CharField(required=False, label='Formation Energy',
-                              widget=forms.TextInput(attrs={'placeholder': 'e.g. <-0.5'})
+                              widget=forms.TextInput(attrs={'placeholder': 'e.g. <=-0.5'})
                              )
     stability = forms.CharField(required=False, 
-                                widget=forms.TextInput(attrs={'placeholder': 'e.g. <-0.5'}),
+                                widget=forms.TextInput(attrs={'placeholder': 'e.g. 0, <=0.05'}),
                                )
     natoms = forms.CharField(required=False, label='# of Atoms', 
                              widget=forms.TextInput(attrs={'placeholder': 'e.g. 2, >3'})
                             )
     ntypes = forms.CharField(required=False, label='# of Element Types',
-                             widget=forms.TextInput(attrs={'placeholder': 'e.g. 2, >3'}),
+                             widget=forms.TextInput(attrs={'placeholder': 'e.g. 2, >3, !=1'}),
                              )
     volume = forms.CharField(required=False)
     filter = forms.CharField(required=False, label='Filter', help_text="<html>Available Filters:\
