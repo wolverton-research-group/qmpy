@@ -92,6 +92,9 @@ class OptimadeStructureList(generics.ListAPIView):
         if not filters:
             return fes
 
+        # shortcut to get all stable phases
+        filters = filters.replace('stability=0', 'stability<=0')
+
         filters = filters.replace('&', ' AND ')
         filters = filters.replace('|', ' OR ')
         filters = filters.replace('~', ' NOT ')

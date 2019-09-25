@@ -90,7 +90,10 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
         return formationenergy.delta_e
 
     def get__oqmd_stability(self, formationenergy):
-        return formationenergy.stability
+        if formationenergy.stability is not None:
+            return max(formationenergy.stability, 0.0)
+        else:
+            return
 
     class Meta:
         model = FormationEnergy

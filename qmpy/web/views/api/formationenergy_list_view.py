@@ -227,6 +227,9 @@ class FormationEnergyList(generics.ListAPIView):
         if not filters:
             return fes
 
+        # shortcut to get all stable phases
+        filters = filters.replace('stability=0', 'stability<=0')
+
         # replace'&' ,'|' and '~'  to 'AND', 'OR' and 'NOT', respectively
         filters = filters.replace('&', ' AND ')
         filters = filters.replace('|', ' OR ')
