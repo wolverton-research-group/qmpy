@@ -185,7 +185,7 @@ div#output {
                     <div style="margin-top:10px">[eV/atom]</div></th>
         <th onclick="sortTable(11, 'num')"><div>Band&nbsp;Gap<span id="header11">&#8645;</span></div>
                     <div style="margin-top:10px">[eV]</div></th>
-        <th onclick="sortTable(12, 'num')"><div>Stability<span id="header12">&#8645;</span></div>
+        <th onclick="sortTable(12, 'special_num')"><div>Stability<span id="header12">&#8645;</span></div>
                     <div style="margin-top:10px">[eV/atom]</div></th>
         <th> Link </th>
     </tr>
@@ -260,6 +260,17 @@ function sortTable(n, type) {
             } else if (type == 'link') {
                 xc = x.innerText.toLowerCase()
                 yc = y.innerText.toLowerCase()
+            } else if (type == 'special_num') {
+                if (x.innerHTML.trim() == "0") {
+                    xc = -9999
+                } else {
+                    xc = Number(x.innerHTML)
+                }
+                if (y.innerHTML.trim() == "0") {
+                    yc = -9999
+                } else {
+                    yc = Number(y.innerHTML)
+                }
             }
 
 
