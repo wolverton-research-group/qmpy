@@ -172,7 +172,8 @@ class Renderer(object):
         if dim == 3:
             cmd += "},"
 
-        cmd += "showlegend: false, margin: {l:1, r:1, t:1, b:1}};"
+        cmd += "legend: {x: 0.75, y:0.9},"
+        cmd += "showlegend: true, margin: {l:1, r:1, t:1, b:1}};"
 
         cmd += 'Plotly.newPlot("%s", data, layout,' %div
         cmd += '{displayModeBar: true, displaylogo: false,'
