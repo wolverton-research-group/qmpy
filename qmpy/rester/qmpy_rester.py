@@ -56,7 +56,7 @@ class QMPYRester(object):
             if k in kwargs_list:
                 url_args.append('%s=%s' %(k, kwargs[k]))
             elif k in filter_list:
-                if '>' in kwargs[k] or '<' in kwargs[k] or '!' in kwargs[k]:
+                if '>' in kwargs[k] or '<' in kwargs[k] or '!=' in kwargs[k]:
                     filter_args.append('%s%s' %(k, kwargs[k]))
                 else:
                     filter_args.append('%s=%s' %(k, kwargs[k]))

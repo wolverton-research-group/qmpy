@@ -23,6 +23,7 @@ class FormationEnergySerializer(QueryFieldsMixin, serializers.ModelSerializer):
     ntypes = serializers.SerializerMethodField()
     natoms = serializers.SerializerMethodField()
 
+    stability = serializers.SerializerMethodField()
     band_gap = serializers.SerializerMethodField()
 
     def get_name(self, formationenergy):
@@ -103,6 +104,12 @@ class FormationEnergySerializer(QueryFieldsMixin, serializers.ModelSerializer):
 
     def get_natoms(self, formationenergy):
         return formationenergy.entry.natoms
+
+    def get_stability(self, formationenergy):
+        if formationenergy.stability is not None:
+            return max(formationenergy.stability, 0.0)
+        else:
+            return
 
     def get_band_gap(self, formationenergy):
         return formationenergy.calculation.band_gap
