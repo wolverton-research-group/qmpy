@@ -67,7 +67,7 @@ class DOS(models.Model):
             dos.read_doscar(dos.file)
             dos.efermi = efermi
         except ValueError:
-            raise VaspError('Could not parse DOSCAR')
+            raise qmpy.analysis.vasp.calculation.VaspError('Could not parse DOSCAR')
         return dos
 
     @property

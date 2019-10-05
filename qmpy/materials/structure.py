@@ -562,6 +562,8 @@ class Structure(models.Model, object):
         """
         self.get_sites()
         dataset = get_symmetry_dataset(self, symprec=tol)
+        if not dataset:
+            return
         self.spacegroup = Spacegroup.objects.get(pk=dataset['number'])
         for i, site in enumerate(self.sites):
             site.wyckoff = self.spacegroup.get_site(dataset['wyckoffs'][i])
@@ -1220,6 +1222,17 @@ class Structure(models.Model, object):
         new.entry = self.entry
         new.composition = self.composition
         return new
+
+    def dedup_atoms(self):
+        for atom in self.atoms:
+            for atom2 in self.atoms:
+                if atom.id == atom2.id:
+                    continue
+                dist = self.get_distance(atom, atom2, limit=1)
+                if dist is None:
+                    continue
+                if dist < 1e-4 and atom.species == atom2.species:
+                    self.remove_atom(atom2)
 
     @property
     def similar(self):
