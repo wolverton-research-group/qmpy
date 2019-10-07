@@ -14,8 +14,10 @@ def entry_view(request, entry_id):
     entry = Entry.objects.get(pk=entry_id)
     data = {'entry': entry}
 
-    if entry.structure_set.filter(label='static') == []:
-        data['entry_structure'] = entry.input
+    if entry.structure_set.filter(label='static').count() != 0:
+        data['entry_structure'] = entry.structure_set.get(label='static')
+    elif entry.structure_set.filter(label='standard').count() != 0:
+        data['entry_structure'] = entry.structure_set.get(label='standard')
     else:
         data['entry_structure'] = entry.structure_set.get(label='static')
 
