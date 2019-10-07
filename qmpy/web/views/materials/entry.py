@@ -14,14 +14,10 @@ def entry_view(request, entry_id):
     entry = Entry.objects.get(pk=entry_id)
     data = {'entry': entry}
 
-    try:
-        entry.structure.symmetrize()
-        data['entry_structure'] = entry.structure
-    except TypeError:
-        if entry.structure_set.filter(label='static') == []:
-            data['entry_structure'] = entry.input
-        else:
-            data['entry_structure'] = entry.structure_set.get(label='static')
+    if entry.structure_set.filter(label='static') == []:
+        data['entry_structure'] = entry.input
+    else:
+        data['entry_structure'] = entry.structure_set.get(label='static')
 
     data = get_globals(data)
     if request.method == 'POST':
