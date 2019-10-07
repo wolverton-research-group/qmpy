@@ -91,7 +91,7 @@ theForm.onsubmit = function(e) {
       Stable Phase</span></p>
   <p class="comp"> 
     <b>Entry Link:</b> 
-    <a href="/materials/entry/{{composition.ground_state.id}}"
+    <a href="/materials/entry/{{current_phase.formation.entry.id}}"
       target='_blank'>
      {{ composition.ground_state.html |safe}}
     </a>
@@ -109,7 +109,7 @@ theForm.onsubmit = function(e) {
       Unstable Phase</span></p>
   <p class="comp"> 
     <b>Entry Link:</b> 
-    <a href="/materials/entry/{{composition.ground_state.id}}"
+    <a href="/materials/entry/{{current_phase.formation.entry.id}}"
       target='_blank'>
       {{ composition.ground_state.html |safe}}
     </a>
