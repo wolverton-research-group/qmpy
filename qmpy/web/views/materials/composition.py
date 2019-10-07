@@ -54,17 +54,32 @@ def composition_view(request, search=None):
         data['search'] = composition
         data['composition'] = comp
         data['plot'] = comp.relative_stability_plot(data=ps.data).get_flot_script()
-        data['results'] = comp.entries
-        energy, gs = ps.gclp(comp.name)
-        data['gs'] = Phase.from_phases(gs)
-        data['phases'] = gs
-        data['compound'] = comp.ground_state
-        if len(gs) == 1:
-            data['singlephase'] = True 
-        else:
-            data['singlephase'] = False
-        #data['singlephase'] = ( len(gs) == 1 )
+
+        data['results'] = FormationEnergy.objects.filter(composition=comp,
+                                                         fit='standard').order_by('delta_e')
         data['space'] = '-'.join(comp.comp.keys())
+
+        if comp.name in ps.phase_dict:
+            energy, gclp_phases = ps.compute_stability(comp)
+
+            data['gs'] = Phase.from_phases(gclp_phases)
+            data['current_phase'] = ps.phase_dict[comp.name]
+            data['gclp_phases'] = gclp_phases.keys()
+
+            if ps.phase_dict[comp.name].stability <= 0:
+                data['phase_type'] = 'stable'
+                data['delta_h'] = data['gs'].energy + data['current_phase'].stability
+                data['decomp_en'] = - data['current_phase'].stability
+            else:
+                data['phase_type'] = 'unstable'
+                data['delta_h'] = data['gs'].energy 
+                data['hull_dis'] = data['current_phase'].stability
+        else:
+            energy, gs = ps.gclp(comp.name)
+            data['gs'] = Phase.from_phases(gs)
+            data['gclp_phases'] = gs.keys()
+            data['phase_type'] = 'nophase'
+            data['delta_h'] = data['gs'].energy 
         return render_to_response('materials/composition.html', 
                 data,
                 RequestContext(request))
