@@ -59,7 +59,15 @@ def composition_view(request, search=None):
                                                          fit='standard').order_by('delta_e')
         data['space'] = '-'.join(comp.comp.keys())
 
-        if comp.name in ps.phase_dict:
+        if comp.ntypes == 1:
+            energy, gs = ps.gclp(comp.name)
+            data['gs'] = Phase.from_phases(gs)
+            data['gclp_phases'] = gs.keys()
+            data['current_phase'] = ps.phase_dict[comp.name]
+            data['phase_type'] = 'stable'
+            data['delta_h'] = data['gs'].energy 
+            data['decomp_en'] = - data['current_phase'].stability
+        elif comp.name in ps.phase_dict:
             energy, gclp_phases = ps.compute_stability(comp)
 
             data['gs'] = Phase.from_phases(gclp_phases)
