@@ -19,7 +19,7 @@ def entry_view(request, entry_id):
     elif entry.structure_set.filter(label='standard').count() != 0:
         data['entry_structure'] = entry.structure_set.get(label='standard')
     else:
-        data['entry_structure'] = entry.structure_set.get(label='static')
+        data['entry_structure'] = entry.input
 
     data = get_globals(data)
     if request.method == 'POST':
