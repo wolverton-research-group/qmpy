@@ -68,6 +68,7 @@ $(function() {
         <th>ID</th>
         <th>Spacegroup</th>
         <th>Formation Energy [eV/atom]</th>
+        <th>Stability [eV/atom]</th>
         <th>Prototype</th>
         <th># of atoms</th>
         <th>Reference</th>
@@ -75,14 +76,15 @@ $(function() {
     </thead>
 
     <tbody>
-      {% for entry in stable %}
-      <tr class=clickableRow href="/materials/entry/{{ entry.id }}">
-        <td>{{ entry.html | safe }}</td>
-        <td>{{ entry.spacegroup.symbol }}</td>
-        <td>{{ entry.energy |floatformat:-3 }}</td>
-        <td>{{ entry.prototype.name }}</td>
-        <td>{{ entry.natoms }}</td>
-        <td>{{ entry.reference.citation }}</td>
+      {% for fe in stable %}
+      <tr class=clickableRow href="/materials/entry/{{ fe.entry.id }}">
+        <td>{{ fe.entry.html | safe }}</td>
+        <td>{{ fe.entry.spacegroup.symbol }}</td>
+        <td>{{ fe.entry.energy |floatformat:-3 }}</td>
+        <td>{{ fe.stability |floatformat:-3 }}</td>
+        <td>{{ fe.entry.prototype.name }}</td>
+        <td>{{ fe.entry.natoms }}</td>
+        <td>{{ fe.entry.reference.citation }}</td>
       </tr>
       {% endfor %}
     </tbody>
@@ -100,6 +102,7 @@ $(function() {
     <th>Composition</th>
     <th>Spacegroup</th>
     <th>Formation Energy [eV/atom]</th>
+    <th>Stability [eV/atom]</th>
     <th>Prototype</th>
     <th># of atoms</th>
     <th>Reference</th>
@@ -107,19 +110,20 @@ $(function() {
 </thead>
 
 <tbody>
-  {% for group, entries in results %}
+  {% for group, fes in results %}
   <tr class=clickableRow href="/materials/composition/{{group}}">
     <td colspan="6"><h2>{{group}}</h2></td>
   </tr>
-  {% for entry in entries %}
-  <tr class=clickableRow href="/materials/entry/{{ entry.id }}">
-    <td>{{ entry.id }}</td>
-    <td>{{ entry.html | safe }}</td>
-    <td>{{ entry.spacegroup.symbol }}</td>
-    <td>{{ entry.energy |floatformat:-3 }}</td>
-    <td>{{ entry.prototype.name }}</td>
-    <td>{{ entry.natoms }}</td>
-    <td>{{ entry.reference.citation }}</td>
+  {% for fe in fes %}
+  <tr class=clickableRow href="/materials/entry/{{ fe.entry.id }}">
+    <td>{{ fe.entry.id }}</td>
+    <td>{{ fe.entry.html | safe }}</td>
+    <td>{{ fe.entry.spacegroup.symbol }}</td>
+    <td>{{ fe.entry.energy |floatformat:-3 }}</td>
+    <td>{{ fe.stability |floatformat:-3 }}</td>
+    <td>{{ fe.entry.prototype.name }}</td>
+    <td>{{ fe.entry.natoms }}</td>
+    <td>{{ fe.entry.reference.citation }}</td>
   </tr>
   {% endfor %}
   {% endfor %}

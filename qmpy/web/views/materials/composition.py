@@ -81,7 +81,7 @@ def composition_view(request, search=None):
         ##        continue
         ##    data['stable'].append(p.formation.energy)
         ## Fe-Ti-Sb: what's the problem?
-        data['stable'] = [ p.formation.entry for p in ps.stable ]
+        data['stable'] = [ p.formation for p in ps.stable ]
 
         
         ## The following step is really slow. Will be removed in future! 
@@ -95,12 +95,12 @@ def composition_view(request, search=None):
         results = defaultdict(list)
         for p in ps.phases:
             c = p.formation.composition
-            results['-'.join(sorted(c.space))] += [p.formation.entry]
+            results['-'.join(sorted(c.space))] += [p.formation]
         ## Mohan >
 
         for k,v in results.items():
             results[k] = sorted(v, key=lambda x:
-                    1000 if x.energy is None else x.energy)
+                    1000 if x.delta_e is None else x.delta_e)
         results = sorted(results.items(), key=lambda x: -len(x[0].split('-')))
         data['results'] = results
         return render_to_response('materials/phasespace.html', 
