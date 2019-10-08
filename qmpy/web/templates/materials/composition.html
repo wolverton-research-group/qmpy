@@ -88,7 +88,7 @@ theForm.onsubmit = function(e) {
   <h1> Composition: {{ composition.html |safe }}</h1>
   {% if phase_type == 'stable' %}
   <p><span style="font-size:25px;background-color:green;color:white;font-weight:800;margin-left:15px">
-      Stable Phase</span></p>
+      &nbsp;Stable Phase&nbsp;</span></p>
   <p class="comp"> 
     <b>Entry Link:</b> 
     <a href="/materials/entry/{{current_phase.formation.entry.id}}"
@@ -98,7 +98,7 @@ theForm.onsubmit = function(e) {
   </p>
   <p class="comp"><b>&Delta;H:</b> {{delta_h | floatformat:-3}} eV/atom </p>
   <p class="comp"><b>Decomposition Energy:</b> {{ decomp_en | floatformat:-3}} eV/atom </p>
-  <p class="comp"> <b>Competing phases: </b>
+  <p class="comp"> <b>Competing Phases: </b>
     {% for p in gclp_phases %}
     {{p.link | safe}}
     {% endfor %} 
@@ -106,7 +106,7 @@ theForm.onsubmit = function(e) {
 
   {% elif phase_type == 'unstable' %}
   <p><span style="font-size:25px;background-color:red;color:white;font-weight:800;margin-left:15px">
-      Unstable Phase</span></p>
+      &nbsp;Unstable Phase&nbsp;</span></p>
   <p class="comp"> 
     <b>Entry Link:</b> 
     <a href="/materials/entry/{{current_phase.formation.entry.id}}"
@@ -116,16 +116,16 @@ theForm.onsubmit = function(e) {
   </p>
   <p class="comp"><b>&Delta;H:</b> {{delta_h | floatformat:-3}} eV/atom </p>
   <p class="comp"><b>Hull Distance:</b> {{ hull_dis | floatformat:-3}} eV/atom </p>
-  <p class="comp"> <b>Decompose into: </b>
+  <p class="comp"> <b>Decompose Into: </b>
     {% for p in gclp_phases %}
     {{p.link | safe}}
     {% endfor %} 
   </p>
   {% elif phase_type == 'nophase' %}
   <p><span style="font-size:25px;background-color:lightblue;color:white;font-weight:800;margin-left:15px">
-      No Single Phase</span></p>
+      &nbsp;No Single Phase&nbsp;</span></p>
   <p class="comp"><b>&Delta;H:</b> {{delta_h | floatformat:-3}} eV/atom </p>
-  <p class="comp"> <b>Decompose into: </b>
+  <p class="comp"> <b>Decompose Into: </b>
     {% for p in gclp_phases %}
     {{p.link | safe}}
     {% endfor %} 
