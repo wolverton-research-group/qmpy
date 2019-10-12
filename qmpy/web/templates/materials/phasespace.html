@@ -81,7 +81,11 @@ $(function() {
         <td>{{ fe.entry.html | safe }}</td>
         <td>{{ fe.entry.spacegroup.symbol }}</td>
         <td>{{ fe.entry.energy |floatformat:-3 }}</td>
-        <td>{{ fe.stability |floatformat:-3 }}</td>
+        {% if fe.stability < 0 %}
+            <td>{{ 0 }}</td>
+        {% else %}
+            <td>{{ fe.stability |floatformat:-3 }}</td>
+        {% endif %}
         <td>{{ fe.entry.prototype.name }}</td>
         <td>{{ fe.entry.natoms }}</td>
         <td>{{ fe.entry.reference.citation }}</td>
@@ -120,7 +124,11 @@ $(function() {
     <td>{{ fe.entry.html | safe }}</td>
     <td>{{ fe.entry.spacegroup.symbol }}</td>
     <td>{{ fe.entry.energy |floatformat:-3 }}</td>
-    <td>{{ fe.stability |floatformat:-3 }}</td>
+    {% if fe.stability < 0 %}
+        <td>{{ 0 }}</td>
+    {% else %}
+        <td>{{ fe.stability |floatformat:-3 }}</td>
+    {% endif %}
     <td>{{ fe.entry.prototype.name }}</td>
     <td>{{ fe.entry.natoms }}</td>
     <td>{{ fe.entry.reference.citation }}</td>
