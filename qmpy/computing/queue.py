@@ -354,6 +354,12 @@ class Job(models.Model):
         if not binary:
             raise AllocationError
 
+        # < Mohan
+        # Set a HARD upper bound for walltime
+        # If longer walltime is needed, please modify the following codes!
+        walltime = min(walltime, job.account.host.walltime)
+        # Mohan >
+
         sec = timedelta(seconds=walltime)
         d = datetime(1,1,1) + sec
         job.walltime = d
