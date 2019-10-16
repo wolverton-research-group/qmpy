@@ -1,6 +1,7 @@
 import logging
 import time
 from django.db import models
+from django.core.exceptions import *
 from datetime import datetime
 import os
 
@@ -197,10 +198,10 @@ def relaxation(entry, xc_func='PBE', **kwargs):
 
     # Check if the calculation is converged / started
     if not entry.calculations.get(cnfg_name, Calculation()).converged:
-        input = entry.input.copy()
+        in_struct = entry.input.copy()
 
         projects = entry.project_set.all()
-        calc = Calculation.setup(input,
+        calc = Calculation.setup(in_struct,
                                  entry=entry,
                                  configuration=cnfg_name,
                                  path=path,
@@ -229,9 +230,9 @@ def relaxation(entry, xc_func='PBE', **kwargs):
             lowspin_dir = os.path.join(entry.path, low_name)
 
             # Get input structure
-            input = entry.input.copy()
+            in_struct = entry.input.copy()
 
-            calc = Calculation.setup(input,  entry=entry,
+            calc = Calculation.setup(in_struct,  entry=entry,
                                              configuration=cnfg_name,
                                              path=lowspin_dir,
                                              **kwargs)
@@ -317,13 +318,13 @@ def static(entry, xc_func='PBE', **kwargs):
         return calc
 
     # Input structure == output structure from relaxation
-    input = calc.output
+    in_struct = calc.output
 
     # Get path to CHGCAR
     chgcar_path = calc.path
 
     # Set up calculation
-    calc = Calculation.setup(input, entry=entry,
+    calc = Calculation.setup(in_struct, entry=entry,
                                     configuration=cnfg_name, 
                                     path=calc_dir, 
                                     chgcar=chgcar_path,
@@ -342,9 +343,39 @@ def static(entry, xc_func='PBE', **kwargs):
     if calc.converged and xc_func.lower() == 'pbe':
         f = calc.get_formation() # LW 16 Jan 2016: Need to rewrite this to have
         # separate hulls for LDA / PBE / ...
+        calc.save()
+        f.calculation = calc
         f.save()
+        
         ps = PhaseSpace(calc.input.comp.keys())
-        ps.compute_stabilities(reevaluate=True, save=True)
+        for p in ps.phases:
+            if p in ps.phase_dict.values():
+                ps.compute_stability(p)
+            else:
+                p2 = ps.phase_dict[p.name]
+                ps.compute_stability(p2)
+                base = max(0, p2.stability)
+                diff = p.energy - p2.energy
+                p.stability = base + diff
+
+            temp_c = Calculation.objects.get(formationenergy__id=p.id)
+            if temp_c.id == calc.id:
+                print("new calc stability")
+                f.stability = p.stability
+                f.save()
+            else:
+                try:
+                    fe = temp_c.get_formation()
+                except MultipleObjectsReturned:
+                    print("Calculation ", 
+                          temp_c.id, 
+                          " has more than one formationenergy")
+                    continue
+                if fe is None:
+                    continue
+                fe.stability = p.stability
+                fe.save()
+        #ps.compute_stabilities(reevaluate=True, save=True)
     else:
         calc.write()
     return calc
@@ -370,8 +401,8 @@ def wavefunction(entry, **kwargs):
     if not calc.converged:
         return calc
 
-    input = calc.input
-    calc = Calculation.setup(input, entry=entry,
+    in_struct = calc.input
+    calc = Calculation.setup(in_struct, entry=entry,
                                     configuration='static',
                                     path=entry.path+'/hybrids/wavefunction',
                                     chgcar=entry.path+'/static',

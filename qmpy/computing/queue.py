@@ -207,6 +207,13 @@ class Task(models.Model):
                     # Sheel doesn't have access to b1004 binaries
                     calc.instructions['binary'] = '~/vasp_53'
                     calc.instructions['queuetype'] = 'normal' 
+                elif allocation.name == 'p30919':
+                    calc.instructions['queuetype'] = 'short'
+                    calc.instructions['serial'] = False
+                    calc.instructions['nodes'] = 1
+                    calc.instructions['ntasks'] = 4
+                    calc.instructions['walltime'] = 3600*4
+                    calc.instructions['binary'] = 'vasp_53'
                 else:
                     calc.instructions['queuetype'] = 'normal'
 
@@ -290,14 +297,11 @@ class Job(models.Model):
         db_table = 'jobs'
 
     @staticmethod
-    def create(task=None, allocation=None, entry=None,
-            account=None,
-            path=None, 
-            walltime=3600, serial=None, 
-            queuetype=None, ntasks=None,
-            header=None,
-            mpi=None, binary=None, pipes=None,
-            footer=None):
+    def create(task=None,
+               allocation=None, entry=None, account=None,
+               path=None, serial=None,
+               walltime=3600, queuetype=None, nodes=None, ntasks=None,
+               header=None, mpi=None, binary=None, pipes=None, footer=None):
 
         if entry is None:
             entry = task.entry
@@ -338,15 +342,24 @@ class Job(models.Model):
             if job.allocation.name == 'p20747':
                 walltime = 3600*24
         else:
-            nodes = 1
+            if nodes is None:
+                nodes = 1
             ppn = job.account.host.ppn
             if job.allocation.name == 'b1004':
                 ppn = 4
-            walltime = job.account.host.walltime
+            if walltime is None:
+                walltime = job.account.host.walltime
+
+            # < Mohan
+            # Set a HARD upper bound for walltime
+            # If longer walltime is needed, please modify the following codes!
+            walltime = min(walltime, job.account.host.walltime)
+            # Mohan >
             
         binary = job.account.host.get_binary(binary)
         if not binary:
             raise AllocationError
+
 
         sec = timedelta(seconds=walltime)
         d = datetime(1,1,1) + sec

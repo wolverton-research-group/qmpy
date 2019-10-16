@@ -53,7 +53,10 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
         return formationenergy.calculation.id
     
     def get__oqmd_spacegroup(self, formationenergy):
-        return formationenergy.calculation.output.spacegroup.hm
+        try:
+            return formationenergy.calculation.output.spacegroup.hm
+        except AttributeError:
+            return
 
     def get__oqmd_prototype(self, formationenergy):
         try:

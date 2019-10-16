@@ -442,7 +442,8 @@ class Phase(object):
     def link(self):
         if self.id:
             link = '<a href="/materials/entry/{id}">{name}</a>'
-            return link.format(id=self.calculation.entry_id, name=self.name)
+            return link.format(id=self.calculation.entry_id, 
+                               name=format_html(self.comp))
         else:
             return ''
 

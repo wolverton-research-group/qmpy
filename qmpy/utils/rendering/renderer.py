@@ -96,6 +96,7 @@ class Renderer(object):
         else:
             plot_type = 'scatter'
 
+        # General parameters
         cmd = 'var line_type = {width: 2, color: "grey"};'
         cmd += 'var stable_marker_type = '
         cmd += '{size: 5, color: "teal", opacity: 0.8};'
@@ -104,18 +105,48 @@ class Renderer(object):
         cmd += 'var axis_type = {title: "", showbackground: false, '
         cmd += 'zeroline: false, showgrid:false, ticks: "", showlabels: false,'
         cmd += 'showticklabels: false, showspikes: false};'
+        cmd += 'var camera_view = {eye: {x: 1.5, y: 0.1, z: 0.1},'
+        cmd += 'center: {x: -0.15, y: -0.1, z: -0.1}};'
+
+        # Function to get dropdown button
+        cmd += 'function getfontbutton(value, _label) {'
+        cmd += 'return {label: _label, method: "relayout",'
+        cmd += 'args: ["scene", {camera: camera_view,'
+        cmd += 'xaxis: axis_type, yaxis: axis_type, zaxis: axis_type,'
+        cmd += 'annotations: getannotation(value)}]}}'
+
+        # Function to get line width button
+        cmd += 'function getlinewidth(value) {'
+        cmd += 'return {label: "Line Width: "+value, method: "restyle",'
+        cmd += 'args: ["line.width", value]}}'
+
+        # Function to get annotations
+        cmd += 'function getannotation(fontsize) {'
+        cmd += 'return ['
+        for text in self.text:
+            cmd += '{'
+            cmd += 'showarrow: false,'
+            cmd += 'x: ' + str(text.point.coord[0]) + ','
+            cmd += 'y: ' + str(text.point.coord[1]) + ','
+            if dim == 3:
+                cmd += 'z: ' + str(text.point.coord[2]) + ','
+
+            cmd += 'text: %s,' %json.dumps(text.text)
+            cmd += 'xanchor: "left",'
+            cmd += 'font: {color: "black", size: fontsize}},'
+        cmd += ']}'
 
         # Prepare data
         cmd += 'var data = ['
 
         # Plot tie lines
         for line in self.lines:
-            cmd += "{"
+            cmd += '{'
             p1, p2 = line.points
-            cmd += "x: [%f, %f]," %(p1.coord[0], p2.coord[0])
-            cmd += "y: [%f, %f]," %(p1.coord[1], p2.coord[1])
+            cmd += 'x: [%f, %f],' %(p1.coord[0], p2.coord[0])
+            cmd += 'y: [%f, %f],' %(p1.coord[1], p2.coord[1])
             if dim == 3:
-                cmd += "z: [%f, %f]," %(p1.coord[2], p2.coord[2])
+                cmd += 'z: [%f, %f],' %(p1.coord[2], p2.coord[2])
             cmd += 'type: "%s",' %plot_type
             cmd += 'mode: "lines",'
             cmd += 'text: ["",""],'
@@ -127,15 +158,15 @@ class Renderer(object):
         # Plot phases
         for pc in self.point_collections:
             label = pc.label
-            cmd += "{"
-            cmd += "x: %s," % json.dumps(list(
+            cmd += '{'
+            cmd += 'x: %s,' % json.dumps(list(
                 map(lambda p: p.coord[0], pc.points)))
-            cmd += "y: %s," % json.dumps(list(
+            cmd += 'y: %s,' % json.dumps(list(
                 map(lambda p: p.coord[1], pc.points)))
             if dim == 3:
-                cmd += "z: %s," % json.dumps(list(
+                cmd += 'z: %s,' % json.dumps(list(
                     map(lambda p: p.coord[2], pc.points)))
-            cmd += "text: %s," % json.dumps(list(
+            cmd += 'text: %s,' % json.dumps(list(
                 map(lambda p: p.label, pc.points)))
             cmd += 'type: "%s",' %plot_type
             cmd += 'mode: "markers",'
@@ -144,37 +175,48 @@ class Renderer(object):
             cmd += 'name: "%s",' %label
             cmd += '},'
 
-        cmd += "];"
+        cmd += '];'
 
         # Prepare Layout
-        cmd += "var layout = {"
+        cmd += 'var layout = {'
         if dim == 3:
-            cmd += "scene: {camera: {eye: {x:1.5, y:0.1, z:0.1},"
-            cmd += "center: {x:-0.15, y:-0.15, z:-0.1}},"
-            cmd += "xaxis: axis_type, yaxis: axis_type, zaxis: axis_type,"
-
-        # Write annotations
-        cmd += "annotations: ["
-        for text in self.text:
-            cmd += "{"
-            cmd += "showarrow: false,"
-            cmd += "x: " + str(text.point.coord[0]) + ","
-            cmd += "y: " + str(text.point.coord[1]) + ","
-            if dim == 3:
-                cmd += "z: " + str(text.point.coord[2]) + ","
-
-            cmd += "text: %s," %json.dumps(text.text)
-            cmd += 'xanchor: "left",'
-            cmd += 'font: {color: "black", size: 11}},'
-
-        cmd += "],"
+            cmd += 'scene: {camera: camera_view,'
+            cmd += 'xaxis: axis_type, yaxis: axis_type, zaxis: axis_type,'
+            cmd += 'annotations: getannotation(12),'
 
         if dim == 3:
-            cmd += "},"
+            cmd += '},'
 
-        cmd += "legend: {x: 0.75, y:0.9},"
-        cmd += "showlegend: true, margin: {l:1, r:1, t:1, b:1}};"
+        cmd += 'legend: {x: 0.75, y:0.9},'
+        cmd += 'showlegend: true, margin: {l:1, r:1, t:1, b:1},'
 
+        # Prepare Update Menus
+        # Options to change font size
+        cmd += 'updatemenus: ['
+        cmd += '{pad: {t: 10}, xanchor: "left", yanchor: "bottom",'
+        cmd += 'x: 0.01, y: 0.9, direction: "down",'
+        cmd += 'buttons: ['
+        cmd += 'getfontbutton(12, "Font Size: Small"),'
+        cmd += 'getfontbutton(15, "Font Size: Medium"),'
+        cmd += 'getfontbutton(18, "Font Size: Large"),'
+        cmd += '{label: "No Text", method: "relayout",'
+        cmd += 'args: ["scene", {camera: camera_view,'
+        cmd += 'xaxis: axis_type, yaxis: axis_type, zaxis: axis_type,'
+        cmd += 'annotations: []}]}]},'
+
+        # Options to change line width
+        cmd += '{pad: {t: 10}, xanchor: "left", yanchor: "bottom",'
+        cmd += 'x: 0.01, y: 0.8, direction: "down",'
+        cmd += 'buttons: ['
+        cmd += 'getlinewidth("2"),'
+        cmd += 'getlinewidth("3"),'
+        cmd += 'getlinewidth("5"),'
+        cmd += 'getlinewidth("8"),'
+        cmd += ']}]'
+        
+        cmd += '};'
+
+        # Create plot
         cmd += 'Plotly.newPlot("%s", data, layout,' %div
         cmd += '{displayModeBar: true, displaylogo: false,'
         cmd += 'modeBarButtonsToRemove:["resetCameraDefault3d","hoverClosest3d"]' 

@@ -63,6 +63,7 @@ urlpatterns += [
     url(r'^computing/projects$', 'qmpy.web.views.projects_view'),
     url(r'^computing/hosts$', 'qmpy.web.views.hosts_view'),
     url(r'^computing/queue$', 'qmpy.web.views.queue_view'),
+    url(r'^computing/onlinesubmit$', 'qmpy.web.views.online_view'),
 
     url(r'^computing/create/host$', 'qmpy.web.views.new_host_view'),
     #url(r'^computing/create/project', 'qmpy.web.views.new_project_view'),

@@ -27,6 +27,7 @@ class PDF(object):
         self.weights = dict((p, []) for p in self.pairs)
 
         structure = structure.copy()
+        # `get_symmetry_dataset` cannot handle the reduced output?
         structure.reduce()
         structure.symmetrize()
         self.structure = structure

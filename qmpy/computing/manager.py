@@ -125,7 +125,7 @@ class TaskManager(daemon.Daemon):
         except Exception, err:
             task.hold()
             task.save()
-            tlogger.warn('Unknown error processing task: %s' % err)
+            tlogger.warn('Unknown error while getting jobs: %s' % err)
             return
 
         if not jobs:
@@ -160,5 +160,5 @@ class TaskManager(daemon.Daemon):
             except Exception, err:
                 task.hold()
                 task.save()
-                tlogger.warn('Unknown error processing task: %s' % err)
+                tlogger.warn('Unknown error while saving Entry: %s' % err)
 

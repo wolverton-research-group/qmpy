@@ -63,10 +63,10 @@ class FormationEnergySerializer(QueryFieldsMixin, serializers.ModelSerializer):
         return formationenergy.composition.generic
     
     def get_spacegroup(self, formationenergy):
-        if formationenergy.calculation.output: 
+        try:
             return formationenergy.calculation.output.spacegroup.hm
-        else:
-            return 
+        except AttributeError:
+            return
 
     def get_prototype(self, formationenergy):
         if formationenergy.entry.prototype: 

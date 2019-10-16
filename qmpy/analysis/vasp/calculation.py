@@ -746,12 +746,35 @@ class Calculation(models.Model):
         return np.array(positions)
 
     def read_stresses(self):
-        self.get_outcar()
-        stresses = []
-        for line in self.outcar:
-            if 'in kB' in line:
-                stresses.append(map(ffloat, line.split()[2:]))
-        return np.array(stresses)
+        """
+            Using vasprun.xml.gz to collect stresses.
+            In future, this function will be moved to read_output_from_vasprun()
+        """
+        try:
+            stresses = []
+            tree = etree.parse(gzip.open(self.path+'/vasprun.xml.gz','rb'))
+            tmp_xmlroot = tree.getroot()
+
+            for _s in tmp_xmlroot.findall("*varray[@name='stress']"):
+                tmp_stress_matrix = []
+                for _v in _s:
+                    tmp_stress_matrix.append(list(map(ffloat, _v.text.strip().split())))
+                stresses.append([
+                    tmp_stress_matrix[0][0],
+                    tmp_stress_matrix[1][1],
+                    tmp_stress_matrix[2][2],
+                    tmp_stress_matrix[0][1],
+                    tmp_stress_matrix[1][2],
+                    tmp_stress_matrix[2][0]
+                ])
+            return np.array(stresses)
+        except:
+            self.get_outcar()
+            stresses = []
+            for line in self.outcar:
+                if 'in kB' in line:
+                    stresses.append(map(ffloat, line.split()[2:]))
+            return np.array(stresses)
 
     def read_kpoints(self):
         kpts = []
