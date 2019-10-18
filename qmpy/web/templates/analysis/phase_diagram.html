@@ -28,6 +28,60 @@
         });
 </script>
 {% endif %}
+<script>
+function filterbelow() {
+    var cutoff = document.getElementsByName('stability')[0].value;
+    var rows = document.getElementsByName('resultrow');
+    for (var i=0; i < rows.length; i++) {
+        if (rows[i].getElementsByTagName('TD')[4].innerText > cutoff) {
+            rows[i].getElementsByTagName('INPUT')[4].checked = false;
+            rows[i].getElementsByTagName('INPUT')[5].checked = false;
+        } 
+        if (rows[i].getElementsByTagName('TD')[4].innerText == "") {
+            rows[i].getElementsByTagName('INPUT')[4].checked = false;
+            rows[i].getElementsByTagName('INPUT')[5].checked = false;
+        } 
+    }
+}
+
+function selectall() {
+    var rows = document.getElementsByName('resultrow');
+    for (var i=0; i < rows.length; i++) {
+        rows[i].getElementsByTagName('INPUT')[4].checked = true;
+        rows[i].getElementsByTagName('INPUT')[5].checked = true;
+    }
+}
+
+function unselectall() {
+    var rows = document.getElementsByName('resultrow');
+    for (var i=0; i < rows.length; i++) {
+        rows[i].getElementsByTagName('INPUT')[4].checked = false;
+        rows[i].getElementsByTagName('INPUT')[5].checked = false;
+    }
+}
+
+function addrow() {
+    var thistable = document.getElementById('thermodata');
+    var newrow = thistable.insertRow(-1);
+    var newcell0 = newrow.insertCell(0);
+    var newcell1 = newrow.insertCell(1);
+    var newcell2 = newrow.insertCell(2);
+    var newcell3 = newrow.insertCell(3);
+    var newcell4 = newrow.insertCell(4);
+    var newcell5 = newrow.insertCell(5);
+    newcell0.innerHTML = '<input type="checkbox" name="use_new" checked value="on">';
+    newcell1.innerHTML = '<input type="checkbox" name="label_new" checked value="on">';
+    newcell2.innerHTML = '<input type="text" size="12" name="composition_new" value="">';
+    newcell3.innerHTML = '<input type="text" size="6" name="formationenergy_new" value="">';
+    newcell4.innerText = '';
+    newcell5.innerHTML = '<input type="button" onclick="deleteRow(this)" value="del"/>';
+}
+
+function deleteRow(r) {
+    var i = r.parentNode.parentNode.rowIndex;
+    document.getElementById('thermodata').deleteRow(i);
+}
+</script>
 
 <div class="flot-container" style="width:500px;height:400px;float:left">
   <div id="placeholder" class="flot-placeholder"></div>
@@ -39,7 +93,13 @@
   <form action="" method="post">{% csrf_token %}
     <input type="hidden" name="search" value="{{search}}">
     <input type="hidden" name="chem_pots" value="{{chem_pots}}">
-    Hide phases more than <input type="text" name="stability" value={{stability}}> above the convex hull.<br>
+    Hide phases more than <input type="text" name="stability" value=""> above the convex hull.
+    <br>
+    <input type="button" onclick="filterbelow()" value="Filter"/>
+    <input type="button" onclick="selectall()" value="Select All"/>
+    <input type="button" onclick="unselectall()" value="Unselect All"/>
+    <input type="button" onclick="addrow()" value="Add Row"/>
+    <br>
 
   <h2> Phase data used to generate this ground state composition: </h2>
   Add/remove/edit this data, and then recreate the phase diagram.
@@ -50,11 +110,13 @@
           <th>Label</th>
           <th>Composition</th>
           <th>Formation Energy</th>
+          <th>Stability</th>
+          <th>Action</th>
         </tr>
       </thead>
       <tbody>
       {% for phase in phase_data %}
-        <tr>
+      <tr name="resultrow">
           <input type="hidden" name="indices" value="{{phase.index}}">
           <input type="hidden" name="use_{{phase.index}}" value="off">
           <input type="hidden" name="label_{{phase.index}}" value="off">
@@ -63,6 +125,16 @@
           <td><input type="checkbox" name="label_{{phase.index}}" {% if phase.show_label %}checked{% endif %} value="on"></td>
           <td><input type="text" size="12" name="composition_{{phase.index}}" value="{{phase.name}}"></td>
           <td><input type="text" size="6" name="formationenergy_{{phase.index}}" value="{{phase.energy | floatformat:-3}}"></td>
+          {% if phase.stability == 0 %}
+            <td name="calc_stability">{{0}}</td>
+          {% elif not phase.stability %}
+            <td name="calc_stability"></td>
+          {% elif phase.stability < 0 %}
+            <td name="calc_stability">{{0}}</td>
+          {% else %}
+            <td name="calc_stability">{{phase.stability | floatformat:-3}}</td>
+          {% endif %}
+          <td><input type="button" onclick="deleteRow(this)" value="del"/></td>
         </tr>
         {% endfor %}
       </tbody>
