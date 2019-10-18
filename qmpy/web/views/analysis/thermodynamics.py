@@ -111,34 +111,15 @@ def phase_diagram_view(request):
                 except ValueError:
                     print "Invalid Input"
 
-            #if 'composition_new' in p:
-            #    print p['composition_new']
-            #    #for c, t, u, l in zip(p['composition_new'], 
-            #    #                      p['formationenergy_new'],
-            #    #                      p['use_new'],
-            #    #                      p['label_new'],
-            #    #                     ):
-            #    #print c
-            #    #print t
-            #    c = p['composition_new']
-            #    t = p['formationenergy_new']
-            #    u = p['use_new']
-            #    l = p['label_new']
-            #    try:
-            #        phase = Phase(composition=c, energy=float(t))
-            #        phase.use = ( u == 'on' )
-            #        phase.show_label = ( l == 'on' )
-            #        pdata.add_phase(phase)
-            #    except ValueError:
-            #        print "Invalid Input"
-
             data['phase_data'] = pdata.phases
             ps = PhaseSpace(data['search'], mus=data['chem_pots'], data=pdata,
                     load=None)
             if not data['chem_pots']:
                 ps.compute_stabilities()
-            print ps.phases
 
+            # < Mohan
+            # This following code might not be needed. WIll be removed in future updates.
+            # Original Codes:
             #if p.get('stability') and not data["chem_pots"]:
             #    ps.compute_stabilities()
             #    data['stability'] = p.get('stability')
@@ -146,6 +127,7 @@ def phase_diagram_view(request):
             #        if phase.stability > float(p.get('stability', 0.25)):
             #            phase.use = False
             #            phase.show_label = False
+            # Mohan >
 
         if ps.shape == (3, 0):
             data['plotlyjs'] = ps.phase_diagram.get_plotly_script_3d("placeholder")
