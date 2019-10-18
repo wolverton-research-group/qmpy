@@ -111,6 +111,7 @@ def phase_diagram_view(request):
                 except ValueError:
                     print "Invalid Input"
 
+            data['stability'] = p.get('stability')
             data['phase_data'] = pdata.phases
             ps = PhaseSpace(data['search'], mus=data['chem_pots'], data=pdata,
                     load=None)
