@@ -9,11 +9,30 @@
 {% block extrastyle %}
 <link rel="stylesheet" type="text/css" href="{% static "css/flot.css" %}"/>
 <style>
+.hidebutton {
+    background-color: #333;
+    outline: none;
+    cursor: pointer;
+    color: white;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 4px;
+    padding-bottom: 5px;
+    text-align: left;
+    font-size: 12px;
+}
+
+.active, .hidebutton:hover{
+    background-color: white;
+    color:black;
+}
+
 .rectbutton {
     padding-left: 10px;
     padding-right: 10px;
     padding-top: 4px;
     padding-bottom: 4px;
+    cursor: pointer;
 }
 
 .roundbutton {
@@ -24,6 +43,7 @@
     border-radius: 10px;
     background-color: blue;
     color:white;
+    cursor: pointer;
 }
 
 .active, .roundbutton:hover{
@@ -89,19 +109,27 @@ function filterbelow() {
     }
 }
 
-function selectall() {
+function filterunstable() {
+    var cutoff = 0;
     var rows = document.getElementsByName('resultrow');
     for (var i=0; i < rows.length; i++) {
-        rows[i].getElementsByTagName('INPUT')[4].checked = true;
-        rows[i].getElementsByTagName('INPUT')[5].checked = true;
+        if (rows[i].getElementsByTagName('TD')[4].innerText > cutoff) {
+            rows[i].getElementsByTagName('INPUT')[4].checked = false;
+            rows[i].getElementsByTagName('INPUT')[5].checked = false;
+        } 
+        if (rows[i].getElementsByTagName('TD')[4].innerText == "") {
+            rows[i].getElementsByTagName('INPUT')[4].checked = false;
+            rows[i].getElementsByTagName('INPUT')[5].checked = false;
+        } 
     }
 }
 
-function unselectall() {
+function select_unselect_all() {
     var rows = document.getElementsByName('resultrow');
+    var flag = rows[0].getElementsByTagName('INPUT')[4].checked;
     for (var i=0; i < rows.length; i++) {
-        rows[i].getElementsByTagName('INPUT')[4].checked = false;
-        rows[i].getElementsByTagName('INPUT')[5].checked = false;
+        rows[i].getElementsByTagName('INPUT')[4].checked = !flag;
+        rows[i].getElementsByTagName('INPUT')[5].checked = !flag;
     }
 }
 
@@ -169,8 +197,18 @@ for (iter = 0; iter < coll.length; iter++) {
     <input type="hidden" name="search" value="{{search}}">
     <input type="hidden" name="chem_pots" value="{{chem_pots}}">
 
-    <b>Filtering</b>: Hide phases more than <input type="text" name="stability" value=""> eV/atom above the convex hull.
-    <input type="button" onclick="filterbelow()" value="Go" class="rectbutton"/>
+    <b>Filtering</b>: <br>
+        <span style="margin-left:2em">Hide phases more than <input type="text" name="stability"
+                                                                            size="6"
+                                                                            value="{{stability}}">
+                                                                            eV/atom above the convex
+                                                                            hull. </span>
+        <br>
+        <span style="margin-left:2em"><input type="button" onclick="filterbelow()" value="Hide Phases"
+                                                                                   class="hidebutton"/></span>
+        <span style="margin-left:5px"><input type="button" onclick="filterunstable()" 
+        value="Hide All Unstable Phases" class="hidebutton"/></span>
+    <br>
     <table id="thermodata">
       <thead>
         <tr>
@@ -207,9 +245,7 @@ for (iter = 0; iter < coll.length; iter++) {
         {% endfor %}
       </tbody>
     </table>
-    <input type="button" onclick="selectall()" value="Select All" class="rectbutton"
-    style="background-color:lightblue"/>
-    <input type="button" onclick="unselectall()" value="Unselect All" class="rectbutton"
+    <input type="button" onclick="select_unselect_all()" value="Select/Unselect All" class="rectbutton"
     style="background-color:lightblue"/>
     <input type="button" onclick="addrow()" value="Add Row" class="rectbutton"
     style="background-color:green;color:white"/>
