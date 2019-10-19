@@ -600,7 +600,6 @@ class Structure(models.Model, object):
         self._uniq_atoms = []
         for ind, mult in counts.items():
             site = self.sites[ind]
-            for site2 in self.duplicates[site]:
             ##for site2 in self.duplicates[site]:
             ## See comment about hashes and Dictionary keys
             for site2 in self.duplicates[ind]:
