@@ -98,11 +98,7 @@ theForm.onsubmit = function(e) {
   </p>
   <p class="comp"><b>&Delta;H:</b> {{delta_h | floatformat:-3}} eV/atom </p>
   <p class="comp"><b>Decomposition Energy:</b> {{ decomp_en | floatformat:-3}} eV/atom </p>
-  <p class="comp"> <b>Competing Phases: </b>
-    {% for p in gclp_phases %}
-    {{p.link | safe}}
-    {% endfor %} 
-  </p>
+  <p class="comp"> <b>Competing Phases: </b> {{ phase_links |safeseq |join:" + " }} </p>
 
   {% elif phase_type == 'unstable' %}
   <p><span style="font-size:25px;background-color:red;color:white;font-weight:800;margin-left:15px">
@@ -116,20 +112,12 @@ theForm.onsubmit = function(e) {
   </p>
   <p class="comp"><b>&Delta;H:</b> {{delta_h | floatformat:-3}} eV/atom </p>
   <p class="comp"><b>Hull Distance:</b> {{ hull_dis | floatformat:-3}} eV/atom </p>
-  <p class="comp"> <b>Decompose Into: </b>
-    {% for p in gclp_phases %}
-    {{p.link | safe}}
-    {% endfor %} 
-  </p>
+  <p class="comp"> <b>Decompose Into: </b> {{ phase_links |safeseq |join:" + " }} </p>
   {% elif phase_type == 'nophase' %}
   <p><span style="font-size:25px;background-color:lightblue;color:white;font-weight:800;margin-left:15px">
       &nbsp;No Single Phase&nbsp;</span></p>
   <p class="comp"><b>&Delta;H:</b> {{delta_h | floatformat:-3}} eV/atom </p>
-  <p class="comp"> <b>Decompose Into: </b>
-    {% for p in gclp_phases %}
-    {{p.link | safe}}
-    {% endfor %} 
-  </p>
+  <p class="comp"> <b>Decompose Into: </b> {{ phase_links |safeseq |join:" + " }} </p>
   {% endif %}
 {% endif %}
 {% if composition.experiment %}
@@ -187,7 +175,11 @@ theForm.onsubmit = function(e) {
     <td>{{ fe.entry.html | safe }}</td>
     <td>{{ fe.entry.structure.spacegroup.symbol }}</td>
     <td>{{ fe.delta_e |floatformat:-3 }}</td>
-    <td>{{ fe.stability |floatformat:-3 }}</td>
+    {% if fe.stability < 0 %}
+    	<td>{{ 0 }}</td>
+    {% else %}
+    	<td>{{ fe.stability |floatformat:-3 }}</td>
+    {% endif %}
     <td>{{ fe.entry.prototype.name }}</td>
     <td>{{ fe.entry.natoms }}</td>
     <td>{{ fe.entry.reference.citation }}</td>

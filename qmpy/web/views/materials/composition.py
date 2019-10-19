@@ -63,6 +63,7 @@ def composition_view(request, search=None):
             energy, gs = ps.gclp(comp.name)
             data['gs'] = Phase.from_phases(gs)
             data['gclp_phases'] = gs.keys()
+            data['phase_links'] = [p.link for p in data['gclp_phases']]
             data['current_phase'] = ps.phase_dict[comp.name]
             data['phase_type'] = 'stable'
             data['delta_h'] = data['gs'].energy 
@@ -73,6 +74,7 @@ def composition_view(request, search=None):
             data['gs'] = Phase.from_phases(gclp_phases)
             data['current_phase'] = ps.phase_dict[comp.name]
             data['gclp_phases'] = gclp_phases.keys()
+            data['phase_links'] = [p.link for p in data['gclp_phases']]
 
             if ps.phase_dict[comp.name].stability <= 0:
                 data['phase_type'] = 'stable'
@@ -86,6 +88,7 @@ def composition_view(request, search=None):
             energy, gs = ps.gclp(comp.name)
             data['gs'] = Phase.from_phases(gs)
             data['gclp_phases'] = gs.keys()
+            data['phase_links'] = [p.link for p in data['gclp_phases']]
             data['phase_type'] = 'nophase'
             data['delta_h'] = data['gs'].energy 
         return render_to_response('materials/composition.html', 

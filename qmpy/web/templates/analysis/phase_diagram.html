@@ -8,6 +8,71 @@
 
 {% block extrastyle %}
 <link rel="stylesheet" type="text/css" href="{% static "css/flot.css" %}"/>
+<style>
+.hidebutton {
+    background-color: #333;
+    outline: none;
+    cursor: pointer;
+    color: white;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 4px;
+    padding-bottom: 5px;
+    text-align: left;
+    font-size: 12px;
+}
+
+.active, .hidebutton:hover{
+    background-color: white;
+    color:black;
+}
+
+.rectbutton {
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    cursor: pointer;
+}
+
+.roundbutton {
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    border-radius: 10px;
+    background-color: blue;
+    color:white;
+    cursor: pointer;
+}
+
+.active, .roundbutton:hover{
+    background-color: white;
+    color:black;
+}
+
+.collapsible {
+    background-color: #777;
+    outline: none;
+    cursor: pointer;
+    color: white;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    text-align: left;
+}
+.active, .collapsible:hover {
+    background-color: #555;
+}
+
+.colcontent {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.2s ease-out;
+}
+
+</style>
 {% endblock %}
 
 
@@ -28,6 +93,97 @@
         });
 </script>
 {% endif %}
+<script>
+function filterbelow() {
+    var cutoff = document.getElementsByName('stability')[0].value;
+    var rows = document.getElementsByName('resultrow');
+    for (var i=0; i < rows.length; i++) {
+        if (rows[i].getElementsByTagName('TD')[4].innerText > cutoff) {
+            rows[i].getElementsByTagName('INPUT')[4].checked = false;
+            rows[i].getElementsByTagName('INPUT')[5].checked = false;
+        } 
+        if (rows[i].getElementsByTagName('TD')[4].innerText == "") {
+            rows[i].getElementsByTagName('INPUT')[4].checked = false;
+            rows[i].getElementsByTagName('INPUT')[5].checked = false;
+        } 
+    }
+}
+
+function filterunstable() {
+    var cutoff = 0;
+    var rows = document.getElementsByName('resultrow');
+    for (var i=0; i < rows.length; i++) {
+        if (rows[i].getElementsByTagName('TD')[4].innerText > cutoff) {
+            rows[i].getElementsByTagName('INPUT')[4].checked = false;
+            rows[i].getElementsByTagName('INPUT')[5].checked = false;
+        } 
+        if (rows[i].getElementsByTagName('TD')[4].innerText == "") {
+            rows[i].getElementsByTagName('INPUT')[4].checked = false;
+            rows[i].getElementsByTagName('INPUT')[5].checked = false;
+        } 
+    }
+}
+
+function select_unselect_all() {
+    var rows = document.getElementsByName('resultrow');
+    var flag = rows[0].getElementsByTagName('INPUT')[4].checked;
+    for (var i=0; i < rows.length; i++) {
+        rows[i].getElementsByTagName('INPUT')[4].checked = !flag;
+        rows[i].getElementsByTagName('INPUT')[5].checked = !flag;
+    }
+}
+
+function addrow() {
+    var thistable = document.getElementById('thermodata');
+    var newrow = thistable.insertRow(-1);
+    var newcell0 = newrow.insertCell(0);
+    var newcell1 = newrow.insertCell(1);
+    var newcell2 = newrow.insertCell(2);
+    var newcell3 = newrow.insertCell(3);
+    var newcell4 = newrow.insertCell(4);
+    var newcell5 = newrow.insertCell(5);
+    newcell0.innerHTML = '<input type="checkbox" name="use_new" checked value="on">';
+    newcell1.innerHTML = '<input type="checkbox" name="label_new" checked value="on">';
+    newcell2.innerHTML = '<input type="text" size="12" name="composition_new" value="">';
+    newcell3.innerHTML = '<input type="text" size="12" name="formationenergy_new" value="">';
+    newcell4.innerText = '';
+    newcell5.innerHTML = '<input type="button" onclick="deleteRow(this)" value="del" style="color:red"/>';
+}
+
+function deleteRow(r) {
+    var i = r.parentNode.parentNode.rowIndex;
+    document.getElementById('thermodata').deleteRow(i);
+}
+
+function deleteunselect() {
+    var rows = document.getElementsByName('resultrow');
+    var i = 0;
+    while (i < rows.length) {
+        if (rows[i].getElementsByTagName('INPUT')[4].checked == false) {
+            var r = rows[i].rowIndex;
+            document.getElementById('thermodata').deleteRow(r);
+        } else {
+            i++;
+        }
+    }
+}
+</script>
+<script>
+var coll = document.getElementsByClassName("collapsible");
+var iter;
+
+for (iter = 0; iter < coll.length; iter++) {
+    coll[iter].addEventListener("click", function() {
+        this.classList.toggle("active");
+        var content = this.nextElementSibling;
+        if (content.style.maxHeight) {
+            content.style.maxHeight = null;
+        } else {
+            content.style.maxHeight = content.scrollHeight + "px";
+        }
+    });
+}
+</script>
 
 <div class="flot-container" style="width:500px;height:400px;float:left">
   <div id="placeholder" class="flot-placeholder"></div>
@@ -37,12 +193,22 @@
 <div class="box" style="width:940px">
   <h1> Customize Phase Diagram </h1>
   <form action="" method="post">{% csrf_token %}
+  <h2> Phase data used to generate this ground state composition: </h2>
     <input type="hidden" name="search" value="{{search}}">
     <input type="hidden" name="chem_pots" value="{{chem_pots}}">
-    Hide phases more than <input type="text" name="stability" value={{stability}}> above the convex hull.<br>
 
-  <h2> Phase data used to generate this ground state composition: </h2>
-  Add/remove/edit this data, and then recreate the phase diagram.
+    <b>Filtering</b>: <br>
+        <span style="margin-left:2em">Hide phases more than <input type="text" name="stability"
+                                                                            size="6"
+                                                                            value="{{stability}}">
+                                                                            eV/atom above the convex
+                                                                            hull. </span>
+        <br>
+        <span style="margin-left:2em"><input type="button" onclick="filterbelow()" value="Hide Phases"
+                                                                                   class="hidebutton"/></span>
+        <span style="margin-left:5px"><input type="button" onclick="filterunstable()" 
+        value="Hide All Unstable Phases" class="hidebutton"/></span>
+    <br>
     <table id="thermodata">
       <thead>
         <tr>
@@ -50,11 +216,13 @@
           <th>Label</th>
           <th>Composition</th>
           <th>Formation Energy</th>
+          <th>Stability</th>
+          <th>Action</th>
         </tr>
       </thead>
       <tbody>
       {% for phase in phase_data %}
-        <tr>
+      <tr name="resultrow">
           <input type="hidden" name="indices" value="{{phase.index}}">
           <input type="hidden" name="use_{{phase.index}}" value="off">
           <input type="hidden" name="label_{{phase.index}}" value="off">
@@ -62,12 +230,28 @@
           <td><input type="checkbox" name="use_{{phase.index}}" {% if phase.use %}checked{% endif %} value="on"></td>
           <td><input type="checkbox" name="label_{{phase.index}}" {% if phase.show_label %}checked{% endif %} value="on"></td>
           <td><input type="text" size="12" name="composition_{{phase.index}}" value="{{phase.name}}"></td>
-          <td><input type="text" size="6" name="formationenergy_{{phase.index}}" value="{{phase.energy | floatformat:-3}}"></td>
+          <td><input type="text" size="12" name="formationenergy_{{phase.index}}" value="{{phase.energy | floatformat:-3}}"></td>
+          {% if phase.stability == 0 %}
+            <td name="calc_stability">{{0}}</td>
+          {% elif not phase.stability %}
+            <td name="calc_stability"></td>
+          {% elif phase.stability < 0 %}
+            <td name="calc_stability">{{0}}</td>
+          {% else %}
+            <td name="calc_stability">{{phase.stability | floatformat:-3}}</td>
+          {% endif %}
+          <td><input type="button" onclick="deleteRow(this)" value="del" style="color:red"/></td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
-    <input type="submit" name="action" value="re-evaluate">
+    <input type="button" onclick="select_unselect_all()" value="Select/Unselect All" class="rectbutton"
+    style="background-color:lightblue"/>
+    <input type="button" onclick="addrow()" value="Add Row" class="rectbutton"
+    style="background-color:green;color:white"/>
+    <input type="button" onclick="deleteunselect()" value="Delete Unselected Rows"
+    class="rectbutton" style="background-color:red;color:white;"/>
+    <input type="submit" name="action" value="re-evaluate" class="roundbutton">
   </form>
 </div>
 {% endif %}
@@ -100,7 +284,7 @@ The formation energies supplied to this tool were calculated using elemental ref
 {% block sidebar %}
 <div id="sidebar" class="box">
   <form action="" method="POST">{% csrf_token %}
-    <h2 class="subhead"> Specify a region of phase space:</h2>
+    <h2> Specify a region of phase space:</h2>
     <input name='search' value="{{ search }}"/>
     <br>Examples:<br>
     <ul>
@@ -108,18 +292,26 @@ The formation energies supplied to this tool were calculated using elemental ref
       <li>Li-H-O
       <li>Li2O-Fe2O3
     </ul>
-    <h2 class="subhead"> Specify chemical potentials or ranges of chemical potentials</h2>
+    <input type='submit'  name="action" value="submit"/><br>
+    <br>
+    <button class="collapsible" type="button"><span style="font-size:15px">Specify chemical
+            potentials</span></button>
+    <div class="colcontent">
+    <h3> Specify chemical potentials or ranges of chemical potentials</h3>
     <input name="chem_pots" value="{{ chem_pots}}">
-    <br>Use in combination with a composition or composition range to check stability as a function of chemical potential.<br>
-    Examples:<br>
+    <br>
+    <p><i>Use in combination with a composition or composition range to check stability as a function
+        of chemical potential.</i></p>
+    Examples:
+    <br>
     <ul>
       <li>O
       <li>Li=-1.8
       <li>O=0:-5
       <li>O=0:-5 Li=0:-5
     </ul>
-    <input type='submit'  name="action" value="submit"/><br>
-    <br><br>
+    </div>
+    <!--
     Use custom phase data file: <input type="file" name="custom_phase_data"><br>
     File format:
     <pre>
@@ -129,6 +321,7 @@ The formation energies supplied to this tool were calculated using elemental ref
     AB -2.5
     AB2 -3.0
   </pre>
+   -->
   </form>
 
 </div>
