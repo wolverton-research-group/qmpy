@@ -1,0 +1,244 @@
+#------------------------------------------------------------------------------
+#$Date: 2014-02-14 10:05:00 +0000 (Fri, 14 Feb 2014) $
+#$Revision: 101573 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/4/33/56/4335638.cif $
+#------------------------------------------------------------------------------
+#
+# This file is available in the Crystallography Open Database (COD),
+# http://www.crystallography.net/
+#
+# All data on this site have been placed in the public domain by the
+# contributors.
+#
+data_4335638
+loop_
+_publ_author_name
+'Constantinos C. Stoumpos'
+'Christos D. Malliakas'
+'Mercouri G. Kanatzidis'
+_publ_contact_author_address
+;
+   Department of Chemistry
+     2145 Sheridan Road
+   Northwestern University
+   Evanston, IL 60208-3113
+           USA
+;
+_publ_contact_author_email       m-kanatzidis@northwestern.edu
+_publ_contact_author_fax         847-491-5937
+_publ_contact_author_name        'Mercouri G. Kanatzidis'
+_publ_contact_author_phone       847-467-1541
+_publ_section_title
+;
+ Semiconducting Tin and Lead Iodide Perovskites with Organic Cations:
+ Phase Transitions, High Mobilities, and Near-Infrared Photoluminescent
+ Properties
+;
+_journal_name_full               'Inorganic Chemistry'
+_journal_page_first              9019
+_journal_page_last               9038
+_journal_paper_doi               10.1021/ic401215x
+_journal_volume                  52
+_journal_year                    2013
+_chemical_formula_moiety         CH3NH3PbI3
+_chemical_formula_sum            'C H6 I3 N Pb'
+_chemical_formula_weight         619.96
+_chemical_name_common            beta-Methylammonium_Lead_Triiodide
+_chemical_name_systematic
+; 
+ ? 
+;
+_space_group_IT_number           108
+_symmetry_cell_setting           tetragonal
+_symmetry_space_group_name_Hall  'I 4 -2c'
+_symmetry_space_group_name_H-M   'I 4 c m'
+_atom_sites_solution_hydrogens   none
+_atom_sites_solution_primary     direct
+_atom_sites_solution_secondary   difmap
+_audit_creation_method           SHELXL-97
+_cell_angle_alpha                90.00
+_cell_angle_beta                 90.00
+_cell_angle_gamma                90.00
+_cell_formula_units_Z            4
+_cell_length_a                   8.849(2)
+_cell_length_b                   8.849(2)
+_cell_length_c                   12.642(2)
+_cell_measurement_reflns_used    3357
+_cell_measurement_temperature    293(2)
+_cell_measurement_theta_max      29.72
+_cell_measurement_theta_min      3.22
+_cell_volume                     989.9(4)
+_computing_cell_refinement       'STOE X-AREA'
+_computing_data_collection       'STOE X-AREA'
+_computing_data_reduction        'STOE X-RED'
+_computing_structure_refinement  'SHELXL-97 (Sheldrick, 2008)'
+_computing_structure_solution    'SHELXS-97 (Sheldrick, 2008)'
+_diffrn_ambient_temperature      293(2)
+_diffrn_detector                 'image plate (34 cm diameter)'
+_diffrn_detector_area_resol_mean 6.67
+_diffrn_detector_type            STOE
+_diffrn_measured_fraction_theta_full 0.971
+_diffrn_measured_fraction_theta_max 0.971
+_diffrn_measurement_device       '2-circle goniometer'
+_diffrn_measurement_device_type  'STOE IPDS 2'
+_diffrn_measurement_method       'rotation method'
+_diffrn_radiation_collimation    '0.5 mm diameter, monocapillary'
+_diffrn_radiation_monochromator  'plane graphite'
+_diffrn_radiation_polarisn_norm  0
+_diffrn_radiation_type           'Mo K\a'
+_diffrn_radiation_wavelength     0.71073
+_diffrn_reflns_av_R_equivalents  0.0664
+_diffrn_reflns_av_sigmaI/netI    0.0341
+_diffrn_reflns_limit_h_max       12
+_diffrn_reflns_limit_h_min       -12
+_diffrn_reflns_limit_k_max       10
+_diffrn_reflns_limit_k_min       -12
+_diffrn_reflns_limit_l_max       15
+_diffrn_reflns_limit_l_min       -16
+_diffrn_reflns_number            4483
+_diffrn_reflns_theta_full        29.03
+_diffrn_reflns_theta_max         29.03
+_diffrn_reflns_theta_min         3.26
+_diffrn_source
+'sealed x-ray tube, 12 x 0.4 mm long-fine focus'
+_diffrn_source_current           30
+_diffrn_source_power             1.20
+_diffrn_source_voltage           40
+_exptl_absorpt_coefficient_mu    26.312
+_exptl_absorpt_correction_T_max  0.9213
+_exptl_absorpt_correction_T_min  0.8317
+_exptl_absorpt_correction_type   integration
+_exptl_crystal_colour            black
+_exptl_crystal_density_diffrn    4.159
+_exptl_crystal_description       'rhombic dodecahedron'
+_exptl_crystal_F_000             1040
+_exptl_crystal_size_max          0.005
+_exptl_crystal_size_mid          0.003
+_exptl_crystal_size_min          0.002
+_refine_diff_density_max         0.927
+_refine_diff_density_min         -1.676
+_refine_diff_density_rms         0.241
+_refine_ls_abs_structure_details 'Flack H D (1983), Acta Cryst. A39, 876-881'
+_refine_ls_abs_structure_Flack   0(10)
+_refine_ls_extinction_coef       SHELXL
+_refine_ls_extinction_method     none
+_refine_ls_goodness_of_fit_ref   1.268
+_refine_ls_hydrogen_treatment    none
+_refine_ls_matrix_type           full
+_refine_ls_number_parameters     18
+_refine_ls_number_reflns         678
+_refine_ls_number_restraints     2
+_refine_ls_restrained_S_all      1.267
+_refine_ls_R_factor_all          0.0418
+_refine_ls_R_factor_gt           0.0378
+_refine_ls_shift/su_max          0.000
+_refine_ls_shift/su_mean         0.000
+_refine_ls_structure_factor_coef Fsqd
+_refine_ls_weighting_details
+'calc w=1/[\s^2^(Fo^2^)+(0.0181P)^2^+20.6179P] where P=(Fo^2^+2Fc^2^)/3'
+_refine_ls_weighting_scheme      calc
+_refine_ls_wR_factor_gt          0.0865
+_refine_ls_wR_factor_ref         0.0879
+_reflns_number_gt                637
+_reflns_number_total             678
+_reflns_threshold_expression     >2sigma(I)
+_[local]_cod_data_source_file    ic401215x_si_003_4.cif
+_[local]_cod_data_source_block   3_293K
+_cod_original_cell_volume        990.0(4)
+_cod_database_code               4335638
+loop_
+_symmetry_equiv_pos_as_xyz
+'x, y, z'
+'-x, -y, z'
+'-y, x, z'
+'y, -x, z'
+'x, -y, z+1/2'
+'-x, y, z+1/2'
+'-y, -x, z+1/2'
+'y, x, z+1/2'
+'x+1/2, y+1/2, z+1/2'
+'-x+1/2, -y+1/2, z+1/2'
+'-y+1/2, x+1/2, z+1/2'
+'y+1/2, -x+1/2, z+1/2'
+'x+1/2, -y+1/2, z+1'
+'-x+1/2, y+1/2, z+1'
+'-y+1/2, -x+1/2, z+1'
+'y+1/2, x+1/2, z+1'
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_U_iso_or_equiv
+_atom_site_adp_type
+_atom_site_occupancy
+_atom_site_symmetry_multiplicity
+_atom_site_calc_flag
+_atom_site_refinement_flags
+Pb Pb 0.0000 0.0000 0.0000 0.0319(2) Uani 1 4 d S
+I1 I 0.0000 0.0000 0.2472(7) 0.0794(6) Uani 1 4 d S
+I2 I 0.21417(15) 0.71417(15) 0.0046(6) 0.0830(7) Uani 1 2 d S
+C C 0.5000 0.0000 0.352(11) 0.34(10) Uiso 1 4 d SD
+N N 0.5000 0.0000 0.242(11) 0.17(2) Uiso 1 4 d SD
+loop_
+_atom_site_aniso_label
+_atom_site_aniso_U_11
+_atom_site_aniso_U_22
+_atom_site_aniso_U_33
+_atom_site_aniso_U_23
+_atom_site_aniso_U_13
+_atom_site_aniso_U_12
+Pb 0.0318(2) 0.0318(2) 0.0322(4) 0.000 0.000 0.000
+I1 0.1071(10) 0.1071(10) 0.0239(11) 0.000 0.000 0.000
+I2 0.0678(6) 0.0678(6) 0.1134(16) 0.0279(17) 0.0279(17) 0.0434(7)
+loop_
+_atom_type_symbol
+_atom_type_description
+_atom_type_scat_dispersion_real
+_atom_type_scat_dispersion_imag
+_atom_type_scat_source
+C C 0.0033 0.0016 'International Tables Vol C Tables 4.2.6.8 and 6.1.1.4'
+H H 0.0000 0.0000 'International Tables Vol C Tables 4.2.6.8 and 6.1.1.4'
+N N 0.0061 0.0033 'International Tables Vol C Tables 4.2.6.8 and 6.1.1.4'
+I I -0.4742 1.8119 'International Tables Vol C Tables 4.2.6.8 and 6.1.1.4'
+Pb Pb -3.3944 10.1111 'International Tables Vol C Tables 4.2.6.8 and 6.1.1.4'
+loop_
+_geom_angle_atom_site_label_1
+_geom_angle_atom_site_label_2
+_geom_angle_atom_site_label_3
+_geom_angle
+_geom_angle_site_symmetry_1
+_geom_angle_site_symmetry_3
+I1 Pb I2 88.94(13) . 3_655
+I1 Pb I2 88.94(13) . 4_455
+I2 Pb I2 177.9(3) 3_655 4_455
+I1 Pb I2 88.94(13) . 1_545
+I2 Pb I2 89.980(5) 3_655 1_545
+I2 Pb I2 89.980(5) 4_455 1_545
+I1 Pb I2 88.94(13) . 2_565
+I2 Pb I2 89.980(5) 3_655 2_565
+I2 Pb I2 89.980(5) 4_455 2_565
+I2 Pb I2 177.9(3) 1_545 2_565
+I1 Pb I1 180.0 . 5_554
+I2 Pb I1 91.06(13) 3_655 5_554
+I2 Pb I1 91.06(13) 4_455 5_554
+I2 Pb I1 91.06(13) 1_545 5_554
+I2 Pb I1 91.06(13) 2_565 5_554
+Pb I1 Pb 180.0 . 5
+Pb I2 Pb 163.55(6) 13_554 1_565
+loop_
+_geom_bond_atom_site_label_1
+_geom_bond_atom_site_label_2
+_geom_bond_distance
+_geom_bond_site_symmetry_2
+Pb I1 3.125(8) .
+Pb I2 3.1613(8) 3_655
+Pb I2 3.1613(8) 4_455
+Pb I2 3.1613(8) 1_545
+Pb I2 3.1613(8) 2_565
+Pb I1 3.196(8) 5_554
+I1 Pb 3.196(8) 5
+I2 Pb 3.1613(8) 13_554
+I2 Pb 3.1613(8) 1_565
+C N 1.39(2) .

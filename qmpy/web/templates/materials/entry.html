@@ -38,19 +38,14 @@
 	<li>Label: {{ entry.label }}
 	{% endif %}
 	{% if entry.composition.experiment %}
-	<li>Experimental Heat of Formation (298K): {{ entry.composition.experiment | floatformat:3 }}</li>
+	<li>Experimental Heat of Formation (298K): {{ entry.composition.experiment | floatformat:3 }} eV/atom</li>
 	{% endif %}
-  {% if entry.duplicate_of %}
-  <!-- [[v]] -->
-  <!-- added an extra if here to check if the entry is a duplicate of only itself -->
-    {% if not entry.duplicate_of_id == entry.id %}
+    {% if not entry.duplicate_of.id == entry.id %}
 	<li>Duplicate of:
-  <a href="/materials/entry/{{ entry.duplicate_of_id }}">Entry {{entry.duplicate_of_id}}</a>
+    <a href="/materials/entry/{{ entry.duplicate_of.id }}">Entry {{entry.duplicate_of.id}}</a>
     {% endif %}
-  {% endif %}
-  <!-- [[v]] -->
-  <!-- changed elif to if in the line below and ended the previous if on the line above-->
-  </li>{% if entry.duplicates.all %} 
+  </li>
+  {% if entry.duplicates.all %}
   <li>See also: 
   <a href="/materials/duplicates/{{ entry.id }}">duplicates list</a>
   {% endif %}
@@ -60,18 +55,19 @@
 	<a href="/materials/prototype/{{ entry.prototype_id }}">{{entry.prototype_id}}</a>
 	</li>{% endif %}
 
-  <li> Structure: <a href="/materials/structure/{{entry.structure.id}}">
-    {{entry.structure.id}}</a></li>
-  <li> Spacegroup: <a href="/analysis/symmetry/spacegroup/{{entry.structure.spacegroup}}">
-    {{entry.structure.spacegroup.symbol}}</a></li>
-  <li> # of atoms: {{entry.structure.natoms}}</li>
+  <li> Structure: <a href="/materials/structure/{{entry_structure.id}}">
+    {{entry_structure.id}}</a></li>
+  <li> Spacegroup: <a href="/analysis/spacegroup/{{entry_structure.spacegroup}}">
+    {{entry_structure.spacegroup.symbol}}</a></li>
+  <li> # of atoms: {{entry_structure.natoms}}</li>
 
   <li> Path: {{entry.path}} </li>
 
-	{% if entry.holds %}
+  <!--	{% if entry.holds %}
   <li> Holds: {% for hold in entry.holds %} <a href="/materials/hold/{{hold}}">{{hold}}</a>
   {% endfor %}
-	</li> {% endif %}
+	</li> {% endif %} 
+  -->
 
 	{% if entry.keywords %}
   <li> Associated keywords: {% for kw in entry.keywords %} <a href="/materials/keyword/{{kw}}">{{kw}}</a>
@@ -129,6 +125,26 @@
 
 {% block sidebar %}
 <div id="sidebar" class="box">
+  {% if not entry.tasks %}
+  <h1> Control Panel</h1>
+  <form action="" method="post">{% csrf_token %}
+    <input type="submit" name="calculate" value="Request calculation">
+  </form>
+  {% endif %}
+  {% if entry.holds %}
+  <!-- 
+  <form action="" method="post">{% csrf_token %}
+    <input type="submit" name="clear_holds" value="Clear holds">
+  </form>
+  -->
+  {% endif %}
+
+  <form action="" method="post">{% csrf_token %}
+    Add keyword: <input type="text" name="add_keyword"><br>
+    <!-- Add hold: <input type="text" name="add_hold"><br> -->
+    <input type="submit">
+  </form>
+
   <h1> Visualization </h1>
   {% if entry.natoms > 200 %}
   Structure contains more than 200 atoms, so is not being displayed. <br>
@@ -138,9 +154,9 @@
       var Info = {
         j2sPath: "{% static 'js/jsmol/j2s' %}",
         {% if primitive %}
-        src: "/materials/export/primitive/cif/{{entry.structure.id}}",
+        src: "/materials/export/primitive/cif/{{entry_structure.id}}",
         {% else %}
-        src: "/materials/export/conventional/cif/{{entry.structure.id}}",
+        src: "/materials/export/conventional/cif/{{entry_structure.id}}",
         {% endif %}
         use: "HTML5",
         width: 400,

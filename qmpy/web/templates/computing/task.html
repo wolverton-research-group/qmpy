@@ -40,15 +40,17 @@
       <th>State</th>
       <th>Host</th>
       <th>User</th>
+      <th>qid</th>
       <th>Run path</th>
     </thead>
     <tbody>
       {% for job in task.job_set.all %}
       <tr class=clickableRow href="/computing/job/{{job.id}}">
-        <td>{{job.id}}</td>
+        <td width="80">{{job.id}}</td>
         <td>{{job.state}}</td>
         <td>{{job.account.host.name}}</td>
-        <td>{{job.account.user.name}}</td>
+        <td width="60">{{job.account.username}}</td>
+        <td width="80">{{job.qid}}</td>
         <td>{{job.run_path}}</td>
       </tr>
       {% endfor %}

@@ -3,6 +3,7 @@
 """
 qmpy is a package containing many tools for computational materials science. 
 """
+
 import numpy as np
 try:
     import pyximport; pyximport.install()
@@ -14,6 +15,15 @@ import os, os.path
 import stat
 import sys
 import ConfigParser
+
+import django.core.exceptions as de
+
+
+with open(os.path.join(os.path.dirname(__file__), 'VERSION.txt')) as fr:
+    __version__ = fr.read().strip()
+VERSION = __version__
+__short_version__ = __version__.rpartition('.')[0]
+
 
 INSTALL_PATH = os.path.abspath(os.path.dirname(__file__))
 sys.path = [os.path.join(INSTALL_PATH, 'qmpy', 'db')] + sys.path
@@ -79,18 +89,31 @@ except ImportError:
     logging.warn('Failed to import matplotlib')
 
 try:
-    import pyspglib
+    import spglib 
     FOUND_SPGLIB = True
 except ImportError:
-    logging.warn("Failed to import pyspglib."
+    logging.warn("Failed to import spglib."
             'Download at: http://sourceforge.net/projects/spglib/ and'
             'follow instructions for installing python API')
     FOUND_SPGLIB = False
+
+try:
+    import sklearn
+    FOUND_SKLEARN = True
+except ImportError:
+    FOUND_SKLEARN = False
 
 ### Kludge to get the django settings module into the path
 sys.path.insert(-1, INSTALL_PATH)
 if 'DJANGO_SETTINGS_MODULE' not in os.environ:
     os.environ['DJANGO_SETTINGS_MODULE'] = 'qmpy.db.settings'
+
+# Load models (Django >= 1.7)
+try:
+    import django
+    django.setup()
+except:
+    pass
 
 from models import *
 from analysis import *
@@ -106,7 +129,7 @@ import os
 def read_spacegroups(numbers=None):
     data = open(INSTALL_PATH+'/data/spacegroups.yml').read()
     Spacegroup.objects.all().delete()
-    spacegroups = yaml.load(data)
+    spacegroups = yaml.safe_load(data)
     for sgd in spacegroups.values():
         if numbers:
             if sgd['number'] not in numbers:
@@ -141,7 +164,7 @@ def read_elements():
     elements = open(INSTALL_PATH+'/data/elements/data.yml').read()
     Element.objects.all().delete()
     elts = []
-    for elt, data in yaml.load(elements).items():
+    for elt, data in yaml.safe_load(elements).items():
         e = Element()
         e.__dict__.update(data)
         elts.append(e)
@@ -150,7 +173,7 @@ def read_elements():
 def read_hubbards():
     hubs = open(INSTALL_PATH+'/configuration/vasp_settings/hubbards.yml').read()
 
-    for group, hubbard in yaml.load(hubs).items():
+    for group, hubbard in yaml.safe_load(hubs).items():
         for ident, data in hubbard.items():
             elt, ligand, ox = ident.split('_')
             hub = Hubbard(
@@ -235,6 +258,8 @@ def sync_resources():
             alloc.save()
             proj.allocations.add(alloc)
 
+
+# Try to prevent exception when importing before database is set up
 try:
     if not Spacegroup.objects.exists():
         read_spacegroups()
@@ -247,5 +272,15 @@ try:
 
     if not Hubbard.objects.exists():
         read_hubbards()
+
+    if not User.objects.exists():
+        sync_resources()
+
+    if MetaData.objects.filter(type='global_warning').exists:
+        for md in MetaData.objects.filter(type='global_warning'):
+            logger.warn(md.value)
+    if MetaData.objects.filter(type='global_info').exists:
+        for md in MetaData.objects.filter(type='global_info'):
+            logger.info(md.value)
 except:
     pass

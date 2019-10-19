@@ -5,8 +5,10 @@
 {% block title %} OQMD | The Open Quantum Materials Database {% endblock %}
 
 {% block branding %}
-<h1> OQMD:</h1>
-<h2> The Open Quantum Materials Database</h2>
+<a href="/">
+<img src="{% static "img/new_logo_oqmd.png" %}" width=300 alt="New logo">
+</a>
+
 {% endblock %}
 
 {% block global-warning %}
@@ -20,7 +22,7 @@ Warning: {{ message.value }}<br>
 {% block global-info %}
 {% if global_info %}
 {% for message in global_info %}
-<b>Newsflash:</b> {{ message.value }} <small>(Download it <a href="http://oqmd.org/download/">here</a>.)</small><br>
+Notice: {{ message.value }}<br>
 {% endfor %}
 {% endif %}
 {% endblock %}
@@ -38,9 +40,29 @@ Welcome, {{ user.username }}.<br>
 
 	<li><a href="/materials/">Materials</a>
   <ul>
-    <li> <a href="/materials/composition">Search</a></li>
+    <li> <a href="/materials/composition">Search Phases</a></li>
+    <li> <a href="/api/search">Search Materials</a></li>
+    <li> <a href="/materials/discovery">Compound discovery</a> </li>
   </ul>
-
+  <li><a href="/computing/">Computing</a>
+  <ul>
+    <li> <a href="/computing/hosts">Hosts</a>
+      <ul>
+        {% for host in host_list %}
+        <li> <a href="/computing/host/{{host.name}}">
+          {{host.name}}</a></li>
+        {% endfor %} </ul></li>
+    <li> <a href="/computing/projects">Projects</a>
+      <ul>
+        {% for project in project_list %}
+          {% if project.active %}
+            <li> <a href="/computing/project/{{project.name}}">{{project.name}}</a></li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+    </li>
+    <li> <a href="/computing/queue">Queue</a></li>
+  </ul>
 	<li><a href="/analysis/">Analysis</a>
   <ul>
     <li> <a href="/analysis/gclp/">GCLP</a> </li>
@@ -51,10 +73,17 @@ Welcome, {{ user.username }}.<br>
 	<li><a href="/documentation/overview">Documentation</a>
   <ul>
     <li> <a href="/documentation/vasp">DFT settings</a></li>
-    <li> <a href="{% static "docs/index.html" %}">python API</a></li>
+    <li> <a href="{% static "docs/index.html" %}">Python API</a></li>
     <li> <a href="/documentation/structures">Structure sources</a></li>
     <li> <a href="/documentation/publications">Publications</a></li>
     <li> <a href="/faq">FAQ</a></li>
+  </ul>
+
+	<li><a href="/api">API</a>
+  <ul>
+    <li> <a href="/oqmdapi/formationenergy">OQMD API</a></li>
+    <li> <a href="/optimade/structures">Optimade API</a></li>
+    <li> <a href="{% static "docs/restful.html" %}">RESTful API Documentation</a></li>
   </ul>
 
 	<li><a href="/download/">Download</a></li>
@@ -66,5 +95,6 @@ Welcome, {{ user.username }}.<br>
 <div style="width:200px;float:left">
 	Contact us by <a href="mailto:oqmd.questions@gmail.com">e-mail</a></div>
 <div style="width:400px;float:right;text-align:right">
-	If you are using any results from this website, please reference this work as shown <a href="/documentation/publications">here</a></div>
+	If you are using any results from this website, 
+        please reference this work as shown <a href="/documentation/publications">here</a></div>
 {% endblock %}

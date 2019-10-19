@@ -1,0 +1,20 @@
+{% extends "base_site.html" %}
+{% load admin_static %}
+{% load i18n %}
+
+{% block content %}
+
+<h1> OQMD API </h1>
+
+<h2> Implemented RESTful APIs  </h2>
+<ul>
+	<li><a href="/oqmdapi/formationenergy">All data - OQMD API</a></li>
+	<li><a href="/optimade/structures">All data - Optimade API</a></li>
+</ul>
+<h2> Documentation  </h2>
+<ul>
+    <li> <a href="{% static "docs/restful.html" %}">RESTful API Documentation</a></li>
+</ul>
+
+
+{% endblock %}

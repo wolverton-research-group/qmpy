@@ -339,19 +339,45 @@ class Host(models.Model):
         running = {}
         if not raw_data:
             return
-        for line in raw_data.split('\n'):
-            if 'Active Jobs' in line:
-                continue
-            line = line.split()
-            if len(line) != 9:
-                continue
-            try:
-                running[int(line[0])] = {
-                        'user':line[1],
-                        'state':line[2],
-                        'proc':int(line[3])}
-            except:
-                pass
+
+        ## < Mohan
+        if 'squeue' in self.check_queue:
+            for line in raw_data.strip().split('\n'):
+                if 'JOBID' in line:
+                    continue
+                line = line.split()
+
+                try:
+                    qid = int(line[0])
+                    running[qid] = {
+                            'user':line[3],
+                            'state':line[4],
+                            'proc':int(line[6])*self.ppn}
+                except:
+                    pass
+
+        else:
+            for line in raw_data.strip().split('\n'):
+                if 'Active Jobs' in line:
+                    continue
+                line = line.split()
+                if len(line) != 9:
+                    continue
+                try:
+                    # < Mohan
+                    if 'Moab' in line[0]:
+                        qid = int(line[0].strip().split('.')[1])
+                    else:
+                        qid = int(line[0])
+                    running[qid] = {
+                            'user':line[1],
+                            'state':line[2],
+                            'proc':int(line[3])}
+                    # Mohan >
+                except:
+                    pass
+        ## Mohan >
+
         self.running = running
         self.save()
         
@@ -434,7 +460,7 @@ class Account(models.Model):
         except cls.DoesNotExist:
             return Account(host=host, user=user)
 
-    def create_passwordless_ssh(self, key='id_dsa', origin=None):
+    def create_passwordless_ssh(self, key='id_rsa', origin=None):
         msg = 'password for {user}@{host}: '
         if origin is None:
             origin = '/home/{user}/.ssh'.format(user=getpass.getuser())
@@ -497,16 +523,31 @@ class Account(models.Model):
     def submit(self, path=None, run_path=None, qfile=None):
         self.execute('mkdir %s' % run_path, ignore_output=True)
         self.copy(folder=path, file='*', destination=run_path)
-        cmd = 'cd {path} && {sub} {qfile}'.format(
-                path=run_path, 
+        cmd = 'command cd {path} && {sub} {qfile}'.format(
+                path=run_path,
                 sub=self.host.sub_script,
                 qfile=qfile)
         stdout = self.execute(cmd)
-        jid = int(stdout.split()[0].split('.')[0])
+
+        ## < Mohan
+        if 'sbatch' in self.host.sub_script:
+            jid = int(stdout.strip().split()[-1])
+            return jid
+
+        else:
+            # < Mohan
+            tmp = stdout.strip().split()[0]
+            if 'Moab' in tmp:
+                jid = int(tmp.split('.')[1])
+            else:
+                jid = int(tmp.split('.')[0])
+            # Mohan >
+        ## Mohan >
+
         return jid
 
     def execute(self, command='exit 0', ignore_output=False):
-        ssh = 'ssh {user}@{host} "{cmd}"'.format(
+        ssh = 'ssh {user}@{host} \'{cmd}\''.format(
                 user=self.username,
                 host=self.host.ip_address,
                 cmd=command)
@@ -516,12 +557,13 @@ class Account(models.Model):
         call = subprocess.Popen(ssh, shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE)
-        stdout,stderr = call.communicate()
+        stdout, stderr = call.communicate()
 
-        logging.debug('stdout: %s', stdout)
-        logging.debug('stderr: %s', stderr)
+        logging.debug('stdout: %s' % stdout)
+        logging.debug('stderr: %s' % stderr)
         if stderr and not ignore_output:
-            logging.warn('WARNING: %s', stderr)
+            logging.warn('WARNING: %s' % stderr)
+            logging.warn('(u, h, cmd) = {}, {}, {}'.format(self.username, self.host, command))
         return stdout
 
     def copy(self, destination=None, to=None, # where to send the stuff
@@ -551,13 +593,13 @@ class Account(models.Model):
         
         if clear_dest_dir:
             if to == 'local':
-                command = subprocess.Popen('rm -f %s/*' % destination,
+                command = subprocess.Popen('rm -f "%s"/*' % destination,
                                                   stderr=subprocess.PIPE,
                                                   stdout=subprocess.PIPE)
                 stdout, stderr = command.communicate()
             else:
-                stdout, stderr = self.execute('rm -f %/*' % destination)
-            logging.debug('stdout: %s', stdout)
+                stdout, stderr = self.execute('rm -f "%/"*' % destination)
+            logging.debug('stdout: %s' % stdout)
             
         if fr == 'local':
             scp = 'scp '
@@ -569,36 +611,36 @@ class Account(models.Model):
             scp += '-r '
 
         if send_dir:
-            scp += os.path.abspath(folder)
+            scp += os.path.abspath("{}".format(folder))
         else:
-            scp += '{path}/{file}'.format(
+            scp += '"{path}"/{file}'.format(
                     path=os.path.abspath(folder), file=file)
 
         if to == 'local':
             scp += ' '+destination
         else:
-            scp += ' {user}@{host}:{path}'.format(
+            scp += ' {user}@{host}:"{path}"'.format(
                 user=to.username, host=to.host.ip_address, 
                 path=os.path.abspath(destination))
 
-        logging.debug('copy command: %s', scp)
+        logging.debug('copy command: %s' % scp)
         cmd = subprocess.Popen(scp,
                 shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE)
         stdout, stderr = cmd.communicate()
-        logging.debug('stdout: %s', stdout)
-        logging.debug('stderr: %s', stderr)
+        logging.debug('stdout: %s' % stdout)
+        logging.debug('stderr: %s' % stderr)
 
         if move:
             if send_dir:
-                rmcmd = 'rm -rf {path}'.format(path=os.path.abspath(folder))
+                rmcmd = 'rm -rf "{path}"'.format(path=os.path.abspath(folder))
             else:
-                rmcmd = 'rm -f {path}/{file}'.format(file=file,
+                rmcmd = 'rm -f "{path}/"{file}'.format(file=file,
                         path=os.path.abspath(folder))
-            logging.debug('wiping source: %s', rmcmd)
+            logging.debug('wiping source: %s' % rmcmd)
             stdout = fr.execute(rmcmd)
-            logging.debug('output: %s', stdout)
+            logging.debug('output: %s' % stdout)
 
 #===============================================================================#
 
@@ -737,6 +779,10 @@ class Project(models.Model):
     def failed(self):
         return self.task_set.filter(state=-1)
 
+    @property
+    def held(self):
+        return self.task_set.filter(state=-2)
+
     @staticmethod
     def create():
         '''
@@ -805,9 +851,6 @@ def write_resources():
     #   walltime: maximum walltime, in seconds
     # host2: ...
     """
-    f_hosts = open(current_loc+'/../configuration/resources/hosts.yml', 'w')
-    f_hosts.write(hosts_header)
-    f_hosts.write('\n')
     
     users_header = """# user1:
     #   hostname1:
@@ -819,9 +862,6 @@ def write_resources():
     # user2:
     #   hostname1: ...
     """
-    f_users = open(current_loc+'/../configuration/resources/users.yml', 'w')
-    f_users.write(users_header)
-    f_users.write('\n')
     
     allocations_header = """# allocation1:
     #   host: hostname
@@ -831,9 +871,6 @@ def write_resources():
     #       - user2
     # allocation2: ...
     """
-    f_allocations = open(current_loc+'/../configuration/resources/allocations.yml', 'w')
-    f_allocations.write(allocations_header)
-    f_allocations.write('\n')
     
     projects_header = """# project1:
     #   allocations:
@@ -845,10 +882,6 @@ def write_resources():
     #       - user2
     # project2: ...
     """
-    f_projects = open(current_loc+'/../configuration/resources/projects.yml', 'w')
-    f_projects.write(projects_header)
-    f_projects.write('\n')
-    
     ######
     # list of values that need to be written into the configuration files
     ######
@@ -883,8 +916,12 @@ def write_resources():
         for hv in host_values:
             dict2[hv] = clean(h.__getattribute__(hv))
         dict1[clean(h.name)] = dict2
-    yaml.dump(dict1, f_hosts, default_flow_style=False)
+    with open(current_loc+'/../configuration/resources/hosts.yml', 'w') as f_hosts:
+        f_hosts.write(hosts_header)
+        f_hosts.write('\n')
+        yaml.dump(dict1, f_hosts, default_flow_style=False)
     
+
     ######
     # write user configurations into users.yml
     ######
@@ -898,8 +935,12 @@ def write_resources():
             dict2[clean(a.host.name)] = {'run_path':clean(a.run_path), \
                                         'username':clean(a.username)}
         dict1[clean(u.username)] = dict2
-    yaml.dump(dict1, f_users, default_flow_style=False)
+    with open(current_loc+'/../configuration/resources/users.yml', 'w') as f_users:
+        f_users.write(users_header)
+        f_users.write('\n')
+        yaml.dump(dict1, f_users, default_flow_style=False)
     
+
     ######
     # write allocation configurations into allocations.yml
     ######
@@ -912,8 +953,12 @@ def write_resources():
         dict2['key'] = clean(a.key)
         dict2['users'] = [ clean(u) for u in a.users.all().values_list('username', flat=True) ]
         dict1[clean(a.name)] = dict2
-    yaml.dump(dict1, f_allocations, default_flow_style=False)
+    with open(current_loc+'/../configuration/resources/allocations.yml', 'w') as f_allocations:
+        f_allocations.write(allocations_header)
+        f_allocations.write('\n')
+        yaml.dump(dict1, f_allocations, default_flow_style=False)
     
+
     ######
     # write project configurations into projects.yml
     ######
@@ -926,4 +971,7 @@ def write_resources():
         dict2['priority'] = clean(p.priority)
         dict2['users'] = [ clean(u) for u in p.users.all().values_list('username', flat=True) ]
         dict1[clean(p.name)] = dict2
-    yaml.dump(dict1, f_projects, default_flow_style=False)
+    with open(current_loc+'/../configuration/resources/projects.yml', 'w') as f_projects:
+        f_projects.write(projects_header)
+        f_projects.write('\n')
+        yaml.dump(dict1, f_projects, default_flow_style=False)

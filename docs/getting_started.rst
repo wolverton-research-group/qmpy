@@ -83,7 +83,7 @@ database MySQL. On a typical linux installation this process will look like::
     all, you will need to enter a mysql session as root ("mysql -u root -p"),
     create a user within MySQL ("CREATE USER 'newuser'@'localhost';"), grant 
     that user permissions ("GRANT ALL PRIVILEGES ON * . * TO
-    'newuser'@'localhost'; FLUSH PRIVILEGES;"). 
+    'newuser'@'localhost'; FLUSH PRIVILEGES;").
 
 .. note::
     The name of the deployed database has changed since previous releases

@@ -91,6 +91,9 @@ class Entry(models.Model):
                 self.reference.save()
                 self.reference = self.reference
         super(Entry, self).save(*args, **kwargs)
+        if not self.duplicate_of:
+            self.duplicate_of = self
+            super(Entry, self).save(*args, **kwargs)
         if self._structures:
             for k, v in self.structures.items():
                 v.label = k
@@ -144,7 +147,10 @@ class Entry(models.Model):
 
         # Step 2
         entry = Entry(**kwargs)
-        structure = io.read(source_file)
+        try:
+            structure = io.poscar.read(source_file)
+        except ValueError:
+            structure = io.cif.read(source_file)
         structure.make_primitive()
         entry.source_file = source_file
         entry.path = os.path.dirname(source_file)
@@ -170,7 +176,7 @@ class Entry(models.Model):
         # check for perfect crystals
         if not any([ s.partial for s in structure.sites ]):
             dup = Entry.get(structure)
-            if not dup is None:
+            if dup is not None:
                 entry.duplicate_of = dup
                 entry.add_hold('duplicate')
             return entry
@@ -444,9 +450,8 @@ class Entry(models.Model):
         forms = forms.exclude(stability=None)
         if not forms.exists():
             return None
-        return any([ f.stability < 0 for f in forms ])
+        return any([ f.stability <= 1E-3 for f in forms ])
         
-
     _history = None
     @property
     def history_graph(self):
@@ -603,7 +608,7 @@ class Entry(models.Model):
 
         for dir in os.listdir(self.path):
             if os.path.isdir(self.path+'/'+dir):
-                logger.debug('rm -rf %s/%s &> /dev/null', self.path, dir)
+                logger.debug('rm -rf %s/%s &> /dev/null' % (self.path, dir))
                 os.system('rm -rf %s/%s &> /dev/null' % (self.path, dir))
 
     def visualize(self, structure='source'):

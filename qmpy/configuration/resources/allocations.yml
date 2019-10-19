@@ -1,54 +1,76 @@
-#name:
-# host: hostname
-# key: key needed for identifying allocation
-# users: [list, of, permitted, users]
-
+# allocation1:
+    #   host: hostname
+    #   key: key needed for identifying allocation
+    #   users:
+    #       - user1
+    #       - user2
+    # allocation2: ...
+    
 b1004:
   host: quest
   key: b1004
-  users: [jes786, jwd686, sjk648]
-
+  users:
+  - jsm1683
+  - jhc585
+babbage:
+  host: babbage
+  key: ''
+  users: []
 byrd:
   host: byrd
-  users: [jwd686, oqmd, sjk648]
-
-e20438:
-  host: quest
-  key: e20438
-  users: [jwd686]
-
-hopper:
-  host: hopper
-  users: [jwd686, sjk648]
-
+  key: ''
+  users: []
 josquin:
   host: josquin
-  users: [jwd686, oqmd, sjk648]
-
-p20254:
+  key: ''
+  users: []
+p30140:
   host: quest
-  key: p20254
-  users: [jwd686]
-
-p20268:
+  key: p30140
+  users: []
+p30239:
   host: quest
-  key: p20268
-  users: [sjk648]
-
-p20273:
+  key: p30239
+  users:
+  - jhc585
+p30436:
   host: quest
-  key: p20273
-  users: [sjk648]
-
-p20274:
+  key: p30436
+  users:
+  - kpq6413
+p30475:
   host: quest
-  key: p20274
-  users: [jes786]
-
+  key: p30475
+  users:
+  - sdg0032
+p30563:
+  host: quest
+  key: p30563
+  users:
+  - jhc585
+p30578:
+  host: quest
+  key: p30578
+  users: []
+p30649:
+  host: quest
+  key: p30649
+  users:
+  - bbh2050
+p30919:
+  host: quest
+  key: ''
+  users:
+  - alz6518
 palestrina:
   host: palestrina
-  users: [jwd686, oqmd, sjk648]
-
+  key: ''
+  users: []
+stampede:
+  host: stampede
+  key: ''
+  users: []
 victoria:
   host: victoria
-  users: [oqmd, sjk648]
+  key: ''
+  users: []

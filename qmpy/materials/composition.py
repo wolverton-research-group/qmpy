@@ -33,6 +33,7 @@ class Composition(models.Model):
     """
     formula = models.CharField(primary_key=True, max_length=255)
     generic = models.CharField(max_length=255, blank=True, null=True)
+    element_list = models.CharField(max_length=255, blank=True, null=True)
     meta_data = models.ManyToManyField('MetaData')
 
     element_set = models.ManyToManyField('Element', null=True)
@@ -92,6 +93,7 @@ class Composition(models.Model):
             comp = Composition(formula=f)
             comp.ntypes = len(comp.comp)
             comp.generic = format_generic_comp(comp.comp)
+            comp.element_list = '_'.join(comp.comp.keys())+'_'
             comp.save()
             comp.element_set = comp.comp.keys()
             return comp
@@ -138,7 +140,7 @@ class Composition(models.Model):
 
     @property
     def entries(self):
-        entries = self.entry_set.filter(duplicate_of=F("id"))
+        entries = self.entry_set.filter(id=F("duplicate_of__id"))
         if not entries.exists():
             return []
         return sorted(entries, key=lambda x:
@@ -166,17 +168,18 @@ class Composition(models.Model):
 
     @property
     def total_energy(self):
-        calcs = self.calculation_set.filter(converged=True, 
-                            configuration__in=['standard', 'static'])
+        calcs = self.calculation_set.filter(converged=True, label='static')
         if not calcs.exists():
-            return
+            calcs = self.calculation_set.filter(converged=True, label='standard')
+            if not calcs.exists():
+                return
         return min( c.energy_pa for c in calcs )
 
 
     @property
     def energy(self):
         calcs = self.calculation_set.filter(converged=True, 
-                            configuration__in=['standard', 'static'])
+                            label__in=['standard', 'static'])
         if not calcs.exists():
             return
         return min( c.formation_energy() for c in calcs )
@@ -225,6 +228,10 @@ class Composition(models.Model):
         return format_comp(reduce_comp(self.comp))
 
     @property
+    def name_unreduced(self):
+        return format_comp(self.comp)
+
+    @property
     def latex(self):
         return format_latex(reduce_comp(self.comp))
 
@@ -247,11 +254,14 @@ class Composition(models.Model):
             return
         return min(expts.values_list('delta_e', flat=True))
 
-    @property
-    def relative_stability_plot(self):
+    def relative_stability_plot(self,data=data):
         if not self.energy:
             return Renderer()
-        ps = thermo.PhaseSpace(self.name)
+
+        if data:
+            ps = thermo.PhaseSpace(self.name,data=data)
+        else:
+            ps = thermo.PhaseSpace(self.name)
         return ps.phase_diagram
 
     def get_mass(self):
@@ -262,6 +272,7 @@ class Composition(models.Model):
 
     def find_unique(self):
         unique = []
+        #vih
         for e1 in self.entry_set.all():
             for i, e2 in enumerate(unique):
                 if e1.structure == e2.structure:

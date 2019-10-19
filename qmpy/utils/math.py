@@ -242,3 +242,12 @@ def wrap(x, tol=1e-4):
     x[abs(x) < tol] = 0
     x[abs(abs(x) - 1) < tol] = 0
     return x
+
+def shortest_dist(soa, cell):
+    """
+    Returns shortest distance of a site or atom to the origin once wrapped in
+    periodic cell vectors.
+    """
+    vec = np.dot(wrap(soa.coord), cell)
+    return norm(vec)
+

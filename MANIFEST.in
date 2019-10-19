@@ -2,5 +2,7 @@ include qmpy/data/elements
 include qmpy/data/thermodata *
 include qmpy/io/files *
 recursive-include qmpy/analysis/vasp/files *
+recursive-include qmpy/analysis/vasp/test
 recursive-include qmpy/web *
 recursive-include * *.cfg *.yml *.q *.txt *
+recursive-exclude .git *
