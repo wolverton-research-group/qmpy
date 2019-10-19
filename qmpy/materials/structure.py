@@ -592,7 +592,6 @@ class Structure(models.Model, object):
                 trans.append(t)
         self.translations = trans
         self.orbits = orbits.values()
-        self.duplicates = dict((self.sites[e], v) for e, v in orbits.items())
         ##self.duplicates = dict((self.sites[e], v) for e, v in orbits.items())
         ## See comment about hashes and Dictionary keys
         self.duplicates = dict((e, v) for e, v in orbits.items())
