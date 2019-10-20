@@ -44,25 +44,6 @@ Welcome, {{ user.username }}.<br>
     <li> <a href="/api/search">Search Materials</a></li>
     <li> <a href="/materials/discovery">Compound discovery</a> </li>
   </ul>
-  <li><a href="/computing/">Computing</a>
-  <ul>
-    <li> <a href="/computing/hosts">Hosts</a>
-      <ul>
-        {% for host in host_list %}
-        <li> <a href="/computing/host/{{host.name}}">
-          {{host.name}}</a></li>
-        {% endfor %} </ul></li>
-    <li> <a href="/computing/projects">Projects</a>
-      <ul>
-        {% for project in project_list %}
-          {% if project.active %}
-            <li> <a href="/computing/project/{{project.name}}">{{project.name}}</a></li>
-          {% endif %}
-        {% endfor %}
-      </ul>
-    </li>
-    <li> <a href="/computing/queue">Queue</a></li>
-  </ul>
 	<li><a href="/analysis/">Analysis</a>
   <ul>
     <li> <a href="/analysis/gclp/">GCLP</a> </li>
