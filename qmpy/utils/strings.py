@@ -198,13 +198,16 @@ def format_generic_comp(comp):
             gen_comp)
 
 def format_html(comp):
-    return format_comp(comp, template='{elt}<sub>{amt}</sub>')
+    return format_comp(comp, template='{elt}<sub>{amt}</sub>').replace('<sub></sub>', '')
 
 def format_latex(comp):
     return format_comp(comp, template='{elt}$_{{{amt}}}$')
 
 def format_bold_latex(comp):
     return format_comp(comp, template='{elt}$_{{\mathbf{{{amt}}}}}$')
+
+def format_gnuplot(comp):
+    return format_comp(comp, template='{elt}_{{{amt}}}')
 
 def normalize_dict(dictionary):
     tot = float(sum(dictionary.values()))

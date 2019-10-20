@@ -85,6 +85,145 @@ class Renderer(object):
             cmd += '\n' + text.get_flot_series()
         return cmd
 
+    def get_plotly_script_3d(self, div="plotlyjs", **kwargs):
+        """
+        Return javascript of plotly.js to plot phase diagram
+        """
+
+        dim = 3
+        if dim == 3:
+            plot_type = 'scatter3d'
+        else:
+            plot_type = 'scatter'
+
+        # General parameters
+        cmd = 'var line_type = {width: 2, color: "grey"};'
+        cmd += 'var stable_marker_type = '
+        cmd += '{size: 5, color: "teal", opacity: 0.8};'
+        cmd += 'var unstable_marker_type = '
+        cmd += '{size: 4, color: "#af5f00", opacity: 0.5};'
+        cmd += 'var axis_type = {title: "", showbackground: false, '
+        cmd += 'zeroline: false, showgrid:false, ticks: "", showlabels: false,'
+        cmd += 'showticklabels: false, showspikes: false};'
+        cmd += 'var camera_view = {eye: {x: 1.5, y: 0.1, z: 0.1},'
+        cmd += 'center: {x: -0.15, y: -0.1, z: -0.1}};'
+
+        # Function to get dropdown button
+        cmd += 'function getfontbutton(value, _label) {'
+        cmd += 'return {label: _label, method: "relayout",'
+        cmd += 'args: ["scene", {camera: camera_view,'
+        cmd += 'xaxis: axis_type, yaxis: axis_type, zaxis: axis_type,'
+        cmd += 'annotations: getannotation(value)}]}}'
+
+        # Function to get line width button
+        cmd += 'function getlinewidth(value) {'
+        cmd += 'return {label: "Line Width: "+value, method: "restyle",'
+        cmd += 'args: ["line.width", value]}}'
+
+        # Function to get annotations
+        cmd += 'function getannotation(fontsize) {'
+        cmd += 'return ['
+        for text in self.text:
+            cmd += '{'
+            cmd += 'showarrow: false,'
+            cmd += 'x: ' + str(text.point.coord[0]) + ','
+            cmd += 'y: ' + str(text.point.coord[1]) + ','
+            if dim == 3:
+                cmd += 'z: ' + str(text.point.coord[2]) + ','
+
+            cmd += 'text: %s,' %json.dumps(text.text)
+            cmd += 'xanchor: "left",'
+            cmd += 'font: {color: "black", size: fontsize}},'
+        cmd += ']}'
+
+        # Prepare data
+        cmd += 'var data = ['
+
+        # Plot tie lines
+        for line in self.lines:
+            cmd += '{'
+            p1, p2 = line.points
+            cmd += 'x: [%f, %f],' %(p1.coord[0], p2.coord[0])
+            cmd += 'y: [%f, %f],' %(p1.coord[1], p2.coord[1])
+            if dim == 3:
+                cmd += 'z: [%f, %f],' %(p1.coord[2], p2.coord[2])
+            cmd += 'type: "%s",' %plot_type
+            cmd += 'mode: "lines",'
+            cmd += 'text: ["",""],'
+            cmd += 'hoverinfo: "text",'
+            cmd += 'line: line_type,'
+            cmd += 'showlegend: false,'
+            cmd += '},'
+
+        # Plot phases
+        for pc in self.point_collections:
+            label = pc.label
+            cmd += '{'
+            cmd += 'x: %s,' % json.dumps(list(
+                map(lambda p: p.coord[0], pc.points)))
+            cmd += 'y: %s,' % json.dumps(list(
+                map(lambda p: p.coord[1], pc.points)))
+            if dim == 3:
+                cmd += 'z: %s,' % json.dumps(list(
+                    map(lambda p: p.coord[2], pc.points)))
+            cmd += 'text: %s,' % json.dumps(list(
+                map(lambda p: p.label, pc.points)))
+            cmd += 'type: "%s",' %plot_type
+            cmd += 'mode: "markers",'
+            cmd += 'hoverinfo: "text",'
+            cmd += 'marker: %s_marker_type,' %label.lower()
+            cmd += 'name: "%s",' %label
+            cmd += '},'
+
+        cmd += '];'
+
+        # Prepare Layout
+        cmd += 'var layout = {'
+        if dim == 3:
+            cmd += 'scene: {camera: camera_view,'
+            cmd += 'xaxis: axis_type, yaxis: axis_type, zaxis: axis_type,'
+            cmd += 'annotations: getannotation(12),'
+
+        if dim == 3:
+            cmd += '},'
+
+        cmd += 'legend: {x: 0.75, y:0.9},'
+        cmd += 'showlegend: true, margin: {l:1, r:1, t:1, b:1},'
+
+        # Prepare Update Menus
+        # Options to change font size
+        cmd += 'updatemenus: ['
+        cmd += '{pad: {t: 10}, xanchor: "left", yanchor: "bottom",'
+        cmd += 'x: 0.01, y: 0.9, direction: "down",'
+        cmd += 'buttons: ['
+        cmd += 'getfontbutton(12, "Font Size: Small"),'
+        cmd += 'getfontbutton(15, "Font Size: Medium"),'
+        cmd += 'getfontbutton(18, "Font Size: Large"),'
+        cmd += '{label: "No Text", method: "relayout",'
+        cmd += 'args: ["scene", {camera: camera_view,'
+        cmd += 'xaxis: axis_type, yaxis: axis_type, zaxis: axis_type,'
+        cmd += 'annotations: []}]}]},'
+
+        # Options to change line width
+        cmd += '{pad: {t: 10}, xanchor: "left", yanchor: "bottom",'
+        cmd += 'x: 0.01, y: 0.8, direction: "down",'
+        cmd += 'buttons: ['
+        cmd += 'getlinewidth("2"),'
+        cmd += 'getlinewidth("3"),'
+        cmd += 'getlinewidth("5"),'
+        cmd += 'getlinewidth("8"),'
+        cmd += ']}]'
+        
+        cmd += '};'
+
+        # Create plot
+        cmd += 'Plotly.newPlot("%s", data, layout,' %div
+        cmd += '{displayModeBar: true, displaylogo: false,'
+        cmd += 'modeBarButtonsToRemove:["resetCameraDefault3d","hoverClosest3d"]' 
+        cmd += '});'
+
+        return cmd
+
     def plot_in_matplotlib(self, **kwargs):
         if 'axes' in kwargs:
             axes = kwargs['axes']
@@ -115,7 +254,7 @@ class Renderer(object):
     def _write_matplotlib_text(self, px, py, p, **kwargs):
         stable = kwargs['stable']
         if not stable:
-            fs = 20
+            fs = 20 
         else:
             fs = 32
     
@@ -123,7 +262,7 @@ class Renderer(object):
             px -= 0.055; 
             return 'ax.text(%s, %s, r"%s", fontsize=%s)\n' %(px, py, p, fs)
         if abs(px-0.0) < 0.005 and abs(py-0.0) < 0.005:
-            px -= 0.055; py -= 0.025
+            px -= 0.055; py -= 0.025 
             return 'ax.text(%s, %s, r"%s", fontsize=%s)\n' %(px, py, p, fs)
         if abs(px-1.0) < 0.005 and abs(py-0.0) < 0.005:
             px += 0.025; py -= 0.025
@@ -135,10 +274,10 @@ class Renderer(object):
         else:
             py -= 0.005
             px += 0.020 if stable else 0.010
-    
+         
         return 'ax.text(%s, %s, r"%s", fontsize=%s)\n' %(px, py, p, fs)
 
-    def write_matplotlib_script(self, **kwargs):
+    def write_matplotlib_script_bk(self, **kwargs):
         prefixes = {0:'unary', 1:'binary', 2:'ternary', 3:'quaternary',
                 4:'graph'}
         prefix = kwargs['prefix'] if 'prefix' in kwargs else prefixes[self.dim]
@@ -205,6 +344,131 @@ class Renderer(object):
         fo.write('# save the plot in a PDF\n')
         fo.write('plt.savefig("%s_hull.pdf", bbox_inches="tight", dpi=300)\n' %(prefix))
 
+    ### Mohan
+    def write_matplotlib_script(self, **kwargs):
+        prefixes = {0:'unary', 1:'binary', 2:'ternary', 3:'quaternary',
+                4:'graph'}
+        prefix = kwargs['prefix'] if 'prefix' in kwargs else prefixes[self.dim]
+        hd = kwargs['hull_distance'] if 'hull_distance' in kwargs else False
+        fo = open(prefix+'_hull_mpl.py', 'w')
+        
+        fo.write('# import statements go here\n')
+        fo.write('import matplotlib as mpl\n')
+        fo.write('import matplotlib.pyplot as plt\n')
+        fo.write('from matplotlib import rc\n')
+        fonts = ["New Century Schoolbook", "Times", "Palatino", "serif"]
+        fo.write('rc("font",**{"family":"serif","serif":%s})\n' %(fonts))
+        fo.write('rc("font",**{"weight":"bold"})\n')
+        fo.write('rc("text", usetex=True)\n')
+        fo.write('\n')
+
+        fo.write('# initialize the mpl figure, and add a big subplot\n')
+        fo.write('fig = plt.figure(figsize=(10,8.7))\n')
+        fo.write('ax = fig.add_subplot(111)\n')
+        fo.write('\n')
+
+        fo.write('''
+# Function to get the shift of each label
+def _shift(p,stable=True):
+    px, py = p
+    if abs(px-0.5) < 0.005 and abs(py-0.866) < 0.005:
+        sx = -0.055; sy = 0;
+    if abs(px-0.0) < 0.005 and abs(py-0.0) < 0.005:
+        sx = -0.055; sy = -0.025 
+    if abs(px-1.0) < 0.005 and abs(py-0.0) < 0.005:
+        sx =  0.025;  sy = -0.025
+
+    if py < 0.005:
+        sy = -0.070 if stable else -0.045
+        sx = -0.055 if stable else -0.025
+    else:
+        sy = -0.005
+        sx =  0.020 if stable else 0.010
+
+    return [sx,sy]
+
+# Function to plot tie lines
+def plot_tielines(px,py,**kwargs):
+    lw = kwargs.get('lw',3.0)
+    lc = kwargs.get('lc','#AAAAAA')
+    ls = kwargs.get('ls','-')
+    ax.plot(px,py,c=lc,lw=lw,ls=ls)
+
+# Function to plot stable phases
+def stable(p,name=None,**kwargs):
+    marker   = kwargs.get('marker','o')
+    ms       = kwargs.get('ms','18')
+    mfc      = kwargs.get('mfc','forestgreen')
+    mec      = kwargs.get('mec','none')
+    mew      = kwargs.get('mew','0.0')
+    fontsize = kwargs.get('fontsize',32)
+    label    = kwargs.get('label',True)
+    xshift   = kwargs.get('xshift',_shift(p,stable=True)[0])
+    yshift   = kwargs.get('yshift',_shift(p,stable=True)[1])
+    ax.plot(p[0],p[1],marker=marker,ms=ms,mfc=mfc,mec=mec,mew=mew)
+    if label and name:
+        ax.text(p[0]+xshift,p[1]+yshift,name,fontsize=fontsize)
+
+# Function to plot unstable phases
+def unstable(p,name=None,**kwargs):
+    marker   = kwargs.get('marker','o')
+    ms       = kwargs.get('ms','10')
+    mfc      = kwargs.get('mfc','crimson')
+    mec      = kwargs.get('mec','none')
+    mew      = kwargs.get('mew','0.0')
+    fontsize = kwargs.get('fontsize',20)
+    label    = kwargs.get('label',True)
+    xshift   = kwargs.get('xshift',_shift(p,stable=False)[0])
+    yshift   = kwargs.get('yshift',_shift(p,stable=False)[1])
+    ax.plot(p[0],p[1],marker=marker,ms=ms,mfc=mfc,mec=mec,mew=mew)
+    if label and name:
+        ax.text(p[0]+xshift,p[1]+yshift,name,fontsize=fontsize)
+        ''')
+        
+        fo.write('\n')
+
+        fo.write('# plot all the tie lines in the hull\n')
+        for line in self.lines:
+            px = [ p.coord[0] for p in line.points ]
+            py = [ p.coord[1] for p in line.points ]
+            fo.write('plot_tielines(%s, %s)\n' %(px, py))
+        fo.write('\n')
+        
+        unstable = self.point_collections[0].points
+        fo.write('# plot all the unstable phases \n')
+        phases = set()
+        for p in unstable: 
+            px = p.coord[0]; py = p.coord[1]
+            pname = p.label.split(':')[0]
+            if pname in phases:
+                continue
+            phases.add(pname)
+            pname = r'%s' %(format_bold_latex(parse_comp(pname)))
+            if hd:
+                pstab = p.options['hull_distance']
+                pname = '%s (%0.3f)' %(pname, pstab)
+            penergy = float(p.label.split(':')[1].split()[0])
+            fo.write('unstable([%s,%s],r"%s")\n' %(px, py, pname))
+        fo.write('\n')
+        
+        stable = self.point_collections[1].points
+        fo.write('# plot all the stable phases \n')
+        for p in stable:
+            px = p.coord[0]; py = p.coord[1]
+            pname = p.label.split(':')[0]
+            pname = r'%s' %(format_bold_latex(parse_comp(pname)))
+            penergy = float(p.label.split(':')[1].split()[0])
+            fo.write('stable([%s,%s],r"%s")\n' %(px, py, pname))
+        fo.write('\n')
+        
+        fo.write('# change axis limits and make axes invisible\n')
+        fo.write('ax.set_xlim(-0.05, 1.05)\n')
+        fo.write('ax.set_ylim(-0.05, 0.90)\n')
+        fo.write('ax.set_axis_off()\n')
+        fo.write('\n')
+        
+        fo.write('# save the plot in a PDF\n')
+        fo.write('plt.savefig("%s_hull.pdf", bbox_inches="tight", dpi=300)\n' %(prefix))
 
     def write_phase_coordinates(self, **kwargs):
         prefixes = {0:'unary', 1:'binary', 2:'ternary', 3:'quaternary',

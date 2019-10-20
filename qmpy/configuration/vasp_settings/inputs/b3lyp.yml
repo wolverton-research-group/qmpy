@@ -1,5 +1,5 @@
 encut: 520
-prec: med
+prec: acc
 nelmin: 5
 istart: 1
 icharg: 1

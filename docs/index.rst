@@ -1,5 +1,5 @@
 .. qmpy documentation master file, created by
-   sphinx-quickstart on Wed Feb 26 17:36:09 2014.
+   sphinx-quickstart on Wed Jul 31 2019.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
@@ -17,8 +17,8 @@ Wolverton's group at Northwestern University (http://wolverton.northwestern.edu)
    getting_started
    tutorials
    models
-   analysis
-   examples
+   restful
+
 
 Contribute
 ==========
@@ -26,22 +26,23 @@ Contribute
 - Issue Tracker: http://github.com/wolverton-research-group/qmpy/issues
 - Source: http://github.com/wolverton-research-group/qmpy
 
+
 Support
 =======
 
-If you are having issues, please let us know.
-We can be reached at oqmd.contact@gmail.com.
+If you are having issues, please let us know. We can be reached at
+oqmd.questions@gmail.com.
+
 
 License
 =======
 
-The project is licensed under the MIT license.
+.. include:: ../LICENSE.txt
 
 
 Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
 

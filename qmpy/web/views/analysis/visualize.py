@@ -6,8 +6,9 @@ from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.core.context_processors import csrf
 
-import cStringIO
+import StringIO
 from qmpy import *
+from ..tools import get_globals
 
 global custom_data
 custom_data = None
@@ -60,7 +61,7 @@ direct
     if request.method == 'POST':
         custom_data = p.get('crystal_data', '')
         data['crystal_data'] = custom_data
-        f = cStringIO.StringIO()
+        f = StringIO.StringIO()
         f.write(custom_data)
         s = io.read(f)
         s.symmetrize()
@@ -69,11 +70,10 @@ direct
     custom_data = data['crystal_data']
     return render_to_response('analysis/view_data.html',
             get_globals(data),
-            ##data,
             RequestContext(request))
 
 def jsmol(request):
     global custom_data
-    f = cStringIO.StringIO()
+    f = StringIO.StringIO()
     f.write(custom_data)
-    return HttpResponse(f.getvalue(), mimetype="plain/text")
+    return HttpResponse(f.getvalue(), content_type="plain/text")

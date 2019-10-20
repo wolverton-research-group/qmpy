@@ -1,0 +1,49 @@
+#= General Settings =#
+  PREC = ACC
+  ISTART = 0
+  ICHARG = 1
+  ISPIN = 2
+  MAGMOM = 1*5.0000 3*0.0000 1*7.0000
+
+#= LDA+U Fields =#
+ LDAU = .TRUE.
+ LDAUPRINT = 1
+ LDAUU = 0.0 0.0 4.0
+ LDAUJ = 0 0 0
+ LDAUL = -1 -1 3
+
+#= Parallelization =#
+
+#= Ionic Relaxation Settings =#
+  NSW = 60
+  IBRION = 2
+  ISIF = 3
+  POTIM = 0.1
+
+#= Electronic Relxation Settings =#
+  ENCUT = 400
+  NELM = 60
+  NELMIN = 5
+  LREAL = .FALSE.
+  EDIFF = 0.0001
+  ALGO = NORMAL
+
+#= Write flags =#
+  LCHARG = .TRUE.
+  LWAVE = .FALSE.
+  LVTOT = .FALSE.
+
+#= DOS =#
+  NBANDS = 32
+  ISMEAR = 1
+  SIGMA = 0.2
+
+#= Uncategorized/OQMD codes  =#
+  LDAULS = -1 -1 3
+  LDAU = .TRUE.
+  LDAUUS = 0 0 4
+  PSTRESS = 0
+  LORBIT = 11
+  EPSILON = 1
+  LDIPOL = .FALSE.
+  IDIPOL = 0

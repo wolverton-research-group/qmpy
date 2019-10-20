@@ -64,11 +64,12 @@ def _get_b_factor(atom):
 def _get_atom(cba):
     """Convert a _atom loop to an Atom"""
     atom = strx.Atom()
+    atom.coord =_get_atom_coord(cba)
     atom.element_id = _get_element(cba)
     if atom.element_id == 'D' or atom.element_id == 'T':
         atom.element_id = 'H'
 
-    atom.coord = _get_atom_coord(cba)
+    #atom.coord = _get_atom_coord(cba)
     atom.occupancy = _get_occupancy(cba)
     atom.b_factor = _get_b_factor(cba)
     return atom
@@ -217,28 +218,27 @@ def _add_cell_loop(structure, cb):
 def _add_symmetry_loop(structure, cb, wrap=False):
     structure.group_atoms_by_symmetry()
     data = sym.get_symmetry_dataset(structure)
-    eqd = dict( (i, e) for i, e in enumerate(data['equivalent_atoms']) )
+    eqd = dict((i, e) for i, e in enumerate(data['equivalent_atoms']))
     cb['_symmetry_space_group_name_H-M'] = str(data['international'])
     cb['_symmetry_Int_Tables_number'] = str(data['number'])
-    ss_cols = [[ '_symmetry_equiv_pos_site_id', '_symmetry_equiv_pos_as_xyz']]
-    ss_data = [[ [ str(i+1) for i in range(len(data['rotations'])) ],
-                 [ str(sym.Operation.get((r, t))) for r, t in 
-                             zip(data['rotations'], data['translations']) ] ]]
-    cb.AddCifItem(( ss_cols, ss_data ))
-    a_rows = [[ '_atom_site_label', '_atom_site_type_symbol',
-                '_atom_site_fract_x', '_atom_site_fract_y', '_atom_site_fract_z', 
-                '_atom_site_Wyckoff_symbol',
-                '_atom_site_occupancy' ]]
-    a_data = [ [ str('%s%d' % (a.element_id, eqd[i])) 
-                      for i, a in enumerate(structure)],
-                [ str('%s%+d' % (a.element_id, 
-                    a.ox if a.ox else 0 ))
-                                 for a in structure ],
-                [ '%08f' % a.x for a in structure ], 
-                [ '%08f' % a.y for a in structure ], 
-                [ '%08f' % a.z for a in structure ], 
-                [ str(data['wyckoffs'][i]) for i in range(len(structure)) ],
-                [ '%08f' % a.occupancy for a in structure ] ]
+    ss_cols = [['_symmetry_equiv_pos_site_id', '_symmetry_equiv_pos_as_xyz']]
+    ss_data = [[[str(i+1) for i in range(len(data['rotations']))],
+                [str(sym.Operation.get((r, t))) for r, t in
+                    zip(data['rotations'], data['translations'])]]]
+    cb.AddCifItem((ss_cols, ss_data))
+    a_rows = [['_atom_site_label', '_atom_site_type_symbol',
+               '_atom_site_fract_x', '_atom_site_fract_y', '_atom_site_fract_z',
+               '_atom_site_Wyckoff_symbol',
+               '_atom_site_occupancy']]
+    a_data = [[str('%s%d' % (a.element_id, eqd[i]))
+               for i, a in enumerate(structure)],
+               [str('%s%+d' % (a.element_id, a.ox if a.ox else 0))
+                for a in structure],
+                ['%08f' % a.x for a in structure],
+                ['%08f' % a.y for a in structure],
+                ['%08f' % a.z for a in structure],
+                [str(data['wyckoffs'][i]) for i in range(len(structure))],
+                ['%08f' % a.occupancy for a in structure]]
 
     if wrap:
         tmparr = np.array(a_data).T.tolist()
@@ -246,17 +246,17 @@ def _add_symmetry_loop(structure, cb, wrap=False):
             for i, j, k in itertools.product([0, 1], [0, 1], [0, 1]):
                 if i == 0 and j == 0 and k == 0:
                     continue
-                if ( float(a[2])+i <= 1 and 
-                     float(a[3])+j <= 1 and
-                     float(a[4])+k <= 1):
-                    tmparr.append([ a[0], a[1], 
-                        '%08f' % (float(a[2])+i),
-                        '%08f' % (float(a[3])+j),
-                        '%08f' % (float(a[4])+k),
-                        a[5], a[6]])
+                if (float(a[2])+i <= 1 and
+                    float(a[3])+j <= 1 and
+                    float(a[4])+k <= 1):
+                        tmparr.append([a[0], a[1],
+                            '%08f' % (float(a[2])+i),
+                            '%08f' % (float(a[3])+j),
+                            '%08f' % (float(a[4])+k),
+                                       a[5], a[6]])
         tmparr = sorted(tmparr, key=lambda x: x[0])
         a_data = np.array(tmparr).T.tolist()
-    cb.AddCifItem(( a_rows, [a_data] ))
+    cb.AddCifItem((a_rows, [a_data]))
 
 def _add_header(structure, cb):
     form_sum = ''

@@ -29,12 +29,18 @@
 
 {% block content_title %}
 <h1>Project: <a href="/computing/project/{{project.name}}">{{ project.name }}</a></h1>
+
+{% if project.name == 'Online_submit' %}
+<div class="flot-container" style="width:50%;height:30px;float:left">
+<a href="/computing/onlinesubmit"> Upload Files </a>
+</div>
+{% endif %}
 {% endblock %}
 
 {% block content %}
 <div>
   <h2> Summary</h2>
-  <div clsss="flot-container" style="width:250px;height:250px;float:left">
+  <div class="flot-container" style="width:250px;height:250px;float:left">
     <div id="placeholder" class="flot-placeholder"></div>
   </div>
 
@@ -55,6 +61,9 @@
       <tr class="clickableRow" href="/computing/project/failed/{{project.name}}">
         <td>Failed</td>
         <td>{{project.failed.count}}</td></tr>
+      <tr class="clickableRow" href="/computing/project/held/{{project.name}}">
+        <td>Held</td>
+        <td>{{project.held.count}}</td></tr>
     </table>
   </div>
 </div>
@@ -65,6 +74,8 @@
     <thead>
       <tr>
         <th>Priority</th>
+        <th>Task</th>
+        <th>Entry</th>
         <th>Composition</th>
         <th>Running since</th>
         <th>Module</th>
@@ -75,8 +86,10 @@
       {% for j in upcoming %}
       <tr class=clickableRow href="/computing/task/{{j.id}}">
         <td>{{j.priority}}</td>
+        <td width="80">{{j.id}}</td>
+        <td width="80">{{j.entry.id}}</td>
         <td>{{j.entry.name}}</td>
-        <td>{{j.created}}</td>
+        <td width="150">{{j.created}}</td>
         <td>{{j.module}}</td>
         <td>{{j.kwargs}}</td></tr>
       {% endfor %}
@@ -87,25 +100,56 @@
 <div style="margin-top:30px;width:100%;float:left">
   <h2>Currently running</h2>
 
+<div style="margin-top:1px;margin-bottom:4px;width:100%;float:left">
+  <form action="" method="POST">{% csrf_token %}
+      <button type="submit" name="restartall" style="float:left">Restart ALL</button>
+      <p style="text-indent: .6em;">Restart all tasks that should be reset!</p>
+   </form>
+</div>
+
   <table>
     <thead>
       <tr>
+        <th>Entry</th>
         <th>Composition</th>
         <th>Running since</th>
         <th>Module</th>
+        <th>Status</th>
         <th>Extra arguments</th>
+        <th colspan="2">Action</th>
       </tr>
     </thead>
     <tbody>
-      {% for j in project.running %}
-      <tr class=clickableRow href="/computing/task/{{j.id}}">
-        <td>{{j.entry.name}}</td>
-        <td>{{j.created}}</td>
-        <td>{{j.module}}</td>
-        <td>{{j.kwargs}}</td></tr>
+      {% for j in project.running|slice:":100" %}
+      <tr>
+      <td width="80" class=clickableRow href="/computing/task/{{j.id}}">{{j.entry.id}}</td>
+      <td class=clickableRow href="/computing/task/{{j.id}}">{{j.entry.name}}</td>
+      <td width="150" class=clickableRow href="/computing/task/{{j.id}}">{{j.created}}</td>
+      <td class=clickableRow href="/computing/task/{{j.id}}">{{j.module}}</td>
+      <td class=clickableRow href="/computing/task/{{j.id}}">{{j.last_job_state}}</td>
+      <td class=clickableRow href="/computing/task/{{j.id}}">{{j.kwargs}}</td>
+      {% if j.last_job_state != 1 %}
+        <td>
+           <form action="" method="POST">{% csrf_token %}
+               <button type="submit" value="{{j.id}}" name="reset" style="float:right">Reset</button>
+           </form>
+        </td>
+        <td>
+           <form action="" method="POST">{% csrf_token %}
+               <button type="submit" value="{{j.id}}" name="reset_entry" style="float:right">Reset Entry</button>
+           </form>
+        </td>
+      {% endif %}
+      </tr>
       {% endfor %}
     </tbody>
   </table>
+</div>
+<div style="margin-top:5px;margin-bottom:4px;width:50%;float:left">
+  <p>Note: "status=1" means tasks are running successfully. Otherwise, it is highly recommended to
+  reset the tasks (Press the "Reset" or "Restart ALL" button). If on repeated resets, the task still
+  keeps returning to "state=0", try the "Reset Entry" button (Note: this will recompute the
+  entry from scratch).</p>
 </div>
 {% endblock %}
 

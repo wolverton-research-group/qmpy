@@ -17,10 +17,19 @@ def new_host_view(request):
             'sub_text':qfile}
     if request.method == 'POST':
         data.update(request.POST)
+        host = Host.create(**data)
         host = Host(**data)
-        print host
         host.save()
     return render_to_response("computing/new_host.html", 
             data,
             RequestContext(request))
 
+
+def new_project_view(request):
+    data = {
+            }
+    if request.method == 'POST':
+        data.update(request.POST)
+    return render_to_response("computing/new_project.html", 
+            data,
+            RequestContext(request))

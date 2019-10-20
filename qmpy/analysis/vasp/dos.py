@@ -2,12 +2,16 @@ from django.db import models
 import yaml
 import os.path
 import logging
+import gzip
 
 import numpy as np
 
 import qmpy
 import qmpy.db.custom as custom
 from qmpy.utils import *
+
+import bokeh.plotting as bkp
+from bokeh.models import HoverTool, Span
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +67,7 @@ class DOS(models.Model):
             dos.read_doscar(dos.file)
             dos.efermi = efermi
         except ValueError:
-            raise VaspError('Could not parse DOSCAR')
+            raise qmpy.analysis.vasp.calculation.VaspError('Could not parse DOSCAR')
         return dos
 
     @property
@@ -142,6 +146,61 @@ class DOS(models.Model):
             self._plot = canvas
         return self._plot
 
+    _bokeh_plot = None
+    @property
+    def bokeh_plot(self):
+        if self._bokeh_plot is None:
+            spinflag = False
+            if len(self.dos) == 2:
+                spinflag = True
+
+            if spinflag:
+                source = bkp.ColumnDataSource(data=dict(
+                    en = self.energy,
+                    up = self.dos[0],
+                    down = -self.dos[1],
+                ))
+            else:
+                source = bkp.ColumnDataSource(data=dict(
+                    en = self.energy,
+                    dos = self.dos[0],
+                ))
+
+            p = bkp.figure(width=500, height=300,
+                           x_range=(-10, 10),
+                           tools=['pan', 'box_zoom', 'hover', 'reset', 'save', 'help'])
+
+            p.title.text = 'Density of States'
+            p.title.align = 'center'
+            p.title.text_font_size = "15pt"
+
+            p.xaxis.axis_label = u'E \u2212 E_Fermi (eV)'
+            p.xaxis.axis_label_text_font_size = '14pt'
+            p.xaxis.major_label_text_font_size = '12pt'
+
+            p.yaxis.axis_label = '# of states (arb. units)'
+            p.yaxis.axis_label_text_font_size = '14pt'
+            p.yaxis.major_label_text_font_size = '12pt'
+
+            
+            vline = Span(location=0, dimension='height', 
+                         line_color='gray', line_width=1.5,
+                         line_dash='dashed')
+            p.renderers.extend([vline])
+
+            if spinflag:
+                p.line('en', 'up',   line_width = 2, line_color = 'blue',
+                       legend="Spin Up",   source=source)
+                p.line('en', 'down', line_width = 2, line_color = 'orange', 
+                       legend="Spin Down", source=source)
+            else:
+                p.line('en', 'dos',  line_width = 2, line_color = 'blue',
+                       legend='total',       source=source)
+
+            p.legend.click_policy = "hide"
+            self._bokeh_plot = p
+
+        return self._bokeh_plot
 
     def get_projected_dos(self, strc, element, orbital=None, debug=False):
         """
@@ -273,7 +332,7 @@ class DOS(models.Model):
     @property
     def dos(self):
         if self.data.shape[0] == 3:
-            return self.data[1, :]
+            return np.array([self.data[1, :]]) # make output consistent (nested list)
         elif self.data.shape[0] == 5:
             return self.data[1:3, :]
 
@@ -295,12 +354,15 @@ class DOS(models.Model):
         """Read a VASP DOSCAR file"""
         if os.path.getsize(fname) < 300:
             return
-        f = open(fname)
+        if os.path.splitext(fname)[1] == '.gz':
+            f = gzip.open(fname, 'rb')
+        else:
+            f = open(fname, 'r')
         natoms = int(f.readline().split()[0])
         [f.readline() for nn in range(4)]  # Skip next 4 lines.
         # First we have a block with total and total integrated DOS
         ndos, efermi = f.readline().split()[2:4]
-        self._efermi = float(efermi)
+        self.efermi = float(efermi)
         ndos = int(ndos)
         dos = []
         for nd in xrange(ndos):
@@ -323,3 +385,4 @@ class DOS(models.Model):
                 cdos[nd] = np.array([float(x) for x in line])
             dos.append(cdos.T)
         self._site_dos = np.array(dos)
+        f.close()

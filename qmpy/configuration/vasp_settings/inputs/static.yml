@@ -1,6 +1,6 @@
 encut: 520
 prec: med
-algo: fast
+algo: normal
 nelmin: 5
 istart: 1
 icharg: 1

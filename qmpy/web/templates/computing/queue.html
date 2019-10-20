@@ -1,43 +1,58 @@
 {% extends "base_site.html" %}
 {% load admin_static %}
 {% load i18n %}
+{% load custom_filters %}
 
 {% block extrastyle %}
 <link rel="stylesheet" type="text/css" href="{% static "css/flot.css" %}"/>
 {% endblock %}
 
 {% block extrascript %}
-<script language="javascript" type="text/javascript" src={% static "js/flot/jquery.flot.pie.js" %}></script>
+<script language="javascript" type="text/javascript" src={% static "js/jquery.flot.pie.js" %}></script>
 {% endblock %}
 
 {% block content %}
 <h1> Queue Status: </h1>
-
+<h2> Total number of jobs running: {{count}} </h2>
+<h2> Last 20 jobs submitted: </h2>
 <table>
   <thead>
-    <th>ID</th>
+    <th style="padding:5px">ID</th>
     <th>Host</th>
     <th>Submission time</th>
   </thead>
   <tbody>
-    {% for job in running %}
+    {% for job in running%}
     <tr class=clickableRow href="/computing/job/{{job.id}}">
-      <td>{{job.id}}</td>
-      <td>{{job.account.host}}</td>
-      <td>{{job.created | date:"m/d/y P"}}</td>
+      <td style="padding-right:20px;padding-left:20px;width:50px">{{job.id}}</td>
+      <td style="padding-right:20px;padding-left:20px;width:50px">{{job.account.host}}</td>
+      <td style="padding-right:20px;padding-left:20px;width:150px">{{job.created | date:"m/d/y P"}}</td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
-
 {% endblock %}
 
 {% block sidebar %}
-<div id="sidebar" class="box">
-  <h1> Control panel </h1>
-  <form action="" method="post">{% csrf_token %}
-    If you press this button, all running jobs will be cancelled, and collected. So don't press it unless you mean it!
-    <input type="button" value="Cancel All" onclick="this.form.submit();">
-  </form>
+<div id="sidebar" class="box" style="width:450px">
+  <h1> Recently Finished </h1>
+  <table>
+	<thead>
+	    <tr>
+		<th style="padding:5px">Compound</th>
+        <th>Finished time</th>
+        <th>Projects</th>
+	    </tr>
+	</thead>
+	<tbody>
+        {% for id in recent_ids %}
+        <tr class=clickableRow href="/materials/entry/{{id}}">
+            <td style="padding-right:20px;padding-left:20px;width:60px">{{ recent_name_dict | get_item:id | safe }}</td>
+            <td style="padding-right:20px;padding-left:20px;width:120px">{{ recent_finished_dict | get_item:id | date:"m/d/y P" }}</td>
+            <td style="padding-right:20px;padding-left:20px;width:60px">{{ recent_project_dict | get_item:id }}</td>
+	    </tr>
+        {% endfor %}
+	</tbody>
+  </table>
 </div>
 {% endblock %}

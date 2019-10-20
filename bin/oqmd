@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import division
 import sys
 import argparse
 import os.path
 import itertools
 from qmpy import *
+from django.db.models import get_app, get_models
 
 def main():
     '''Handles command line args, parses them to understand what sub-scripts to
@@ -18,32 +20,46 @@ Command line access to OQMD functionality. Allows a user to obtain information
 about database entries, do thermodynamic analyisis or request calculations.
 ''')
 
-    parser.add_argument('module', default='query',
-            help='Select the general functionality group you want to access')
+    parser.add_argument('task', default='query',
+            nargs='*',
+            help='''What do you want to do?
 
-    parser.add_argument('--task','-T',
-            nargs='*', default='',
-            help='''What do you want to do, a given task may have a different
-            meaning depending on the selected module.''')
+Valid options:
+    
+    add_host
+    start_host
+    stop_host
+    add_user
+    add_project
+    add_allocation
+    utilization
+    progress
+    failed
+    
+    describe_database
+
+    add_structure
+    add_structures
+
+
+''')
 
     parser.add_argument('--formula','-F',
             nargs='*', default='',
-            help='''A representation of a composition or compositions. 
-            Fe2O3 -> {'Fe':2, 'O':3}
-            FeO -> {'Fe':1, 'O':1}
-            {Fe,Ni}O -> [{'Fe':1, 'O':1}, {'Ni':1, 'O':1}]''')
+            help='''A representation of a composition or compositions. Used
+when the task requires a composition. 
+Examples:
+    Fe2O3 -> {'Fe':2, 'O':3}
+    FeO -> {'Fe':1, 'O':1}
+    {Fe,Ni}O -> [{'Fe':1, 'O':1}, {'Ni':1, 'O':1}]''')
 
     parser.add_argument('--data',
             nargs='*', default='',
-            help='')
+            help='Supply your own data for thermodynamic analyses.')
 
     runner, args = parser.parse_known_args(sys.argv[1:])
     if not runner.task:
-        if runner.module == 'gclp':
-            runner.task = ['single_point']
-        else:
-            return parser.parse_args(['--help'])
-
+        return parser.parse_args(['--help'])
     runner.args = args
 
 #==============================================================================#
@@ -62,8 +78,13 @@ about database entries, do thermodynamic analyisis or request calculations.
 # module: database
 #==============================================================================#
 
-    if runner.task[0] == 'describe':
-        raise NotImplementedError
+    if runner.task[0] == 'describe_database':
+        app = get_app('qmpy')
+        for model in get_models(app):
+            print 'Model: %s' % model.__name__
+            for field in model._meta.fields:
+                print '   -', field.name
+            print 
 
     #======================================================================#
     if runner.task[0] == 'add_structure':
@@ -82,7 +103,7 @@ about database entries, do thermodynamic analyisis or request calculations.
             print 'Please verify that it is a valid structure file'
 
     #======================================================================#
-    if runner.task[0] == 'add_directory':
+    if runner.task[0] == 'add_structures':
         if 'project' not in runner.kwargs:
             runner.kwargs['project'] = raw_input('project: ')
         if 'keywords' not in runner.kwargs:
@@ -101,33 +122,17 @@ about database entries, do thermodynamic analyisis or request calculations.
 #==============================================================================#
 # queue
 #==============================================================================#
-    if runner.module == 'daemon':
-        ts = TaskManager('/tmp/oqmd-tasksever.pid')
-        js = JobManager('/tmp/oqmd-jobsever.pid')
-        if runner.task[0] == 'start':
-            ts.start()
-            js.start()
-        elif runner.task[1] == 'stop':
-            ts.stop()
-            js.stop()
-        elif runner.task[1] == 'restart':
-            ts.restart()
-            js.restart()
-        else:
-            print 'Unknown command'
-            sys.exit(2)
+
+    if 'jobserver' in runner.task:
+        js = JobManager('/tmp/oqmd-jobserver.pid')
+        getattr(js, runner.task[1])()
 
     #======================================================================#
-    if runner.module == 'jobserver':
-        js = JobManager('/tmp/oqmd-jobsever.pid')
-        getattr(js, runner.task[0])()
-
-    #======================================================================#
-    if runner.module == 'taskserver':
-        ts = TaskManager('/tmp/oqmd-tasksever.pid')
-        method = getattr(ts, runner.task[0])
-        if len(runner.task) > 1:
-            kwargs = dict(arg.split('=') for arg in runner.task[1:])
+    if 'taskserver' in runner.task:
+        ts = TaskManager('/tmp/oqmd-taskserver.pid')
+        method = getattr(ts, runner.task[1])
+        if len(runner.task) > 2:
+            kwargs = dict(arg.split('=') for arg in runner.task[3:])
         else:
             kwargs = {}
         method(**kwargs)
@@ -166,40 +171,17 @@ about database entries, do thermodynamic analyisis or request calculations.
             print '!'+''.ljust(78, '=')+'!'
             print h.center(80)
             print '!'+''.ljust(78, '=')+'!'
-            print 'PATH'.rjust(60), 'NCPUS'.ljust(20)
+            print 'Entry'.rjust(60), 'NCPUS'.ljust(20)
             host = Host.objects.get(name=h)
             for j in host.jobs:
-                print j.entry.path.rjust(60),
+                print str(j.entry).rjust(60),
                 print str(j.ncpus).ljust(20)
 
     #======================================================================#
     if runner.task[0] == 'utilization':
         print 'Resource utilization:'
         for h in Host.objects.all():
-            print '   - %s : %s' % (h.name, h.utilization)
-
-    #======================================================================#
-    if runner.task[0] == 'detail':
-        if len(runner.task) == 1:
-            tasks = Task.objects.all()
-        else:
-            tasks = Task.objects.filter(project=runner.task[1])
-        print '%s tasks for this project' % tasks.count()
-        print '   - FAILED:   %s' % tasks.filter(state=-1).count()
-        print '   - RUNNING:  %s' % tasks.filter(state=1).count()
-        print '   - COMPLETE: %s' % tasks.filter(state=2).count()
-        print 
-        tasks = Task.objects.filter(project=runner.task[1])
-        print '%s tasks for this project' % tasks.count()
-        num = float(tasks.count())
-        print 'Progress:'
-        for t in tasks:
-            prog = t.entry.calculation_set.filter(done=True).count()
-            print t.entry.name.rjust(20), '\t', t.entry.path,
-            print ' \t [' +\
-                    ''.join('##' for i in range(prog) )+\
-                    ''.join('  ' for i in range(4-prog) )+\
-                    ']'
+            print '   - %s : %0.1f %%' % (h.name, h.utilization/h.ncpus*100)
 
     #======================================================================#
     if runner.task[0] == 'progress':
@@ -210,15 +192,11 @@ about database entries, do thermodynamic analyisis or request calculations.
         
         for project in projects:
             print 'Project: %s' % project
-            tasks = Task.objects.filter(project=project)
-            init = Calculation.objects.filter(done=True, settings='initialize', 
-                    entry__task__project=project)
-            cr = Calculation.objects.filter(done=True, settings='coarse_relax', 
-                    entry__task__project=project)
-            fr = Calculation.objects.filter(done=True, settings='fine_relax',
-                    entry__task__project=project)
-            std = Calculation.objects.filter(done=True, settings='standard',
-                    entry__task__project=project)
+            tasks = Task.objects.filter(project_set=project)
+            rel = Calculation.objects.filter(converged=True,
+                        label='relaxation', entry__task__project_set=project)
+            sta = Calculation.objects.filter(converged=True, 
+                        label='static', entry__task__project_set=project)
 
             print '  %s tasks for this project' % tasks.count()
             print '     - FAILED:   %s' % tasks.filter(state=-1).count()
@@ -226,10 +204,8 @@ about database entries, do thermodynamic analyisis or request calculations.
             print '     - COMPLETE: %s' % tasks.filter(state=2).count()
             num = float(tasks.count())
             print '  Progress:'
-            print '     - initialized: {0:.3f}%'.format(init.count()/num*100)
-            print '     - coarse relaxed: {0:.3f}%'.format(cr.count()/num*100)
-            print '     - fine_relaxed: {0:.3f}%'.format(fr.count()/num*100)
-            print '     - completed: {0:.3f}%'.format(std.count()/num*100)
+            print '     - Relaxed: {0:.3f}%'.format(rel.count()/num*100)
+            print '     - Completed: {0:.3f}%'.format(sta.count()/num*100)
             print 
 
     #======================================================================#
@@ -237,15 +213,18 @@ about database entries, do thermodynamic analyisis or request calculations.
         if len(runner.task) == 1:
             tasks = Task.objects.filter(state=-1)
         else:
-            project = runner.task[1]
-            tasks = Task.objects.filter(project=project, state=-1)
-        for t in tasks:
-            print t.entry.name.rjust(10),
-            errs = set()
-            for err in t.entry.errors.values():
-                errs |= set(err)
-            print t.entry.path.ljust(30),
-            print ', '.join(errs)
+            projects = runner.task[1:]
+
+        for project in projects:
+            print 'Project: %s' % project
+            tasks = Task.objects.filter(project_set=project, state=-1)
+            for t in tasks:
+                print t.entry.name.rjust(10),
+                errs = set()
+                for err in t.entry.errors.values():
+                    errs |= set(err)
+                print t.entry.path.ljust(30),
+                print ', '.join(errs)
 
     #======================================================================#
     if runner.task[0] == 'cancel':
@@ -426,8 +405,6 @@ about database entries, do thermodynamic analyisis or request calculations.
 
     if runner.task[0] in ['query', 'search']:
         for formula in runner.formula:
-            #if runner.task == ['count']:
-            #    print query(formula=runner.formula, search=runner.search).count()
             if runner.task == ['summary']:
                 if '-' in formula:
                     comps = Composition.get_space(formula)

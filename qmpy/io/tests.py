@@ -20,6 +20,20 @@ class POSCARTestCase(TestCase):
                          ('Cu', [0.5, 0.5, 0.5])]
         self.struct = Structure.create(cell=cell, atoms=atoms)
 
+    def test_read_poscar_from_streaming(self):
+        f = StringIO.StringIO("""Cu
+3.54
+1.0 0.0 0.0
+0.0 1.0 0.0
+0.0 0.0 1.0
+Cu
+2
+direct
+0.0 0.0 0.0
+0.5 0.5 0.5""")
+        s = io.poscar.read(f)
+        self.assertTrue(simple_equal(self.struct, s))
+
     def test_vasp4(self):
         s = io.poscar.read(INSTALL_PATH+'/io/files/POSCAR_vasp4')
         self.assertTrue(simple_equal(self.struct, s))
@@ -32,7 +46,7 @@ class POSCARTestCase(TestCase):
         ans = open(INSTALL_PATH+'/io/files/POSCAR_vasp5').read()
         self.assertEqual(io.poscar.write(self.struct), ans)
 
-    def test_write_vasp5(self):
+    def test_write_vasp4(self):
         ans = open(INSTALL_PATH+'/io/files/POSCAR_vasp4').read()
         self.assertEqual(io.poscar.write(self.struct, vasp4=True), ans)
 
@@ -51,5 +65,7 @@ class CifTestCase(TestCase):
         self.assertTrue(simple_equal(self.struct, s))
 
     def test_write(self):
-        ans = open(INSTALL_PATH+'/io/files/test.cif').read()
-        self.assertEqual(io.cif.write(self.struct), ans)
+        s = io.poscar.read(INSTALL_PATH+'/io/files/POSCAR_vasp4')
+        with open(INSTALL_PATH+'/io/files/test.cif') as fr:
+            self.assertEqual(io.cif.write(s), fr.read())
+

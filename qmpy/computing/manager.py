@@ -20,8 +20,8 @@ logger = logging.getLogger(__name__)
 jlogger = logging.getLogger('JobManager')
 tlogger = logging.getLogger('TaskManager')
 
-jfile = qmpy.LOG_PATH+'/job_manager.log'
-tfile = qmpy.LOG_PATH+'/task_manager.log'
+jfile = os.path.join(qmpy.LOG_PATH, 'job_manager.log')
+tfile = os.path.join(qmpy.LOG_PATH, 'task_manager.log')
 
 jlog_file = logging.handlers.WatchedFileHandler(jfile)
 tlog_file = logging.handlers.WatchedFileHandler(tfile)
@@ -38,7 +38,7 @@ tlogger.setLevel(logging.INFO)
 def check_die(n=None):
     if n is None:
         if os.path.exists('/home/oqmd/controls/stop/running'):
-            exit(0)
+            sys.exit(0)
     else:
         for i in range(n):
             time.sleep(1)
@@ -58,8 +58,8 @@ class JobManager(daemon.Daemon):
         while True:
             ddb.reset_queries()
             jobs = queue.Job.objects.filter(state=1, account__host__state=1,
-                    created__lt=datetime.now() - timedelta(seconds=-200000))
-            for job in jobs:    
+                    created__lt=datetime.now() - timedelta(seconds=-200000000))
+            for job in jobs:
                 check_die()
                 if job.is_done():
                     jlogger.info('Collected %s' % job)
@@ -125,29 +125,29 @@ class TaskManager(daemon.Daemon):
         except Exception, err:
             task.hold()
             task.save()
-            tlogger.warn('Unknown error processing task: %s' % err)
+            tlogger.warn('Unknown error while getting jobs: %s' % err)
             return
 
         if not jobs:
             task.complete()
-            tlogger.info('Finished: Task %s (Entry %s)' % 
+            tlogger.info('Finished: Task %s (Entry %s)' %
                     (task.id, task.entry.id))
 
         for job in jobs:
             nattempts = 1
             while not job.state == 1:
-                if nattempts == 5:
+                if nattempts == 2:
                     break
                 check_die()
                 try:
                     job.submit()
                     if job.account.host == 'quest':
-                        time.sleep(5)
+                        time.sleep(50)
                 except Exception:
                     tlogger.warn('Submission error, waiting 30 seconds'
                             ' (Host %s), Task: %s, Entry: %s' % (host.name,
                                 task.id, task.entry.id))
-                    check_die(30)
+                    check_die(60)
                     nattempts += 1
             job.save()
             host.utilization += job.ncpus
@@ -160,5 +160,5 @@ class TaskManager(daemon.Daemon):
             except Exception, err:
                 task.hold()
                 task.save()
-                tlogger.warn('Unknown error processing task: %s' % err)
+                tlogger.warn('Unknown error while saving Entry: %s' % err)
 

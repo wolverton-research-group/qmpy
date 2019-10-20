@@ -1,0 +1,20 @@
+forrtl: error (78): process killed (SIGTERM)
+Image              PC                Routine            Line        Source             
+vasp_53_serial     00000000009FDF0E  Unknown               Unknown  Unknown
+vasp_53_serial     0000000000AB6EE9  Unknown               Unknown  Unknown
+vasp_53_serial     00000000009F5DE7  Unknown               Unknown  Unknown
+vasp_53_serial     00000000009F619D  Unknown               Unknown  Unknown
+vasp_53_serial     00000000009F5DD4  Unknown               Unknown  Unknown
+vasp_53_serial     00000000009F6117  Unknown               Unknown  Unknown
+vasp_53_serial     00000000009E1F90  Unknown               Unknown  Unknown
+vasp_53_serial     00000000009A6BE6  Unknown               Unknown  Unknown
+vasp_53_serial     00000000009A7D36  Unknown               Unknown  Unknown
+vasp_53_serial     00000000009A76CD  Unknown               Unknown  Unknown
+vasp_53_serial     000000000051E3A7  Unknown               Unknown  Unknown
+vasp_53_serial     000000000051BA24  Unknown               Unknown  Unknown
+vasp_53_serial     00000000007EEFE5  Unknown               Unknown  Unknown
+vasp_53_serial     00000000007FF967  Unknown               Unknown  Unknown
+vasp_53_serial     000000000042AC04  Unknown               Unknown  Unknown
+vasp_53_serial     0000000000405BFC  Unknown               Unknown  Unknown
+libc.so.6          0000003FF7C1ECDD  Unknown               Unknown  Unknown
+vasp_53_serial     0000000000405AF9  Unknown               Unknown  Unknown

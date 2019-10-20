@@ -31,12 +31,14 @@
     </thead>
     <tbody>
       {% for project in projects %}
+      {% if not project.name == 'voorhees' %}
       <tr class=clickableRow href="/computing/project/{{project.name}}">
         <td>{{project.name}}</td>
         <td>{{project.task_set.count}}</td>
         <td>{{project.completed.count}}</td>
         <td>{{project.failed.count}}</td>
       </tr>
+      {% endif %}
       {% endfor %}
     </tbody>
   </table>

@@ -8,8 +8,9 @@ import StringIO
 import fractions as frac
 import logging
 
-import qmpy
 from qmpy.utils import *
+from django.db.models import F, Q
+import operator
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +27,7 @@ class PhaseData(object):
     A PhaseData object is a container for storing and organizing phase data.
     Most importantly used when doing a large number of thermodynamic analyses
     and it is undesirable to access the database for every space you want to
-    consider. 
+    consider.
     """
     def __init__(self):
         self.clear()
@@ -89,7 +90,7 @@ class PhaseData(object):
 
     def add_phases(self, phases):
         """
-        Loops over a sequence of phases, and applies `add_phase` to each. 
+        Loops over a sequence of phases, and applies `add_phase` to each.
 
         Equivalent to::
 
@@ -106,7 +107,6 @@ class PhaseData(object):
         Load a library file, containing self-consistent thermochemical data.
 
         Equivalent to::
-            
             >>> pd = PhaseData()
             >>> pd.read_file(INSTALL_PATH+'/data/thermodata/%s' % library)
 
@@ -150,27 +150,26 @@ class PhaseData(object):
             else:
                 f.write(l+'\n')
 
-    def load_oqmd(self, space=None, search={}, exclude={}, 
-            stable=False, fit='standard', 
+    def load_oqmd(self, space=None, search={}, exclude={},
+            stable=False, fit='standard',
             total=False):
         """
         Load data from the OQMD.
 
         Keyword Arguments:
-            space: 
+            space:
                 sequence of elements. If supplied, will return only phases
-                within that region of phase space. i.e. ['Fe', 'O'] will 
+                within that region of phase space. i.e. ['Fe', 'O'] will
                 return Fe, O and all iron oxides.
 
             search:
-                dictionary of database search keyword:value pairs. 
+                dictionary of database search keyword:value pairs.
 
             stable:
                 Restrict search to only stable phases (faster, but relies on
                 having current phase stability analyses).
 
         Examples::
-            
             >>> pd = PhaseData()
             >>> search = {'calculation__path__contains':'icsd'}
             >>> pd.load_oqmd(space=['Fe','O'], search=search, stable=True)
@@ -180,6 +179,7 @@ class PhaseData(object):
         from qmpy.materials.element import Element
         logger.debug('Loading Phases from the OQMD')
         data = FormationEnergy.objects.all()
+        ##data = data.filter(entry__id=F('entry__duplicate_of__id'))
 
         if fit:
             data = data.filter(fit=fit)
@@ -196,9 +196,23 @@ class PhaseData(object):
             data = data.exclude(**exclude)
 
         if space:
-            space_qs = Element.objects.exclude(symbol__in=space)
-            data = data.filter(composition__element_set__in=space)
-            data = data.exclude(composition__element_set__in=space_qs)
+            ## Query phase space using element_list
+            dim = len(space)+1
+
+            element_q_lst = [Q(composition__element_list__contains=s+'_') for s in space]
+            combined_q = reduce(operator.or_, element_q_lst)
+            combined_q = reduce(operator.and_, [combined_q, Q(composition__ntypes__lt=dim)])
+
+            exclude_element_q_lst = [Q(composition__element_list__contains=e.symbol+'_') 
+                                        for e in Element.objects.exclude(symbol__in=space)]
+            combined_q_not = reduce(operator.or_, exclude_element_q_lst)
+
+            data = data.filter(combined_q).exclude(combined_q_not)
+
+            ## The following is old method (will be removed in future)
+            #space_qs = Element.objects.exclude(symbol__in=space)
+            #data = data.filter(composition__element_set__in=space)
+            #data = data.exclude(composition__element_set__in=space_qs)
 
         data = data.distinct()
         columns = [ 'id', 'composition_id', 'stability',
@@ -215,18 +229,22 @@ class PhaseData(object):
                 energy = row['calculation__energy_pa']
             else:
                 energy = row['delta_e']
-            phase = Phase(energy=energy, 
-                      composition=parse_comp(row['composition_id']),
-                      description=row['calculation__input__spacegroup'],
-                      stability=row['stability'],
-                      per_atom=True,
-                      total=total)
-            phase.id = row['id']
-            self.add_phase(phase)
+            try:
+                phase = Phase(energy=energy,
+                        composition=parse_comp(row['composition_id']),
+                        description=row['calculation__input__spacegroup'],
+                        stability=row['stability'],
+                        per_atom=True,
+                        total=total)
+                phase.id = row['id']
+                self.add_phase(phase)
+            except TypeError:
+                raise PhaseError('Something went wrong with Formation object\
+                                 {}. No composition?'.format(row['id']))
 
     def read_file(self, filename, per_atom=True):
         """
-        Read in a thermodata file (named filename). 
+        Read in a thermodata file (named filename).
 
         File format::
 
@@ -315,7 +333,7 @@ class PhaseData(object):
 
 class Phase(object):
     """
-    A Phase object is a point in composition-energy space. 
+    A Phase object is a point in composition-energy space.
 
     Examples::
 
@@ -338,9 +356,9 @@ class Phase(object):
     _calculation = None
     custom_name = None
     phase_dict = {}
-    def __init__(self, 
-            composition=None, 
-            energy=None, 
+    def __init__(self,
+            composition=None,
+            energy=None,
             description='',
             per_atom=True,
             stability=None,
@@ -348,7 +366,7 @@ class Phase(object):
             name=''):
 
         if composition is None or energy is None:
-            raise IncompletePhaseError
+            raise PhaseError("Composition and/or energy missing.")
         if isinstance(composition, basestring):
             composition = parse_comp(composition)
 
@@ -424,7 +442,8 @@ class Phase(object):
     def link(self):
         if self.id:
             link = '<a href="/materials/entry/{id}">{name}</a>'
-            return link.format(id=self.calculation.entry_id, name=self.name)
+            return link.format(id=self.calculation.entry_id, 
+                               name=format_html(self.comp))
         else:
             return ''
 
@@ -466,7 +485,7 @@ class Phase(object):
         """
         Set of elements in the phase.
         """
-        return set([ k for k, v in self.unit_comp.items() 
+        return set([ k for k, v in self.unit_comp.items()
             if abs(v) > 1e-6 ])
 
     @property
@@ -591,7 +610,7 @@ class Phase(object):
     def amt(self, comp):
         """
         Returns a composition dictionary with the specified composition pulled
-        out as 'var'. 
+        out as 'var'.
 
         Examples::
 
@@ -617,7 +636,7 @@ class Phase(object):
     def fraction(self, comp):
         """
         Returns a composition dictionary with the specified composition pulled
-        out as 'var'. 
+        out as 'var'.
 
         Examples::
 

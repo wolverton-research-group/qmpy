@@ -55,8 +55,8 @@ def atoms_to_structure(atoms):
     struct.cell = atoms.get_cell()
     for a in atoms: 
         atom = Atom()
-        atom.symbol = a.symbol
         atom.coord = a.position
+        atom.symbol = a.symbol
         atom.magmom = a.magmom
         atom.direct = False
         struct.add_atom(atom)

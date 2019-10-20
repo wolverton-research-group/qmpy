@@ -53,3 +53,6 @@ docs/_build/
 
 # Linux tempfiles
 *.swp
+
+# Django migrations
+*/migrations

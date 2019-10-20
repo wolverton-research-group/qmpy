@@ -1,28 +1,27 @@
 # Django settings for oqmd project.
-import os.path
+import os
 INSTALL_PATH = os.path.dirname(os.path.abspath(__file__))
 INSTALL_PATH = os.path.split(INSTALL_PATH)[0]
 INSTALL_PATH = os.path.split(INSTALL_PATH)[0]
 
 DEBUG = False
-##DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-        #('Scott Kirklin','scott.kirklin@gmail.com'),
-        ('Vinay Hegde','hegdevinayi@gmail.com')
+        ('Scott Kirklin','scott.kirklin@gmail.com'),
+        ('Vinay Hegde', 'hegdevinayi@gmail.com')
 )
 
 MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql', 
-        'NAME': 'qmdb_dev', 
-        'USER': 'oqmd',                      
-        'PASSWORD': 'oqmdpass@123!',                  
-        'HOST': '127.0.0.1',                      
-        'PORT': '5715'                       
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.environ.get('qmdb_v1_1_name'),
+        'USER': os.environ.get('qmdb_v1_1_user'),
+        'PASSWORD': os.environ.get('qmdb_v1_1_pswd'),
+        'HOST': os.environ.get('qmdb_v1_1_host'),
+        'PORT': os.environ.get('qmdb_v1_1_port') 
     }
 }
 
@@ -126,6 +125,10 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.admindocs',
     'qmpy',
+    'rest_framework',
+    'rest_framework_xml',
+    'rest_framework_yaml',
+    'crispy_forms',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -167,6 +170,24 @@ TEMPLATE_CONTEXT_PROCESSORS = (
         "django.core.context_processors.request",
         )
 
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKEND': ('django_filters.rest_framework.DjangoFilterBackend',),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 100,
+    'DEFAULT_PARSER_CLASSES':(
+        'rest_framework_xml.parsers.XMLParser',
+        'rest_framework_yaml.parsers.YAMLParser',
+    ),
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+        'rest_framework_xml.renderers.XMLRenderer',
+        'rest_framework_yaml.renderers.YAMLRenderer',
+    ),
+}
+
+CRIPSY_TEMPLATE_PACK = 'bootstrap'
+                              
 #CACHES = {
 #        'default': {
 #            'BACKEND':
@@ -178,4 +199,3 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 AUTH_USER_MODEL = 'qmpy.User'
 
 GOOGLE_ANALYTICS_MODEL = True
-

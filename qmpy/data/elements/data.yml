@@ -1587,7 +1587,7 @@ O:
   p_elec: 4.0
   period: 2.0
   production: 461000.0
-  s_elec: 4.0
+  s_elec: 2.0
   scattering_factors: {a1: 3.0485, a2: 2.2868, a3: 1.5463, a4: 0.867, b1: 13.2771,
     b2: 5.7011, b3: 0.3239, b4: 32.908901, c: 0.2508}
   specific_heat: 0.917999982834

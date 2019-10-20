@@ -2,15 +2,28 @@
 {% load admin_static %}
 {% load i18n %}
 
-{% block title %}{{ s.name }}{% endblock %}
+
+{% block title %}
+{% if search %}
+{{search}}
+{% else %}
+OQMD | Search Phases
+{% endif %}
+{% endblock %}
 
 {% block extrastyle %}
 <link rel="stylesheet" type="text/css" href="{% static "css/flot.css" %}"/>
+<style>
+.comp {
+    margin-left:15px
+}
+</style>
 {% endblock %}
 
 {% block extrascript %}
 <script language="javascript" type="text/javascript" src={% static "js/jquery.flot.pie.js" %}></script>
 
+{% if phase_comp %}
 <script language="javascript" type="text/javascript">
   function labelFormatter(label, series) {
         return "<div style='font-size:12pt; text-align:center; padding:2px; color:black;'>" + label + "<br/>" + Math.round(series.percent) + "%</div>";
@@ -31,7 +44,8 @@
         }
       });
     });
-  </script>
+</script>
+{% endif %}
 
 <script language="javascript" type="text/javascript">
 $(function() {
@@ -39,11 +53,21 @@ $(function() {
     });
 </script>
 
+{% if pd3d %}
+<script type="text/javascript" src="https://cdn.plot.ly/plotly-1.49.4.min.js">
+</script>
+<script language="javascript" type="text/javascript">
+$(function() {
+    {{ pd3d | safe }}
+    });
+</script>
+{% else %}
 <script language="javascript" type="text/javascript">
 $(function() {
     {{ pd | safe }}
     });
 </script>
+{% endif %}
 
 <script type='text/javascript'>//<![CDATA[ 
 window.onload=function(){
@@ -61,20 +85,43 @@ theForm.onsubmit = function(e) {
 
 {% block content_title %}
 {% if gs %}
-  <h1> Composition: {{ composition.name }}</h1>
-  <h1>&Delta;H = {{gs.energy | floatformat:-3}} eV/atom </h1>
-  {% if singlephase %}
-  <h1> Stable phase: <a href="/materials/entry/{{compound.id}}">
-      {{ compound.name }}</a></h1>
-  {% else %}
-  <h1> No single stable phase, decomposes into:
-    {% for p in phases %}
-    {{p.link | safe}}
-    {% endfor %} </h1>
+  <h1> Composition: {{ composition.html |safe }}</h1>
+  {% if phase_type == 'stable' %}
+  <p><span style="font-size:25px;background-color:green;color:white;font-weight:800;margin-left:15px">
+      &nbsp;Stable Phase&nbsp;</span></p>
+  <p class="comp"> 
+    <b>Entry Link:</b> 
+    <a href="/materials/entry/{{current_phase.formation.entry.id}}"
+      target='_blank'>
+     {{ composition.ground_state.html |safe}}
+    </a>
+  </p>
+  <p class="comp"><b>&Delta;H:</b> {{delta_h | floatformat:-3}} eV/atom </p>
+  <p class="comp"><b>Decomposition Energy:</b> {{ decomp_en | floatformat:-3}} eV/atom </p>
+  <p class="comp"> <b>Competing Phases: </b> {{ phase_links |safeseq |join:" + " }} </p>
+
+  {% elif phase_type == 'unstable' %}
+  <p><span style="font-size:25px;background-color:red;color:white;font-weight:800;margin-left:15px">
+      &nbsp;Unstable Phase&nbsp;</span></p>
+  <p class="comp"> 
+    <b>Entry Link:</b> 
+    <a href="/materials/entry/{{current_phase.formation.entry.id}}"
+      target='_blank'>
+      {{ composition.ground_state.html |safe}}
+    </a>
+  </p>
+  <p class="comp"><b>&Delta;H:</b> {{delta_h | floatformat:-3}} eV/atom </p>
+  <p class="comp"><b>Hull Distance:</b> {{ hull_dis | floatformat:-3}} eV/atom </p>
+  <p class="comp"> <b>Decompose Into: </b> {{ phase_links |safeseq |join:" + " }} </p>
+  {% elif phase_type == 'nophase' %}
+  <p><span style="font-size:25px;background-color:lightblue;color:white;font-weight:800;margin-left:15px">
+      &nbsp;No Single Phase&nbsp;</span></p>
+  <p class="comp"><b>&Delta;H:</b> {{delta_h | floatformat:-3}} eV/atom </p>
+  <p class="comp"> <b>Decompose Into: </b> {{ phase_links |safeseq |join:" + " }} </p>
   {% endif %}
 {% endif %}
 {% if composition.experiment %}
-<h1> Expt &Delta;H = {{ composition.experiment | floatformat:-3 }} eV/atom</h1>
+<p class="comp" style="font-size:18px"><u><b>Expt &Delta;H:</b> {{ composition.experiment | floatformat:-3 }} eV/atom</u></p>
 {% endif %}
 {% endblock %}
 
@@ -83,6 +130,15 @@ theForm.onsubmit = function(e) {
 <div class="box">
   This composition appears in the {{ space }} region of phase space. It's relative stability is shown in the {{ space }} phase diagram (left). The relative stability of all other phases at this composition (and the combination of other stable phases, if no compound at this composition is stable) is shown in the relative stability plot (right).
   <div>
+    {% if pd3d %}
+    <div style="width:600px;height:500px;margin:1px;float:left">
+      <div id="phasediagram" class="flot-placeholder"></div>
+    </div>
+
+    <div style="width:200px;height:500px;margin:1px;margin-left:10px;float:left">
+      <div id="placeholder" class="flot-placeholder"></div>
+    </div>
+    {% else %}
     <div style="width:500px;height:400px;margin:40px;float:left">
       <div id="phasediagram" class="flot-placeholder"></div>
     </div>
@@ -90,6 +146,7 @@ theForm.onsubmit = function(e) {
     <div style="width:200px;height:400px;margin:40px;float:left">
       <div id="placeholder" class="flot-placeholder"></div>
     </div>
+    {% endif %}
   </div>
 </div>
 {% endif %}
@@ -104,6 +161,7 @@ theForm.onsubmit = function(e) {
     <th>Composition</th>
     <th>Spacegroup</th>
     <th>Formation Energy [eV/atom]</th>
+    <th>Stability [eV/atom]</th>
     <th>Prototype</th>
     <th># of atoms</th>
     <th>Reference</th>
@@ -111,15 +169,20 @@ theForm.onsubmit = function(e) {
 </thead>
 
 <tbody>
-  {% for entry in results %}
-  <tr class=clickableRow href="/materials/entry/{{ entry.id }}">
-    <td>{{ entry.id }}</td>
-    <td>{{ entry.html | safe }}</td>
-    <td>{{ entry.structure.spacegroup.symbol }}</td>
-    <td>{{ entry.energy |floatformat:-3 }}</td>
-    <td>{{ entry.prototype.name }}</td>
-    <td>{{ entry.natoms }}</td>
-    <td>{{ entry.reference.citation }}</td>
+  {% for fe in results %}
+  <tr class=clickableRow href="/materials/entry/{{ fe.entry.id }}">
+    <td>{{ fe.entry.id }}</td>
+    <td>{{ fe.entry.html | safe }}</td>
+    <td>{{ fe.entry.structure.spacegroup.symbol }}</td>
+    <td>{{ fe.delta_e |floatformat:-3 }}</td>
+    {% if fe.stability < 0 %}
+    	<td>{{ 0 }}</td>
+    {% else %}
+    	<td>{{ fe.stability |floatformat:-3 }}</td>
+    {% endif %}
+    <td>{{ fe.entry.prototype.name }}</td>
+    <td>{{ fe.entry.natoms }}</td>
+    <td>{{ fe.entry.reference.citation }}</td>
   </tr>
   {% endfor %}
 </tbody>

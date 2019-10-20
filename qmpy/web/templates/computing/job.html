@@ -1,12 +1,11 @@
 {% extends "base_site.html" %}
 
 {% block content_title %}
-Job: <a href="/computing/job/{{job.id}}">{{ job.id }}</a>
+<h1> Job: <a href="/computing/job/{{job.id}}">{{ job.id }}</a> </h1>
 {% endblock %}
 
 {% block content %}
 
-<h1>Job: {{ job.id }}</h1>
 <h2>Status: 
   {% if job.state == 2 %} Complete
   {% elif job.state == 1 %} Running

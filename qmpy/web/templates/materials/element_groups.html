@@ -1,0 +1,33 @@
+{% extends "base_site.html" %}
+{% load admin_static %}
+{% load custom_filters %}
+
+{% block extrastyle %}
+{% endblock %}
+
+{% block extrascript %}
+{% endblock %}
+
+{% block content_title %}
+<h2>Element Groups</h2>
+{% endblock %}
+
+{% block content %}
+<table>
+	<thead>
+	 <tr>
+	  <th>Name</th>
+      <th>Elements</th>
+	 </tr>
+	</thead>
+	<tbody>
+    {% for group in groups %}
+    <tr> 
+      <td> {{group}} </td>
+      <td> {{element_groups | get_item:group }} </td>
+	</tr>
+    {% endfor %}
+	</tbody>
+</table>
+
+{% endblock %}

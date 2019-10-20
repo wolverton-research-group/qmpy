@@ -1,17 +1,22 @@
 #!/bin/bash
-#MSUB -l nodes={nodes}:ppn={ppn}
-#MSUB -l walltime={walltime}
-#MSUB -N {name}
-#MSUB -A {key}
-#MSUB -o jobout.txt
-#MSUB -e joberr.txt
+#SBATCH -N {nodes}
+#SBATCH -n {ntasks}
+#SBATCH -t {walltime}
+#SBATCH -J {name}
+#SBATCH -A {key}
+#SBATCH -p {queuetype}
+#SBATCH -o jobout.txt
 
-module load mpi/openmpi-1.6.3-intel2011.3
-module load intel/2011.3
 ulimit -s unlimited
+export OMP_NUM_THREADS=1
 
-cd $PBS_O_WORKDIR
-NPROCS=`wc -l < $PBS_NODEFILE`
+module purge
+
+module load mpi/intel-mpi-5.1.3.258 
+module swap intel/2016.0 intel/2013.2
+
+NPROCS={ntasks}
+
 #running on {host}
 
 {header}
