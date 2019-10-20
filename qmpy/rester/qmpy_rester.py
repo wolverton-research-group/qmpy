@@ -1,7 +1,7 @@
 import json
 import os
 
-WEBPORT = os.environ.get('web_port')
+WEBPORT = os.environ.get('web_port_pub')
 
 REST_OPTIMADE  = 'http://larue.northwestern.edu:'+WEBPORT+'/optimade'
 REST_OQMDAPI   = 'http://larue.northwestern.edu:'+WEBPORT+'/oqmdapi'

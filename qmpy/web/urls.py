@@ -2,7 +2,7 @@ from django.conf.urls import patterns, include, url
 
 import django.views.generic
 from django.views.generic import DetailView, ListView
-from django.contrib import admin
+#from django.contrib import admin
 from qmpy.db import settings
 
 from rest_framework import routers
@@ -12,16 +12,16 @@ from qmpy.web import views
 #router.register(r'users', views.UserViewSet)
 
 # Uncomment the next two lines to enable the admin:
-##admin.autodiscover()
+#admin.autodiscover()
 
 urlpatterns = [
     url(r'^$', 'qmpy.web.views.home_page'),
 
     ## admin
-    url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
-    url(r'^accounts/login/.*$', 'django.contrib.auth.views.login'),
-    url(r'^accounts/logout/.*$', 'django.contrib.auth.views.logout'),
-    url(r'^admin/', include(admin.site.urls)),
+    #url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
+    #url(r'^accounts/login/.*$', 'django.contrib.auth.views.login'),
+    #url(r'^accounts/logout/.*$', 'django.contrib.auth.views.logout'),
+    #url(r'^admin/', include(admin.site.urls)),
 
     ]
 
@@ -36,6 +36,7 @@ urlpatterns += [
     url(r'^materials/prototypes$', 'qmpy.web.views.prototypes_view'),
     url(r'^materials/keyword/(?P<keyword>.*)$', 'qmpy.web.views.keyword_view'),
     url(r'^materials/generic_composition/(?P<search>.*)$', 'qmpy.web.views.generic_composition_view'),
+
     url(r'^materials/export/(?P<convention>.*)/(?P<format>.*)/(?P<structure_id>.*)',
         'qmpy.web.views.export_structure'),
     url(r'^materials/export/(?P<format>.*)/(?P<structure_id>.*)', 'qmpy.web.views.export_structure'),
@@ -58,25 +59,25 @@ urlpatterns += [
     url(r'^analysis/calculation/(?P<calculation_id>.*)$', 'qmpy.web.views.calculation_view'),
 
     ## computing
-    url(r'^computing/$', 'qmpy.web.views.computing_view'),
-    url(r'^computing/projects$', 'qmpy.web.views.projects_view'),
-    url(r'^computing/hosts$', 'qmpy.web.views.hosts_view'),
-    url(r'^computing/queue$', 'qmpy.web.views.queue_view'),
-    url(r'^computing/onlinesubmit$', 'qmpy.web.views.online_view'),
+    #url(r'^computing/$', 'qmpy.web.views.computing_view'),
+    #url(r'^computing/projects$', 'qmpy.web.views.projects_view'),
+    #url(r'^computing/hosts$', 'qmpy.web.views.hosts_view'),
+    #url(r'^computing/queue$', 'qmpy.web.views.queue_view'),
+    #url(r'^computing/onlinesubmit$', 'qmpy.web.views.online_view'),
 
-    url(r'^computing/create/host$', 'qmpy.web.views.new_host_view'),
+    #url(r'^computing/create/host$', 'qmpy.web.views.new_host_view'),
     #url(r'^computing/create/project', 'qmpy.web.views.new_project_view'),
     #url(r'^computing/create/user', 'qmpy.web.views.new_user_view'),
     #url(r'^computing/create/', 'qmpy.web.views.new_user_view'),
 
-    url(r'^computing/project/(?P<state>.*)/(?P<project_id>.*)$', 'qmpy.web.views.project_state_view'),
-    url(r'^computing/project/(?P<project_id>.*)$', 'qmpy.web.views.project_view'),
-    url(r'^computing/host/(?P<host_id>.*)$', 'qmpy.web.views.host_view'),
-    url(r'^computing/user/(?P<user_id>.*)$', 'qmpy.web.views.user_view'),
-    url(r'^computing/allocation/(?P<allocation_id>.*)$', 'qmpy.web.views.allocation_view'),
+    #url(r'^computing/project/(?P<state>.*)/(?P<project_id>.*)$', 'qmpy.web.views.project_state_view'),
+    #url(r'^computing/project/(?P<project_id>.*)$', 'qmpy.web.views.project_view'),
+    #url(r'^computing/host/(?P<host_id>.*)$', 'qmpy.web.views.host_view'),
+    #url(r'^computing/user/(?P<user_id>.*)$', 'qmpy.web.views.user_view'),
+    #url(r'^computing/allocation/(?P<allocation_id>.*)$', 'qmpy.web.views.allocation_view'),
 
-    url(r'^computing/task/(?P<task_id>.*)$', 'qmpy.web.views.task_view'),
-    url(r'^computing/job/(?P<job_id>.*)$', 'qmpy.web.views.job_view'),
+    #url(r'^computing/task/(?P<task_id>.*)$', 'qmpy.web.views.task_view'),
+    #url(r'^computing/job/(?P<job_id>.*)$', 'qmpy.web.views.job_view'),
 
     ## analysis
     url(r'^analysis/$', 'qmpy.web.views.analysis_view'),
@@ -117,6 +118,6 @@ urlpatterns += [
 
     ## other
     url(r'^faq', 'qmpy.web.views.faq_view'),
-    url(r'^playground', 'qmpy.web.views.play_view')
+    #url(r'^playground', 'qmpy.web.views.play_view')
 ]
 
