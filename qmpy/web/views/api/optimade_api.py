@@ -99,6 +99,8 @@ class OptimadeStructureList(generics.ListAPIView):
         filters = filters.replace('|', ' OR ')
         filters = filters.replace('~', ' NOT ')
         q = query_to_Q(filters)
+        if not q:
+            return [] 
         fes = fes.filter(q)
 
         return fes
