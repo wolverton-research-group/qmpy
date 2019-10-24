@@ -17,6 +17,11 @@ OQMD | Search Phases
 .comp {
     margin-left:15px
 }
+.question {
+    margin-left:3px;
+    margin-right:3px;
+    background-color:yellow;
+}
 </style>
 {% endblock %}
 
@@ -79,8 +84,20 @@ theForm.onsubmit = function(e) {
     return false;
 }
 }//]]>  
-
 </script>
+
+<script language="javascript" type="text/javascript">
+function openWindow() {
+    msgwin = window.open('', 'popup', 'width=800px, height=400px');
+    msgwin.document.write(
+            '<HTML><HEAD><TITLE>Defination</TITLE></HEAD>' +
+            '<Body>' +
+            '<img src={% static "img/Explanation_Chull.png" %} style="width:100vw">' +
+            '</Body>');
+
+}
+</script>
+
 {% endblock %}
 
 {% block content_title %}
@@ -97,7 +114,7 @@ theForm.onsubmit = function(e) {
     </a>
   </p>
   <p class="comp"><b>&Delta;H:</b> {{delta_h | floatformat:-3}} eV/atom </p>
-  <p class="comp"><b>Decomposition Energy:</b> {{ decomp_en | floatformat:-3}} eV/atom </p>
+  <p class="comp"><b>Decomposition Energy<button onClick="openWindow()" class="question">?</button>:</b> {{ decomp_en | floatformat:-3}} eV/atom </p>
   <p class="comp"> <b>Competing Phases: </b> {{ phase_links |safeseq |join:" + " }} </p>
 
   {% elif phase_type == 'unstable' %}
@@ -111,7 +128,7 @@ theForm.onsubmit = function(e) {
     </a>
   </p>
   <p class="comp"><b>&Delta;H:</b> {{delta_h | floatformat:-3}} eV/atom </p>
-  <p class="comp"><b>Hull Distance:</b> {{ hull_dis | floatformat:-3}} eV/atom </p>
+  <p class="comp"><b>Hull Distance<button onClick="openWindow()" class="question">?</button>:</b> {{ hull_dis | floatformat:-3}} eV/atom </p>
   <p class="comp"> <b>Decompose Into: </b> {{ phase_links |safeseq |join:" + " }} </p>
   {% elif phase_type == 'nophase' %}
   <p><span style="font-size:25px;background-color:lightblue;color:white;font-weight:800;margin-left:15px">

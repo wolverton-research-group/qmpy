@@ -7,8 +7,8 @@ with open(os.path.join(os.path.dirname(__file__), 'qmpy', 'VERSION.txt')) as fr:
 setup(
     name='qmpy',
     version=version,
-    author='S. Kirklin',
-    author_email='scott.kirklin@gmail.com',
+    author='The OQMD Development Team',
+    author_email='oqmd.questions@gmail.com',
     license='LICENSE.txt',
     classifiers=["Programming Language :: Python :: 2.7"],
     packages=find_packages(),

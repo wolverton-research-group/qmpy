@@ -47,7 +47,7 @@ def optimade_filter_conversion(filter_expr):
     filter_expr_out = filter_expr_out.replace('&', 'AND')
     filter_expr_out = filter_expr_out.replace('|', 'OR')
     # Convert 'elements=' into mutiple 'element=' filters
-    for els in re.findall('elements=[\S]*', filter_expr):
+    for els in re.findall('elements=[^-0-9\/]+', filter_expr):
         els_out = els.replace('elements=', '')
 
         els_lst = [' element='+e+' ' for e in els_out.split(',')]
