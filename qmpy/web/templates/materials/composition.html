@@ -187,8 +187,8 @@ function openWindow() {
 
 <tbody>
   {% for fe in results %}
-  <tr class=clickableRow href="/materials/entry/{{ fe.entry.id }}">
-    <td>{{ fe.entry.id }}</td>
+  <tr>
+    <td><a href="/materials/entry/{{ fe.entry.id }}" target="_blank">{{ fe.entry.id  }}</a></td>
     <td>{{ fe.entry.html | safe }}</td>
     <td>{{ fe.entry.structure.spacegroup.symbol }}</td>
     <td>{{ fe.delta_e |floatformat:-3 }}</td>

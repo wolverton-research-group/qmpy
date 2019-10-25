@@ -95,8 +95,8 @@
   </thead>
   <tbody>
     {% for calc in entry.calculation_set.all %}
-    <tr class=clickableRow href="/analysis/calculation/{{calc.id}}">
-      <td>{{calc.label}}</td>
+    <tr>
+      <td><a href="/analysis/calculation/{{calc.id}}">{{ calc.label  }}</a></td>
       <td>{{calc.energy_pa | floatformat:-3}}</td>
       <td>{{calc.band_gap | floatformat:-1}}</td>
       <td>{{calc.output.volume_pa | floatformat:-3}}</td>
