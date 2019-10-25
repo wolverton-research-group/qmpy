@@ -99,6 +99,9 @@ def search_data(request):
                         'sort_by', 'desc', 'sort_offset', 'limit']:
                 tmp = form.cleaned_data.get(arg)
                 if tmp != '' and tmp != None:
+                    if arg == 'element_set':
+                        tmp = tmp.replace(' ','')
+                        tmp = tmp.replace('%20','')
                     kwargs[arg] = tmp
 
             # Update 'offset'
