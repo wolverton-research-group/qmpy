@@ -17,16 +17,16 @@
 <h2> Last 20 jobs submitted: </h2>
 <table>
   <thead>
-    <th style="padding:5px">ID</th>
-    <th>Host</th>
     <th>Submission time</th>
+    <th>Host</th>
+    <th>User</th>
   </thead>
   <tbody>
     {% for job in running%}
     <tr class=clickableRow href="/computing/job/{{job.id}}">
-      <td style="padding-right:20px;padding-left:20px;width:50px">{{job.id}}</td>
-      <td style="padding-right:20px;padding-left:20px;width:50px">{{job.account.host}}</td>
       <td style="padding-right:20px;padding-left:20px;width:150px">{{job.created | date:"m/d/y P"}}</td>
+      <td style="padding-right:20px;padding-left:20px;width:50px">{{job.account.host}}</td>
+      <td style="padding-right:20px;padding-left:20px;width:50px">{{job.account.username}}</td>
     </tr>
     {% endfor %}
   </tbody>
@@ -34,7 +34,7 @@
 {% endblock %}
 
 {% block sidebar %}
-<div id="sidebar" class="box" style="width:450px">
+<div id="sidebar" class="box" style="width:480px">
   <h1> Recently Finished </h1>
   <table>
 	<thead>
@@ -49,7 +49,7 @@
         <tr class=clickableRow href="/materials/entry/{{id}}">
             <td style="padding-right:20px;padding-left:20px;width:60px">{{ recent_name_dict | get_item:id | safe }}</td>
             <td style="padding-right:20px;padding-left:20px;width:120px">{{ recent_finished_dict | get_item:id | date:"m/d/y P" }}</td>
-            <td style="padding-right:20px;padding-left:20px;width:60px">{{ recent_project_dict | get_item:id }}</td>
+            <td style="padding-right:20px;padding-left:20px;width:141px">{{ recent_project_dict | get_item:id }}</td>
 	    </tr>
         {% endfor %}
 	</tbody>
