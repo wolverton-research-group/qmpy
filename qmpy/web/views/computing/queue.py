@@ -48,7 +48,9 @@ def queue_view(request):
 
     recent_name_dict = dict([(str(c.entry.id), format_html(c.comp)) for c in recent_])
     recent_finished_dict = dict([(str(c.entry.id), c.entry.task_set.order_by('-finished')[0].finished) for c in recent_])
-    recent_project_dict = dict([(str(c.entry.id), ', '.join(p.name for p in c.entry.projects)) for c in recent_])
+    recent_project_dict = dict([(str(c.entry.id), 
+                                 ', '.join(p.name for p in c.entry.task_set.order_by('-finished')[0].projects)) 
+                                for c in recent_])
 
     recent_ids = list(map(lambda x: x[0], sorted(recent_finished_dict.items(), key=lambda x: x[1],
                                                  reverse=True)))
