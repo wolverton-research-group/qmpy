@@ -9,6 +9,7 @@ Introduction
 ============
 
 RESTful API is now supported at (http://oqmd.org)! It allows the users to access the data of around 700,000 materials easily by using simple HTTP requests. Downloading the entire SQL database is no longer required to extract materials data unless the DFT calculation-related information is to be viewed. This system is implemented within Django Python API framework. The querying on database is supported with a form-based user interface at (http://oqmd.org/api/search). But the documention provided in this page may be used for a more flexible querying and eliminating the need to use a UI. 
+OQMD RESTful API is a new addition to the general **qmpy** python API. The direct database query using qmpy API on commandline to a locally hosted version of OQMD database is still fully supported in addition to the RESTful part.
 
 Querying
 ========
@@ -175,3 +176,23 @@ or
 Web Browser
 -----------
 :field:`CTRL+S` on the webpage
+
+Additional notes
+~~~~~~~~~~~~~~~~
+
+Pagination
+----------
+Pagination is a particularly useful feature while viewing queried data in the web browser as it avoids loading a large file containing information of hundreds of thousands of materials in a single webpage. Pagination can avoid a possible browser crash and thus a full data-loss in such a data overload scenario by returning data in smaller subsets along with URLs to the `next` and `previous` subsets in the `links` section of the returned result. By default, the maximum data returned in each subset, references as `limit`, is set to be 50. 
+
+
+OPTiMaDe RESTful Specification
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The Open Databases Integration for Materials Design (`OPTiMaDe.org <https://www.optimade.org/>`_) consortium aims to make materials databases interoperational by developing a common REST API. This specification provides a detailed set of rules about keywords for materials data, certain rules about data lookup flexibility, and format of the returned data.
+
+Currently OQMD's RESTful implementation is compatible with the OPTiMaDe specification v0.9.5 and we will be updating it to v0.10.0 in the near future. There are a few notable differences between OQMDAPI and OPTiMaDe API because the former follows the traditional qmpy API keywords which had been under use in OQMD database since its inception. For example, the number of different types of element species consisting a particular chemical compound is referenced by `ntypes` keyword in qmpy API (and thus also in OQMD RESTful API) while the same quantity is referenced as `nelements` in OPTiMaDe API. Queries made in either APIs are processed internally within the same workflow following the initial keyword conversions.
+
+OPTiMaDe: Example Queries
+-------------------------
+1. ``http://oqmd.org/optimade/structures?filter=ntypes=3%20AND%20elements=Al,Mn``
+2. ``http://oqmd.org:8080/optimade/structures?filter=_oqmd_band_gap=0 OR (_oqmd_band_gap<0.5 AND nelements>3) AND elements=O``
