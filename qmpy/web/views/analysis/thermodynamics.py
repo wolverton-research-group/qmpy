@@ -90,21 +90,45 @@ def phase_diagram_view(request):
                 c = p['composition_%s' % i]
                 t = p['formationenergy_%s' % i]
                 phase = Phase(composition=c, energy=float(t))
-                phase.id = int(p['id_%s' % i])
+                try:
+                    phase.id = int(p['id_%s' % i])
+                except ValueError:
+                    print "User input phase", phase
                 phase.use = ( p['use_%s' % i] == 'on' )
                 phase.show_label = ( p['label_%s' % i] == 'on' )
                 pdata.add_phase(phase)
+
+            c_s = p.getlist('composition_new')
+            t_s = p.getlist('formationenergy_new')
+            u_s = p.getlist('use_new')
+            l_s = p.getlist('label_new')
+            for c, t, u, l in zip(c_s, t_s, u_s, l_s):
+                try:
+                    phase = Phase(composition=c, energy=float(t))
+                    phase.use = ( u == 'on' )
+                    phase.show_label = ( l == 'on' )
+                    pdata.add_phase(phase)
+                except ValueError:
+                    print "Invalid Input"
+
+            data['stability'] = p.get('stability')
             data['phase_data'] = pdata.phases
             ps = PhaseSpace(data['search'], mus=data['chem_pots'], data=pdata,
                     load=None)
-
-            if p.get('stability') and not data["chem_pots"]:
+            if not data['chem_pots']:
                 ps.compute_stabilities()
-                data['stability'] = p.get('stability')
-                for phase in ps._phases:
-                    if phase.stability > float(p.get('stability', 0.25)):
-                        phase.use = False
-                        phase.show_label = False
+
+            # < Mohan
+            # This following code might not be needed. WIll be removed in future updates.
+            # Original Codes:
+            #if p.get('stability') and not data["chem_pots"]:
+            #    ps.compute_stabilities()
+            #    data['stability'] = p.get('stability')
+            #    for phase in ps._phases:
+            #        if phase.stability > float(p.get('stability', 0.25)):
+            #            phase.use = False
+            #            phase.show_label = False
+            # Mohan >
 
         if ps.shape == (3, 0):
             data['plotlyjs'] = ps.phase_diagram.get_plotly_script_3d("placeholder")
