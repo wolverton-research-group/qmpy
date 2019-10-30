@@ -182,7 +182,7 @@ Additional notes
 
 Pagination
 ----------
-Pagination is a particularly useful feature while viewing queried data in the web browser as it avoids loading a large file containing information of hundreds of thousands of materials in a single webpage. Pagination can avoid a possible browser crash and thus a full data-loss in such a data overload scenario by returning data in smaller subsets along with URLs to the `next` and `previous` subsets in the `links` section of the returned result. By default, the maximum data returned in each subset, references as `limit`, is set to be 50. 
+Pagination is a particularly useful feature while viewing queried data in the web browser as it avoids loading a large file containing information of hundreds of thousands of materials in a single webpage. Pagination can avoid a possible browser crash and thus a full data-loss in such a data overload scenario by returning data in smaller subsets along with URLs to the :field:`next` and :field:`previous` subsets in the :field:`links` section of the returned result. By default, the maximum data returned in each subset, references as :field:`limit`, is set to be 50. 
 
 
 OPTiMaDe RESTful Specification
@@ -190,7 +190,9 @@ OPTiMaDe RESTful Specification
 
 The Open Databases Integration for Materials Design (`OPTiMaDe.org <https://www.optimade.org/>`_) consortium aims to make materials databases interoperational by developing a common REST API. This specification provides a detailed set of rules about keywords for materials data, certain rules about data lookup flexibility, and format of the returned data.
 
-Currently OQMD's RESTful implementation is compatible with the OPTiMaDe specification v0.9.5 and we will be updating it to v0.10.0 in the near future. There are a few notable differences between OQMDAPI and OPTiMaDe API because the former follows the traditional qmpy API keywords which had been under use in OQMD database since its inception. For example, the number of different types of element species consisting a particular chemical compound is referenced by `ntypes` keyword in qmpy API (and thus also in OQMD RESTful API) while the same quantity is referenced as `nelements` in OPTiMaDe API. Queries made in either APIs are processed internally within the same workflow following the initial keyword conversions.
+Currently OQMD's RESTful implementation is compatible with the OPTiMaDe v0.9.5 specification and we will be updating it to v0.10.0 in the near future. There are a few notable differences between OQMDAPI and OPTiMaDe API because the former follows the traditional qmpy API keywords which had been under use in OQMD database since its inception. 
+
+For example, the number of different types of element species consisting a particular chemical compound is referenced by :field:`ntypes` keyword in qmpy API (and thus also in OQMD RESTful API) while the same quantity is referenced as :field:`nelements` in OPTiMaDe API. Queries made in either APIs are processed internally within the same workflow following the initial keyword conversions.
 
 OPTiMaDe: Example Queries
 -------------------------
