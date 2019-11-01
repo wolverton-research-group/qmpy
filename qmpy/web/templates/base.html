@@ -1,4 +1,7 @@
 {% load admin_static %}<!DOCTYPE html>
+{% comment %}
+{% load analytics %}
+{% endcomment %}
 <html lang="{{ LANGUAGE_CODE|default:"en-us" }}" {% if LANGUAGE_BIDI %}dir="rtl"{% endif %}>
 <head>
 
@@ -69,5 +72,8 @@
 	<div id="footer">
 		{% block footer %} {% endblock %}</div></div>
 
+{% comment %}
+{% analytics "UA-48437345-3" %}
+{% endcomment %}
 </body>
 </html>

@@ -5,21 +5,31 @@
 OQMD | Download
 {% endblock %}
 
-
 {% block extrahead %}
 {% endblock %}
 
 {% block content %}
 
-<h1> Download </h1>
-<h2> Last updated on: {{ updated_on }}</h2>
+<h1>Download</h1>
 
-<p>
-Download the database at: <a href="{% static 'downloads/qmdb.sql.gz' %}">Download</a>
-</p>
+We provide the entire OQMD for download below as MySQL database dumps. <br><br>
 
-<p>
-Download the codebase to support it at: <a href="https://pypi.python.org/pypi/qmpy">Download</a>
-</p>
+<u>Note:</u> To host OQMD locally by importing the provided database dumps, the MySQL data folder
+(e.g. "/var/lib/mysql" for the system-MySQL on GNU/Linux systems) can require around 150-200G of
+disk space.<br><br>
 
+<h2>OQMD v1.2</h2>
+An incremental release with minor changes but a large number of new structures added. Release notes will be made available shortly!<br>
+Download the database here: <a href="{% static 'downloads/qmdb__v1_2__062018.sql.gz' %}">qmdb__v1_2__062018.sql.gz</a> (size: 8.9G)<br>
+The codebase to support it is available on <a href="https://pypi.org/project/qmpy/1.2.0/">PyPI</a><br><br><br>
+
+<h2>OQMD v1.1</h2>
+An incremental release with minor changes but a large number of new structures added.<br>
+Download the database here: <a href="{% static 'downloads/qmdb__v1_1__102016.sql.gz' %}">qmdb__v1_1__102016.sql.gz</a> (size: 4.7G)<br>
+The codebase to support it is available on <a href="https://pypi.org/project/qmpy/1.1.0.post1/">PyPI</a><br><br><br>
+
+<h2>OQMD v1.0</h2>
+The first release of OQMD retroactively called v1.0. Release notes will be made available shortly!<br>
+Download the database here: <a href="{% static 'downloads/qmdb__v1_0__042014.sql.gz' %}">qmdb__v1_0__042014.sql.gz</a> (size: 4.4G)<br>
+The codebase to support it is available on <a href="https://pypi.python.org/pypi/qmpy/0.4.8/">PyPI</a>
 {% endblock %} 
