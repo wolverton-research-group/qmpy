@@ -14,6 +14,9 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
+# needed for newer versions of Django with mod_wsgi
+WSGI_APPLICATION = 'qmpy.db.wsgi.application'
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -26,7 +29,7 @@ DATABASES = {
 }
 
 ALLOWED_HOSTS = ['www.oqmd.org', 'oqmd.org', 'http://oqmd.org', 'http://www.oqmd.org']
-##ALLOWED_HOSTS = ['josquin.northwestern.edu', 'josquin.northwestern.edu/oqmd.org']
+# ALLOWED_HOSTS = ['josquin.northwestern.edu', 'josquin.northwestern.edu:8080/oqmd2.org']
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -64,7 +67,7 @@ MEDIA_URL = '/media/'
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = '/var/www/html/oqmd.org/static/'
+STATIC_ROOT = '/home/oqmd/oqmd2.org/static/'
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
@@ -129,6 +132,7 @@ INSTALLED_APPS = (
     'rest_framework_xml',
     'rest_framework_yaml',
     'crispy_forms',
+    'mod_wsgi.server',
 )
 
 # A sample logging configuration. The only tangible logging
