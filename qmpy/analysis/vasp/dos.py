@@ -167,7 +167,7 @@ class DOS(models.Model):
                 ))
 
             p = bkp.figure(width=500, height=300,
-                           x_range=(-10, 10),
+                           x_range=(-6, 6),
                            tools=['pan', 'box_zoom', 'hover', 'reset', 'save', 'help'])
 
             p.title.text = 'Density of States'

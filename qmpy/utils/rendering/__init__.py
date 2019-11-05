@@ -11,8 +11,6 @@ if not 'matplotlib' in sys.modules:
         matplotlib.use('WXAgg')
     except:
         matplotlib.use('Agg')
-import matplotlib.pylab as plt
-from mpl_toolkits.mplot3d import Axes3D
 import json
 
 __all__ = ['Axis', 'Point', 'PointCollection', 'Line', 'Text', 'Renderer']

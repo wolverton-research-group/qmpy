@@ -295,15 +295,17 @@ html {
 	float: left;
 	width: 100%;
 	overflow: hidden;
-	font-size: 36px;
+	font-size: 28px;
 	background: #D46A6A;
 }
 
 #global-info {
-	float: left;
+    text-align: center;
+	float: center;
 	width: 100%;
 	overflow: hidden;
-	font-size: 36px;
+	font-size: 24px;
+	background: #E6E6E6;
 }
 
 #content {
