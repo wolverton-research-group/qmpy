@@ -79,7 +79,7 @@ $(function() {
       {% for fe in stable %}
       <tr class=clickableRow href="/materials/entry/{{ fe.entry.id }}">
         <td>{{ fe.entry.html | safe }}</td>
-        <td>{{ fe.entry.spacegroup.symbol }}</td>
+        <td>{{ fe.calculation.output.spacegroup.hm }}</td>
         <td>{{ fe.entry.energy |floatformat:-3 }}</td>
         {% if fe.stability < 0 %}
             <td>{{ 0 }}</td>
@@ -122,7 +122,7 @@ $(function() {
   <tr class=clickableRow href="/materials/entry/{{ fe.entry.id }}">
     <td>{{ fe.entry.id }}</td>
     <td>{{ fe.entry.html | safe }}</td>
-    <td>{{ fe.entry.spacegroup.symbol }}</td>
+    <td>{{ fe.calculation.output.spacegroup.hm }}</td>
     <td>{{ fe.entry.energy |floatformat:-3 }}</td>
     {% if fe.stability < 0 %}
         <td>{{ 0 }}</td>
