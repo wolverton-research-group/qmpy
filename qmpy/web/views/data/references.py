@@ -2,7 +2,7 @@ import numpy as np
 
 import matplotlib
 matplotlib.use("Agg")
-import matplotlib.pylab as plt
+import matplotlib.pyplot as plt
 import StringIO
 
 from django.shortcuts import render_to_response

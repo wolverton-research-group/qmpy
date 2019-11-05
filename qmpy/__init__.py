@@ -92,7 +92,7 @@ try:
     import spglib 
     FOUND_SPGLIB = True
 except ImportError:
-    logging.warn("Failed to import pyspglib."
+    logging.warn("Failed to import spglib."
             'Download at: http://sourceforge.net/projects/spglib/ and'
             'follow instructions for installing python API')
     FOUND_SPGLIB = False

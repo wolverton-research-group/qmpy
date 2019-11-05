@@ -138,3 +138,18 @@ def phase_diagram_view(request):
     return render_to_response('analysis/phase_diagram.html',
             get_globals(data),
             RequestContext(request))
+
+def chem_pot_view(request):
+    data = {'search': ''}
+    if request.method == 'POST':
+        p = request.POST
+        data['search'] = p['search']
+        elts = parse_comp(data['search']).keys()
+        ps = PhaseSpace('-'.join(elts))
+        ps.stability_window(data['search'])
+        data['flotscript'] = ps.renderer.get_flot_script()
+        data['chem_pots'] = ps.chempot_bounds(data['search'], total=True)
+
+    return render_to_response('analysis/chem_pots.html',
+            data,
+            RequestContext(request))

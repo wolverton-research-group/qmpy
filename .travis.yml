@@ -5,6 +5,7 @@ python:
 branches:
   only:
     - master
+    - production
 virtualenv:
   system_site_packages: true
 services:
