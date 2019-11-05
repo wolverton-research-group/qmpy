@@ -2,7 +2,7 @@
 Installation
 ============
 
-    It is recommended to install and use the `qmpy` within a python virtual environment. See :ref:`virtual-env`.
+*Note: It is recommended to install and use the qmpy within a python virtual environment. See,* :ref:`virtual-env`.
     
 ---------
 From repo

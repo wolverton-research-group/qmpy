@@ -88,7 +88,7 @@ theForm.onsubmit = function(e) {
 
 <script language="javascript" type="text/javascript">
 function openWindow() {
-    msgwin = window.open('', 'popup', 'width=800px, height=400px');
+    msgwin = window.open('', 'popup', 'width=900px, height=550px');
     msgwin.document.write(
             '<HTML><HEAD><TITLE>Definition</TITLE></HEAD>' +
             '<Body>' +
@@ -118,8 +118,6 @@ function openWindow() {
   <p class="comp"> <b>Competing Phases: </b> {{ phase_links |safeseq |join:" + " }} </p>
 
   {% elif phase_type == 'unstable' %}
-  <p><span style="font-size:25px;background-color:red;color:white;font-weight:800;margin-left:15px">
-      &nbsp;Unstable Phase&nbsp;</span></p>
   <p class="comp"> 
     <b>Entry Link:</b> 
     <a href="/materials/entry/{{current_phase.formation.entry.id}}"
@@ -131,14 +129,13 @@ function openWindow() {
   <p class="comp"><b>Hull Distance<button onClick="openWindow()" class="question">?</button>:</b> {{ hull_dis | floatformat:-3}} eV/atom </p>
   <p class="comp"> <b>Decompose Into: </b> {{ phase_links |safeseq |join:" + " }} </p>
   {% elif phase_type == 'nophase' %}
-  <p><span style="font-size:25px;background-color:lightblue;color:white;font-weight:800;margin-left:15px">
-      &nbsp;No Single Phase&nbsp;</span></p>
+  <p class="comp"><b>No Calculated Phase</b></p>
   <p class="comp"><b>&Delta;H:</b> {{delta_h | floatformat:-3}} eV/atom </p>
   <p class="comp"> <b>Decompose Into: </b> {{ phase_links |safeseq |join:" + " }} </p>
   {% endif %}
 {% endif %}
 {% if composition.experiment %}
-<p class="comp" style="font-size:18px"><u><b>Expt &Delta;H:</b> {{ composition.experiment | floatformat:-3 }} eV/atom</u></p>
+<p class="comp" style="font-size:18px"><u><b>Experimental formation energy:</b> {{ composition.experiment | floatformat:-3 }} eV/atom</u></p>
 {% endif %}
 {% endblock %}
 
@@ -187,7 +184,7 @@ function openWindow() {
 
 <tbody>
   {% for fe in results %}
-  <tr>
+  <tr class=clickableRow href="/materials/entry/{{ fe.entry.id }}">
     <td><a href="/materials/entry/{{ fe.entry.id }}" target="_blank">{{ fe.entry.id  }}</a></td>
     <td>{{ fe.entry.html | safe }}</td>
     <td>{{ fe.entry.structure.spacegroup.symbol }}</td>
