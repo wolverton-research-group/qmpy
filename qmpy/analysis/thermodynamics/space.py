@@ -2,7 +2,7 @@
 
 import networkx as nx
 from scipy.spatial import ConvexHull
-import matplotlib.pylab as plt
+import matplotlib.pyplot as plt
 import logging
 
 from django.db import transaction
