@@ -1,6 +1,6 @@
 from qmpy import *
 from qmpy.analysis.pdf import *
-import matplotlib.pylab as plt
+#import matplotlib.pylab as plt
 
 s = io.read('files/POSCAR')
 

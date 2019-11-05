@@ -3,7 +3,6 @@ import logging
 from renderable import *
 import qmpy
 import point
-from mpl_toolkits.mplot3d import Axes3D
 
 logger = logging.getLogger(__name__)
 

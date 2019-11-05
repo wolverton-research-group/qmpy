@@ -249,7 +249,7 @@ class Calculation(models.Model):
         for h in self.hubbards:
             if not h:
                 continue
-            for a in self.input:
+            for a in self.output:
                 if ( h.element == a.element and
                         h.ox in [None, a.ox]):
                     hcomp[h] += 1

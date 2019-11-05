@@ -3,7 +3,6 @@
 import numpy as np
 import numpy.linalg as linalg
 from scipy.spatial import Voronoi
-import matplotlib.pylab as plt
 import itertools
 import logging
 
