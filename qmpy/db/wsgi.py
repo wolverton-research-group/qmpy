@@ -5,9 +5,6 @@ import site
 INSTALL_DIR = os.path.abspath(__file__).replace('/qmpy/db/wsgi.py', '')
 
 os.environ['HOME'] = '/dev/shm'
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.cbook
 
 # # Add the app's directory to the PYTHONPATH
 sys.path.append(INSTALL_DIR+'/qmpy/db')
