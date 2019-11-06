@@ -15,6 +15,7 @@ FAQs
     from a locally hosted qmdb-SQL-database by querying for "qmpy.ExptFormationEnergy" objects
     
 3. I am encountering problems with pip installation of the new qmpy(v1.3.0). What to do?
+
     - Installation of the dependency package pygraphviz via pip could raise issues in 
       some systems. If you're using a conda environment, it maybe easily solved by 
       installing pygraphviz prior to the qmpy installation via
