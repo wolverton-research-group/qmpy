@@ -25,6 +25,9 @@ or::
 
         $ sudo apt-get install libatlas-dev libatlas-base-dev 
         $ sudo apt-get install liblapack-dev gfortran
+        
+    Some of the common installation problems are addressed in the FAQs 
+    section of the documentation
 
 ----------------
 From GitHub repo
