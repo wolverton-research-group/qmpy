@@ -5,13 +5,25 @@
 {% block content %}
 
 <h1> OQMD API </h1>
+<p>
+OQMD now supports REpresentational State Transfer (REST) API based, fully open data transfer from our servers to the users around the world. 
+The RESTful system allows a user to access the OQMD.org to search, filter and download data without having to download the entire SQL database or even without using a browser or any additional software packages at the user-end.
+All it needs is a simple, general file retrieval system (eg: wget) and all the data filter constraints are passed from the user to the server via the URL of file request.
+At this time, we support a native OQMD RESTful specification based on conventional qmpy data keywords, and the <a href="http://www.optimade.org/">OPTiMaDe</a> RESTful specification - A detailed description of all these is provided in the <a href="{% static "docs/restful.html" %}"> RESTful Documentation page</a>.
+
+The data is availed without requiring any user credentials. So usage of a specific Python query package is optional, but nevertheless a standalone <a href="https://pypi.org/project/qmpy-rester/">Querying System</a> is provided for convenience of the frequent users.
+</p>
 
 <h2> Implemented RESTful APIs  </h2>
+<p>
+The following links are the endpoints for the user's preferred RESTful query specification. By default, these endpoints list the paginated OQMD data without applying any filters.
 <ul>
-	<li><a href="/oqmdapi/formationenergy">All data - OQMD API</a></li>
-	<li><a href="/optimade/structures">All data - Optimade API</a></li>
+	<li><a href="/oqmdapi/formationenergy">All data - OQMD API Endpoint</a></li>
+	<li><a href="/optimade/structures">All data - Optimade API Endpoint</a></li>
 </ul>
+</p>
 <h2> Documentation  </h2>
+More information on the RESTful API system is available within the OQMD documention
 <ul>
     <li> <a href="{% static "docs/restful.html" %}">RESTful API Documentation</a></li>
 </ul>
