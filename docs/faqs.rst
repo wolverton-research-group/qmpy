@@ -44,6 +44,13 @@ FAQs
       ``element_list`` is defined `here <https://github.com/wolverton-research-group/qmpy/blob/eb592d7846676b8c40399190235575959eb4983b/qmpy/materials/composition.py#L96>`_ as:
       
           ``comp.element_list = '_'.join(comp.comp.keys())+'_'``
-      
+
+4. How can I reproduce the calculation of an entry in the database?
+    
+    -If you just want the total energy:
+     You can run a static calculation using the settings as shown in the webpage (INCAR,KPOINTS). Output structure of the 'static' calculation shown in the 'Calculation History' can be used as POSCAR. You need to create POTCAR by your own. (Note: different version of POTCAR will give **very different** energy result. You can contact us at oqmd.questions@gmail.com for further information.)
+    -If you also want to do the relaxation:
+     For entries that have 'relaxation' calculation in 'Calculation History', the input structure of 'relaxation' calculation can be used as POSCAR. You can then run a relaxation calculation, followed by a static calculation using the settings as shown in the webpage. Please don't use the structures given in 'coarse_relax', 'fine_relax' or '_lda' calculations, they are not the structures used for final static calculation, which is used to calculate the formation energy.
+    **For any calculations, it is recommended to use 'Calculation.setup' function in qmpy to generate the inputs for vasp calculations.**
 
 .. _`npj Comput. Mater. 1, 15010 (2015)`: http://dx.doi.org/10.1038/npjcompumats.2015.10
