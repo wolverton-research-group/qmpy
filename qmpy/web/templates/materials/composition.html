@@ -187,7 +187,7 @@ function openWindow() {
   <tr class=clickableRow href="/materials/entry/{{ fe.entry.id }}">
     <td><a href="/materials/entry/{{ fe.entry.id }}" target="_blank">{{ fe.entry.id  }}</a></td>
     <td>{{ fe.entry.html | safe }}</td>
-    <td>{{ fe.entry.structure.spacegroup.symbol }}</td>
+    <td>{{ fe.calculation.output.spacegroup.symbol }}</td>
     <td>{{ fe.delta_e |floatformat:-3 }}</td>
     {% if fe.stability < 0 %}
     	<td>{{ 0 }}</td>
@@ -195,7 +195,7 @@ function openWindow() {
     	<td>{{ fe.stability |floatformat:-3 }}</td>
     {% endif %}
     <td>{{ fe.entry.prototype.name }}</td>
-    <td>{{ fe.entry.natoms }}</td>
+    <td>{{ fe.calculation.output.natoms }}</td>
     <td>{{ fe.entry.reference.citation }}</td>
   </tr>
   {% endfor %}
