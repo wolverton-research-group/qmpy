@@ -78,7 +78,7 @@ class DataFilterForm(forms.Form):
                              <i>stability</i>, <i>delta_e</i>, <i>band_gap</i><br>\
                              Logical Operators: <code>AND</code>, <code>OR</code>, <code>NOT</code>\
                              </html>",
-                             widget=forms.TextInput(attrs={'placeholder': 'e.g. (NOT element=O) AND (ntypes=2 OR natoms<5) AND stability<0.01'}),
+                             widget=forms.TextInput(attrs={'placeholder': 'e.g. (NOT element=O) AND (ntypes=2 OR spacegroup="Fm-3m") AND stability<0.01'}),
                             )
     limit = forms.IntegerField(required=False, label='Limit', initial=50)
     sort_offset = forms.IntegerField(required=False, label='Offset', initial=0)

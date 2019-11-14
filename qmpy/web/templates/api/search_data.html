@@ -110,6 +110,17 @@ div#output {
 
 {% crispy form %}
 <a name='apisearchresult'></a>
+
+{% if suburl %}
+    {% if not result %}
+    <p>
+    <font size="3">
+    There are <b>0</b> entries found.
+    </font>
+    </p>
+    {% endif %}
+{% endif %}
+
 {% if result %}
 <h1> Results: </h1>
 <section style="width:100%;margin-bottom:10px">

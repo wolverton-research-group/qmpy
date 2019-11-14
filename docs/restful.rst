@@ -115,7 +115,7 @@ Keywords exclusively available for for usage in :field:`fields`:
 
 Keywords commonly available for both :field:`filter` and :field:`fields`
     - :field:`prototype`: structure prototype of that compound, e.g. Cu, CsCl
-    - :field:`spacegroup`: the space group of the structure, e.g. Fm-3m
+    - :field:`spacegroup`: the space group of the structure, e.g. "Fm-3m" (make sure to add double quotes)
     - :field:`natoms`: number of atoms in the supercell, e.g. 2, >5
     - :field:`volume`: volume of the supercell, e.g. >10
     - :field:`ntypes`: number of elements types in the compound, e.g. 2, <3
