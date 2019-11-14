@@ -116,7 +116,8 @@ class Lark2Django:
 
                     else:
                         if db_prop in self.db_keys.keys():
-                            return op_fn(self.db_keys[db_prop],self.evaluate(children[2]))
+                            _child_value = self.evaluate(children[2]).replace('"','')
+                            return op_fn(self.db_keys[db_prop],_child_value)
                         else:
                             error_msg = "Unknown property is queried : "+(db_prop)
                             #print(error_msg)
