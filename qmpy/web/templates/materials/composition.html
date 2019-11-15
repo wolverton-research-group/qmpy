@@ -205,6 +205,38 @@ function openWindow() {
 
 {% endif %}
 
+{% if running %}
+<div style="padding-top:20px;float:left">
+<h2> Compounds under calculation at this composition </h2>
+<table>
+<thead>
+  <tr>
+    <th>ID</th>
+    <th>Composition</th>
+    <th>Spacegroup</th>
+    <th>Prototype</th>
+    <th># of atoms</th>
+    <th>Reference</th>
+  </tr>
+</thead>
+
+<tbody>
+  {% for entry in running %}
+  <tr class=clickableRow href="/materials/entry/{{ entry.id }}">
+    <td><a href="/materials/entry/{{ entry.id }}" target="_blank">{{ entry.id  }}</a></td>
+    <td>{{ entry.html | safe }}</td>
+    <td>{{ entry.input.spacegroup.symbol }}</td>
+    <td>{{ entry.prototype.name }}</td>
+    <td>{{ entry.input.natoms }}</td>
+    <td>{{ entry.reference.citation }}</td>
+  </tr>
+  {% endfor %}
+</tbody>
+</table>
+</div>
+
+{% endif %}
+
 {% endblock %}
 
 {% block sidebar %}
