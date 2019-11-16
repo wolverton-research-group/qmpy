@@ -57,6 +57,8 @@ def composition_view(request, search=None):
 
         data['results'] = FormationEnergy.objects.filter(composition=comp,
                                                          fit='standard').order_by('delta_e')
+        data['running'] = Entry.objects.filter(composition=comp,formationenergy=
+                             None).filter(id=F("duplicate_of__id"))
         data['space'] = '-'.join(comp.comp.keys())
 
         if comp.ntypes == 1:
