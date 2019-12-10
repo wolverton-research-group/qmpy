@@ -233,7 +233,21 @@ class Host(models.Model):
         self.utilization = util
         return util
 
-    def get_project(self):
+    # < Jiahong
+    #def get_project(self):
+    #    """
+    #    Out of the active projects able to run on this host,
+    #      select one at random
+
+    #    Output:
+    #        Project, Active project able to run on this host
+    #    """
+    #    proj = Project.objects.filter(allocations__host=self, state=1)
+    #    proj = proj.filter(task__state=0)
+    #    if proj.exists():
+    #        return random.choice(list(proj.distinct()))
+
+    def get_project(self, maxuse=400):
         """
         Out of the active projects able to run on this host,
           select one at random
@@ -244,7 +258,10 @@ class Host(models.Model):
         proj = Project.objects.filter(allocations__host=self, state=1)
         proj = proj.filter(task__state=0)
         if proj.exists():
-            return random.choice(list(proj.distinct()))
+            proj_list = list(proj.distinct())
+            proj_list = [p for p in proj_list if p.running.count() < maxuse]
+            if len(proj_list) > 0:
+                return random.choice(proj_list)
 
     def get_tasks(self, project=None):
         tasks = queue.Task.objects.filter(state=0)
