@@ -78,7 +78,7 @@ class User(AbstractUser):
     def create():
         username = raw_input("Username: ")
         email = raw_input("E-mail address: ")
-        user, new = User.objects.get_or_create(username=username)
+        user, new = User.objects.get_or_create(username=username,last_login=datetime.now())
         if not new:
             print 'User by that name exists!'
             print 'Please try a new name, or exit with Ctrl-x'
