@@ -7,7 +7,7 @@ import gzip
 import os
 from os.path import exists, isfile, isdir
 import time
-import StringIO
+import io
 
 from django.db import models
 import numpy as np
@@ -82,7 +82,7 @@ def write(struct, filename=None, comments=None, direct=True,
                 cdict['%s%+f' % (a.element_id, a.oxidation_state)] += 1
             else:
                 cdict['%s%+d' % (a.element_id, a.oxidation_state)] += 1
-        ordered_keys = sorted([ k for k in cdict.keys() ])
+        ordered_keys = sorted([ k for k in list(cdict.keys()) ])
         counts = [ int(cdict[k]) for k in ordered_keys ]
 
     if comments is not None:
@@ -136,7 +136,7 @@ def read(poscar, species=None):
     struct = st.Structure()
 
     # Read in the title block, and system sell
-    if isinstance(poscar, StringIO.StringIO):
+    if isinstance(poscar, io.StringIO):
         poscar = poscar
     else:
         poscar = open(poscar,'r')
@@ -168,11 +168,11 @@ def read(poscar, species=None):
     # If the format is not VASP 5, the elements should
     #  have been listed in the title
     if not vasp5:
-        counts = map(int, _species)
+        counts = list(map(int, _species))
         if not species:
             _species = title.strip().split()
             for s in _species:
-                if not s in qmpy.elements.keys():
+                if not s in list(qmpy.elements.keys()):
                     msg = 'In VASP4.x format, title line MUST be species present'
                     raise POSCARError
         else:

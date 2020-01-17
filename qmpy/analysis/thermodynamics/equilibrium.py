@@ -2,7 +2,7 @@ import numpy as np
 import logging
 
 import qmpy
-import phase
+from . import phase
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +52,7 @@ class Equilibrium:
         A = self.composition_matrix
         b = self.energy_array
         dmus = np.linalg.lstsq(A, b)
-        self._chem_pots = dict(zip(self.elements, dmus[0]))
+        self._chem_pots = dict(list(zip(self.elements, dmus[0])))
         return self._chem_pots
 
     @property

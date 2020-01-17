@@ -21,13 +21,13 @@ import qmpy
 import qmpy.materials.composition as comp
 import qmpy.materials.structure as strx
 import qmpy.io.poscar as poscar
-import potential as pot
+from . import potential as pot
 import qmpy.materials.formation_energy as fe
 import qmpy.utils as utils
 import qmpy.db.custom as cdb
 import qmpy.analysis.thermodynamics as thermo
 import qmpy.analysis.griddata as grid
-import dos
+from . import dos
 from qmpy.data import chem_pots
 from qmpy.materials.atom import Atom, Site
 from qmpy.utils import *
@@ -44,7 +44,7 @@ re_iter = re.compile('([0-9]+)\( *([0-9]+)\)')
 def value_formatter(value):
     if isinstance(value, list):
         return ' '.join(map(value_formatter, value))
-    elif isinstance(value, basestring):
+    elif isinstance(value, str):
         return value.upper()
     elif isinstance(value, bool):
         return ('.%s.' % value).upper()
@@ -251,12 +251,12 @@ class Calculation(models.Model):
                 if ( h.element == a.element and
                         h.ox in [None, a.ox]):
                     hcomp[h] += 1
-        return dict(hcomp.items())
+        return dict(list(hcomp.items()))
 
     @property
     def true_comp(self):
         comp = defaultdict(int)
-        for c, v in self.comp.items():
+        for c, v in list(self.comp.items()):
             if self.hubbard_set.filter(element=c).exists():
                 h = self.hubbard_set.get(element=c)
                 if h:
@@ -321,7 +321,7 @@ class Calculation(models.Model):
         ps.compute_stabilities()
 
     def get_incar(self):
-        s = dict((k.lower(), v) for k, v in self.settings.items() if not k in
+        s = dict((k.lower(), v) for k, v in list(self.settings.items()) if not k in
                 ['gamma', 'kppra', 'scale_encut', 'potentials', 'hubbards'])
 
         incar = '#= General Settings =#\n'
@@ -486,7 +486,7 @@ class Calculation(models.Model):
                 elif t == 'string':
                     settings[s.get('name').lower()] = s.text.strip()
             elif s.tag == 'v':
-                settings[s.get('name').lower()] = map(float, s.text.split())
+                settings[s.get('name').lower()] = list(map(float, s.text.split()))
         self.settings = settings
 
         # read other things
@@ -494,7 +494,7 @@ class Calculation(models.Model):
         for b in self.xmlroot.findall("structure/crystal/*[@name='basis']"):
             cell = []
             for v in b:
-                cell.append(map(float, v.strip().split()))
+                cell.append(list(map(float, v.strip().split())))
             lattices.append(np.vstack(cell))
 
         # coords
@@ -502,7 +502,7 @@ class Calculation(models.Model):
         for c in self.xmlroot.findall("structure/varray[@name='positions']"):
             coords = []
             for v in c:
-                coords.append(map(float, v.strip().split()))
+                coords.append(list(map(float, v.strip().split())))
             positions.append(np.vstack(coords))
 
         raise NotImplementedError
@@ -623,7 +623,7 @@ class Calculation(models.Model):
             if 'ions per type' in line:
                 # there are 2*N occurrences of "POTCAR:" in OUTCAR
                 elt_list = elt_list[:len(elt_list)/2]
-                counts = map(int, line.split()[4:])
+                counts = list(map(int, line.split()[4:]))
                 assert len(counts) == len(elt_list)
                 for n, e in zip(counts, elt_list):
                     elements += [e]*n
@@ -720,7 +720,7 @@ class Calculation(models.Model):
                 if '------' in line:
                     continue
                 try:
-                    force_loop.append(map(float, line.split()[3:]))
+                    force_loop.append(list(map(float, line.split()[3:])))
                 except ValueError:
                     # when the forces output format is messed up
                     # e.g. "0.0000000 0.0000000-1173493.45" without space b/w f_y, f_z
@@ -740,7 +740,7 @@ class Calculation(models.Model):
             elif len(position_loop) < self.natoms:
                 if '------' in line:
                     continue
-                position_loop.append(map(float, line.split()[:3]))
+                position_loop.append(list(map(float, line.split()[:3])))
                 if len(position_loop) == self.natoms:
                     positions.append(position_loop)
         return np.array(positions)
@@ -773,7 +773,7 @@ class Calculation(models.Model):
             stresses = []
             for line in self.outcar:
                 if 'in kB' in line:
-                    stresses.append(map(ffloat, line.split()[2:]))
+                    stresses.append(list(map(ffloat, line.split()[2:])))
             return np.array(stresses)
 
     def read_kpoints(self):
@@ -785,7 +785,7 @@ class Calculation(models.Model):
                 self.irreducible_kpoints = int(line.split()[1])
             if 'k-points in reciprocal lattice and weights' in line:
                 for j in range(self.irreducible_kpoints):
-                    x,y,z,w = map(float, self.outcar[i+j+1].split())
+                    x,y,z,w = list(map(float, self.outcar[i+j+1].split()))
                     kpts.append([x,y,z])
                     weights.append(w)
                 else:
@@ -811,7 +811,7 @@ class Calculation(models.Model):
                 tocc = []
                 tband = []
                 for j in range(self.settings['nbands']):
-                    b, e, o = map(ffloat, self.outcar[i+j+2].split())
+                    b, e, o = list(map(ffloat, self.outcar[i+j+2].split()))
                     tocc.append(o)
                     tband.append(e)
                 occs.append(tocc)
@@ -892,7 +892,7 @@ class Calculation(models.Model):
         v_fin = None
         for line in self.outcar[::-1]:
             if 'Iteration' in line:
-                ionic, electronic = map(int, re_iter.findall(line)[0])
+                ionic, electronic = list(map(int, re_iter.findall(line)[0]))
                 if sett_nelm == electronic:
                     sc_converged = False
                 if sett_nsw == ionic:
@@ -1067,7 +1067,7 @@ class Calculation(models.Model):
     def read_stdout(self, filename='stdout.txt'):
         stdout_file = os.path.join(self.path, filename)
         if not os.path.exists(stdout_file):
-            print('VASP stdout file {} not found'.format(stdout_file))
+            print(('VASP stdout file {} not found'.format(stdout_file)))
             return []
         with open(stdout_file, 'r') as fr:
             stdout = fr.read()
@@ -1166,15 +1166,14 @@ class Calculation(models.Model):
         d = f.readlines() 
         #max: scaling added
         scale = float(d[1].strip())
-        lattice = np.array([map(float, r.split()) for r in d[2:5]])*scale
+        lattice = np.array([list(map(float, r.split())) for r in d[2:5]])*scale
         stoich = np.array(d[6].split(),int)
         count = sum(stoich)
         meshsize = np.array(d[9+int(count)].split(),int)
         mesh_spacing = 1./meshsize
         top = 10+int(count)
         length = int(np.floor(np.product(meshsize)/width))
-        list = np.array(map(lambda d:
-            np.array(d.strip().split(), float), d[top:top+length]))
+        list = np.array([np.array(d.strip().split(), float) for d in d[top:top+length]])
         if np.product(meshsize) % width != 0:
             trail = d[top+length].rstrip().split()
             rem = np.product(meshsize) % width
@@ -1522,8 +1521,8 @@ class Calculation(models.Model):
 
     def set_hubbards(self, convention='wang'):
         hubs = HUBBARDS.get(convention, {})
-        elts = set( k[0] for k in hubs.keys() )
-        ligs = set( k[1] for k in hubs.keys() )
+        elts = set( k[0] for k in list(hubs.keys()) )
+        ligs = set( k[1] for k in list(hubs.keys()) )
 
         # How many ligand elements are in the struture?
         lig_int = ligs & set(self.input.comp.keys())
@@ -1678,8 +1677,8 @@ class Calculation(models.Model):
         hub_mus = chem_pots[reference]['hubbards']
         elt_mus = chem_pots[reference]['elements']
         adjust = 0
-        adjust -= sum([ hub_mus.get(k.key, 0)*v for k,v in self.hub_comp.items() ])
-        adjust -= sum([ elt_mus[k]*v for k,v in self.comp.items() ])
+        adjust -= sum([ hub_mus.get(k.key, 0)*v for k,v in list(self.hub_comp.items()) ])
+        adjust -= sum([ elt_mus[k]*v for k,v in list(self.comp.items()) ])
         formation.delta_e = ( self.energy + adjust ) / self.natoms
         formation.composition = self.input.composition
         formation.entry = self.entry
@@ -1739,7 +1738,7 @@ class Calculation(models.Model):
                 CHGCAR/WAVECAR file for the calculation.
         """
 
-        if isinstance(structure, basestring):
+        if isinstance(structure, str):
             structure = os.path.abspath(structure)
             if path is None:
                 path = os.path.dirname(structure)

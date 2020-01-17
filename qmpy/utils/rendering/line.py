@@ -1,8 +1,8 @@
 import logging
 
 import qmpy
-import point
-from renderable import *
+from . import point
+from .renderable import *
 
 logger = logging.getLogger(__name__)
 

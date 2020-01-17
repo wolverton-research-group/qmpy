@@ -81,8 +81,8 @@ if __name__ == "__main__":
     #print E_vib
     #print S_vib
     #print F_vib
-    print 3*BOLTZCONST
-    print "T_(K) E_vib_(meV/atom) S_vib_(meV/atom/K) F_vib_(meV/atom) C_V_(meV/atom/K)"
+    print(3*BOLTZCONST)
+    print("T_(K) E_vib_(meV/atom) S_vib_(meV/atom/K) F_vib_(meV/atom) C_V_(meV/atom/K)")
     for i in range(len(temp)):
-        print temp[i],E_vib[i],S_vib[i],F_vib[i],C_V[i]
+        print(temp[i],E_vib[i],S_vib[i],F_vib[i],C_V[i])
 

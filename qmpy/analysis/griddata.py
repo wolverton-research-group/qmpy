@@ -91,10 +91,10 @@ class GridData():
         neighbors = [ np.array(index) + n for n in neighbors ]
         neighbors = [ n % self.mesh for n in neighbors ]
         values = [ self.data[tuple(n)] for n in neighbors ]
-        print values
+        print(values)
 
         lowest = np.argsort(values)[0]
-        print lowest
+        print(lowest)
         if values[lowest] < self.data[tuple(index)]:
             return self.local_min(neighbors[lowest])
         return index, self.data[tuple(index)]

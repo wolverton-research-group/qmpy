@@ -52,7 +52,7 @@ class QMPYRester(object):
                        'natoms', 'ntypes', 'stability',
                        'delta_e', 'band_gap']
 
-        for k in kwargs.keys():
+        for k in list(kwargs.keys()):
             if k in kwargs_list:
                 url_args.append('%s=%s' %(k, kwargs[k]))
             elif k in filter_list:
@@ -61,7 +61,7 @@ class QMPYRester(object):
                 else:
                     filter_args.append('%s=%s' %(k, kwargs[k]))
 
-        if 'filter' in kwargs.keys():
+        if 'filter' in list(kwargs.keys()):
             filter_args.append(kwargs['filter'])
 
 
@@ -69,14 +69,14 @@ class QMPYRester(object):
             filters_tag = ' AND '.join(filter_args)
             url_args.append('filter='+filters_tag)
         if verbose:
-            print "Your filters are:"
+            print("Your filters are:")
             if url_args == []:
-                print "   No filters?"
+                print("   No filters?")
             else:
                 for arg in url_args:
-                    print "   ", arg
+                    print("   ", arg)
 
-            ans = raw_input('Proceed? [Y/n]:')
+            ans = input('Proceed? [Y/n]:')
 
             if ans not in ['Y', 'y', 'Yes', 'yes']:
                 return
@@ -118,14 +118,14 @@ class QMPYRester(object):
                 url_args.append('%s=%s' %(k, kwargs[k]))
 
         if verbose:
-            print "Your Entry filters are:"
+            print("Your Entry filters are:")
             if url_args == []:
-                print "   No filters?"
+                print("   No filters?")
             else:
                 for arg in url_args:
-                    print "   ", arg
+                    print("   ", arg)
 
-            ans = raw_input('Proceed? [Y/n]:')
+            ans = input('Proceed? [Y/n]:')
 
             if ans not in ['Y', 'y', 'Yes', 'yes']:
                 return
@@ -175,14 +175,14 @@ class QMPYRester(object):
                 url_args.append('%s=%s' %(k, kwargs[k]))
 
         if verbose:
-            print "Your Calculation filters are:"
+            print("Your Calculation filters are:")
             if url_args == []:
-                print "   No filters?"
+                print("   No filters?")
             else:
                 for arg in url_args:
-                    print "   ", arg
+                    print("   ", arg)
 
-            ans = raw_input('Proceed? [Y/n]:')
+            ans = input('Proceed? [Y/n]:')
 
             if ans not in ['Y', 'y', 'Yes', 'yes']:
                 return

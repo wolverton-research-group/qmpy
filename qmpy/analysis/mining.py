@@ -24,7 +24,7 @@ def get_npoint_statistics(comp):
     return desc
 
 def get_composition_descriptors(comp):
-    if isinstance(comp, basestring):
+    if isinstance(comp, str):
         comp = parse_comp(comp)
     elif isinstance(comp, qmpy.Composition):
         comp = comp.comp
@@ -34,7 +34,7 @@ def get_composition_descriptors(comp):
     return desc
 
 def get_basic_composition_descriptors(comp):
-    if isinstance(comp, basestring):
+    if isinstance(comp, str):
         comp = parse_comp(comp)
     elif isinstance(comp, qmpy.Composition):
         comp = comp.comp
@@ -47,10 +47,10 @@ def get_basic_composition_descriptors(comp):
         for func in [ max_diff, average ]:
             desc['%s_%s' % (func.__doc__, attr)] = func(data)
 
-    desc['s_val'] = sum([ elts[e]['s_elec']*x for e,x in comp.items() ])
-    desc['p_val'] = sum([ elts[e]['p_elec']*x for e,x in comp.items() ])
-    desc['d_val'] = sum([ elts[e]['d_elec']*x for e,x in comp.items() ])
-    desc['f_val'] = sum([ elts[e]['f_elec']*x for e,x in comp.items() ])
+    desc['s_val'] = sum([ elts[e]['s_elec']*x for e,x in list(comp.items()) ])
+    desc['p_val'] = sum([ elts[e]['p_elec']*x for e,x in list(comp.items()) ])
+    desc['d_val'] = sum([ elts[e]['d_elec']*x for e,x in list(comp.items()) ])
+    desc['f_val'] = sum([ elts[e]['f_elec']*x for e,x in list(comp.items()) ])
     return desc
 
 def get_rich_composition_descriptors(comp):
@@ -60,7 +60,7 @@ def get_rich_composition_descriptors(comp):
     desc['stable'] = forms.filter(stability__lte=0).exists()
     desc['near_stable'] = forms.filter(stability__lte=0.025).exists()
 
-    near_forms = qmpy.Formation.search(comp.comp.keys())
+    near_forms = qmpy.Formation.search(list(comp.comp.keys()))
     desc['stable_in_space'] = near_forms.filter(stability__lt=0).count()
     desc['near_statble_in_space'] = near_forms.filter(stability__lt=0.025).count()
     return desc

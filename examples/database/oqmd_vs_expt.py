@@ -9,7 +9,7 @@ comps = comps.filter(exptformationenergy__dft=False)
 
 f = open('data.txt', 'w')
 for comp in comps.distinct():
-    print comp
+    print(comp)
     # OQMD deltaH
     gs = comp.ground_state
     if gs is None:

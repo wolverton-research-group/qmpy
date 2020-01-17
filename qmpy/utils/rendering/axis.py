@@ -1,6 +1,6 @@
 import logging
 
-from renderable import *
+from .renderable import *
 import qmpy
 
 logger = logging.getLogger(__name__)

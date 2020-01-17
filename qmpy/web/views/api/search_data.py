@@ -4,7 +4,7 @@ from django.shortcuts import render
 from django.core.context_processors import csrf
 
 from qmpy import INSTALL_PATH
-from search_data_forms import DataFilterForm
+from .search_data_forms import DataFilterForm
 from qmpy.rester import qmpy_rester
 
 import operator

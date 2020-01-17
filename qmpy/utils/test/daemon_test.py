@@ -3,7 +3,7 @@ import time
 import os.path
 
 p = os.path.dirname(os.path.abspath(__file__))
-print p
+print(p)
 
 class TaskManager(Daemon):
     def run(self):
@@ -12,7 +12,7 @@ class TaskManager(Daemon):
             tasks = open(p+'/tasks.txt').readlines()
             if tasks:
                 task = tasks.pop(0).strip()
-                print 'running task:', task
+                print('running task:', task)
                 open(p+'/jobs.txt','a').write('job-%s\n' %
                         task.replace('task-', ''))
             open(p+'/tasks.txt','w').write(''.join(tasks))
@@ -24,7 +24,7 @@ def JobManager(Daemon):
             jobs = open(p+'/jobs.txt').readlines()
             if jobs:
                 job = jobs.pop(0)
-                print 'finished %s' % (job.replace('job-', ''))
+                print('finished %s' % (job.replace('job-', '')))
             open(p+'/jobs.txt','w').write(''.join(jobs))
             time.sleep(1)
 

@@ -19,8 +19,8 @@ X = []
 X2 = []
 for c, v in data:
     y.append(v)
-    X.append(get_basic_composition_descriptors(c).values())
-    X2.append(get_composition_descriptors(c).values())
+    X.append(list(get_basic_composition_descriptors(c).values()))
+    X2.append(list(get_composition_descriptors(c).values()))
 
 X = np.array(X)
 X2 = np.array(X)
@@ -48,4 +48,4 @@ clf = SVR()
 
 clf.fit(train_x, train_y)
 
-print clf.score(test_x, test_y)
+print(clf.score(test_x, test_y))

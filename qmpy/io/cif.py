@@ -84,12 +84,12 @@ def _get_lattice_parameters(cb):
             _get_value(cb.get('_cell_angle_gamma')))
 
 def _get_oxidation_state_data(cb):
-    if '_atom_type_symbol' in cb.keys():
+    if '_atom_type_symbol' in list(cb.keys()):
         cl = cb.GetLoop('_atom_type_symbol')
-        if '_atom_type_oxidation_number' in cl.keys():
+        if '_atom_type_oxidation_number' in list(cl.keys()):
             symbols = [l._atom_type_symbol for l in cl]
             ox = [l._atom_type_oxidation_number for l in cl]
-            return dict(zip(symbols, map(_get_value, ox)))
+            return dict(list(zip(symbols, list(map(_get_value, ox)))))
     else:
         return {}
 
@@ -107,59 +107,59 @@ def _get_sym_ops(cb):
         [rotation matrix, translation matrix] - A 2-member
         list containing the rotation and translation matrices
     '''
-    if '_symmetry_equiv_pos_as_xyz' in cb.keys():
+    if '_symmetry_equiv_pos_as_xyz' in list(cb.keys()):
         rots, trans = [], []
         for op in cb.GetLoop('_symmetry_equiv_pos_as_xyz'):
             r, t = parse_sitesym(op._symmetry_equiv_pos_as_xyz)
             rots.append(r)
             trans.append(t)
         return [rots, trans]
-    if '_space_group_symop_operation_xyz' in cb.keys():
+    if '_space_group_symop_operation_xyz' in list(cb.keys()):
         rots, trans = [], []
         for op in cb.GetLoop('_space_group_symop_operation_xyz'):
             r, t = parse_sitesym(op._space_group_symop_operation_xyz)
             rots.append(r)
             trans.append(t)
         return [rots, trans]
-    if '_symmetry_int_tables_number' in cb.keys():
+    if '_symmetry_int_tables_number' in list(cb.keys()):
         try:
             sg = cb.get('_symmetry_int_tables_number')
             sg = sym.Spacegroup.objects.get(number=sg.strip())
             return [sg.rotations, sg.translations]
-        except Exception, err:
-            print err
+        except Exception as err:
+            print(err)
             pass
-    if '_[local]_cod_cif_authors_sg_H-M' in cb.keys():
+    if '_[local]_cod_cif_authors_sg_H-M' in list(cb.keys()):
         try:
             sg = cb.get('_[local]_cod_cif_authors_sg_H-M')
             sg = sym.Spacegroup.objects.get(hm=sg.strip())
             return [sg.rotations, sg.translations]
-        except Exception, err:
-            print err
+        except Exception as err:
+            print(err)
             pass
-    if '_symmetry_space_group_name_Hall' in cb.keys():
+    if '_symmetry_space_group_name_Hall' in list(cb.keys()):
         try:
             sg = cb.get('_symmetry_space_group_name_Hall')
             sg = sym.Spacegroup.objects.get(hall=sg.strip())
             return [sg.rotations, sg.translations]
-        except Exception, err:
-            print err
+        except Exception as err:
+            print(err)
             pass
-    if '_space_group_name_Hall' in cb.keys():
+    if '_space_group_name_Hall' in list(cb.keys()):
         try:
             sg = cb.get('_space_group_name_Hall')
             sg = sym.Spacegroup.objects.get(hall=sg.strip())
             return [sg.rotations, sg.translations]
-        except Exception, err:
-            print err
+        except Exception as err:
+            print(err)
             pass
-    if '_symmetry_space_group_name_H-M' in cb.keys():
+    if '_symmetry_space_group_name_H-M' in list(cb.keys()):
         try:
             sg = cb.get('_symmetry_space_group_name_H-M')
             sg = sym.Spacegroup.objects.get(hm=sg.strip())
             return [sg.rotations, sg.translations]
-        except Exception, err:
-            print err
+        except Exception as err:
+            print(err)
             pass
     return [np.eye(3)], [np.array([0,0,0])]
 
@@ -260,7 +260,7 @@ def _add_symmetry_loop(structure, cb, wrap=False):
 
 def _add_header(structure, cb):
     form_sum = ''
-    for k, v in structure.comp.items():
+    for k, v in list(structure.comp.items()):
         form_sum += '%s%s' % (k, v)
 
     cb.AddCifItem(('_chemical_formula_sum', form_sum))
@@ -325,7 +325,7 @@ def read(cif_file, grammar=None):
     else:
         cf = ReadCif(cif_file)
     structures = []
-    for key in cf.keys():
+    for key in list(cf.keys()):
         structures.append(_read_cif_block(cf[key]))
     if len(structures) == 1:
         return structures[0]
@@ -333,50 +333,50 @@ def read(cif_file, grammar=None):
         return structures
 
 def _get_journal(cb):
-    if '_citation_journal_id_ASTM' in cb.keys():
+    if '_citation_journal_id_ASTM' in list(cb.keys()):
         code = cb.get('_citation_journal_id_ASTM')[0]
         j, new = rx.Journal.objects.get_or_create(code=code)
         if new:
             j.name = cb.get('_citation_journal_full')[0]
         return j
-    elif '_journal_name_full' in cb.keys():
+    elif '_journal_name_full' in list(cb.keys()):
         name = cb.get('_journal_name_full')
         j, new = rx.Journal.objects.get_or_create(name=name)
         return j
 
 def _get_authors(cb):
     auths = []
-    if '_publ_author_name' in cb.keys():
+    if '_publ_author_name' in list(cb.keys()):
         for name in cb.get('_publ_author_name'):
             auths.append(rx.Author.from_name(name))
     return auths
 
 def _get_year(cb):
-    if '_citation_year' in cb.keys():
+    if '_citation_year' in list(cb.keys()):
         return cb.get('_citation_year')[0]
-    elif '_journal_year' in cb.keys():
+    elif '_journal_year' in list(cb.keys()):
         return cb.get('_journal_year')
 
 def _get_volume(cb):
-    if '_citation_journal_volume' in cb.keys():
+    if '_citation_journal_volume' in list(cb.keys()):
         return cb.get('_citation_journal_volume')[0]
-    elif '_journal_volume' in cb.keys():
+    elif '_journal_volume' in list(cb.keys()):
         return cb.get('_journal_volume')
 
 def _get_first_page(cb):
-    if '_citation_page_first' in cb.keys():
+    if '_citation_page_first' in list(cb.keys()):
         return cb.get('_citation_page_first')[0]
-    elif '_journal_page_first' in cb.keys():
+    elif '_journal_page_first' in list(cb.keys()):
         return cb.get('_journal_page_first')
 
 def _get_last_page(cb):
-    if '_citation_page_last' in cb.keys():
+    if '_citation_page_last' in list(cb.keys()):
         return cb.get('_citation_page_last')[0]
-    elif '_journal_page_last' in cb.keys():
+    elif '_journal_page_last' in list(cb.keys()):
         return cb.get('_journal_page_last')
 
 def _get_title(cb):
-    if '_publ_section_title' in cb.keys():
+    if '_publ_section_title' in list(cb.keys()):
         return cb.get('_publ_section_title').strip()
 
 def read_reference(cif_file):
@@ -384,7 +384,7 @@ def read_reference(cif_file):
     Read a cif file and return a :mod:`~qmpy.Reference`.
     """
     cf = ReadCif(cif_file, grammar='1.1')
-    cif_block = cf[cf.keys()[0]]
+    cif_block = cf[list(cf.keys())[0]]
     reference = rx.Reference()
     reference.authors = _get_authors(cif_block)
     reference.journal = _get_journal(cif_block)

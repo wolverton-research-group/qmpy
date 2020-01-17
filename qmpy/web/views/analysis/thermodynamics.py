@@ -1,6 +1,6 @@
 from tempfile import mkstemp
 import os.path
-import cStringIO
+import io
 import pulp
 import json
 
@@ -15,7 +15,7 @@ from ..tools import get_globals
 
 def construct_flot(phase_dict):
     data = []
-    for p, v in phase_dict.items():
+    for p, v in list(phase_dict.items()):
         series = {'label':p.name, 'data':v}
         data.append(series)
     return json.dumps(data)
@@ -32,12 +32,12 @@ def gclp_view(request):
         p = request.POST
         if p.get('search'):
             comp = parse_comp(p['search'])
-            bounds = '-'.join(comp.keys())
+            bounds = '-'.join(list(comp.keys()))
             data['search'] = p['search']
 
         if p['action'] == 'submit':
             ps = PhaseSpace(bounds)
-            data['phase_data'] = ps.phase_dict.values()
+            data['phase_data'] = list(ps.phase_dict.values())
 
         elif p['action'] == 're-evaluate':
             indices = p.getlist('indices')
@@ -57,7 +57,7 @@ def gclp_view(request):
         data['energy'] /= sum(comp.values())
         data['phase_comp'] = dict(phases)
         data['pstr'] = Phase.from_phases(phases).name
-        for k, v in data['phase_comp'].items():
+        for k, v in list(data['phase_comp'].items()):
             data['phase_comp'][k] /= sum(k.nom_comp.values())
     data.update(csrf(request))
     return render_to_response('analysis/gclp.html',
@@ -76,10 +76,10 @@ def phase_diagram_view(request):
             data['chem_pots'] = p['chem_pots']
 
         if p['action'] == 'submit':
-            print data["chem_pots"]
+            print(data["chem_pots"])
             ps = PhaseSpace(data['search'], mus=data['chem_pots'])
             if ps.shape[0] > 0:
-                data['phase_data'] = ps.phase_dict.values()
+                data['phase_data'] = list(ps.phase_dict.values())
             else:
                 data['phase_data'] = ps.phases
 
@@ -93,7 +93,7 @@ def phase_diagram_view(request):
                 try:
                     phase.id = int(p['id_%s' % i])
                 except ValueError:
-                    print "User input phase", phase
+                    print("User input phase", phase)
                 phase.use = ( p['use_%s' % i] == 'on' )
                 phase.show_label = ( p['label_%s' % i] == 'on' )
                 pdata.add_phase(phase)
@@ -109,7 +109,7 @@ def phase_diagram_view(request):
                     phase.show_label = ( l == 'on' )
                     pdata.add_phase(phase)
                 except ValueError:
-                    print "Invalid Input"
+                    print("Invalid Input")
 
             data['stability'] = p.get('stability')
             data['phase_data'] = pdata.phases
@@ -144,7 +144,7 @@ def chem_pot_view(request):
     if request.method == 'POST':
         p = request.POST
         data['search'] = p['search']
-        elts = parse_comp(data['search']).keys()
+        elts = list(parse_comp(data['search']).keys())
         ps = PhaseSpace('-'.join(elts))
         ps.stability_window(data['search'])
         data['flotscript'] = ps.renderer.get_flot_script()

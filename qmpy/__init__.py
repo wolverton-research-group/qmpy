@@ -14,7 +14,7 @@ import logging.handlers
 import os, os.path
 import stat
 import sys
-import ConfigParser
+import configparser
 
 import django.core.exceptions as de
 
@@ -30,7 +30,7 @@ sys.path = [os.path.join(INSTALL_PATH, 'qmpy', 'db')] + sys.path
 
 LOG_PATH = os.path.join(INSTALL_PATH, 'logs')
 
-config = ConfigParser.ConfigParser()
+config = configparser.ConfigParser()
 config.read(os.path.join(INSTALL_PATH,'configuration','site.cfg'))
 
 VASP_POTENTIALS = config.get('VASP', 'potential_path')
@@ -115,13 +115,13 @@ try:
 except:
     pass
 
-from models import *
-from analysis import *
-from analysis.thermodynamics import *
-from analysis.symmetry import *
-from analysis.vasp import *
-from computing import *
-from data import *
+from .models import *
+from .analysis import *
+from .analysis.thermodynamics import *
+from .analysis.symmetry import *
+from .analysis.vasp import *
+from .computing import *
+from .data import *
 
 import yaml
 import os
@@ -130,7 +130,7 @@ def read_spacegroups(numbers=None):
     data = open(INSTALL_PATH+'/data/spacegroups.yml').read()
     Spacegroup.objects.all().delete()
     spacegroups = yaml.safe_load(data)
-    for sgd in spacegroups.values():
+    for sgd in list(spacegroups.values()):
         if numbers:
             if sgd['number'] not in numbers:
                 continue
@@ -152,7 +152,7 @@ def read_spacegroups(numbers=None):
         sg.save()
 
         wycks = []
-        for k, site in sgd['wyckoff_sites'].items():
+        for k, site in list(sgd['wyckoff_sites'].items()):
             wycks.append(WyckoffSite(symbol=k, 
                                x=site['coordinate'].split()[0],
                                y=site['coordinate'].split()[1],
@@ -164,7 +164,7 @@ def read_elements():
     elements = open(INSTALL_PATH+'/data/elements/data.yml').read()
     Element.objects.all().delete()
     elts = []
-    for elt, data in yaml.safe_load(elements).items():
+    for elt, data in list(yaml.safe_load(elements).items()):
         e = Element()
         e.__dict__.update(data)
         elts.append(e)
@@ -173,8 +173,8 @@ def read_elements():
 def read_hubbards():
     hubs = open(INSTALL_PATH+'/configuration/vasp_settings/hubbards.yml').read()
 
-    for group, hubbard in yaml.safe_load(hubs).items():
-        for ident, data in hubbard.items():
+    for group, hubbard in list(yaml.safe_load(hubs).items()):
+        for ident, data in list(hubbard.items()):
             elt, ligand, ox = ident.split('_')
             hub = Hubbard(
                     l=data['L'],
@@ -201,10 +201,10 @@ def read_potentials():
                     for pot in pots:
                         pot.save()
                 except Exception:
-                    print 'Couldn\'t load:', path
+                    print(('Couldn\'t load:', path))
 
 def sync_resources():
-    for host, data in hosts.items():
+    for host, data in list(hosts.items()):
         h = Host.get(host)
         h.__dict__.update({'check_queue':data['check_queue'],
             'ip_address':data['ip_address'],
@@ -216,21 +216,21 @@ def sync_resources():
             'sub_text':data['sub_text']})
         h.save()
 
-    for username, data in users.items():
+    for username, data in list(users.items()):
         try:
             user = User.objects.get(username=username)
         except User.DoesNotExist:
             user = User(username=username)
         user.save()
 
-        for host, adata in data.items():
+        for host, adata in list(data.items()):
             host = Host.get(host)
             host.save()
             acc = Account.get(user, host)
             acc.__dict__.update(**adata)
             acc.save()
 
-    for allocation, data in allocations.items():
+    for allocation, data in list(allocations.items()):
         host = Host.get(data['host'])
         host.save()
         alloc = Allocation.get(allocation)
@@ -244,7 +244,7 @@ def sync_resources():
             user.save()
             alloc.users.add(user)
 
-    for project, data in projects.items():
+    for project, data in list(projects.items()):
         proj = Project.get(project)
         proj.save()
 

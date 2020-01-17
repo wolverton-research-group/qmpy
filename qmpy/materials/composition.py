@@ -82,7 +82,7 @@ class Composition(models.Model):
             <Composition: Fe2O3>
 
         """
-        if isinstance(composition, basestring):
+        if isinstance(composition, str):
             composition = parse_comp(composition)
         comp = reduce_comp(composition)
         f = ' '.join(['%s%g' % (k, comp[k]) for k in sorted(comp.keys())])
@@ -93,9 +93,9 @@ class Composition(models.Model):
             comp = Composition(formula=f)
             comp.ntypes = len(comp.comp)
             comp.generic = format_generic_comp(comp.comp)
-            comp.element_list = '_'.join(comp.comp.keys())+'_'
+            comp.element_list = '_'.join(list(comp.comp.keys()))+'_'
             comp.save()
-            comp.element_set = comp.comp.keys()
+            comp.element_set = list(comp.comp.keys())
             return comp
 
     @classmethod
@@ -119,7 +119,7 @@ class Composition(models.Model):
 
         """
         space = set()
-        if isinstance(bounds, basestring):
+        if isinstance(bounds, str):
             bounds = bounds.split('-')
         if len(bounds) == 1:
             return [Composition.get(bounds[0])]
@@ -265,7 +265,7 @@ class Composition(models.Model):
         return ps.phase_diagram
 
     def get_mass(self):
-        return sum([elements[k]['mass']*v for k, v in self.unit_comp.items() ])
+        return sum([elements[k]['mass']*v for k, v in list(self.unit_comp.items()) ])
 
     def get_similar(self):
         return Composition.objects.filter(generic=self.generic)

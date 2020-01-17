@@ -154,7 +154,7 @@ class FormationEnergy(models.Model):
     @staticmethod
     def search(bounds, fit='standard'):
         space = set()
-        if isinstance(bounds, basestring):
+        if isinstance(bounds, str):
             bounds = bounds.split('-')
         for b in bounds:
             bound = parse_comp(b)

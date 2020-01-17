@@ -9,9 +9,9 @@ from django.db import transaction
 
 import qmpy
 from qmpy.utils import *
-import phase
-from reaction import Reaction
-from equilibrium import Equilibrium
+from . import phase
+from .reaction import Reaction
+from .equilibrium import Equilibrium
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +39,7 @@ class Heap(dict):
     @property
     def sequences(self):
         seqs = []
-        for k, v in self.items():
+        for k, v in list(self.items()):
             if not v:
                 seqs.append([k])
             else:
@@ -150,7 +150,7 @@ class PhaseSpace(object):
         self.mus = {}
         if mus is None:
             return
-        elif isinstance(mus, basestring):
+        elif isinstance(mus, str):
             mus = mus.replace(',', ' ')
             for mu in mus.split():
                 self.mus.update(parse_mu(mu))
@@ -210,7 +210,7 @@ class PhaseSpace(object):
     def phase_dict(self):
         if self._phase_dict:
             return self._phase_dict
-        phase_dict = dict([ (k, p) for k, p in self.data.phase_dict.items()
+        phase_dict = dict([ (k, p) for k, p in list(self.data.phase_dict.items())
                 if p.use and self.in_space(p) ])
         self._phase_dict = phase_dict
         return self._phase_dict
@@ -219,17 +219,17 @@ class PhaseSpace(object):
     def phase_dict(self, phase_dict):
         self.clear_all()
         self.data = phase.PhaseData()
-        self.data.phases = phase_dict.values()
+        self.data.phases = list(phase_dict.values())
 
     def phase_energy(self, p):
-        dE = sum([self.mus.get(k, 0)*v for k,v in p.unit_comp.items()])
-        N = sum(v for k,v in p.unit_comp.items() if k in self.bound_space)
+        dE = sum([self.mus.get(k, 0)*v for k,v in list(p.unit_comp.items())])
+        N = sum(v for k,v in list(p.unit_comp.items()) if k in self.bound_space)
         if N == 0:
             N = 1
         return (p.energy - dE)/N
 
     def phase_comp(self, p):
-        comp = dict((k,v) for k,v in p.comp.items() 
+        comp = dict((k,v) for k,v in list(p.comp.items()) 
                  if k in self.bound_elements)
         return unit_comp(comp)
 
@@ -300,7 +300,7 @@ class PhaseSpace(object):
             2
 
         """
-        cpdims = [ k for k,v in self.mus.items() if isinstance(v, list) ]
+        cpdims = [ k for k,v in list(self.mus.items()) if isinstance(v, list) ]
         return len(cpdims)
 
     @property
@@ -392,14 +392,14 @@ class PhaseSpace(object):
         """
         if isinstance(composition, phase.Phase):
             composition = composition.comp
-        elif isinstance(composition, basestring):
+        elif isinstance(composition, str):
             composition = parse_comp(composition)
 
         composition = defaultdict(float, composition)
         if self.bounds is None:
             return np.array([ composition[k] for k in self.bound_elements ])
 
-        bcomp = dict((k,v) for k,v in composition.items() if k in
+        bcomp = dict((k,v) for k,v in list(composition.items()) if k in
                 self.bound_space)
         composition = unit_comp(bcomp)
         cvec = np.array([ composition.get(k, 0) for k in self.bound_elements ])
@@ -420,7 +420,7 @@ class PhaseSpace(object):
 
         """
         if self.bounds is None:
-            return defaultdict(float, zip(self.elements, coord))
+            return defaultdict(float, list(zip(self.elements, coord)))
         if len(coord) != len(self.bounds):
             raise PhaseSpaceError
         if len(coord) != len(self.bounds):
@@ -430,9 +430,9 @@ class PhaseSpace(object):
         coord = [ c/float(tot) for c in coord ]
         comp = defaultdict(float)
         for b, x in zip(self.bounds, coord):
-            for elt, val in b.items():
+            for elt, val in list(b.items()):
                 comp[elt] += val*x
-        return dict( (k,v) for k,v in comp.items() if v > 1e-4 )
+        return dict( (k,v) for k,v in list(comp.items()) if v > 1e-4 )
 
     _spaces = None
     @property
@@ -456,7 +456,7 @@ class PhaseSpace(object):
         """
         if self._spaces:
             return self._spaces
-        spaces = set([ frozenset(p.space) for p in self.phase_dict.values() ])
+        spaces = set([ frozenset(p.space) for p in list(self.phase_dict.values()) ])
         spaces = [ space for space in spaces if not 
                 any([ space < space2 for space2 in spaces ])]
         self._spaces = list(map(list, spaces))
@@ -515,7 +515,7 @@ class PhaseSpace(object):
         return self._dual_spaces
 
     def find_tie_lines(self):
-        phases = self.phase_dict.values()
+        phases = list(self.phase_dict.values())
         indict = dict((k, v) for v, k in enumerate(phases))
         adjacency = np.zeros((len(indict), len(indict)))
         for space in self.dual_spaces:
@@ -620,13 +620,13 @@ class PhaseSpace(object):
         Calculate the range of phase `p` with respect to `element`.
         """
         if element is None and len(self.mus) == 1:
-            element = self.mus.keys()[0]
+            element = list(self.mus.keys())[0]
         tcomp = dict(p.unit_comp)
         e, c = self.gclp(tcomp, mus=None)
         tcomp[element] = tcomp.get(element, 0) + 0.001
         edo, xdo = self.gclp(tcomp, mus=None)
         tcomp[element] -= 0.001
-        if element in p.comp.keys():
+        if element in list(p.comp.keys()):
             tcomp[element] -= 0.001
             eup, xup = self.gclp(tcomp, mus=None)
             return (edo-e)/0.001, (e-eup)/0.001
@@ -650,7 +650,7 @@ class PhaseSpace(object):
         pot_bounds = {}
         tcomp = dict(p.unit_comp)
         e, c = self.gclp(tcomp, mus=None)
-        for elt in p.comp.keys():
+        for elt in list(p.comp.keys()):
             tcomp = dict(p.unit_comp)
             tcomp[elt] -= 0.001
             eup, xup = self.gclp(tcomp)
@@ -696,7 +696,7 @@ class PhaseSpace(object):
             return True
         if isinstance(composition, phase.Phase):
             composition = composition.comp
-        elif isinstance(composition, basestring):
+        elif isinstance(composition, str):
             composition = parse_comp(composition)
 
         if set(composition.keys()) <= self.space:
@@ -721,13 +721,13 @@ class PhaseSpace(object):
             return True
         if isinstance(composition, phase.Phase):
             composition = composition.unit_comp
-        elif isinstance(composition, basestring):
+        elif isinstance(composition, str):
             composition = parse_comp(composition)
 
         if not self.in_space(composition):
             return False
 
-        composition = dict( (k,v) for k,v in composition.items() if k in
+        composition = dict( (k,v) for k,v in list(composition.items()) if k in
                 self.bound_elements )
         composition = unit_comp(composition)
 
@@ -751,7 +751,7 @@ class PhaseSpace(object):
         Get the convex hull for a given space.
         """
         if phases is None: ## ensure there are phases to get the hull of
-            phases = self.phase_dict.values()
+            phases = list(self.phase_dict.values())
 
         ## ensure that all phases have negative formation energies
         _phases = []
@@ -878,7 +878,7 @@ class PhaseSpace(object):
             facet = facets.pop(0)
             done_list.append(sorted(facet))
             try:
-                phases, E = self.get_minima(self.phase_dict.values(), facet)
+                phases, E = self.get_minima(list(self.phase_dict.values()), facet)
             except:
                 continue
             p = phase.Phase.from_phases(phases)
@@ -907,11 +907,11 @@ class PhaseSpace(object):
         if not composition:
             return 0.0, {}
 
-        if isinstance(composition, basestring):
+        if isinstance(composition, str):
             composition = parse_comp(composition)
             
         if not phases:
-            phases = [ p for p in self.phase_dict.values() if p.use ]
+            phases = [ p for p in list(self.phase_dict.values()) if p.use ]
 
         _mus = self.mus
         if mus is None:
@@ -942,10 +942,10 @@ class PhaseSpace(object):
         phase_vars = pulp.LpVariable.dicts('lib', phases, 0.0)
         prob += pulp.lpSum([ (p.energy -
             sum([ p.unit_comp.get(elt,0)*mu
-                for elt, mu in mus.items() ])) * phase_vars[p]
+                for elt, mu in list(mus.items()) ])) * phase_vars[p]
             for p in phases]),\
                     "Free Energy"
-        for elt, constraint in composition.items():
+        for elt, constraint in list(composition.items()):
             prob += pulp.lpSum([
                 p.unit_comp.get(elt,0)*phase_vars[p]
                 for p in phases ]) == float(constraint),\
@@ -962,8 +962,8 @@ class PhaseSpace(object):
         phase_comp = dict([ (p, phase_vars[p].varValue)
             for p in phases if phase_vars[p].varValue > 1e-5])
         
-        energy = sum( p.energy*amt for p, amt in phase_comp.items() )
-        energy -= sum([ a*composition.get(e, 0) for e,a in mus.items()])
+        energy = sum( p.energy*amt for p, amt in list(phase_comp.items()) )
+        energy -= sum([ a*composition.get(e, 0) for e,a in list(mus.items())])
         return energy, phase_comp
 
     def get_minima(self, phases, bounds):
@@ -1003,7 +1003,7 @@ class PhaseSpace(object):
         return xsoln, E
 
     def compute_hull(self):
-        phases = [ p for p in self.phase_dict.values() if (
+        phases = [ p for p in list(self.phase_dict.values()) if (
             self.phase_energy(p) < 0 and len(p.space) > 1 ) ]
         region = Region([self.phase_dict[elt] for elt in self.space ])
         region.contained = phases
@@ -1068,7 +1068,7 @@ class PhaseSpace(object):
 
         for p in phases:
             if p.stability is None:
-                if p in self.phase_dict.values():
+                if p in list(self.phase_dict.values()):
                     self.compute_stability(p)
                 else:
                     p2 = self.phase_dict[p.name]
@@ -1134,7 +1134,7 @@ class PhaseSpace(object):
 
         """
         if element is None and len(self.mus) == 1:
-            element = self.mus.keys()[0]
+            element = list(self.mus.keys())[0]
         ps = PhaseSpace('-'.join(self.space), data=self.data)
         chem_pots = set()
         for p in ps.stable:
@@ -1148,7 +1148,7 @@ class PhaseSpace(object):
 
         """
         if element is None and len(self.mus) == 1:
-            element = self.mus.keys()[0]
+            element = list(self.mus.keys())[0]
         mus = self.find_reaction_mus(element=element)
         if umin is None:
             umin = min(mus)
@@ -1279,9 +1279,9 @@ class PhaseSpace(object):
         xaxis = Axis('x')
         xaxis.min, xaxis.max = (0, 1)
         xaxis.label = '-'.join([format_comp(b) for b in self.bounds])
-        elt = self.mus.keys()[0]
+        elt = list(self.mus.keys())[0]
         yaxis = Axis('y', label='&Delta;&mu;<sub>'+elt+'</sub>', units='eV/atom')
-        murange = self.mus.values()[0]
+        murange = list(self.mus.values())[0]
         yaxis.min = min(murange)
         yaxis.max = max(murange)
         self.renderer.xaxis = xaxis
@@ -1289,7 +1289,7 @@ class PhaseSpace(object):
 
         if False:
             points = []
-            for window, hull in self.chempot_scan().items():
+            for window, hull in list(self.chempot_scan().items()):
                 hull = sorted(hull, key=lambda x: self.coord(x)[0])
                 for i in range(len(hull)-1):
                     p1 = hull[i]
@@ -1473,7 +1473,7 @@ class PhaseSpace(object):
         # Use phase_dict to collect unstable phases, which will 
         # return one phase per composition
         points = []
-        for c, p in self.phase_dict.items():
+        for c, p in list(self.phase_dict.items()):
             if not self.in_bounds(p):
                 continue
             if p in self.stable:
@@ -1501,7 +1501,7 @@ class PhaseSpace(object):
             if not self.in_bounds(p):
                 continue
             label = '%s:<br>- ' % p.name
-            label += ' <br>- '.join(o.name for o in self.graph[p].keys())
+            label += ' <br>- '.join(o.name for o in list(self.graph[p].keys()))
             pt = Point(coord_to_gtet(self.coord(p)), label=label)
             points.append(pt)
             if p.show_label:
@@ -1529,7 +1529,7 @@ class PhaseSpace(object):
         points = []
         for p in self.stable:
             label = '%s:<br>' % p.name
-            for other in G[p].keys():
+            for other in list(G[p].keys()):
                 label += '  -%s<br>' % other.name
             pt = Point(positions[p], label=label)
             points.append(pt)
@@ -1546,7 +1546,7 @@ class PhaseSpace(object):
     def stability_window(self, composition, **kwargs):
         self.renderer = Renderer()
         chem_pots = self.chempot_bounds(composition)
-        for eq, pots in chem_pots.items():
+        for eq, pots in list(chem_pots.items()):
             pt = Point(coord_to_point([ pots[k] for k in self.elements ]))
             self.renderer.add(pt)
 
@@ -1564,7 +1564,7 @@ class PhaseSpace(object):
 
         """
 
-        if isinstance(var, basestring):
+        if isinstance(var, str):
             var = parse_comp(var)
 
         if facet:
@@ -1610,11 +1610,11 @@ class PhaseSpace(object):
             >>> space.get_reactions('Li', electrons=1)
 
         """
-        if isinstance(var, basestring):
+        if isinstance(var, str):
             var = parse_comp(var)
         vname = format_comp(reduce_comp(var))
         vphase = self.phase_dict[vname]
-        vpd = dict( (self.phase_dict[k], v) for k,v in var.items() )
+        vpd = dict( (self.phase_dict[k], v) for k,v in list(var.items()) )
         for facet in self.hull:
             reacts, prods, delta_var = self.get_reaction(var, facet=facet)
             if vphase in facet:
@@ -1634,7 +1634,7 @@ class PhaseSpace(object):
         Plot the convex hull along the reaction path, as well as the voltage
         profile.
         """
-        if isinstance(var, basestring):
+        if isinstance(var, str):
             var = parse_comp(var)
         vname = format_comp(var)
 

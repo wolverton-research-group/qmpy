@@ -19,14 +19,14 @@
 
 # -- Project information -----------------------------------------------------
 
-project = u'qmpy'
-copyright = u'2019, The OQMD development team'
-author = u'The OQMD development team'
+project = 'qmpy'
+copyright = '2019, The OQMD development team'
+author = 'The OQMD development team'
 
 # The short X.Y version
-version = u'1.2.0'
+version = '1.2.0'
 # The full version, including alpha/beta/rc tags
-release = u'v1.2.0'
+release = 'v1.2.0'
 
 
 # -- General configuration ---------------------------------------------------
@@ -68,7 +68,7 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = [u'_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'colorful'
@@ -161,8 +161,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'qmpy.tex', u'qmpy Documentation',
-     u'The OQMD development team', 'manual'),
+    (master_doc, 'qmpy.tex', 'qmpy Documentation',
+     'The OQMD development team', 'manual'),
 ]
 
 
@@ -171,7 +171,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'qmpy', u'qmpy Documentation',
+    (master_doc, 'qmpy', 'qmpy Documentation',
      [author], 1)
 ]
 
@@ -182,7 +182,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'qmpy', u'qmpy Documentation',
+    (master_doc, 'qmpy', 'qmpy Documentation',
      author, 'qmpy', 'One line description of project.',
      'Miscellaneous'),
 ]

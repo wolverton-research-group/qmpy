@@ -39,7 +39,7 @@ cols = {'BCC':{'a':'calculation__input__x2'},
         'HCP':{'a':'calculation__input__x1', 'c':'calculation__input__z3'}}
 
 def apply_format(value):
-    if isinstance(value, basestring):
+    if isinstance(value, str):
         return value
     if value is True:
         return 'Yes'
@@ -89,7 +89,7 @@ def latex_table(contents, headers=[], units=[], title=''):
 def name(comp):
     comp = parse_comp(comp)
     coeffs = get_coeffs(comp)
-    elts = sorted(comp.keys(), key=lambda x: (-comp[x], electronegativity(x)))
+    elts = sorted(list(comp.keys()), key=lambda x: (-comp[x], electronegativity(x)))
     return '$\\rm{'+''.join(['{elt}_{{{amt}}}'.format(elt=k, amt=coeffs[k]) for k in
         elts])+'}$'
 
@@ -125,7 +125,7 @@ def tabulate(elt, lattice):
         trow.append(row['in_icsd'])
         content.append(trow)
     content = sorted(content, key=lambda x:(
-        (0 if isinstance(x[2], basestring) else x[2]), x[3]))
+        (0 if isinstance(x[2], str) else x[2]), x[3]))
 
     f = open('%s_%s.tex' % (lattice, elt), 'w')
     f.write(latex_table(content, headers, units))
@@ -151,12 +151,12 @@ def process(elt, lattice):
     forms = Formation.objects.filter(delta_e__lt=0, entry__in=entries.values('id'))
     forms = forms.annotate(hhi=Max('composition__element_set__HHI_P'))
     results = forms.values(*['entry', 'composition', 'delta_e', 'stability', 'hhi'] + 
-        cols[lattice].values())
+        list(cols[lattice].values()))
     if props.get('hhi'):
         results = results.filter(hhi__lt=props['hhi'])
     results = results.filter(stability__lt=props.get('hd', 0.025))
     lm = props.get('lm', 0.1)
-    for k, v in cols[lattice].items():
+    for k, v in list(cols[lattice].items()):
         results = results.filter(**{v+'__lt':props[k]*(1+lm)})
         results = results.filter(**{v+'__gt':props[k]*(1-lm)})
 
@@ -172,7 +172,7 @@ def process(elt, lattice):
             done_comps.append(name)
         s = PhaseSpace(set([elt]) | set(comp.keys()), data=pd)
         row['lm'] = {}
-        for k, v in cols[lattice].items():
+        for k, v in list(cols[lattice].items()):
             row['lm'][k] = 100*(row[v]-props[k])/props[k]
 
         if row['stability'] < 0:
@@ -182,9 +182,9 @@ def process(elt, lattice):
             else:
                 row['keep'] = False
         else:
-            phases = [ p for k, p in s.phase_dict.items() if not k == name ]
+            phases = [ p for k, p in list(s.phase_dict.items()) if not k == name ]
             decomp = s.gclp(name, phases=phases)[1]
-            if s.phase_dict[elt] in decomp.keys():
+            if s.phase_dict[elt] in list(decomp.keys()):
                 row['keep'] = True
             else:
                 row['keep'] = False
@@ -202,9 +202,9 @@ def process(elt, lattice):
     open('%s_%s.txt' % (elt, lattice), 'w').write(json.dumps(dicts))
 
 if __name__ == '__main__':
-    for lattice, elts in data.items():
-        for elt, props in elts.items():
-            print '%s: %s' % (elt, lattice)
+    for lattice, elts in list(data.items()):
+        for elt, props in list(elts.items()):
+            print('%s: %s' % (elt, lattice))
             if len(sys.argv) == 1 or sys.argv[1] == 'table':
                 tabulate(elt, lattice)
             elif sys.argv[1] == 'data':

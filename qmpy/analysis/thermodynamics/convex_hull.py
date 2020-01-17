@@ -25,7 +25,7 @@ class Simplex(object):
         self.comps = np.array(cc)
         self.energies = np.array([ p.energy for p in phases ])
 
-        self.bounds = np.array(range(len(space)))
+        self.bounds = np.array(list(range(len(space))))
         self.ref_energies = np.array([ self.energies[i] for i in self.bounds ])
         self.ref_comps = np.array([ self.comps[i] for i in self.bounds ])
 

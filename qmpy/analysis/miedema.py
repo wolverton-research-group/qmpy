@@ -41,7 +41,7 @@ class Miedema(object):
         """
         self.energy = None
         # validate composition
-        if isinstance(composition, basestring):
+        if isinstance(composition, str):
             composition = parse_comp(composition)
         elif isinstance(composition, qmpy.Composition):
             composition = dict(composition.comp)
@@ -58,7 +58,7 @@ class Miedema(object):
             return
 
         composition = unit_comp(composition)
-        self.elt_a, self.elt_b = composition.keys()
+        self.elt_a, self.elt_b = list(composition.keys())
         self.x = composition[self.elt_b]
         self.A = params[self.elt_a]
         self.B = params[self.elt_b]
@@ -94,22 +94,22 @@ class Miedema(object):
         # List of Transition Metals as given in Fig 2.28 of 
         # de Boer, et al., Cohesion in Metals (1988) (page 66).
         tmrange = []
-        tmrange.extend(range(20,30))
-        tmrange.extend(range(38,48))
-        tmrange.extend(range(56,58))
-        tmrange.extend(range(72,80))
+        tmrange.extend(list(range(20,30)))
+        tmrange.extend(list(range(38,48)))
+        tmrange.extend(list(range(56,58)))
+        tmrange.extend(list(range(72,80)))
         tmrange.extend([90,92,94])
         # List of Non-Transition Metals as given in Fig 2.28 of 
         # de Boer, et al., Cohesion in Metals (1988) (page 66).
         nontmrange = []
-        nontmrange.extend(range(3,8))
-        nontmrange.extend(range(11,16))
+        nontmrange.extend(list(range(3,8)))
+        nontmrange.extend(list(range(11,16)))
         nontmrange.extend([19])
-        nontmrange.extend(range(30,34))
+        nontmrange.extend(list(range(30,34)))
         nontmrange.extend([37])
-        nontmrange.extend(range(48,52))
+        nontmrange.extend(list(range(48,52)))
         nontmrange.extend([55])
-        nontmrange.extend(range(80,84))
+        nontmrange.extend(list(range(80,84)))
         # If one of A,B is in tmrange and the other is in nontmrange, set RtoP
         # to the product of elemental values, otherwise set RtoP to zero.
         if (self.A[3] in tmrange) and (self.B[3] in

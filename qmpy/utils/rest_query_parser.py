@@ -1,5 +1,5 @@
 import re
-from oqmd_optimade import Lark2Django
+from .oqmd_optimade import Lark2Django
 
 def element_set_conversion(filter_expr):
     """

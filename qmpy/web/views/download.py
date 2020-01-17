@@ -1,7 +1,7 @@
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 
-from tools import get_globals
+from .tools import get_globals
 from qmpy.data.meta_data import DatabaseUpdate
 
 def download_home(request):

@@ -131,7 +131,7 @@ class Element(models.Model):
             return [ cls.get(v) for v in value ]
         elif isinstance(value, int):
             return cls.objects.get(z=value)
-        elif isinstance(value, basestring):
+        elif isinstance(value, str):
             return cls.objects.get(symbol=value)
 
     # methods
@@ -191,7 +191,7 @@ class Species(models.Model):
         """
         if isinstance(value, cls):
             return value
-        elif isinstance(value, basestring):
+        elif isinstance(value, str):
             spec, new = cls.objects.get_or_create(name=value)
             if new:
                 elt, ox = parse_species(value)

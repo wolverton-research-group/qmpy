@@ -16,6 +16,6 @@ for e1, e2 in itertools.combinations(elts, r=2):
                 continue
             dists = get_pair_distances(s, 10)
             bonds.append(min(dists[k]))
-        print e1, e2, np.average(bonds), np.std(bonds)
+        print(e1, e2, np.average(bonds), np.std(bonds))
     except:
         continue

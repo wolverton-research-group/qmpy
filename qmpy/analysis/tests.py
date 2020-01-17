@@ -11,17 +11,17 @@ class MiedemaTestCase(TestCase):
 
     def test_methods(self):
         ## test that it generally works
-        self.assertEquals(Miedema('FeNi').energy, -0.03)
-        self.assertEquals(Miedema('FeNi').energy, -0.03)
+        self.assertEqual(Miedema('FeNi').energy, -0.03)
+        self.assertEqual(Miedema('FeNi').energy, -0.03)
         c = Composition.get('LiBe')
-        self.assertEquals(Miedema(c).energy, -0.08)
-        self.assertEquals(Miedema({'Pt':1,'Ti':3}).energy, -0.76)
+        self.assertEqual(Miedema(c).energy, -0.08)
+        self.assertEqual(Miedema({'Pt':1,'Ti':3}).energy, -0.76)
 
         ## test that non-metals are ignored
-        self.assertEquals(Miedema('Fe2O3').energy, None)
+        self.assertEqual(Miedema('Fe2O3').energy, None)
 
         ## test that it is quantity invariant
-        self.assertEquals(Miedema('Fe5Ni5').energy, -0.03)
+        self.assertEqual(Miedema('Fe5Ni5').energy, -0.03)
 
 class PDFTestCase(TestCase):
     def test_distances(self):

@@ -1,8 +1,8 @@
-from renderer import *
-from point import *
-from line import *
-from axis import *
-from text import *
+from .renderer import *
+from .point import *
+from .line import *
+from .axis import *
+from .text import *
 
 import sys
 if not 'matplotlib' in sys.modules:

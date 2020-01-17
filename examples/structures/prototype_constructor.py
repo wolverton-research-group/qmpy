@@ -26,7 +26,7 @@ a = 'Li'
 s = io.poscar.read('quaternaries/garnet-Li3Nd3W2O12')
 for group in groups:
     for b,c in sorted(itertools.product(group['Nd'], group['W'])):
-        print "Li3{b}3{c}2O12".format(b=b, c=c)
+        print("Li3{b}3{c}2O12".format(b=b, c=c))
         path = '../quaternaries/garnet/O/{a}_{b}_{c}'.format(a=a,b=b,c=c)
         name = '{a}_{b}_{c}'.format(a=a,b=b,c=c)
         mkdir(path)
@@ -42,5 +42,5 @@ for group in groups:
         entry.save()
         task = Task.create(entry, 'static')
         task.save()
-        print entry
+        print(entry)
 

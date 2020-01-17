@@ -12,5 +12,5 @@ comps = [ parse_comp('Na0.48 O3 W1'),
           {'Bi':0.1231, 'Na':0.2324, 'Ar':0.6445} ]
 
 for c in comps:
-    print format_comp(c),
-    print format_comp(reduce_comp(c))
+    print(format_comp(c), end=' ')
+    print(format_comp(reduce_comp(c)))

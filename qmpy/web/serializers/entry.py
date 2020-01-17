@@ -6,7 +6,7 @@ from qmpy.materials.structure import Structure
 from qmpy.materials.formation_energy import FormationEnergy
 from qmpy.analysis.vasp import Calculation
 
-from calculation import CalculationRawSerializer
+from .calculation import CalculationRawSerializer
 
 class EntrySerializer(serializers.ModelSerializer):
     icsd_id = serializers.SerializerMethodField()

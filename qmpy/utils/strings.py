@@ -24,6 +24,7 @@ import logging
 import qmpy
 from qmpy.utils.math import *
 import qmpy.data as data
+from functools import reduce
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +51,7 @@ def parse_mu(value):
     if '=' in value:
         elt, pot = value.split('=')
         if ':' in pot:
-            pot = map(float, pot.split(':'))[:2]
+            pot = list(map(float, pot.split(':')))[:2]
         else:
             pot = float(pot)
     else:
@@ -72,7 +73,7 @@ def parse_comp(value):
     return dict(comp)
 
 def parse_space(value):
-    if isinstance(value, basestring):
+    if isinstance(value, str):
         space = re.sub('[-,_]', ' ', value)
         space = [ unit_comp(parse_comp(b)) for b in space.split()]
     elif isinstance(value, (list,set)):
@@ -129,7 +130,7 @@ def parse_species(value):
 
 def format_mus(mus):
     name = ''
-    for k, v in mus.items():
+    for k, v in list(mus.items()):
         if name:
             name += ' '
         name += k
@@ -160,7 +161,7 @@ def format_species(element, value):
 def get_coeffs(values):
     wasdict = False
     if isinstance(values, dict):
-        keys, values = zip(*values.items())
+        keys, values = list(zip(*list(values.items())))
         wasdict = True
 
     coeffs = []
@@ -173,7 +174,7 @@ def get_coeffs(values):
             coeffs.append(('%.8f' % v).rstrip('0'))
 
     if wasdict:
-        return dict(zip(keys, coeffs))
+        return dict(list(zip(keys, coeffs)))
     else:
         return coeffs
 
@@ -187,13 +188,13 @@ def electronegativity(elt):
 
 def format_comp(comp, template='{elt}{amt}', delimiter='',
         key=lambda x: (electronegativity(x), x)):
-    elts = sorted(comp.keys(), key=key)
+    elts = sorted(list(comp.keys()), key=key)
     coeffs = get_coeffs(comp)
     return delimiter.join(template.format(elt=k, amt=coeffs[k]) for k in elts)
 
 def format_generic_comp(comp):
     amts = get_coeffs(sorted(comp.values()))
-    gen_comp = zip(alphabet, amts)
+    gen_comp = list(zip(alphabet, amts))
     return ''.join('{elt}{amt}'.format(elt=elt, amt=amt) for elt, amt in
             gen_comp)
 
@@ -211,7 +212,7 @@ def format_gnuplot(comp):
 
 def normalize_dict(dictionary):
     tot = float(sum(dictionary.values()))
-    return dict((k, v/tot) for k,v in dictionary.items())
+    return dict((k, v/tot) for k,v in list(dictionary.items()))
 
 def unit_comp(comp):
     return normalize_dict(comp)
@@ -235,7 +236,7 @@ def reduce_by_any_means(values):
     i = 0
     d = 0
     vals = np.array([ roundclose(v) for v in values])
-    primes = range(1, 10)
+    primes = list(range(1, 10))
     while d < 1e-6:
         if i > len(primes)-1:
             vals = np.round(vals*10**3)/10**3
@@ -277,12 +278,12 @@ def reduce_comp(values, method='auto'):
 
     wasdict = False
     if isinstance(values, dict):
-        keys, values = zip(*values.items())
+        keys, values = list(zip(*list(values.items())))
         wasdict = True
 
     def make_return(values):
         if wasdict:
-            return dict(zip(keys, map(roundclose, values)))
+            return dict(list(zip(keys, list(map(roundclose, values)))))
         else:
             return values
 
@@ -304,14 +305,14 @@ def reduce_comp(values, method='auto'):
 def normalize_comp(values):
     wasdict = False
     if isinstance(values, dict):
-        keys, values = zip(*values.items())
+        keys, values = list(zip(*list(values.items())))
         wasdict = True
 
     vals = np.array(values)
     vals /= min(vals)
 
     if wasdict:
-        return dict(zip(keys, vals))
+        return dict(list(zip(keys, vals)))
     else:
         return vals.tolist()
 
@@ -346,7 +347,7 @@ def parse_formula_regex(formula):
             symbols = symbols.split(',')
             elts = []
             for symbol in symbols:
-                if symbol in data.element_groups.keys():
+                if symbol in list(data.element_groups.keys()):
                     elts += [ e for e in data.element_groups[symbol] ]
                 else:
                     elts += [ symbol ]
@@ -359,7 +360,7 @@ def read_compressed_array(string):
     if '-' in string:
         first = string.startswith('-')
         string = string.lstrip('-')
-        vals = map(lambda x: -float(x), string.split('-'))
+        vals = [-float(x) for x in string.split('-')]
         if not first:
             vals[0] = -vals[0]
         return vals

@@ -17,6 +17,6 @@ for structure in structures:
             result = 'LAYERED'
             break
     result += ' %s %s' % (structure.id, structure)
-    print result
+    print(result)
     open('layered.txt', 'a').write(result+'\n')
 

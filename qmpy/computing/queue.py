@@ -7,7 +7,7 @@ import time
 from datetime import datetime, timedelta
 import random
 
-from resources import Project, Account, Allocation
+from .resources import Project, Account, Allocation
 from qmpy.analysis.vasp import Calculation
 from qmpy.db.custom import *
 import qmpy
@@ -110,7 +110,7 @@ class Task(models.Model):
             priority=None, projects=None): 
         if projects is None:
             projects = entry.projects
-        elif isinstance(projects, basestring):
+        elif isinstance(projects, str):
             projects = Project.objects.get(name=projects)
         if priority is None:
             priority = len(entry.input)
@@ -423,7 +423,7 @@ class Job(models.Model):
     def description(self):
         uniq = ''
         if self.task.kwargs:
-            uniq='_' + '_'.join(['%s:%s' % (k, v) for k, v in self.task.kwargs.items()])
+            uniq='_' + '_'.join(['%s:%s' % (k, v) for k, v in list(self.task.kwargs.items())])
         return '{entry}_{subdir}{uniq}'.format(
                 entry=self.entry.id,
                 subdir=self.subdir.strip('/').replace('/','_'),

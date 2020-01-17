@@ -102,7 +102,7 @@ def standard(entry, **kwargs):
         f.save()
         entry.calculations['standard'] = calc
         entry.structures['standard'] = calc.output
-        ps = PhaseSpace(calc.input.comp.keys())
+        ps = PhaseSpace(list(calc.input.comp.keys()))
         ps.compute_stabilities(save=True)
     return calc
 
@@ -347,9 +347,9 @@ def static(entry, xc_func='PBE', **kwargs):
         f.calculation = calc
         f.save()
         
-        ps = PhaseSpace(calc.input.comp.keys())
+        ps = PhaseSpace(list(calc.input.comp.keys()))
         for p in ps.phases:
-            if p in ps.phase_dict.values():
+            if p in list(ps.phase_dict.values()):
                 ps.compute_stability(p)
             else:
                 p2 = ps.phase_dict[p.name]
@@ -367,9 +367,9 @@ def static(entry, xc_func='PBE', **kwargs):
                 try:
                     fe = temp_c.get_formation()
                 except MultipleObjectsReturned:
-                    print("Calculation ", 
+                    print(("Calculation ", 
                           temp_c.id, 
-                          " has more than one formationenergy")
+                          " has more than one formationenergy"))
                     continue
                 if fe is None:
                     continue

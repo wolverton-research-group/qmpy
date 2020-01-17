@@ -10,8 +10,8 @@ import django.db as ddb
 from django.db import transaction
 
 import qmpy
-import queue
-import resources as rsc
+from . import queue
+from . import resources as rsc
 import qmpy.utils.daemon as daemon
 import qmpy.analysis.vasp.calculation as vasp
 
@@ -54,7 +54,7 @@ class JobManager(daemon.Daemon):
 
     """
     def run(self):
-        os.umask(022)
+        os.umask(0o22)
         while True:
             ddb.reset_queries()
             jobs = queue.Job.objects.filter(state=1, account__host__state=1,
@@ -84,7 +84,7 @@ class TaskManager(daemon.Daemon):
           entry contain the path or path fragment will be run.
     """
     def run(self, project=None):
-        os.umask(022)
+        os.umask(0o22)
         while True:
             check_die()
             ddb.reset_queries()
@@ -109,7 +109,7 @@ class TaskManager(daemon.Daemon):
             self.handle_task(task, host)
 
     def handle_task(self, task, host):
-        os.umask(022)
+        os.umask(0o22)
         t0 = time.time()
         tlogger.info('Processing: Task %s (Entry %s)' % 
                 (task.id, task.entry.id))
@@ -117,12 +117,12 @@ class TaskManager(daemon.Daemon):
             jobs = task.get_jobs(host=host)
         except queue.ResourceUnavailableError:
             raise
-        except vasp.VaspError, err:
+        except vasp.VaspError as err:
             task.fail()
             task.save()
             tlogger.warn('VASP error: %s', err)
             return
-        except Exception, err:
+        except Exception as err:
             task.hold()
             task.save()
             tlogger.warn('Unknown error while getting jobs: %s' % err)
@@ -157,7 +157,7 @@ class TaskManager(daemon.Daemon):
         with transaction.atomic():
             try:
                 task.entry.save()
-            except Exception, err:
+            except Exception as err:
                 task.hold()
                 task.save()
                 tlogger.warn('Unknown error while saving Entry: %s' % err)

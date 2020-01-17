@@ -19,7 +19,7 @@ def get_marked_list(qs1, qs2):
 
 def construct_flot(phase_dict):
     data = []
-    for p, v in phase_dict.items():
+    for p, v in list(phase_dict.items()):
         series = {'label':p, 'data':v}
         data.append(series)
     return json.dumps(data)
@@ -44,11 +44,11 @@ def allocation_view(request, allocation_id):
     if request.method == 'POST':
         p = request.POST
 
-        users = [ k.split('_')[1] for k in p.keys() if 'user_' in k 
+        users = [ k.split('_')[1] for k in list(p.keys()) if 'user_' in k 
                                         and p.get(k) == 'on' ]
         alloc.users = [ User.get(u) for u in users ]
 
-        projects = [ k.split('_')[1] for k in p.keys() if 'project_' in k and 
+        projects = [ k.split('_')[1] for k in list(p.keys()) if 'project_' in k and 
                                                 p.get(k) == 'on' ]
         alloc.project_set = projects
 
@@ -106,11 +106,11 @@ def project_view(request, project_id):
             proj.priority = p.get('priority', 50)
             proj.save()
 
-            allocs = [ k.split('_')[1] for k in p.keys() if 'alloc_' in k and
+            allocs = [ k.split('_')[1] for k in list(p.keys()) if 'alloc_' in k and
                                                         p.get(k) == 'on' ]
             proj.allocations = allocs 
 
-            users = [ k.split('_')[1] for k in p.keys() if 'user_' in k and
+            users = [ k.split('_')[1] for k in list(p.keys()) if 'user_' in k and
                                                        p.get(k) == 'on']
             proj.users = [ User.get(u) for u in users ]
 
@@ -155,7 +155,7 @@ def hosts_view(request):
 def project_state_view(request, state=0, project_id=None):
     data = get_globals()
     project = Project.get(project_id)
-    if isinstance(state, basestring):
+    if isinstance(state, str):
         if state.lower() == 'held':
             state = -2
         elif state.lower() == 'failed':

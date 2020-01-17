@@ -116,7 +116,7 @@ def main(argv):
     mean_vel = (integral/12./sp.pi)**(-1/3.)
     debeye_temp = PLANCKCONST/BOLTZCONST*(3.*natoms*AVONUM*
                       density/4./sp.pi/molmass)**(1/3.)*mean_vel
-    print debeye_temp,mean_vel
+    print(debeye_temp,mean_vel)
 
 
 

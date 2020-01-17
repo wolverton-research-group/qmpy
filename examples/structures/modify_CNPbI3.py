@@ -29,5 +29,5 @@ for atom in struct:
 
 struct.symmetrize()
 struct.save()
-print struct.id
+print(struct.id)
 io.poscar.write(struct, 'POSCAR')

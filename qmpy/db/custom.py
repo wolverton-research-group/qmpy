@@ -1,14 +1,13 @@
 from collections import defaultdict
 from django.db import models
 import json
-import cPickle
+import pickle
 import numpy as np
 import ast
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 
-class TagField(models.TextField):
+class TagField(models.TextField, metaclass=models.SubfieldBase):
     description = "Stores tags in a single database column."
-    __metaclass__ = models.SubfieldBase
 
     def __init__(self, delimiter="|", *args, **kwargs):
         self.delimiter = delimiter
@@ -26,9 +25,8 @@ class TagField(models.TextField):
     def get_prep_value(self, value):
         return self.delimiter.join(value)
 
-class NumpyArrayField(models.TextField):
+class NumpyArrayField(models.TextField, metaclass=models.SubfieldBase):
     description = "Stores a Numpy ndarray."
-    __metaclass__ = models.SubfieldBase
 
     def __init__(self, *args, **kwargs):
         super(NumpyArrayField, self).__init__(*args, **kwargs)
@@ -41,18 +39,17 @@ class NumpyArrayField(models.TextField):
 
         if not value:
             return np.array([])
-        return np.array(cPickle.loads(str(value)))
+        return np.array(pickle.loads(str(value)))
 
     def get_prep_value(self, value):
         if isinstance(value, list):
-            return cPickle.dumps(value)
+            return pickle.dumps(value)
         elif isinstance(value, np.ndarray):
-            return cPickle.dumps(value.tolist())
+            return pickle.dumps(value.tolist())
         else:
             raise TypeError('%s is not a list or numpy array' % value)
 
-class DictField(models.TextField):
-    __metaclass__ = models.SubfieldBase
+class DictField(models.TextField, metaclass=models.SubfieldBase):
     description = "Stores a python dictionary"
 
     def __init__(self, *args, **kwargs):
@@ -74,14 +71,13 @@ class DictField(models.TextField):
         if isinstance(value, defaultdict):
             value = dict(value)
 
-        return unicode(value)
+        return str(value)
 
     def value_to_string(self, obj):
         value = self._get_val_from_obj(obj)
         return self.get_db_prep_value(value)
 
-class JSONField(models.TextField):
-    __metaclass__ = models.SubfieldBase
+class JSONField(models.TextField, metaclass=models.SubfieldBase):
     description = "Stores a python dictionary"
 
     def __init__(self, *args, **kwargs):
@@ -90,12 +86,12 @@ class JSONField(models.TextField):
     def to_python(self, value):
         if not value:
             return value
-        if not isinstance(value, basestring):
+        if not isinstance(value, str):
             return value
         return json.loads(value)
 
     def get_prep_value(self, value):
-        print 'get prep value', value
+        print('get prep value', value)
         return json.dumps(value)
 
 class DictModel(models.Model):
@@ -115,21 +111,21 @@ class DictModel(models.Model):
         del self.data[key]
 
     def keys(self):
-        return self.data.keys()
+        return list(self.data.keys())
 
     def values(self):
-        return self.data.values()
+        return list(self.data.values())
 
     def items(self):
-        return self.data.items()
+        return list(self.data.items())
 
 def sync_database():
-    print 'This will download a *very* large database.'
-    ans = raw_input('  Are you sure you want to proceed? (y/n) [n]: ')
+    print('This will download a *very* large database.')
+    ans = input('  Are you sure you want to proceed? (y/n) [n]: ')
     if ans.lower()[0] != 'y':
         return
 
-    loc = raw_input('Where should the database be downloaded to?'+
+    loc = input('Where should the database be downloaded to?'+
             '[/tmp]: ' )
     if not loc:
         loc = '/tmp'
@@ -137,11 +133,11 @@ def sync_database():
     url = "http://oqmd.org/static/downloads/database.tgz"
 
     file_name = loc + '/' + url.split('/')[-1]
-    u = urllib2.urlopen(url)
+    u = urllib.request.urlopen(url)
     f = open(file_name, 'wb')
     meta = u.info()
     file_size = int(meta.getheaders("Content-Length")[0])
-    print "Downloading: %s Bytes: %s" % (file_name, file_size)
+    print("Downloading: %s Bytes: %s" % (file_name, file_size))
 
     file_size_dl = 0
     block_sz = 8192
@@ -154,8 +150,8 @@ def sync_database():
         f.write(buffer)
         status = r"%10d  [%3.2f%%]" % (file_size_dl, file_size_dl * 100. / file_size)
         status = status + chr(8)*(len(status)+1)
-        print status,
-    print
+        print(status, end=' ')
+    print()
     f.close()
 
     msg = 'The database has been successfully downloaded.'
@@ -166,5 +162,5 @@ def sync_database():
     msg += 'Note: if you already have a database named "qmdb" this process'
     msg += ' will overwrite the existing oqmd database.'
 
-    print msg
+    print(msg)
 

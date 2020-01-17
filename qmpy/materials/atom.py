@@ -501,7 +501,7 @@ class Site(models.Model):
             elif isinstance(comp, Atom):
                 site.add_atom(comp)
             elif isinstance(comp, dict):
-                for k,v in comp.items():
+                for k,v in list(comp.items()):
                     a = Atom.create(k, coord, occupancy=v)
             else:
                 raise TypeError("Unknown datatype")
@@ -539,7 +539,7 @@ class Site(models.Model):
     @comp.setter
     def comp(self, comp):
         atoms = []
-        for k,v in comp.items():
+        for k,v in list(comp.items()):
             a = Atom.create(k, self.coord, occupancy=v)
             atoms.append(a)
         self.atoms = atoms

@@ -20,9 +20,9 @@ from django.db import transaction
 
 import qmpy
 import shutil
-from element import Element, Species
-from atom import Atom, Site
-from composition import Composition
+from .element import Element, Species
+from .atom import Atom, Site
+from .composition import Composition
 from qmpy.utils import *
 from qmpy.utils.folder_management import change_directory
 from qmpy.data.meta_data import *
@@ -228,7 +228,7 @@ class Structure(models.Model, object):
 
         self.natoms = len(self.atoms)
         self.nsites = len(self.sites)
-        self.ntypes = len(self.comp.keys())
+        self.ntypes = len(list(self.comp.keys()))
         self.get_volume()
 
         super(Structure, self).save(*args, **kwargs)
@@ -341,12 +341,12 @@ class Structure(models.Model, object):
     @property
     def elements(self):
         """List of Elements"""
-        return [ Element.get(e) for e in self.comp.keys() ]
+        return [ Element.get(e) for e in list(self.comp.keys()) ]
 
     @property
     def species(self):
         """List of species"""
-        return [ Species.get(s) for s in self.spec_comp.keys() ]
+        return [ Species.get(s) for s in list(self.spec_comp.keys()) ]
 
     @property
     def stresses(self):
@@ -399,8 +399,8 @@ class Structure(models.Model, object):
     @property
     def lat_param_dict(self):
         """Dictionary of lattice parameters."""
-        return dict(zip( ['a', 'b', 'c', 'alpha', 'beta', 'gamma'], 
-                         self.lat_params))
+        return dict(list(zip( ['a', 'b', 'c', 'alpha', 'beta', 'gamma'], 
+                         self.lat_params)))
 
     _lat_params = None
     @property
@@ -523,7 +523,7 @@ class Structure(models.Model, object):
         if isinstance(elements, list):
             for a, e in zip(self.atoms, elements):
                 a.element_id = e
-        elif isinstance(elements, basestring):
+        elif isinstance(elements, str):
             for a in self.atoms:
                 a.element_id = elements
         elif isinstance(elements, qmpy.Element):
@@ -580,7 +580,7 @@ class Structure(models.Model, object):
             origins[i] = e
             orbits[e].append(self.sites[i])
         self.origins = origins
-        self.operations = zip(dataset['rotations'], dataset['translations'])
+        self.operations = list(zip(dataset['rotations'], dataset['translations']))
         rots = []
         for r in dataset['rotations']:
             if not any([ np.allclose(r, x) for x in rots ]):
@@ -591,13 +591,13 @@ class Structure(models.Model, object):
             if not any([ np.allclose(t, x) for x in trans ]):
                 trans.append(t)
         self.translations = trans
-        self.orbits = orbits.values()
+        self.orbits = list(orbits.values())
         ##self.duplicates = dict((self.sites[e], v) for e, v in orbits.items())
         ## See comment about hashes and Dictionary keys
-        self.duplicates = dict((e, v) for e, v in orbits.items())
+        self.duplicates = dict((e, v) for e, v in list(orbits.items()))
         self._uniq_sites = []
         self._uniq_atoms = []
-        for ind, mult in counts.items():
+        for ind, mult in list(counts.items()):
             site = self.sites[ind]
             ##for site2 in self.duplicates[site]:
             ## See comment about hashes and Dictionary keys
@@ -1097,7 +1097,7 @@ class Structure(models.Model, object):
         if len(coords) != len(self.atoms):
             raise ValueError('%s != %s' % (len(coords), len(self)))
         for a, c in zip(self.atoms, coords):
-            c = np.array(map(float,c))
+            c = np.array(list(map(float,c)))
             a.coord = wrap(c)
             a._dist = None
 
@@ -1155,7 +1155,7 @@ class Structure(models.Model, object):
     @property
     def relative_rec_lat(self):
         rec_lat = self.reciprocal_lattice
-        rec_mags = map(la.norm, rec_lat)
+        rec_mags = list(map(la.norm, rec_lat))
         r0 = min(rec_mags)
         return np.array([ np.round(r/r0, 4) for r in rec_mags ])
 
@@ -1200,7 +1200,7 @@ class Structure(models.Model, object):
         while self.natoms*np.product(kpts) < kppra:
             prev_kpts = kpts.copy()
             refk = np.array(np.ones(3)*refr)*scale
-            kpts = np.array(map(np.round, refk))
+            kpts = np.array(list(map(np.round, refk)))
             scale += 1
 
         upper = kppra - np.product(prev_kpts)*self.natoms
@@ -1414,7 +1414,7 @@ class Structure(models.Model, object):
         return self._neighbor_dict
 
     def get_sublattice(self, elements, new=True):
-        if isinstance(elements, basestring):
+        if isinstance(elements, str):
             elements = [elements]
         if new:
             struct = self.copy()
@@ -1596,7 +1596,7 @@ class Structure(models.Model, object):
             return self
 
         if cartesian:
-            cv = np.array(map(float, np.dot(self.inv.T, cv)))
+            cv = np.array(list(map(float, np.dot(self.inv.T, cv))))
 
         coords = self.coords + cv
         self.coords = wrap(coords)
@@ -1612,7 +1612,7 @@ class Structure(models.Model, object):
 
         """
         limits = [ int(np.ceil(distance/self.lp[i])) for i in range(3) ]
-        ranges = [ range(0, l+1) for l in limits ]
+        ranges = [ list(range(0, l+1)) for l in limits ]
         d2 = distance**2
         lattice_points = []
         for i, j, k in itertools.product(*ranges):
@@ -1735,7 +1735,7 @@ class Structure(models.Model, object):
 
         # Test for simple IxJxK lattice multiplication        
         diag = True
-        for i, j in itertools.combinations(range(3), r=2):
+        for i, j in itertools.combinations(list(range(3)), r=2):
             if i == j:
                 continue
             if transform[i,j] != 0:
@@ -1746,7 +1746,7 @@ class Structure(models.Model, object):
             i = int(transform[0,0])
             j = int(transform[1,1])
             k = int(transform[2,2])
-            points = itertools.product(range(i), range(j), range(k))
+            points = itertools.product(list(range(i)), list(range(j)), list(range(k)))
         else:
             points = self.find_lattice_points_by_transform(transform)
 
@@ -2156,7 +2156,7 @@ class Structure(models.Model, object):
             if abs(sum(self.comp.values()) - n) > tol:
                 hopeless = True
 
-            for k in init_comp.keys():
+            for k in list(init_comp.keys()):
                 d = init_comp[k] - self.comp.get(k, 0.0)
                 if abs(d) > tol:
                     hopeless = True

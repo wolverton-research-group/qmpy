@@ -96,7 +96,7 @@ class Potential(models.Model):
                     try:
                         potcar['element'] = elt.Element.objects.get(symbol=telt)
                     except:
-                        print "Unknown element in potcar", telt
+                        print("Unknown element in potcar", telt)
                         raise
                     if 'GW' in line:
                         potcar['gw'] = True
@@ -156,7 +156,7 @@ class Hubbard(models.Model):
         app_label = 'qmpy'
         db_table = 'hubbards'
 
-    def __nonzero__(self):
+    def __bool__(self):
         if self.u > 0 and self.l != -1:
             return True
         else:

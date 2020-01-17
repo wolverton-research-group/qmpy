@@ -294,8 +294,8 @@ def standardize_cell(structure,
 
     """
     _check_spglib_install()
-    rev_lookup = dict(zip(structure.site_comp_indices,
-                          structure.site_compositions))
+    rev_lookup = dict(list(zip(structure.site_comp_indices,
+                          structure.site_compositions)))
     cell = spglib.standardize_cell(
         _structure_to_cell(structure),
         to_primitive=to_primitive,
@@ -325,8 +325,8 @@ def refine_cell(structure,
 
     """
     _check_spglib_install()
-    rev_lookup = dict(zip(structure.site_comp_indices,
-                          structure.site_compositions))
+    rev_lookup = dict(list(zip(structure.site_comp_indices,
+                          structure.site_compositions)))
     cell = spglib.refine_cell(
         _structure_to_cell(structure),
         symprec=symprec
@@ -355,8 +355,8 @@ def find_primitive(structure,
 
     """
     _check_spglib_install()
-    rev_lookup = dict(zip(structure.site_comp_indices,
-                          structure.site_compositions))
+    rev_lookup = dict(list(zip(structure.site_comp_indices,
+                          structure.site_compositions)))
     cell = spglib.find_primitive(
         _structure_to_cell(structure),
         symprec=symprec

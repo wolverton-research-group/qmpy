@@ -1,7 +1,7 @@
 from tempfile import mkstemp
 import os.path
 import csv
-import cStringIO
+import io
 
 
 from django.http import HttpResponse
@@ -65,7 +65,7 @@ def structure_view(request, structure_id):
 def export_structure(request, structure_id, convention='primitive', format='poscar'):
     s = Structure.objects.get(id=structure_id)
     structstr = write(s, format=format, convention=convention, wrap=True)
-    fileobj = cStringIO.StringIO(structstr)
+    fileobj = io.StringIO(structstr)
     return HttpResponse(fileobj.getvalue(), 'text/plain')
 
 def prototype_view(request, name):
@@ -104,7 +104,7 @@ def export_xrd(request, structure_id):
     data = '\n'.join([','.join(map(str,
         [p.two_theta, p.intensity, p.multiplicity, p.hkl[0]])) for p in
         xrd.peaks])
-    f = cStringIO.StringIO(data)
+    f = io.StringIO(data)
     return HttpResponse(f.getvalue(), 'text/csv')
 
 def export_kpoints(request, structure_id, mesh=8000):
@@ -112,5 +112,5 @@ def export_kpoints(request, structure_id, mesh=8000):
     c = Calculation()
     c.settings = {'kppra':float(mesh), 'gamma':True}
     c.input = s
-    f = cStringIO.StringIO(c.get_kpoints())
+    f = io.StringIO(c.get_kpoints())
     return HttpResponse(f.getvalue(), 'text/plain')

@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from qmpy.models import Entry, Task, Calculation, Formation, MetaData
-from tools import get_globals
+from .tools import get_globals
 
 def home_page(request):
     data = get_globals()

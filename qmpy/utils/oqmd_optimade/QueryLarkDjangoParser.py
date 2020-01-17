@@ -115,7 +115,7 @@ class Lark2Django:
                         return op_fn(self.db_keys[db_prop],f_lst)
 
                     else:
-                        if db_prop in self.db_keys.keys():
+                        if db_prop in list(self.db_keys.keys()):
                             _child_value = self.evaluate(children[2]).replace('"','')
                             return op_fn(self.db_keys[db_prop],_child_value)
                         else:

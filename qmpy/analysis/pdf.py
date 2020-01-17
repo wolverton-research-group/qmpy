@@ -20,7 +20,7 @@ class PDF(object):
     """
 
     def __init__(self, structure, limit=10):
-        elements = structure.comp.keys()
+        elements = list(structure.comp.keys())
         pairs = itertools.combinations_with_replacement(elements, r=2)
         self.pairs = [ self.get_pair(pair) for pair in pairs ]
         self.distances = dict((p, []) for p in self.pairs)
@@ -87,7 +87,7 @@ class PDF(object):
                 vals += np.exp(-(d-xs)**2/(2*smearing**2))*w
             vals = prefactor*vals/norms
             vals = [ v if v > 1e-4 else 0.0 for v in vals ]
-            line = Line(zip(xs, vals), label='%s-%s' % (e1, e2))
+            line = Line(list(zip(xs, vals)), label='%s-%s' % (e1, e2))
             renderer.add(line)
 
         renderer.xaxis.label = 'interatomic distance [&#8491;]'

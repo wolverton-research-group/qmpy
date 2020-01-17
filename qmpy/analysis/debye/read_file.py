@@ -88,4 +88,4 @@ def main(argv):
 
 if __name__ == "__main__":
     contents = main(sys.argv)
-    print contents
+    print(contents)

@@ -4,13 +4,14 @@ import numpy as np
 from collections import defaultdict
 import os.path
 import qmpy
-import StringIO
+import io
 import fractions as frac
 import logging
 
 from qmpy.utils import *
 from django.db.models import F, Q
 import operator
+from functools import reduce
 
 logger = logging.getLogger(__name__)
 
@@ -133,20 +134,20 @@ class PhaseData(object):
         pr = False
         if filename is None:
             pr = True
-            print 'Composition Energy'
+            print('Composition Energy')
         else:
             f = open(os.path.abspath(filename), 'w')
             f.write('Composition Energy\n')
 
         if minimal:
-            phases = self.phase_dict.values()
+            phases = list(self.phase_dict.values())
         else:
             phases = self.phases
 
         for p in phases:
             l = '%s %s' % (format_comp(p.comp), p.energy)
             if pr:
-                print l
+                print(l)
             else:
                 f.write(l+'\n')
 
@@ -263,11 +264,11 @@ class PhaseData(object):
             formula unit. Defaults to True.
 
         """
-        if isinstance(filename, basestring):
+        if isinstance(filename, str):
             fileobj = open(filename)
         elif isinstance(filename, file):
             fileobj = filename
-        elif isinstance(filename, type(StringIO.StringIO())):
+        elif isinstance(filename, type(io.StringIO())):
             fileobj = filename
             fileobj.name = None
         thermodata = fileobj.readlines()
@@ -294,7 +295,7 @@ class PhaseData(object):
             line = line.strip().split()
             if not line:
                 continue
-            ddict = dict(zip(headers, line))
+            ddict = dict(list(zip(headers, line)))
             phase = Phase(composition=ddict['composition'],
                           energy=float(ddict['energy']),
                           description=ddict.get('description', 
@@ -367,7 +368,7 @@ class Phase(object):
 
         if composition is None or energy is None:
             raise PhaseError("Composition and/or energy missing.")
-        if isinstance(composition, basestring):
+        if isinstance(composition, str):
             composition = parse_comp(composition)
 
         self.description = description
@@ -388,14 +389,14 @@ class Phase(object):
         composite phase of unit composition.
         """
         if len(phase_dict) == 1:
-            return phase_dict.keys()[0]
+            return list(phase_dict.keys())[0]
 
-        pkeys = sorted(phase_dict.keys(), key=lambda x: x.name)
-        energy = sum([ amt*p.energy for p, amt in phase_dict.items() ])
+        pkeys = sorted(list(phase_dict.keys()), key=lambda x: x.name)
+        energy = sum([ amt*p.energy for p, amt in list(phase_dict.items()) ])
 
         comp = defaultdict(float)
-        for p, factor in phase_dict.items():
-            for e, amt in p.unit_comp.items():
+        for p, factor in list(phase_dict.items()):
+            for e, amt in list(p.unit_comp.items()):
                 comp[e] += amt*factor
 
         phase = Phase(
@@ -453,22 +454,22 @@ class Phase(object):
             return self.custom_name
         if self.phase_dict:
             name_dict = dict((p, v/p.natoms) for p, v in
-                    self.phase_dict.items())
-            return ' + '.join('%.3g %s' % (v, p.name) for p, v in name_dict.items())
+                    list(self.phase_dict.items()))
+            return ' + '.join('%.3g %s' % (v, p.name) for p, v in list(name_dict.items()))
         return format_comp(self.nom_comp)
 
     @property
     def latex(self):
         if self.phase_dict:
             return ' + '.join('%.3g %s' % (v, p.latex) for p, v in
-                    self.phase_dict.items())
+                    list(self.phase_dict.items()))
         return format_latex(self.nom_comp)
 
     @property
     def volume(self):
         if self.phase_dict:
             return sum( phase.calculation.volume_pa*amt for phase, amt in
-                    self.phase_dict.items() )
+                    list(self.phase_dict.items()) )
         else:
             return self.calculation.volume_pa
 
@@ -476,7 +477,7 @@ class Phase(object):
     def mass(self):
         if self.phase_dict:
             return sum( phase.calculation.composition.get_mass()*amt for phase, amt in
-                    self.phase_dict.items() )
+                    list(self.phase_dict.items()) )
         else:
             return self.calculation.composition.get_mass()
 
@@ -485,7 +486,7 @@ class Phase(object):
         """
         Set of elements in the phase.
         """
-        return set([ k for k, v in self.unit_comp.items()
+        return set([ k for k, v in list(self.unit_comp.items())
             if abs(v) > 1e-6 ])
 
     @property
@@ -621,13 +622,13 @@ class Phase(object):
         """
         if isinstance(comp, Phase):
             comp = comp.comp
-        elif isinstance(comp, basestring):
+        elif isinstance(comp, str):
             comp = parse_comp(comp)
         residual = defaultdict(float, self.comp)
         tot = sum(residual.values())
-        for c, amt in dict(comp).items():
+        for c, amt in list(dict(comp).items()):
             pres = residual[c]/amt
-            for c2, amt2 in comp.items():
+            for c2, amt2 in list(comp.items()):
                 residual[c2] -= pres*amt2
         residual['var'] = (tot - sum(residual.values()))
         residual['var'] /= float(sum(comp.values()))
@@ -648,13 +649,13 @@ class Phase(object):
         """
         if isinstance(comp, Phase):
             comp = comp.unit_comp
-        elif isinstance(comp, basestring):
+        elif isinstance(comp, str):
             comp = unit_comp(parse_comp(comp))
         residual = defaultdict(float, self.unit_comp)
         tot = sum(residual.values())
-        for c, amt in dict(comp).items():
+        for c, amt in list(dict(comp).items()):
             pres = residual[c]/amt
-            for c2, amt2 in comp.items():
+            for c2, amt2 in list(comp.items()):
                 residual[c2] -= pres*amt2
         residual['var'] = (tot - sum(residual.values()))
         residual['var'] /= float(sum(comp.values()))

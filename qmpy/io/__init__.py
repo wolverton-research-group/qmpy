@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import cif
-import poscar
+from . import cif
+from . import poscar
 import ase
 import ase.io
 

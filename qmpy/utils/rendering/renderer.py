@@ -2,12 +2,12 @@ import sys
 import logging
 import json
 
-from renderable import *
+from .renderable import *
 import qmpy
-import point
-import line
-import text
-import axis
+from . import point
+from . import line
+from . import text
+from . import axis
 from qmpy.utils import *
 
 logger = logging.getLogger(__name__)
@@ -160,14 +160,14 @@ class Renderer(object):
             label = pc.label
             cmd += '{'
             cmd += 'x: %s,' % json.dumps(list(
-                map(lambda p: p.coord[0], pc.points)))
+                [p.coord[0] for p in pc.points]))
             cmd += 'y: %s,' % json.dumps(list(
-                map(lambda p: p.coord[1], pc.points)))
+                [p.coord[1] for p in pc.points]))
             if dim == 3:
                 cmd += 'z: %s,' % json.dumps(list(
-                    map(lambda p: p.coord[2], pc.points)))
+                    [p.coord[2] for p in pc.points]))
             cmd += 'text: %s,' % json.dumps(list(
-                map(lambda p: p.label, pc.points)))
+                [p.label for p in pc.points]))
             cmd += 'type: "%s",' %plot_type
             cmd += 'mode: "markers",'
             cmd += 'hoverinfo: "text",'
@@ -234,7 +234,7 @@ class Renderer(object):
             fig = plt.figure()
             axes = fig.gca(projection='3d')
         else:
-            print "I don't know how to display a {d}-D image".format(d=self.dim)
+            print("I don't know how to display a {d}-D image".format(d=self.dim))
             raise RenderingError
                     
         for line in self.lines:

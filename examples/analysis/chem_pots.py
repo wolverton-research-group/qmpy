@@ -16,7 +16,7 @@ import pickle
 def chunks(l, n):
     '''Return n roughly evenly sized chunks from l. The last will always be shortest'''
     N = int(np.ceil(float(len(l))/float(n)))
-    for i in xrange(0, len(l), N):
+    for i in range(0, len(l), N):
         yield l[i:i+N]
 
 if False:
@@ -33,11 +33,11 @@ nothing = chem_pots['nothing']['elements']
 everything = chem_pots['everything']['elements']
 standard = chem_pots['standard']['elements']
 
-elts = np.array(sorted(nothing.keys(), key=lambda x: elements[x]['z']))
+elts = np.array(sorted(list(nothing.keys()), key=lambda x: elements[x]['z']))
 
 for elt in elts:
     if abs(everything[elt] - nothing[elt]) > 0.2:
-        print elt, everything[elt], nothing[elt]
+        print(elt, everything[elt], nothing[elt])
         
 rows = 4
 fig = plt.figure(frameon=False)
@@ -46,7 +46,7 @@ first = True
 for i, telts in enumerate(chunks(elts, rows)):
     telts = elts[i*len(elts)/rows:(i+1)*len(elts)/rows]
     ind = np.arange(len(telts))
-    print len(telts)
+    print(len(telts))
 
     width = 0.65
     

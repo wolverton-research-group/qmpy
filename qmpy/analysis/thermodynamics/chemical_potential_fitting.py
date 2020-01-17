@@ -37,7 +37,7 @@ def fit(name, calculations=None, experiments=None, fit_for=[]):
             expts[name] = expt
         elif delta_e < expts[name].delta_e:
             expts[name] = expt
-    f.experiments = expts.values()
+    f.experiments = list(expts.values())
 
     for (name, energy_pa), calc in zip(calc_data, calculations):
         if energy_pa is None:
@@ -49,7 +49,7 @@ def fit(name, calculations=None, experiments=None, fit_for=[]):
             calcs[name] = calc
         elif energy_pa < calcs[name].energy_pa:
             calcs[name] = calc
-    f.dft = calcs.values()
+    f.dft = list(calcs.values())
 
     valid_pairs = set(calcs.keys()) & set(expts.keys())
     for name in valid_pairs:
@@ -76,7 +76,7 @@ def fit(name, calculations=None, experiments=None, fit_for=[]):
         uc = unit_comp(parse_comp(name))
         # remove non-fitting elements
         b.append(calcs[name].energy_pa - expts[name].delta_e - sum( base_mus[elt]*amt 
-                for elt, amt in uc.items() if elt not in fit_for ))
+                for elt, amt in list(uc.items()) if elt not in fit_for ))
         A.append([ uc.get(elt,0) for elt in fit_for ])
     
     A = np.array(A)
@@ -96,13 +96,13 @@ def fit(name, calculations=None, experiments=None, fit_for=[]):
 
             errs = b - b_hats
             std = np.std(errs)
-            print "iter %s: std: %0.3f" % (i, std)
+            print("iter %s: std: %0.3f" % (i, std))
             inds = np.argwhere(np.abs(errs) < std*4)
             A = A[np.abs(errs) < std*4]
             b = b[np.abs(errs) < std*4]
             i += 1
 
-        element_mus = dict(zip(fit_for, result))
+        element_mus = dict(list(zip(fit_for, result)))
 
     ### Second fit
     A = []
@@ -111,10 +111,10 @@ def fit(name, calculations=None, experiments=None, fit_for=[]):
         uc = unit_comp(parse_comp(name))
         b.append(calcs[name].energy_pa - expts[name].delta_e -
                 sum( base_mus[elt]*amt
-                    for elt, amt in uc.items() 
+                    for elt, amt in list(uc.items()) 
                     if elt not in fit_for) - 
                 sum( element_mus.get(elt, 0)*amt
-                    for elt, amt in uc.items()))
+                    for elt, amt in list(uc.items())))
         A.append([ uc.get(elt, 0) for elt in hubbard_elements ])
 
     A = np.array(A)
@@ -133,14 +133,14 @@ def fit(name, calculations=None, experiments=None, fit_for=[]):
             b_hats = np.dot(A, result)
             errs = b - b_hats
             std = np.std(errs)
-            print "iter %s: std: %0.3f" % (i, std)
+            print("iter %s: std: %0.3f" % (i, std))
             A = A[np.abs(errs) < std*4]
             b = b[np.abs(errs) < std*4]
             i += 1
 
-        hubbard_mus = dict(zip(hubbards, result))
+        hubbard_mus = dict(list(zip(hubbards, result)))
 
-    for elt, mu in base_mus.items():
+    for elt, mu in list(base_mus.items()):
         if elt not in element_mus:
             element_mus[qmpy.Element.get(elt)] = float(mu)
 
@@ -151,7 +151,7 @@ def fit(name, calculations=None, experiments=None, fit_for=[]):
     #hubbard_mus = dict( (str(h.key), float(val)) for h, val in hubbard_mus.items())
 
     new_e_mus = {}
-    for elt, val in element_mus.items():
+    for elt, val in list(element_mus.items()):
         if val > 100:
             val = base_mus[str(elt)]
         mu = qmpy.ReferenceEnergy(element_id=elt, value=val)
@@ -159,7 +159,7 @@ def fit(name, calculations=None, experiments=None, fit_for=[]):
         new_e_mus[str(elt)] = float(val)
 
     new_h_corrs = {}
-    for hub, val in hubbard_mus.items():
+    for hub, val in list(hubbard_mus.items()):
         hm = qmpy.HubbardCorrection(hubbard=hub, value=val, element=hub.element)
         f.hubbard_correction_set.add(hm)
         new_h_corrs[str(hub.key)] = float(val)

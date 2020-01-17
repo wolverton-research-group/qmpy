@@ -189,12 +189,11 @@ class XRD(object):
             if not any([np.allclose(r, rr) for rr in rots]):
                 rots.append(r)
 
-        im, jm, km = map(lambda x: int(np.ceil(max_mag*x)),
-                         self.structure.lat_params[:3])
+        im, jm, km = [int(np.ceil(max_mag*x)) for x in self.structure.lat_params[:3]]
 
-        for h, k, l in itertools.product(range(-im, im+1),
-                                         range(-jm, jm+1),
-                                         range(-km, km+1)):
+        for h, k, l in itertools.product(list(range(-im, im+1)),
+                                         list(range(-jm, jm+1)),
+                                         list(range(-km, km+1))):
             if [h, k, l] == [0, 0, 0]:
                 continue
 

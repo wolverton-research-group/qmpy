@@ -20,7 +20,7 @@ ndict = {1:'elements',
 
 def construct_flot(phase_dict):
     data = []
-    for p, v in phase_dict.items():
+    for p, v in list(phase_dict.items()):
         series = {'label':p.name, 'data':v}
         data.append(series)
     return json.dumps(data)
@@ -46,7 +46,7 @@ def composition_view(request, search=None):
 
     if composition:
         comp = Composition.get(composition)
-        ps = PhaseSpace('-'.join(comp.comp.keys()))
+        ps = PhaseSpace('-'.join(list(comp.comp.keys())))
         ps.infer_formation_energies()
         if ps.shape == (3, 0):
             data['pd3d'] = ps.phase_diagram.get_plotly_script_3d("phasediagram")
@@ -59,12 +59,12 @@ def composition_view(request, search=None):
                                                          fit='standard').order_by('delta_e')
         data['running'] = Entry.objects.filter(composition=comp,formationenergy=
                              None).filter(id=F("duplicate_of__id"))
-        data['space'] = '-'.join(comp.comp.keys())
+        data['space'] = '-'.join(list(comp.comp.keys()))
 
         if comp.ntypes == 1:
             energy, gs = ps.gclp(comp.name)
             data['gs'] = Phase.from_phases(gs)
-            data['gclp_phases'] = gs.keys()
+            data['gclp_phases'] = list(gs.keys())
             data['phase_links'] = [p.link for p in data['gclp_phases']]
             data['current_phase'] = ps.phase_dict[comp.name]
             data['phase_type'] = 'stable'
@@ -75,7 +75,7 @@ def composition_view(request, search=None):
 
             data['gs'] = Phase.from_phases(gclp_phases)
             data['current_phase'] = ps.phase_dict[comp.name]
-            data['gclp_phases'] = gclp_phases.keys()
+            data['gclp_phases'] = list(gclp_phases.keys())
             data['phase_links'] = [p.link for p in data['gclp_phases']]
 
             if ps.phase_dict[comp.name].stability <= 0:
@@ -89,7 +89,7 @@ def composition_view(request, search=None):
         else:
             energy, gs = ps.gclp(comp.name)
             data['gs'] = Phase.from_phases(gs)
-            data['gclp_phases'] = gs.keys()
+            data['gclp_phases'] = list(gs.keys())
             data['phase_links'] = [p.link for p in data['gclp_phases']]
             data['phase_type'] = 'nophase'
             data['delta_h'] = data['gs'].energy 
@@ -126,10 +126,10 @@ def composition_view(request, search=None):
             results['-'.join(sorted(c.space))] += [p.formation]
         ## Mohan >
 
-        for k,v in results.items():
+        for k,v in list(results.items()):
             results[k] = sorted(v, key=lambda x:
                     1000 if x.delta_e is None else x.delta_e)
-        results = sorted(results.items(), key=lambda x: -len(x[0].split('-')))
+        results = sorted(list(results.items()), key=lambda x: -len(x[0].split('-')))
         data['results'] = results
         return render_to_response('materials/phasespace.html', 
                 data,

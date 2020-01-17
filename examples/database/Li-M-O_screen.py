@@ -31,16 +31,16 @@ def full_search():
         comp2['Li'] = 0
         terns[c].append([ quat, sum(comp2.values()) ])
 
-    print len(terns)
+    print(len(terns))
 
     pdata = PhaseData()
     pdata.load_oqmd()
-    for p in pdata.phase_dict.values():
+    for p in list(pdata.phase_dict.values()):
         p._energy += 0.32*p.unit_comp.get('O', 0.0)
     pdata.phase_dict['LiO3']._energy = 10
     pdata.phase_dict['LiO2']._energy = 10
-    for key, vals in terns.items():
-        print key.name
+    for key, vals in list(terns.items()):
+        print(key.name)
         vals = sorted(vals, key=lambda x: x[1] )
         space = PhaseSpace('%s-Li2O' % key.name, data=pdata, load=None)
         #space.get_qhull()
@@ -76,10 +76,10 @@ def how_many():
     li = Element.get('Li').composition_set.all()
     lio = o & li
 
-    print '%s Li-O-M ternary compounds' % lio.filter(ntypes=3).count()
-    print '%s Li-O-M1-M2 quaternary compounds' % lio.filter(ntypes=4).count()
-    print '%s Li-O-M1-M2-M3 pentenary compounds' % lio.filter(ntypes=5).count()
-    print '%s Li-O-M1-...-Mn N-nary compounds' % lio.filter(ntypes__gt=5).count()
+    print('%s Li-O-M ternary compounds' % lio.filter(ntypes=3).count())
+    print('%s Li-O-M1-M2 quaternary compounds' % lio.filter(ntypes=4).count())
+    print('%s Li-O-M1-M2-M3 pentenary compounds' % lio.filter(ntypes=5).count())
+    print('%s Li-O-M1-...-Mn N-nary compounds' % lio.filter(ntypes__gt=5).count())
 
 if __name__ == '__main__':
     if 'scope' in sys.argv:

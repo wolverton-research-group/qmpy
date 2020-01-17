@@ -101,7 +101,7 @@ class LatticeNetwork:
         else:
             t = lower
 
-        order = range(len(self))
+        order = list(range(len(self)))
         random.shuffle(order)
         for i, j in enumerate(order):
             if i >= t:

@@ -16,6 +16,7 @@ from collections import OrderedDict
 
 import time
 import datetime
+from functools import reduce
 
 DEFAULT_LIMIT = 50
 BASE_URL = qmpy_rester.REST_OQMDAPI

@@ -2,7 +2,7 @@ import numpy as np
 import logging
 
 import qmpy
-from renderable import *
+from .renderable import *
 
 logger = logging.getLogger(__name__)
 

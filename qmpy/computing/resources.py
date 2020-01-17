@@ -17,7 +17,7 @@ import pexpect, getpass
 
 import qmpy
 from qmpy.db.custom import DictField
-import queue as queue
+from . import queue as queue
 import threading
 
 logger = logging.getLogger(__name__)
@@ -76,14 +76,14 @@ class User(AbstractUser):
 
     @staticmethod
     def create():
-        username = raw_input("Username: ")
-        email = raw_input("E-mail address: ")
+        username = input("Username: ")
+        email = input("E-mail address: ")
         user, new = User.objects.get_or_create(username=username,last_login=datetime.now())
         if not new:
-            print 'User by that name exists!'
-            print 'Please try a new name, or exit with Ctrl-x'
+            print('User by that name exists!')
+            print('Please try a new name, or exit with Ctrl-x')
             return User.create()
-        print 'Okay, user created!'
+        print('Okay, user created!')
         user.save()
         user.create_accounts()
         #user.assign_allocations()
@@ -91,11 +91,11 @@ class User(AbstractUser):
 
     def create_accounts(self):
         msg = 'Would you like to create cluster accounts for this user?'
-        ans = is_yes(raw_input(msg+' [y/n]: '))
+        ans = is_yes(input(msg+' [y/n]: '))
         if ans is False:
             return
         elif ans is None:
-            print "I didn't understand that command."
+            print("I didn't understand that command.")
             return self.create_accounts()
 
         msg = 'Does user %s have an account on %s? [y/n]: '
@@ -103,16 +103,16 @@ class User(AbstractUser):
         msg3 = 'On %s@%s where should calculations be run? (absolute path): '
         known = self.account_set.values_list('host__name', flat=True)
         for host in Host.objects.exclude(name__in=known):
-            ans = raw_input(msg % (self.username, host.name))
+            ans = input(msg % (self.username, host.name))
             ans = is_yes(ans)
             if ans is False:
                 continue
-            uname = raw_input(msg2 % (self.username, host.name))
+            uname = input(msg2 % (self.username, host.name))
             acct, new = Account.objects.get_or_create(user=self, host=host)
             if not new:
-                print 'Account exists!'
+                print('Account exists!')
                 continue
-            path = raw_input(msg3 % (self.username, host.name))
+            path = input(msg3 % (self.username, host.name))
             acct.run_path = path
             acct.username = uname.strip()
             acct.save()
@@ -176,21 +176,21 @@ class Host(models.Model):
 
         """
         host = {}
-        host['name'] = raw_input('Hostname:')
+        host['name'] = input('Hostname:')
         if Host.objects.filter(name=host['name']).exists():
-            print 'Host by that name already exists!'
+            print('Host by that name already exists!')
             exit(-1)
-        host['ip_address'] = raw_input('IP Address:')
+        host['ip_address'] = input('IP Address:')
         if Host.objects.filter(ip_address=host['ip_address']).exists():
-            print 'Host at that address already exists!'
+            print('Host at that address already exists!')
             exit(-1)
-        host['ppn'] = raw_input('Processors per node:')
-        host['nodes'] = raw_input('Max nodes to run on:')
-        host['sub_script'] = raw_input('Command to submit a script '
+        host['ppn'] = input('Processors per node:')
+        host['nodes'] = input('Max nodes to run on:')
+        host['sub_script'] = input('Command to submit a script '
                 '(e.g. /usr/local/bin/qsub):')
-        host['check_queue'] = raw_input('Command for showq (e.g.'
+        host['check_queue'] = input('Command for showq (e.g.'
                 '/usr/local/maui/bin/showq):')
-        host['sub_text'] = raw_input('Path to qfile template:')
+        host['sub_text'] = input('Path to qfile template:')
         h = Host(**host)
         h.save()
 
@@ -292,14 +292,14 @@ class Host(models.Model):
                     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = self._tmp_proc.communicate()
             if stdout.strip() == self._tmp_acct.user.username:
-                print "quest is up"
+                print("quest is up")
         
         self._tmp_thread = threading.Thread(target=_login)
         self._tmp_thread.start()
 
         self._tmp_thread.join(timeout)
         if self._tmp_thread.is_alive():
-            print "unable login on quest"
+            print("unable login on quest")
             self._tmp_proc.terminate()
             self._tmp_thread.join()
         return self._tmp_proc.returncode
@@ -431,7 +431,7 @@ class Host(models.Model):
     @property
     def utilization_json(self):
         series = []
-        for k, v in self.utilization_by_project.items():
+        for k, v in list(self.utilization_by_project.items()):
             series.append({'data':v, 'label':k})
         return json.dumps(series)
 
@@ -521,12 +521,12 @@ class Account(models.Model):
         time.sleep(2)
         p.close()
 
-        print 'Great! Lets test it real quick...'
+        print('Great! Lets test it real quick...')
         out = self.execute('whoami')
         if out == '%s\n' % self.username: 
-            print 'Awesome! It worked!'
+            print('Awesome! It worked!')
         else:
-            print 'Something appears to be wrong, talk to Scott...'
+            print('Something appears to be wrong, talk to Scott...')
 
     @property
     def active(self):
@@ -691,25 +691,25 @@ class Allocation(models.Model):
     
     @classmethod
     def create(self):
-        name = raw_input('Name your allocation:')
+        name = input('Name your allocation:')
         if Allocation.objects.filter(name=name).exists():
-            print 'Allocation by that name already exists!'
+            print('Allocation by that name already exists!')
             exit(-1)
-        host = raw_input('Which cluster is this allocation on?')
+        host = input('Which cluster is this allocation on?')
         if not Host.objects.filter(name=host).exists():
-            print "This host doesn't exist!"
+            print("This host doesn't exist!")
             exit(-1)
         host = Host.objects.get(name=host)
         alloc = Allocation(name=name, host=host)
         alloc.save()
-        print 'Now we will assign users to this allocation'
+        print('Now we will assign users to this allocation')
         for acct in Account.objects.filter(host=host):
-            inc = raw_input('Can %s use this allocation? y/n [y]:' % 
+            inc = input('Can %s use this allocation? y/n [y]:' % 
                     acct.user.username )
             if inc == 'y' or inc == '':
                 alloc.users.add(acct.user)
-        print 'If this allocation requires a special password, enter',
-        key = raw_input('it now:')
+        print('If this allocation requires a special password, enter', end=' ')
+        key = input('it now:')
         alloc.key=key
         alloc.save()
 
@@ -806,24 +806,24 @@ class Project(models.Model):
         Create a new project. Prompts user on std-in
         for name, users, and allocations of this project.
         '''
-        name = raw_input('Name your project: ')
+        name = input('Name your project: ')
         if Project.objects.filter(name=name).exists():
-            print 'Project by that name already exists!'
+            print('Project by that name already exists!')
             exit(-1)
         proj = Project(name=name)
         proj.save()
-        proj.priority = raw_input('Project priority (1-100): ')
-        users = raw_input('List project users (e.g. sjk648 jsaal531 bwm291): ')
+        proj.priority = input('Project priority (1-100): ')
+        users = input('List project users (e.g. sjk648 jsaal531 bwm291): ')
         for u in users.split():
             if not User.objects.filter(username=u).exists():
-                print 'User named', u, 'doesn\'t exist!'
+                print('User named', u, 'doesn\'t exist!')
             else:
                 proj.users.add(User.objects.get(username=u))
 
-        alloc = raw_input('List project allocations (e.g. byrd victoria b1004): ')
+        alloc = input('List project allocations (e.g. byrd victoria b1004): ')
         for a in alloc.split():
             if not Allocation.objects.filter(name=a).exists():
-                print 'Allocation named', a, 'doesn\'t exist!'
+                print('Allocation named', a, 'doesn\'t exist!')
             else:
                 proj.allocations.add(Allocation.objects.get(name=a))
 
@@ -919,7 +919,7 @@ def write_resources():
     # a function to 'clean' the values from type unicode/ long/ etc. to string/ int
     ######
     def clean(val):
-        if isinstance(val, unicode):
+        if isinstance(val, str):
             val = str(val)
         elif isinstance(val, numbers.Number):
             val = int(val)

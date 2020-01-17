@@ -136,7 +136,7 @@ class DOS(models.Model):
     @property
     def plot(self):
         if self._plot is None:
-            line1 = Line(zip(self.energy, self.total_dos), fill=True)
+            line1 = Line(list(zip(self.energy, self.total_dos)), fill=True)
             line2 = Line([[0,0], [0, max(self.total_dos)*1.1]])
             canvas = Renderer(lines=[line1, line2])
             canvas.yaxis.max = max(self.total_dos)*1.1
@@ -174,7 +174,7 @@ class DOS(models.Model):
             p.title.align = 'center'
             p.title.text_font_size = "15pt"
 
-            p.xaxis.axis_label = u'E \u2212 E_Fermi (eV)'
+            p.xaxis.axis_label = 'E \u2212 E_Fermi (eV)'
             p.xaxis.axis_label_text_font_size = '14pt'
             p.xaxis.major_label_text_font_size = '12pt'
 
@@ -226,7 +226,7 @@ class DOS(models.Model):
         # Check for input errors
         if strc.natoms != self._site_dos.shape[0]:
             raise Exception('Structure has different atom count than DOS')
-        if not element in strc.composition.comp.keys():
+        if not element in list(strc.composition.comp.keys()):
             raise Exception('Element not in structure')
 
         # Get the list of atoms to sum over
@@ -270,8 +270,8 @@ class DOS(models.Model):
 
         # Print out info, if debug mode
         if debug:
-            print "Summing orbitals: ", " ".join(orb_to_sum)
-            print "For atoms: ", " ".join([ str(x) for x in atoms])
+            print("Summing orbitals: ", " ".join(orb_to_sum))
+            print("For atoms: ", " ".join([ str(x) for x in atoms]))
 
         # Do the sum
         output = np.zeros(self.data.shape[1])
@@ -315,7 +315,7 @@ class DOS(models.Model):
                     'dxy':5, 'dyz':6, 'dz2':7, 'dxz':8,
                     'dx2':9}
             if n == 37: # Non-collinear
-                for k in norb.keys(): # Add 3 new columns between each entry
+                for k in list(norb.keys()): # Add 3 new columns between each entry
                     norb[k] = (norb[k] - 1) * 3 + norb[k] 
         elif n == 19:
             norb = {'s+':1, 's-up':1, 's-':2, 's-down':2,
@@ -365,13 +365,13 @@ class DOS(models.Model):
         self.efermi = float(efermi)
         ndos = int(ndos)
         dos = []
-        for nd in xrange(ndos):
+        for nd in range(ndos):
             dos.append(np.array([float(x) for x in f.readline().split()]))
         self.data = np.array(dos).T
         # Next we have one block per atom, if INCAR contains the stuff
         # necessary for generating site-projected DOS
         dos = []
-        for na in xrange(natoms):
+        for na in range(natoms):
             line = f.readline()
             if line == '':
                 # No site-projected DOS
@@ -380,7 +380,7 @@ class DOS(models.Model):
             line = f.readline().split()
             cdos = np.empty((ndos, len(line)))
             cdos[0] = np.array(line)
-            for nd in xrange(1, ndos):
+            for nd in range(1, ndos):
                 line = f.readline().split()
                 cdos[nd] = np.array([float(x) for x in line])
             dos.append(cdos.T)

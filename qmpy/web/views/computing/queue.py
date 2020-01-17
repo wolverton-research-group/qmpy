@@ -52,8 +52,8 @@ def queue_view(request):
                                  ', '.join(p.name for p in c.entry.task_set.order_by('-finished')[0].projects)) 
                                 for c in recent_])
 
-    recent_ids = list(map(lambda x: x[0], sorted(recent_finished_dict.items(), key=lambda x: x[1],
-                                                 reverse=True)))
+    recent_ids = list([x[0] for x in sorted(list(recent_finished_dict.items()), key=lambda x: x[1],
+                                                 reverse=True)])
     count = running.count()
 
     data = {'running':running[:20],
