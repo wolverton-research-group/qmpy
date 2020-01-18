@@ -1,8 +1,9 @@
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
 
 import django.views.generic
 from django.views.generic import DetailView, ListView
-from django.contrib import admin
+from django.contrib import admin, admindocs
+from django.contrib.auth.views import LoginView, LogoutView
 from qmpy.db import settings
 
 from rest_framework import routers
@@ -15,91 +16,91 @@ from qmpy.web import views
 admin.autodiscover()
 
 urlpatterns = [
-    url(r'^$', 'qmpy.web.views.home_page'),
+    url(r'^$', views.home_page),
 
     ## admin
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
-    url(r'^accounts/login/.*$', 'django.contrib.auth.views.login'),
-    url(r'^accounts/logout/.*$', 'django.contrib.auth.views.logout'),
-    url(r'^admin/', include(admin.site.urls)),
+    url(r'^accounts/login/.*$',  LoginView.as_view(template_name='registration/login.html')),
+    url(r'^accounts/logout/.*$', LogoutView.as_view(template_name='registration/loggedout.html')),
+    url(r'^admin/', admin.site.urls),
 
     ]
 
 urlpatterns += [
     ## materials
-    url(r'^materials/$', 'qmpy.web.views.common_materials_view'),
-    url(r'^materials/structure/(?P<structure_id>.*)$', 'qmpy.web.views.structure_view'),
-    url(r'^materials/composition/(?P<search>.*)$', 'qmpy.web.views.composition_view'),
-    url(r'^materials/entry/(?P<entry_id>.*)$', 'qmpy.web.views.entry_view'),
-    url(r'^materials/duplicates/(?P<entry_id>.*)$', 'qmpy.web.views.duplicate_view'),
-    url(r'^materials/prototype/(?P<name>.*)$', 'qmpy.web.views.prototype_view'),
-    url(r'^materials/prototypes$', 'qmpy.web.views.prototypes_view'),
-    url(r'^materials/keyword/(?P<keyword>.*)$', 'qmpy.web.views.keyword_view'),
-    url(r'^materials/generic_composition/(?P<search>.*)$', 'qmpy.web.views.generic_composition_view'),
+    url(r'^materials/$',                                   views.common_materials_view),
+    url(r'^materials/structure/(?P<structure_id>.*)$',     views.structure_view),
+    url(r'^materials/composition/(?P<search>.*)$',         views.composition_view),
+    url(r'^materials/entry/(?P<entry_id>.*)$',             views.entry_view),
+    url(r'^materials/duplicates/(?P<entry_id>.*)$',        views.duplicate_view),
+    url(r'^materials/prototype/(?P<name>.*)$',             views.prototype_view),
+    url(r'^materials/prototypes$',                         views.prototypes_view),
+    url(r'^materials/keyword/(?P<keyword>.*)$',            views.keyword_view),
+    url(r'^materials/generic_composition/(?P<search>.*)$', views.generic_composition_view),
 
     url(r'^materials/export/(?P<convention>.*)/(?P<format>.*)/(?P<structure_id>.*)',
-        'qmpy.web.views.export_structure'),
-    url(r'^materials/export/(?P<format>.*)/(?P<structure_id>.*)', 'qmpy.web.views.export_structure'),
-    url(r'^materials/export/(?P<convention>.*)/(?P<structure_id>.*)', 'qmpy.web.views.export_structure'),
-    url(r'^materials/export/(?P<structure_id>.*)', 'qmpy.web.views.export_structure'),
-    url(r'^materials/xrd/(?P<structure_id>.*).csv', 'qmpy.web.views.export_xrd'),
+        views.export_structure),
+    url(r'^materials/export/(?P<format>.*)/(?P<structure_id>.*)',     views.export_structure),
+    url(r'^materials/export/(?P<convention>.*)/(?P<structure_id>.*)', views.export_structure),
+    url(r'^materials/export/(?P<structure_id>.*)',  views.export_structure),
+    url(r'^materials/xrd/(?P<structure_id>.*).csv', views.export_xrd),
     url(r'^materials/kpoints/(?P<mesh>.*)/(?P<structure_id>.*)/KPOINTS',
-        'qmpy.web.views.export_kpoints'),
-    url(r'^materials/discovery', 'qmpy.web.views.disco_view'),
-    url(r'^materials/chem_pots', 'qmpy.web.views.chem_pot_view'),
-    url(r'^materials/element_groups', 'qmpy.web.views.element_group_view'),
-    url(r'^materials/deposit', 'qmpy.web.views.deposit_view'),
+        views.export_kpoints),
+    url(r'^materials/discovery',      views.disco_view),
+    url(r'^materials/chem_pots',      views.chem_pot_view),
+    url(r'^materials/element_groups', views.element_group_view),
+    url(r'^materials/deposit',        views.deposit_view),
 
     ## References
-    url(r'^reference/author/(?P<author_id>.*)$', 'qmpy.web.views.author_view'),
-    url(r'^reference/journal/(?P<journal_id>.*)$', 'qmpy.web.views.journal_view'),
-    url(r'^reference/(?P<reference_id>.*)$', 'qmpy.web.views.reference_view'),
+    url(r'^reference/author/(?P<author_id>.*)$',   views.author_view),
+    url(r'^reference/journal/(?P<journal_id>.*)$', views.journal_view),
+    url(r'^reference/(?P<reference_id>.*)$',       views.reference_view),
 
     ## calculations
-    url(r'^analysis/calculation/(?P<calculation_id>.*)$', 'qmpy.web.views.calculation_view'),
+    url(r'^analysis/calculation/(?P<calculation_id>.*)$', views.calculation_view),
 
     ## computing
-    url(r'^computing/$', 'qmpy.web.views.computing_view'),
-    url(r'^computing/projects$', 'qmpy.web.views.projects_view'),
-    url(r'^computing/hosts$', 'qmpy.web.views.hosts_view'),
-    url(r'^computing/queue$', 'qmpy.web.views.queue_view'),
-    url(r'^computing/onlinesubmit$', 'qmpy.web.views.online_view'),
+    url(r'^computing/$',             views.computing_view),
+    url(r'^computing/projects$',     views.projects_view),
+    url(r'^computing/hosts$',        views.hosts_view),
+    url(r'^computing/queue$',        views.queue_view),
+    url(r'^computing/onlinesubmit$', views.online_view),
 
-    url(r'^computing/create/host$', 'qmpy.web.views.new_host_view'),
-    #url(r'^computing/create/project', 'qmpy.web.views.new_project_view'),
-    #url(r'^computing/create/user', 'qmpy.web.views.new_user_view'),
-    #url(r'^computing/create/', 'qmpy.web.views.new_user_view'),
+    url(r'^computing/create/host$',    views.new_host_view),
+    #url(r'^computing/create/project', views.new_project_view),
+    #url(r'^computing/create/user',    views.new_user_view),
+    #url(r'^computing/create/',        views.new_user_view),
 
-    url(r'^computing/project/(?P<state>.*)/(?P<project_id>.*)$', 'qmpy.web.views.project_state_view'),
-    url(r'^computing/project/(?P<project_id>.*)$', 'qmpy.web.views.project_view'),
-    url(r'^computing/host/(?P<host_id>.*)$', 'qmpy.web.views.host_view'),
-    url(r'^computing/user/(?P<user_id>.*)$', 'qmpy.web.views.user_view'),
-    url(r'^computing/allocation/(?P<allocation_id>.*)$', 'qmpy.web.views.allocation_view'),
+    url(r'^computing/project/(?P<state>.*)/(?P<project_id>.*)$', views.project_state_view),
+    url(r'^computing/project/(?P<project_id>.*)$',               views.project_view),
+    url(r'^computing/host/(?P<host_id>.*)$',                     views.host_view),
+    url(r'^computing/user/(?P<user_id>.*)$',                     views.user_view),
+    url(r'^computing/allocation/(?P<allocation_id>.*)$',         views.allocation_view),
 
-    url(r'^computing/task/(?P<task_id>.*)$', 'qmpy.web.views.task_view'),
-    url(r'^computing/job/(?P<job_id>.*)$', 'qmpy.web.views.job_view'),
+    url(r'^computing/task/(?P<task_id>.*)$', views.task_view),
+    url(r'^computing/job/(?P<job_id>.*)$',   views.job_view),
 
     ## analysis
-    url(r'^analysis/$', 'qmpy.web.views.analysis_view'),
-    url(r'^analysis/gclp/$', 'qmpy.web.views.gclp_view'),
-    url(r'^analysis/phase_diagram/$', 'qmpy.web.views.phase_diagram_view'),
-    url(r'^analysis/chemical_potentials/$', 'qmpy.web.views.chem_pot_view'),
-    url(r'^analysis/spacegroup/(?P<spacegroup>.*)', 'qmpy.web.views.sg_view'),
-    url(r'^analysis/operation/(?P<operation>.*)', 'qmpy.web.views.op_view'),
-    url(r'^analysis/visualize$', 'qmpy.web.views.vis_data'),
-    url(r'^analysis/visualize/custom$', 'qmpy.web.views.jsmol'),
+    url(r'^analysis/$',                             views.analysis_view),
+    url(r'^analysis/gclp/$',                        views.gclp_view),
+    url(r'^analysis/phase_diagram/$',               views.phase_diagram_view),
+    url(r'^analysis/chemical_potentials/$',         views.chem_pot_view),
+    url(r'^analysis/spacegroup/(?P<spacegroup>.*)', views.sg_view),
+    url(r'^analysis/operation/(?P<operation>.*)',   views.op_view),
+    url(r'^analysis/visualize$',                    views.vis_data),
+    url(r'^analysis/visualize/custom$',             views.jsmol),
 
     ## documentation
-    url(r'^documentation/$', 'qmpy.web.views.docs_view'),
-    url(r'^documentation/vasp$', 'qmpy.web.views.vasp_docs'),
-    url(r'^documentation/structures$', 'qmpy.web.views.structures_docs'), 
-    url(r'^documentation/pots$', 'qmpy.web.views.pots_docs'),
-    url(r'^documentation/overview$', 'qmpy.web.views.overview_docs'),
-    url(r'^documentation/publications$', 'qmpy.web.views.pubs_docs'),
+    url(r'^documentation/$',             views.docs_view),
+    url(r'^documentation/vasp$',         views.vasp_docs),
+    url(r'^documentation/structures$',   views.structures_docs), 
+    url(r'^documentation/pots$',         views.pots_docs),
+    url(r'^documentation/overview$',     views.overview_docs),
+    url(r'^documentation/publications$', views.pubs_docs),
 
     ## api
-    url(r'^api/$', 'qmpy.web.views.api_view'),
-    url(r'^api/search', 'qmpy.web.views.search_data'),
+    url(r'^api/$',      views.api_view),
+    url(r'^api/search', views.search_data),
 
     ## serializer
     url(r'^oqmdapi/entry$', views.EntryList.as_view()),
@@ -114,10 +115,10 @@ urlpatterns += [
     url(r'^optimade/structures/(?P<pk>[0-9]+)/$', views.OptimadeStructureDetail.as_view()),
 
     ## download
-    url(r'^download/', 'qmpy.web.views.download_home'),
+    url(r'^download/', views.download_home),
 
     ## other
-    url(r'^faq', 'qmpy.web.views.faq_view'),
-    url(r'^playground', 'qmpy.web.views.play_view')
+    url(r'^faq',        views.faq_view),
+    url(r'^playground', views.play_view)
 ]
 
