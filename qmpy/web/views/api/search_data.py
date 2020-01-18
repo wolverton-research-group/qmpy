@@ -1,7 +1,7 @@
 from django.http import HttpResponse, QueryDict
 from django.template import RequestContext
 from django.shortcuts import render
-from django.core.context_processors import csrf
+from django.template.context_processors import csrf
 
 from qmpy import INSTALL_PATH
 from .search_data_forms import DataFilterForm

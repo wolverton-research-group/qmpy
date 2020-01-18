@@ -4,7 +4,7 @@ import os.path
 from django.http import HttpResponse
 from django.template import RequestContext
 from django.shortcuts import render_to_response
-from django.core.context_processors import csrf
+from django.template.context_processors import csrf
 
 from qmpy import INSTALL_PATH
 from qmpy.models import *
