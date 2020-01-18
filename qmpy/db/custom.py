@@ -6,12 +6,17 @@ import numpy as np
 import ast
 import urllib.request, urllib.error, urllib.parse
 
-class TagField(models.TextField, metaclass=models.SubfieldBase):
+class TagField(models.TextField):
     description = "Stores tags in a single database column."
 
     def __init__(self, delimiter="|", *args, **kwargs):
         self.delimiter = delimiter
         super(TagField, self).__init__(*args, **kwargs)
+
+    def from_db_value(self, value, expression, connection, context):
+        if not value:
+            return []
+        return value.split(self.delimiter)
 
     def to_python(self, value):
         if isinstance(value, list):
@@ -25,11 +30,16 @@ class TagField(models.TextField, metaclass=models.SubfieldBase):
     def get_prep_value(self, value):
         return self.delimiter.join(value)
 
-class NumpyArrayField(models.TextField, metaclass=models.SubfieldBase):
+class NumpyArrayField(models.TextField):
     description = "Stores a Numpy ndarray."
 
     def __init__(self, *args, **kwargs):
         super(NumpyArrayField, self).__init__(*args, **kwargs)
+
+    def from_db_value(self, value, expression, connection, context):
+        if not value:
+            return np.array([])
+        return np.array(pickle.loads(str(value)))
 
     def to_python(self, value):
         if isinstance(value, list):
@@ -49,11 +59,17 @@ class NumpyArrayField(models.TextField, metaclass=models.SubfieldBase):
         else:
             raise TypeError('%s is not a list or numpy array' % value)
 
-class DictField(models.TextField, metaclass=models.SubfieldBase):
+class DictField(models.TextField):
     description = "Stores a python dictionary"
 
     def __init__(self, *args, **kwargs):
         super(DictField, self).__init__(*args, **kwargs)
+
+    def from_db_value(self, value, expression, connection, context):
+        if not value:
+            value = {}
+        return ast.literal_eval(value)
+
 
     def to_python(self, value):
         if not value:
@@ -77,11 +93,16 @@ class DictField(models.TextField, metaclass=models.SubfieldBase):
         value = self._get_val_from_obj(obj)
         return self.get_db_prep_value(value)
 
-class JSONField(models.TextField, metaclass=models.SubfieldBase):
+class JSONField(models.TextField):
     description = "Stores a python dictionary"
 
     def __init__(self, *args, **kwargs):
         super(JSONField, self).__init__(*args, **kwargs)
+
+    def from_db_value(self, value, expression, connection, context):
+        if not value:
+            return value
+        return json.loads(value)
 
     def to_python(self, value):
         if not value:
