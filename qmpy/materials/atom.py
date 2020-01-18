@@ -49,11 +49,11 @@ class Atom(models.Model):
         | volume: Volume occupied by the atom
 
     """
-    structure = models.ForeignKey('qmpy.Structure', related_name='atom_set', null=True)
-    site = models.ForeignKey('Site', related_name='atom_set', null=True)
+    structure = models.ForeignKey('qmpy.Structure', related_name='atom_set', null=True, on_delete=models.CASCADE)
+    site = models.ForeignKey('Site', related_name='atom_set', null=True, on_delete=models.CASCADE)
 
     # species
-    element = models.ForeignKey('qmpy.Element', blank=True, null=True)
+    element = models.ForeignKey('qmpy.Element', blank=True, null=True, on_delete=models.CASCADE)
     ox = models.IntegerField(default=None, blank=True, null=True)
 
     # position
@@ -73,7 +73,7 @@ class Atom(models.Model):
 
     # symmetry
     occupancy = models.FloatField(default=1)
-    wyckoff = models.ForeignKey(WyckoffSite, blank=True, null=True)
+    wyckoff = models.ForeignKey(WyckoffSite, blank=True, null=True, on_delete=models.SET_NULL)
 
     dist = None
     copy_of = None
@@ -297,8 +297,8 @@ class Site(models.Model):
         | x, y, z: Coordinate of the Site
 
     """
-    structure = models.ForeignKey('qmpy.Structure', related_name='site_set', blank=True, null=True)
-    wyckoff = models.ForeignKey(WyckoffSite, blank=True, null=True)
+    structure = models.ForeignKey('qmpy.Structure', related_name='site_set', blank=True, null=True, on_delete=models.CASCADE)
+    wyckoff = models.ForeignKey(WyckoffSite, blank=True, null=True, on_delete=models.SET_NULL)
     x = models.FloatField()
     y = models.FloatField()
     z = models.FloatField()

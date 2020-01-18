@@ -108,15 +108,15 @@ class Calculation(models.Model):
     meta_data = models.ManyToManyField(MetaData)
 
     label = models.CharField(max_length=63, default='')
-    entry = models.ForeignKey('Entry', db_index=True, null=True, blank=True)
+    entry = models.ForeignKey('Entry', db_index=True, null=True, blank=True, on_delete=models.CASCADE)
     path = models.CharField(max_length=255, null=True, db_index=True)
 
-    composition = models.ForeignKey('Composition', null=True, blank=True)
+    composition = models.ForeignKey('Composition', null=True, blank=True, on_delete=models.CASCADE)
     element_set = models.ManyToManyField('Element')
     natoms = models.IntegerField(blank=True, null=True)
 
     #= inputs =#
-    input = models.ForeignKey(strx.Structure, 
+    input = models.ForeignKey(strx.Structure, on_delete=models.CASCADE,
                               related_name='calculated',
                               null=True, blank=True)
     hubbard_set = models.ManyToManyField('Hubbard')
@@ -124,7 +124,7 @@ class Calculation(models.Model):
     settings = DictField(blank=True, null=True)
     
     #= outputs =#
-    output = models.ForeignKey(strx.Structure, 
+    output = models.ForeignKey(strx.Structure, on_delete=models.CASCADE,
                                related_name='source',
                                null=True, blank=True)
 
@@ -132,7 +132,7 @@ class Calculation(models.Model):
     energy_pa = models.FloatField(null=True, blank=True)
     magmom = models.FloatField(blank=True, null=True)
     magmom_pa = models.FloatField(blank=True, null=True)
-    dos = models.ForeignKey('DOS', blank=True, null=True)
+    dos = models.ForeignKey('DOS', blank=True, null=True, on_delete=models.SET_NULL)
     band_gap = models.FloatField(blank=True, null=True)
     irreducible_kpoints = models.FloatField(blank=True, null=True)
 

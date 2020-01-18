@@ -44,7 +44,7 @@ class Composition(models.Model):
 
     ### thermodyanamic stuff
     meidema = models.FloatField(blank=True, null=True)
-    structure = models.ForeignKey('Structure', blank=True,
+    structure = models.ForeignKey('Structure', blank=True, on_delete=models.SET_NULL,
             null=True,
             related_name='+')
 

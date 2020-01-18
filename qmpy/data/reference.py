@@ -122,7 +122,7 @@ class Reference(models.Model):
     """
     author_set = models.ManyToManyField(Author, related_name='references',
             null=True)
-    journal = models.ForeignKey(Journal, related_name='references', 
+    journal = models.ForeignKey(Journal, related_name='references', on_delete=models.SET_NULL, 
             null=True)
     title = models.TextField(null=True)
     volume = models.IntegerField(null=True)
