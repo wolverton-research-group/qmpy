@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 #    name = models.CharField(max_length=10)
 
 #class EnergyLevel(models.Model):
-#    dos = models.ForeignKey('DOS', related_name='energy_levels')
+#    dos = models.ForeignKey('DOS', related_name='energy_levels',on_delete=models.CASCADE)
 #    energy = models.FloatField(blank=True, null=True)
 #    occupation = models.FloatField(blank=True, null=True)
 #    orbital = models.ForiegnKey(Orbital)
@@ -47,7 +47,7 @@ class DOS(models.Model):
     """
 
     meta_data = models.ManyToManyField('MetaData')
-    entry = models.ForeignKey('Entry', null=True)
+    entry = models.ForeignKey('Entry', null=True,on_delete=models.CASCADE)
     efermi = models.FloatField(default=0.0)
     gap = models.FloatField(blank=True, null=True)
     data = custom.NumpyArrayField(blank=True, null=True)

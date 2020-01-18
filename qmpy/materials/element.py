@@ -156,7 +156,7 @@ class Species(models.Model):
 
     """
     name = models.CharField(max_length=8, primary_key=True)
-    element = models.ForeignKey(Element, blank=True, null=True)
+    element = models.ForeignKey(Element, blank=True, null=True, on_delete=models.CASCADE)
     ox = models.FloatField(blank=True, null=True)
 
     class Meta:

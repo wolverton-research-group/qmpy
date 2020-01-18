@@ -456,8 +456,8 @@ class Account(models.Model):
 
     """
 
-    user = models.ForeignKey(User)
-    host = models.ForeignKey(Host)
+    user = models.ForeignKey(User,on_delete=models.CASCADE)
+    host = models.ForeignKey(Host,on_delete=models.CASCADE)
     username = models.CharField(max_length=255)
     run_path = models.TextField()
     state = models.IntegerField(default=1)
@@ -678,7 +678,7 @@ class Allocation(models.Model):
     name = models.CharField(max_length=63, primary_key=True)
     key = models.CharField(max_length=100, default='')
 
-    host = models.ForeignKey(Host)
+    host = models.ForeignKey(Host,on_delete=models.CASCADE)
     users = models.ManyToManyField(User)
     state = models.IntegerField(default=1)
     

@@ -66,7 +66,7 @@ class Task(models.Model):
     created = models.DateTimeField(blank=True, auto_now_add=True)
     finished = models.DateTimeField(blank=True, null=True)
 
-    entry = models.ForeignKey('Entry')
+    entry = models.ForeignKey('Entry',on_delete=models.CASCADE)
     project_set = models.ManyToManyField(Project)
 
     _projects = None
@@ -287,10 +287,10 @@ class Job(models.Model):
     finished = models.DateTimeField(blank=True, null=True)
     state = models.IntegerField(default=0)
 
-    task = models.ForeignKey(Task)
-    entry = models.ForeignKey('Entry')
-    account = models.ForeignKey(Account)
-    allocation = models.ForeignKey(Allocation)
+    task = models.ForeignKey(Task,on_delete=models.CASCADE)
+    entry = models.ForeignKey('Entry',on_delete=models.CASCADE)
+    account = models.ForeignKey(Account,on_delete=models.CASCADE)
+    allocation = models.ForeignKey(Allocation,on_delete=models.CASCADE)
 
     class Meta:
         app_label = 'qmpy'

@@ -198,8 +198,8 @@ class Operation(models.Model):
         <Operation: +x+y+1/2,-y-z+1/2,+x-z+1/2>
 
     """
-    rotation = models.ForeignKey('Rotation')
-    translation = models.ForeignKey('Translation')
+    rotation = models.ForeignKey('Rotation', on_delete=models.CASCADE)
+    translation = models.ForeignKey('Translation', on_delete=models.CASCADE)
 
     class Meta:
         app_label = 'qmpy'
@@ -275,7 +275,7 @@ class WyckoffSite(models.Model):
         | x, y, z: Coordinate symbols.
 
     """
-    spacegroup = models.ForeignKey('Spacegroup', related_name='site_set')
+    spacegroup = models.ForeignKey('Spacegroup', related_name='site_set', on_delete=models.CASCADE)
     symbol = models.CharField(max_length=1)
     multiplicity = models.IntegerField(blank=True, null=True)
     x = models.CharField(max_length=8)
