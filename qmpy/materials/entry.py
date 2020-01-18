@@ -63,7 +63,7 @@ class Entry(models.Model):
     label = models.CharField(max_length=20, null=True)
 
     ### record keeping
-    duplicate_of = models.ForeignKey('Entry', related_name='duplicates',
+    duplicate_of = models.ForeignKey('Entry', related_name='duplicates', on_delete=models.SET_NULL,
             null=True)
     ntypes = models.IntegerField(blank=True, null=True)
     natoms = models.IntegerField(blank=True, null=True)
@@ -72,9 +72,9 @@ class Entry(models.Model):
     element_set = models.ManyToManyField('Element')
     species_set = models.ManyToManyField('Species')
     project_set = models.ManyToManyField('Project')
-    composition = models.ForeignKey('Composition', blank=True, null=True)
-    reference = models.ForeignKey('Reference', null=True, blank=True)
-    prototype = models.ForeignKey('Prototype', null=True, blank=True)
+    composition = models.ForeignKey('Composition', blank=True, null=True, on_delete=models.PROTECT)
+    reference = models.ForeignKey('Reference', null=True, blank=True, on_delete=models.SET_NULL)
+    prototype = models.ForeignKey('Prototype', null=True, blank=True, on_delete=models.SET_NULL)
 
     class Meta:
         app_label = 'qmpy'

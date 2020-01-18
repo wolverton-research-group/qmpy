@@ -31,7 +31,7 @@ class Potential(models.Model):
     """
 
     potcar = models.TextField()
-    element = models.ForeignKey(elt.Element)
+    element = models.ForeignKey(elt.Element, on_delete=models.PROTECT)
 
     name = models.CharField(max_length=10)
     xc = models.CharField(max_length=3)
@@ -143,10 +143,10 @@ class Hubbard(models.Model):
         | u
 
     """
-    element = models.ForeignKey(elt.Element, related_name='hubbards')
+    element = models.ForeignKey(elt.Element, related_name='hubbards', on_delete=models.CASCADE)
     convention = models.CharField(max_length=20)
     ox = models.FloatField(default=None, null=True)
-    ligand = models.ForeignKey(elt.Element, related_name='+',
+    ligand = models.ForeignKey(elt.Element, related_name='+', on_delete=models.CASCADE,
             null=True, blank=True)
 
     u = models.FloatField(default=0)

@@ -100,17 +100,17 @@ class Structure(models.Model, object):
         >>> s.stresses
 
     """
-    entry = models.ForeignKey('Entry', null=True)
+    entry = models.ForeignKey('Entry', null=True, on_delete=models.CASCADE)
     element_set = models.ManyToManyField('Element')
     species_set = models.ManyToManyField('Species')
     meta_data = models.ManyToManyField('MetaData')
-    reference = models.ForeignKey('Reference', null=True)
+    reference = models.ForeignKey('Reference', null=True, on_delete=models.SET_NULL)
     label = models.CharField(blank=True, max_length=63)
-    prototype = models.ForeignKey('Prototype', null=True, blank=True,
+    prototype = models.ForeignKey('Prototype', null=True, blank=True, on_delete=models.SET_NULL,
                                                related_name='+')
     measured = models.BooleanField(default=False)
 
-    composition = models.ForeignKey('Composition', null=True,
+    composition = models.ForeignKey('Composition', null=True, on_delete=models.CASCADE,
                                     related_name='structure_set')
     natoms = models.IntegerField(null=True, blank=True)
     nsites = models.IntegerField(null=True, blank=True)
@@ -136,7 +136,7 @@ class Structure(models.Model, object):
     syz = models.FloatField(default=0)
     szx = models.FloatField(default=0)
 
-    spacegroup = models.ForeignKey('Spacegroup', blank=True,
+    spacegroup = models.ForeignKey('Spacegroup', blank=True, on_delete=models.SET_NULL,
             null=True)
 
     energy = models.FloatField(blank=True, null=True)
@@ -2186,9 +2186,9 @@ class Prototype(models.Model):
     """
 
     name = models.CharField(max_length=63, primary_key=True)
-    structure = models.ForeignKey(Structure, related_name='+',
+    structure = models.ForeignKey(Structure, related_name='+', on_delete=models.PROTECT,
                                   blank=True, null=True)
-    composition = models.ForeignKey('Composition', blank=True, null=True)
+    composition = models.ForeignKey('Composition', blank=True, null=True, on_delete=models.PROTECT)
 
     class Meta:
         app_label = 'qmpy'

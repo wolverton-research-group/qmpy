@@ -35,7 +35,7 @@ class ExptFormationEnergy(models.Model):
         | source: (str) Identifier for the source.
 
     """
-    composition = models.ForeignKey('Composition', null=True, blank=True)
+    composition = models.ForeignKey('Composition', null=True, blank=True, on_delete=models.PROTECT)
     delta_e = models.FloatField(null=True)
     delta_g = models.FloatField(null=True)
     source = models.CharField(max_length=127, blank=True, null=True)
@@ -77,10 +77,10 @@ class HubbardCorrection(models.Model):
         | value: Correction energy (eV/atom)
 
     """
-    element = models.ForeignKey('Element')
-    hubbard = models.ForeignKey('Hubbard')
+    element = models.ForeignKey('Element', on_delete=models.CASCADE)
+    hubbard = models.ForeignKey('Hubbard', on_delete=models.CASCADE)
     value = models.FloatField()
-    fit = models.ForeignKey('Fit', blank=True, null=True,
+    fit = models.ForeignKey('Fit', blank=True, null=True, on_delete=models.CASCADE,
                                    related_name='hubbard_correction_set')
 
     class Meta:
@@ -101,9 +101,9 @@ class ReferenceEnergy(models.Model):
 
 
     """
-    element = models.ForeignKey('Element')
+    element = models.ForeignKey('Element', on_delete=models.CASCADE)
     value = models.FloatField()
-    fit = models.ForeignKey('Fit', blank=True, null=True,
+    fit = models.ForeignKey('Fit', blank=True, null=True, on_delete=models.CASCADE,
                                    related_name='reference_energy_set')
 
     class Meta:
@@ -128,11 +128,11 @@ class FormationEnergy(models.Model):
         | stability: Distance from the convex hull (eV/atom)
 
     """
-    composition = models.ForeignKey('Composition', null=True, blank=True)
-    entry = models.ForeignKey('Entry', null=True, blank=True)
-    calculation = models.ForeignKey('Calculation', null=True, blank=True)
+    composition = models.ForeignKey('Composition', null=True, blank=True, on_delete=models.PROTECT)
+    entry = models.ForeignKey('Entry', null=True, blank=True, on_delete=models.CASCADE)
+    calculation = models.ForeignKey('Calculation', null=True, blank=True, on_delete=models.SET_NULL)
     description = models.CharField(max_length=20, null=True, blank=True)
-    fit = models.ForeignKey('Fit', null=True)
+    fit = models.ForeignKey('Fit', null=True, on_delete=models.PROTECT)
 
     stability = models.FloatField(blank=True, null=True)
     delta_e = models.FloatField(null=True)
