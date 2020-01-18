@@ -16,7 +16,9 @@ before_install:
   - ./miniconda.sh -b
   - export PATH=/home/travis/miniconda2/bin:$PATH
   - conda update --yes conda
-install: 
+install:
+  - conda remove enum34
+  - conda update python 
   - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy
   - "python setup.py install"
 before_script:
