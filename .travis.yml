@@ -1,8 +1,9 @@
 language: python
 sudo: false
-dist: xenial
-python:
-  - '3.7'
+matrix:
+  include:
+  - python: 3.7
+    dist: xenial
 branches:
   only:
     - master
