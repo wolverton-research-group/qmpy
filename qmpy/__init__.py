@@ -143,7 +143,7 @@ def read_spacegroups(numbers=None):
         cvs = []
         for cv in sgd['centering_vectors']:
             cvs.append(Translation.get(cv))
-        sg.centering_vectors = cvs
+        sg.centering_vectors.set(cvs)
 
         ops = []
         for op in sgd['sym_ops']:
@@ -158,7 +158,7 @@ def read_spacegroups(numbers=None):
                                y=site['coordinate'].split()[1],
                                z=site['coordinate'].split()[2],
                                multiplicity=site['multiplicity']))
-        sg.site_set = wycks
+        sg.site_set.set(wycks,bulk=False)
 
 def read_elements():
     elements = open(INSTALL_PATH+'/data/elements/data.yml').read()
