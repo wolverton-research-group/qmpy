@@ -341,7 +341,7 @@ class Spacegroup(models.Model):
         super(Spacegroup, self).save(*args, **kwargs)
         for op in self.sym_ops:
             op.save()
-        self.operations = self.sym_ops
+        self.operations.set(self.sym_ops)
 
     @staticmethod
     def get(number):

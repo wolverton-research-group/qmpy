@@ -95,7 +95,7 @@ class Composition(models.Model):
             comp.generic = format_generic_comp(comp.comp)
             comp.element_list = '_'.join(list(comp.comp.keys()))+'_'
             comp.save()
-            comp.element_set = list(comp.comp.keys())
+            comp.element_set.set(list(comp.comp.keys()))
             return comp
 
     @classmethod
