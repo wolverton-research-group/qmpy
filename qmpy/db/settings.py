@@ -89,30 +89,42 @@ STATICFILES_FINDERS = (
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'h23o7ac@^_upzx*zzs%1t1bn6#*(7@b3$kp*v9)6hbf%rkr!%z'
 
-# List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
-)
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+            os.path.join(INSTALL_PATH, 'qmpy', 'web', 'templates'),
+        ],
+        'OPTIONS': {
+            'context_processors': [
+                "django.contrib.auth.context_processors.auth",
+                "django.template.context_processors.debug",
+                "django.template.context_processors.i18n",
+                "django.template.context_processors.media",
+                "django.template.context_processors.static",
+                "django.contrib.messages.context_processors.messages",
+                "django.template.context_processors.request",
+                #'django.template.context_processors.tz',
+            ],
+            'loaders': [
+                'django.template.loaders.filesystem.Loader',
+                'django.template.loaders.app_directories.Loader',
+            ]
+        },
+    },
+]
 
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-)
+]
 
 ROOT_URLCONF = 'qmpy.web.urls'
 
-TEMPLATE_DIRS = (
-        os.path.join(INSTALL_PATH, 'qmpy', 'web', 'templates'),
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-)
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -122,8 +134,6 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_extensions',
-    'django.contrib.admin',
-    'django.contrib.admindocs',
     'qmpy',
     'rest_framework',
     'rest_framework_xml',
@@ -160,15 +170,6 @@ LOGGING = {
     }
 }
 
-TEMPLATE_CONTEXT_PROCESSORS = (
-        "django.contrib.auth.context_processors.auth",
-        "django.core.context_processors.debug",
-        "django.core.context_processors.i18n",
-        "django.core.context_processors.media",
-        "django.core.context_processors.static",
-        "django.contrib.messages.context_processors.messages",
-        "django.core.context_processors.request",
-        )
 
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKEND': ('django_filters.rest_framework.DjangoFilterBackend',),

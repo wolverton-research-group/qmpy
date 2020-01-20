@@ -2,8 +2,6 @@ from django.conf.urls import include, url
 
 import django.views.generic
 from django.views.generic import DetailView, ListView
-from django.contrib import admin, admindocs
-from django.contrib.auth.views import LoginView, LogoutView
 from qmpy.db import settings
 
 from rest_framework import routers
@@ -12,18 +10,9 @@ from qmpy.web import views
 #router = routers.DefaultRouter()
 #router.register(r'users', views.UserViewSet)
 
-# Uncomment the next two lines to enable the admin:
-admin.autodiscover()
 
 urlpatterns = [
     url(r'^$', views.home_page),
-
-    ## admin
-    url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
-    url(r'^accounts/login/.*$',  LoginView.as_view(template_name='registration/login.html')),
-    url(r'^accounts/logout/.*$', LogoutView.as_view(template_name='registration/loggedout.html')),
-    url(r'^admin/', admin.site.urls),
-
     ]
 
 urlpatterns += [
