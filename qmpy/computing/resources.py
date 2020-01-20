@@ -146,7 +146,7 @@ class Host(models.Model):
 
     """
     name = models.CharField(max_length=63, primary_key=True)
-    ip_address = models.IPAddressField(null=True)
+    ip_address = models.GenericIPAddressField(null=True)
     hostname = models.CharField(max_length=255)
     binaries = DictField()
     ppn = models.IntegerField(default=8)
