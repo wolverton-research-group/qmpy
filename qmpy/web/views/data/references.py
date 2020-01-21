@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-import io
+from io import StringIO
 
 from django.shortcuts import render_to_response
 from django.template import RequestContext
@@ -26,7 +26,7 @@ def journal_view(request, journal_id):
     plt.hist(dates)
     plt.xlabel('Year')
     plt.ylabel('# of publications with new materials')
-    img = io.StringIO()
+    img = StringIO()
     plt.savefig(img, dpi=75, bbox_inches='tight')
     data_uri = 'data:image/jpg;base64,'
     data_uri += img.getvalue().encode('base64').replace('\n', '')

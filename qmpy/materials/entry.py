@@ -15,7 +15,8 @@ from qmpy.materials.structure import Structure, StructureError
 from qmpy.utils import *
 from qmpy.computing.resources import Project
 from qmpy.data.meta_data import *
-import qmpy.io as io
+import qmpy.io.poscar as poscar
+import qmpy.io.cif as cif
 import qmpy.computing.scripts as scripts
 import qmpy.analysis.vasp as vasp
 
@@ -148,9 +149,9 @@ class Entry(models.Model):
         # Step 2
         entry = Entry(**kwargs)
         try:
-            structure = io.poscar.read(source_file)
+            structure = poscar.read(source_file)
         except ValueError:
-            structure = io.cif.read(source_file)
+            structure = cif.read(source_file)
         structure.make_primitive()
         entry.source_file = source_file
         entry.path = os.path.dirname(source_file)
@@ -171,7 +172,7 @@ class Entry(models.Model):
             if not c1.compare(c2, 5e-2):
                 entry.add_hold("composition mismatch in cif")
                 entry.composition = c2
-            entry.reference = io.cif.read_reference(source_file)
+            entry.reference = cif.read_reference(source_file)
 
         # check for perfect crystals
         if not any([ s.partial for s in structure.sites ]):

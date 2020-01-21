@@ -4,7 +4,7 @@ import numpy as np
 from collections import defaultdict
 import os.path
 import qmpy
-import io
+from io import StringIO
 import fractions as frac
 import logging
 
@@ -268,7 +268,7 @@ class PhaseData(object):
             fileobj = open(filename)
         elif isinstance(filename, file):
             fileobj = filename
-        elif isinstance(filename, type(io.StringIO())):
+        elif isinstance(filename, type(StringIO())):
             fileobj = filename
             fileobj.name = None
         thermodata = fileobj.readlines()

@@ -2,7 +2,6 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 
 from qmpy.models import Spacegroup, Operation
-import io
 from ..tools import get_globals
 
 def sg_view(request, spacegroup):

@@ -6,7 +6,7 @@ from django.template.context_processors import csrf
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-import io 
+from io import StringIO
 
 from qmpy import INSTALL_PATH
 from qmpy.models import *
@@ -41,7 +41,7 @@ def icsd_progress():
     plt.xlabel('# of atoms in primitive cell')
     plt.ylabel('# of entries')
 
-    img = io.StringIO()
+    img = StringIO()
     plt.savefig(img, dpi=75, bbox_inches='tight')
     data_uri = 'data:image/jpg;base64,'
     data_uri += img.getvalue().encode('base64').replace('\n', '')

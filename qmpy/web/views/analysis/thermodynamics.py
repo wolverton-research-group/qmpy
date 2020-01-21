@@ -1,6 +1,5 @@
 from tempfile import mkstemp
 import os.path
-import io
 import pulp
 import json
 
