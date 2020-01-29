@@ -233,9 +233,9 @@ class Structure(models.Model, object):
 
         super(Structure, self).save(*args, **kwargs)
 
-        self.element_set = self.elements
-        self.species_set = self.species
-        self.meta_data = self.comment_objects + self.keyword_objects
+        self.element_set.set(self.elements)
+        self.species_set.set(self.species)
+        self.meta_data.set(self.comment_objects + self.keyword_objects)
 
         if not self._sites is None:
             for s in self.sites:
@@ -860,8 +860,9 @@ class Structure(models.Model, object):
             if abs(shortest_dist(atom2, self.cell) - shortest_dist(atom, self.cell)) > tol:
                 continue
             d = self.get_distance(atom, atom2, limit=1)
-            if d < tol and not d is None:
-                return True
+            if not d is None:
+                if d < tol:
+                    return True
         return False
 
     def get_distance(self, atom1, atom2, limit=None, wrap_self=True):

@@ -77,7 +77,7 @@ class Task(models.Model):
 
     def save(self, *args, **kwargs):
         super(Task, self).save(*args, **kwargs)
-        self.project_set = [ Project.get(p) for p in self.projects ]
+        self.project_set.set([ Project.get(p) for p in self.projects ])
 
     @property
     def projects(self):

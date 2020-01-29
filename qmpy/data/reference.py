@@ -140,7 +140,7 @@ class Reference(models.Model):
         if self.journal:
             self.journal.save()
         super(Reference, self).save(*args, **kwargs)
-        self.author_set = self._authors
+        self.author_set.set(self._authors)
 
     @property
     def authors(self):

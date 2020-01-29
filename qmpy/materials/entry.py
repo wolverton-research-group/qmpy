@@ -108,13 +108,13 @@ class Entry(models.Model):
                 v.save()
             #self.calculation_set = self.calculations.values()
         if self._elements:
-            self.element_set = self.elements
+            self.element_set.set(self.elements)
         if self._species:
-            self.species_set = self.species
+            self.species_set.set(self.species)
         if self._projects:
-            self.project_set = self.projects
+            self.project_set.set(self.projects)
         if self._keywords or self._holds:
-            self.meta_data = self.hold_objects + self.keyword_objects
+            self.meta_data.set(self.hold_objects + self.keyword_objects)
 
     @staticmethod
     def create(source, keywords=[], projects=[], prototype=None, **kwargs):

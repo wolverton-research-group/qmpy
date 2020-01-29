@@ -163,7 +163,7 @@ class Composition(models.Model):
 
     @elements.setter
     def elements(self, elements):
-        self.element_set = elements
+        self.element_set.set(elements)
         self._elements = None
 
     @property
