@@ -29,6 +29,7 @@ before_script:
   - export qmdb_v1_1_pswd=""
   - export qmdb_v1_1_host=""
   - export qmdb_v1_1_port=""
+  - export web_port="0000"
   - mysql -e 'create database qmdb_dev;'
 script:
   - cd qmpy/db
