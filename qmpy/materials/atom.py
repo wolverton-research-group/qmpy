@@ -19,6 +19,8 @@ import qmpy
 from qmpy.utils import *
 from qmpy.analysis.symmetry import WyckoffSite
 
+from functools import total_ordering
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
@@ -28,6 +30,7 @@ class AtomError(qmpy.qmpyBaseError):
 class SiteError(qmpy.qmpyBaseError):
     pass
 
+@total_ordering
 class Atom(models.Model):
     """
     Model for an Atom.
@@ -91,7 +94,7 @@ class Atom(models.Model):
             return False
         return (self.x, self.y, self.z) == (other.x, other.y, other.z)
 
-    def __cmp__(self, other):
+    def __lt__(self, other):
         comp_arr = [[ self.x, other.x ],
                     [ self.y, other.y ],
                     [ self.z, other.z ],
@@ -109,7 +112,7 @@ class Atom(models.Model):
         if all(abs(comp_arr[0] - comp_arr[1]) < 1e-3):
             return 0
         ind = np.lexsort(comp_arr.T)
-        return 2*ind[0] - 1
+        return (ind[0] < 0.5)
 
     @property
     def forces(self):
