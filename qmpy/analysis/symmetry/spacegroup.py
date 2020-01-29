@@ -324,7 +324,7 @@ class Spacegroup(models.Model):
     hall = models.CharField(max_length=30, blank=True, null=True)
     pearson = models.CharField(max_length=30)
     schoenflies = models.CharField(max_length=30)
-    operations = models.ManyToManyField(Operation, null=True)
+    operations = models.ManyToManyField(Operation, blank=True)
     centering_vectors = models.ManyToManyField(Translation)
     lattice_system = models.CharField(max_length=20)
     centrosymmetric = models.BooleanField(default=False)

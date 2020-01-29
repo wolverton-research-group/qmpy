@@ -137,7 +137,7 @@ class FormationEnergy(models.Model):
     stability = models.FloatField(blank=True, null=True)
     delta_e = models.FloatField(null=True)
 
-    equilibrium = models.ManyToManyField('self', blank=True, null=True)
+    equilibrium = models.ManyToManyField('self', blank=True)
 
     class Meta:
         app_label = 'qmpy'
