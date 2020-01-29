@@ -68,6 +68,8 @@ class DictField(models.TextField):
     def from_db_value(self, value, expression, connection, context):
         if not value:
             value = {}
+        if isinstance(value, dict):
+            return value
         return ast.literal_eval(value)
 
 
