@@ -421,6 +421,10 @@ class Phase(object):
     def __repr__(self):
         return '<Phase %s>' % self
 
+    def __hash__(self):
+        return hash(tuple([str(self.comp),float(self.energy)]+\
+                          [str(self.unit_comp[key]) for key in self.comp]))
+
     def __eq__(self, other):
         """
         Phases are defined to be equal if they have the same composition and an
