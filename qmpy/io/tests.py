@@ -1,7 +1,7 @@
 from qmpy import *
 import unittest
 from django.test import TestCase
-
+from io import StringIO
 def simple_equal(s1, s2):
     if not all(s1.atom_types == s2.atom_types):
         return False
@@ -21,7 +21,7 @@ class POSCARTestCase(TestCase):
         self.struct = Structure.create(cell=cell, atoms=atoms)
 
     def test_read_poscar_from_streaming(self):
-        f = StringIO.StringIO("""Cu
+        f = StringIO("""Cu
 3.54
 1.0 0.0 0.0
 0.0 1.0 0.0
