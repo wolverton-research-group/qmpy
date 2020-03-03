@@ -18,7 +18,7 @@ setup(
     include_package_data=True,
     long_description=open('README.md').read(),
     install_requires=[
-        "Django == 1.8.18",
+        "Django == 1.11.28",
         "PuLP",
         "numpy < 1.17",
         "scipy < 1.3",
