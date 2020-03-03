@@ -217,6 +217,14 @@ class Task(models.Model):
                 else:
                     calc.instructions['queuetype'] = 'normal'
 
+            if allocation.name == 'bebop':
+                # Special MPI call for bebop
+                calc.instructions['mpi'] = 'mpirun -psm2 -np $NPROCS'
+            
+            if allocation.name == 'xsede':
+                # Special MPI call for xsede
+                calc.instructions['mpi'] = 'mpirun -np $NPROCS'
+
             if allocation.name == 'babbage':
                 # Check if calculation is parallel
                 if 'serial' in calc.instructions and not calc.instructions['serial']:
