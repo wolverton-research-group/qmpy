@@ -7,5 +7,5 @@ from .element_groups import *
 from .deposit import *
 
 def common_materials_view(request):
-    return render_to_response('materials/index.html', {})
+    return render(request,'materials/index.html', {})
 

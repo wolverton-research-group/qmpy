@@ -5,8 +5,7 @@ from io import StringIO
 
 
 from django.http import HttpResponse
-from django.template import RequestContext
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.template.context_processors import csrf
 
 from qmpy import INSTALL_PATH
@@ -58,9 +57,8 @@ def structure_view(request, structure_id):
     data['pdf'] = pdf.plot().get_flot_script(div='pdf')
     data['xrd'] = xrd.plot().get_flot_script(div='xrd')
     data.update(csrf(request))
-    return render_to_response('materials/structure.html', 
-            data,
-            RequestContext(request))
+    return render(request,'materials/structure.html', 
+                  context=data)
 
 def export_structure(request, structure_id, convention='primitive', format='poscar'):
     s = Structure.objects.get(id=structure_id)
@@ -88,15 +86,13 @@ def prototype_view(request, name):
     data['structure'] = structure
 
     data.update(csrf(request))
-    return render_to_response('materials/prototype.html', 
-            data,
-            RequestContext(request))
+    return render(request,'materials/prototype.html', 
+                  context=data)
 
 def prototypes_view(request):
     data = get_globals()
-    return render_to_response('materials/prototypes.html',
-            data,
-            RequestContext(request))
+    return render(request,'materials/prototypes.html',
+                  context=data)
 
 def export_xrd(request, structure_id):
     s = Structure.objects.get(pk=structure_id)

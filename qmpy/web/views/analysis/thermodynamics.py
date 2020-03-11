@@ -4,8 +4,7 @@ import pulp
 import json
 
 from django.http import HttpResponse
-from django.template import RequestContext
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.template.context_processors import csrf
 
 from qmpy import *
@@ -59,9 +58,9 @@ def gclp_view(request):
         for k, v in list(data['phase_comp'].items()):
             data['phase_comp'][k] /= sum(k.nom_comp.values())
     data.update(csrf(request))
-    return render_to_response('analysis/gclp.html',
-            data,
-            RequestContext(request))
+    return render(request,
+                  'analysis/gclp.html',
+                  data)
 
 def phase_diagram_view(request):
     data = {'search': '',
@@ -134,9 +133,8 @@ def phase_diagram_view(request):
         else:
             data['flotscript'] = ps.phase_diagram.get_flot_script()
         data['renderer'] = ps.renderer
-    return render_to_response('analysis/phase_diagram.html',
-            get_globals(data),
-            RequestContext(request))
+    return render(request, 'analysis/phase_diagram.html',
+                  context=get_globals(data))
 
 def chem_pot_view(request):
     data = {'search': ''}
@@ -149,6 +147,5 @@ def chem_pot_view(request):
         data['flotscript'] = ps.renderer.get_flot_script()
         data['chem_pots'] = ps.chempot_bounds(data['search'], total=True)
 
-    return render_to_response('analysis/chem_pots.html',
-            data,
-            RequestContext(request))
+    return render(request, 'analysis/chem_pots.html',
+                              context=data)

@@ -2,8 +2,7 @@ from tempfile import mkstemp
 import os.path
 
 from django.http import HttpResponse
-from django.template import RequestContext
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.template.context_processors import csrf
 
 from io import StringIO
@@ -69,9 +68,8 @@ direct
         data['structure'] = s
     data.update(csrf(request))
     custom_data = data['crystal_data']
-    return render_to_response('analysis/view_data.html',
-            get_globals(data),
-            RequestContext(request))
+    return render(request,'analysis/view_data.html',
+                  context=get_globals(data))
 
 def jsmol(request):
     global custom_data
