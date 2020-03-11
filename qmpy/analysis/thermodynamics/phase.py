@@ -12,6 +12,7 @@ from qmpy.utils import *
 from django.db.models import F, Q
 import operator
 from functools import reduce
+from functools import total_ordering
 
 logger = logging.getLogger(__name__)
 
@@ -424,6 +425,11 @@ class Phase(object):
     def __hash__(self):
         return hash(tuple([str(self.comp),float(self.energy)]+\
                           [str(self.unit_comp[key]) for key in self.comp]))
+
+    @total_ordering
+    def __lt__(self,other):
+        "Phase-comparison is done based on energy value"
+        return(self.energy < other.energy)
 
     def __eq__(self, other):
         """
