@@ -39,7 +39,7 @@ class NumpyArrayField(models.TextField):
     def from_db_value(self, value, expression, connection, context):
         if not value:
             return np.array([])
-        return np.array(pickle.loads(str(value)))
+        return np.array(pickle.loads( bytes(str(value),'latin-1') ))
 
     def to_python(self, value):
         if isinstance(value, list):
@@ -49,13 +49,13 @@ class NumpyArrayField(models.TextField):
 
         if not value:
             return np.array([])
-        return np.array(pickle.loads(str(value)))
+        return np.array(pickle.loads( bytes(str(value),'latin-1') ))
 
     def get_prep_value(self, value):
         if isinstance(value, list):
-            return pickle.dumps(value)
+            return str(pickle.dumps(value, protocol=0),'latin-1')
         elif isinstance(value, np.ndarray):
-            return pickle.dumps(value.tolist())
+            return str(pickle.dumps(value.tolist(), protocol=0),'latin-1')
         else:
             raise TypeError('%s is not a list or numpy array' % value)
 
