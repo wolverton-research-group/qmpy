@@ -182,6 +182,9 @@ class Hubbard(models.Model):
         retval += ', U=%0.2f, L=%d' % (self.u, self.l)
         return retval
 
+    def __hash__(self):
+        return hash(self.__str__())
+
     @property
     def key(self):
         return '%s_%s' % (self.element_id, self.u)
