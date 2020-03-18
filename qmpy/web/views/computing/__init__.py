@@ -1,12 +1,11 @@
 from django.http import HttpResponse
-from django.template import RequestContext
-from django.shortcuts import render_to_response
-from django.template.context_processors import csrf
+from django.shortcuts import render
 
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from io import StringIO
+from io import BytesIO
+import base64
 
 from qmpy import INSTALL_PATH
 from qmpy.models import *
@@ -41,10 +40,14 @@ def icsd_progress():
     plt.xlabel('# of atoms in primitive cell')
     plt.ylabel('# of entries')
 
-    img = StringIO()
-    plt.savefig(img, dpi=75, bbox_inches='tight')
-    data_uri = 'data:image/jpg;base64,'
-    data_uri += img.getvalue().encode('base64').replace('\n', '')
+    img = BytesIO()
+    plt.savefig(img, dpi=75, bbox_inches='tight',format='png')
+    img.seek(0)
+    data_uri = img.getvalue()
+    img.close()
+
+    data_uri = base64.b64encode(data_uri)
+    data_uri = data_uri.decode('utf-8')
     plt.close()
     return data_uri
 
@@ -55,7 +58,6 @@ def computing_view(request):
             'projects': Project.objects.all(),
             'allocations': Allocation.objects.all(),
             'icsd':icsd_progress()}
-    return render_to_response('computing/index.html', 
-            data, 
-            RequestContext(request))
+    return render(request,'computing/index.html', 
+            data)
 
