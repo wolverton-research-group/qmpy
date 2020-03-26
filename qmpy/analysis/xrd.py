@@ -149,7 +149,7 @@ class XRD(object):
         ratio *= self.wavelength
         if (ratio >= -1 and ratio <= 1):
             return np.arcsin(ratio)
-        elif angle < -1:
+        elif ratio < -1:
             return -np.pi/2
         else:
             return np.pi/2
