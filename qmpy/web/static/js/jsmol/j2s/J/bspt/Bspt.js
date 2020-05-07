@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.bspt");
-Clazz.load (null, "J.bspt.Bspt", ["J.bspt.CubeIterator", "$.Leaf", "J.util.Logger", "$.SB"], function () {
+Clazz.load (null, "J.bspt.Bspt", ["J.bspt.CubeIterator", "$.Leaf"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.treeDepth = 0;
 this.dimMax = 0;
@@ -13,25 +13,19 @@ this.dimMax = dimMax;
 this.index = index;
 this.reset ();
 }, "~N,~N");
-$_M(c$, "reset", 
+Clazz.defineMethod (c$, "reset", 
 function () {
 this.eleRoot =  new J.bspt.Leaf (this, null, 0);
 this.treeDepth = 1;
 });
-$_M(c$, "addTuple", 
+Clazz.defineMethod (c$, "addTuple", 
 function (tuple) {
 this.eleRoot = this.eleRoot.addTuple (0, tuple);
-}, "J.util.P3");
-$_M(c$, "stats", 
+}, "JU.T3");
+Clazz.defineMethod (c$, "stats", 
 function () {
 });
-$_M(c$, "dump", 
-function () {
-var sb =  new J.util.SB ();
-this.eleRoot.dump (0, sb);
-J.util.Logger.info (sb.toString ());
-});
-$_M(c$, "allocateCubeIterator", 
+Clazz.defineMethod (c$, "allocateCubeIterator", 
 function () {
 return  new J.bspt.CubeIterator (this);
 });
