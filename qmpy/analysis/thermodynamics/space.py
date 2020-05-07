@@ -1478,6 +1478,8 @@ class PhaseSpace(object):
                 continue
             if p in self.stable:
                 continue
+            if p.stability==None:
+                continue
             label = '{}<br> hull distance: {:.3f} eV/atom<br> formation energy: {:.3f} eV/atom'.format(
                 p.name, p.stability, p.energy
             )
