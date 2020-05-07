@@ -2,37 +2,156 @@
 {% load static %}
 {% load i18n %}
 
+{% block extrahead %}
+<!-- CSS code snippet From w3schools.com - Abhi -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body {font-family: Arial;}
+
+/* Style the tab */
+.tab {
+  overflow: hidden;
+  border: 1px solid #ccc;
+  background-color: rgba(255, 255, 255, 1);
+}
+
+/* Style the buttons inside the tab */
+.tab button {
+  background-color: inherit;
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  transition: 0.3s;
+  font-size: 17px;
+  font-color: rgba(2, 128, 144,1);
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+  background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+  background-color: #ccc;
+}
+
+/* Style the tab content */
+.tabcontent {
+  display: none;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-top: none;
+}
+</style>
+
+<style>
+.dropbtn {
+  background-color: #3498DB;
+  color: white;
+  margin-top:10px;
+  width:120px;
+  padding: 16px;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+}
+
+.dropbtn:hover, .dropbtn:focus {
+  background-color: #2980B9;
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f1f1f1;
+  min-width: 160px;
+  overflow: auto;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdown a:hover {background-color: #ddd;}
+
+.show {display: block;}
+</style>
+
+<style>
+.submit-button
+{
+    background-color: white;
+    color: rgba(2, 128, 144,1);
+    padding: 4px;
+    font-size: 16px;
+    border: none;
+}
+</style>
+{% endblock %}
+
+
+
 {% block extrastyle %}
 <script type="text/javascript" src={% static "js/jsmol/JSmol.min.js" %}></script>
 {% endblock %}
+
+
 
 {% block content_title %}
 <h1> JSMol visualizer </h1>
 {% endblock %}
 
 {% block content %}
-Copy and paste your own structure data, in any format readable by JSMol into the text box below for quick visualization.
+
+<div>
+        <script type="text/javascript">
+                var Info = {
+                        j2sPath: "{% static 'js/jsmol/j2s' %}",
+                        src: "/analysis/visualize/custom",
+                        use: "HTML5",
+                        width: 650,
+                        height: 650,
+                };
+                jmolApplet0 = Jmol.getApplet("myJmol", Info);
+                Jmol._persistentMenu = true;
+        </script>
+
+</div>
 
 <script>
-	jQuery(document).ready(function($) {
-		$(".clickableRow").click(function() {
-			window.document.location = $(this).attr("href")
-		});
-	});
+/* When the user clicks on the button, 
+toggle between hiding and showing the dropdown content */
+function dropFunction(id) {
+  document.getElementById(id).classList.toggle("show");
+}
+
+// Close the dropdown if the user clicks outside of it
+window.onclick = function(event) {
+  if (!event.target.matches('.dropbtn')) {
+    var dropdowns = document.getElementsByClassName("dropdown-content");
+    var i;
+    for (i = 0; i < dropdowns.length; i++) {
+      var openDropdown = dropdowns[i];
+      if (openDropdown.classList.contains('show')) {
+        openDropdown.classList.remove('show');
+      }
+    }
+  }
+}
 </script>
-
-<div>
-	<h1> Structure data </h1>
-</div>
-
-<div>
-	<form action="" method="post">{% csrf_token %}
-		<textarea cols="40" rows="30" name="crystal_data">
-{{ crystal_data }}
-		</textarea><br>
-		<input type="submit" value="submit">
-	</form>
-</div>
 
 <!--- RESULTS -->
 
@@ -75,16 +194,189 @@ Copy and paste your own structure data, in any format readable by JSMol into the
 {% endblock %}
 
 {% block sidebar %}
-<div id="sidebar" class="box">
-	<script>
-		var Info = {
-			j2sPath: "{% static 'js/jsmol/j2s' %}",
-			src: "/analysis/visualize/custom",
-			use: "HTML5",
-			width: 400,
-			height: 400
-		};
-		Jmol.getApplet("myJmol", Info);
-	</script>
+
+<div id="sidebar_small" style="background:rgba(2, 128, 144,1);border-width:0px;box-shadow:none" class="box">
+
+<script>
+        jQuery(document).ready(function($) {
+                $(".clickableRow").click(function() {
+                        window.document.location = $(this).attr("href")
+                });
+        });
+</script>
+
+<div class="tab">
+  <button class="tablinks" onclick="openOption(event, 'StructData')" id="defaultOpen">Data</button>
+  <button class="tablinks" onclick="openOption(event, 'CustomPlot')">Plot</button>
+  <button class="tablinks" onclick="openOption(event, 'Export')">Export</button>
+  <button class="tablinks" onclick="openOption(event, 'Tips')">Tips </button>
+</div>
+
+<div id="StructData" class="tabcontent">
+        <a style="color:white;">Paste your structure data 
+          in a format readable by JSMol into the text box below to visualize</a>
+
+        <form action="" method="post">{% csrf_token %}
+                <textarea cols="40" rows="30" name="crystal_data">
+        {{ crystal_data }}
+                </textarea><br>
+                <input type="submit" value="submit" class="submit-button">
+        </form>
+
+</div>
+
+<div id="CustomPlot" class="tabcontent">
+
+  <div class="dropdown">
+    <button onclick="dropFunction('myDropdown1')" class="dropbtn">Background</button>
+    <div id="myDropdown1" class="dropdown-content">
+      <a href="javascript:Jmol.script(jmolApplet0,'background white; ');">White</a>
+      <a href="javascript:Jmol.script(jmolApplet0,'background black; ');">Black</a>
+      <a href="javascript:Jmol.script(jmolApplet0,'background yellow; ');">Yellow</a>
+      <a href="javascript:Jmol.script(jmolApplet0,'background cyan; ');">Cyan</a>
+      <a href="javascript:Jmol.script(jmolApplet0,'background magenta; ');">Magenta</a>
+    </div>
+  </div>
+
+  <div class="dropdown">
+    <button onclick="dropFunction('myDropdown2')" class="dropbtn">Bond size</button>
+    <div id="myDropdown2" class="dropdown-content">
+      <a href="javascript:Jmol.script(jmolApplet0,'wireframe OFF; ');">r=0 &#8491;</a>
+      <a href="javascript:Jmol.script(jmolApplet0,'wireframe 0.10; ');">r=0.10 &#8491;</a>
+      <a href="javascript:Jmol.script(jmolApplet0,'wireframe 0.15; ');">r=0.15 &#8491;</a>
+      <a href="javascript:Jmol.script(jmolApplet0,'wireframe 0.18; ');">r=0.18 &#8491;</a>
+      <a href="javascript:Jmol.script(jmolApplet0,'wireframe 0.20; ');">r=0.20 &#8491;</a>
+      <a href="javascript:Jmol.script(jmolApplet0,'wireframe 0.25; ');">r=0.25 &#8491;</a>
+      <a href="javascript:Jmol.script(jmolApplet0,'wireframe 0.30; ');">r=0.30 &#8491;</a>
+    </div>
+  </div>
+
+  <div class="dropdown">
+    <button onclick="dropFunction('myDropdown3')" class="dropbtn">Atom size</button>
+    <div id="myDropdown3" class="dropdown-content">
+      <a href="javascript:Jmol.script(jmolApplet0,'spacefill OFF; ');">r = 0 &#8491;</a>
+      <a href="javascript:Jmol.script(jmolApplet0,'spacefill 100%; ');">r = vdW </a>
+      <a href="javascript:Jmol.script(jmolApplet0,'spacefill 25%; ');">r = 25% vdW </a>
+      <a href="javascript:Jmol.script(jmolApplet0,'spacefill 35%; ');">r = 35% vdW </a>
+      <a href="javascript:Jmol.script(jmolApplet0,'spacefill 50%; ');">r = 50% vdW </a>
+      <a href="javascript:Jmol.script(jmolApplet0,'spacefill 75%; ');">r = 75% vdW </a>
+      <a href="javascript:Jmol.script(jmolApplet0,'spacefill IONIC; ');">r = Ionic </a>
+    </div>
+  </div>
+
+
+  <div class="dropdown">
+    <button onclick="dropFunction('myDropdown4')" class="dropbtn">Orientation</button>
+    <div id="myDropdown4" class="dropdown-content">
+      <a href="javascript:Jmol.script(jmolApplet0,'spin off; ');">Spin Off</a>
+      <a href="javascript:Jmol.script(jmolApplet0,'spin on; ');">Spin On</a>
+      <a href="javascript:Jmol.script(jmolApplet0,'reset; ');">Reset</a>
+      <a href="javascript:Jmol.script(jmolApplet0,'zoom IN; ');">Zoom In</a>
+      <a href="javascript:Jmol.script(jmolApplet0,'zoom OUT; ');">Zoom Out</a>
+
+    </div>
+  </div>
+
+  <div class="dropdown">
+    <button onclick="dropFunction('myDropdown5')" class="dropbtn">Style</button>
+    <div id="myDropdown5" class="dropdown-content">
+      <a href="javascript:Jmol.script(jmolApplet0,'set colorRasmol FALSE; ');">Jmol Colors</a>
+      <a href="javascript:Jmol.script(jmolApplet0,'set colorRasmol TRUE; ');">RasMol Colors</a>
+    </div>
+  </div>
+
+  <div class="dropdown">
+    <button onclick="dropFunction('myDropdown6')" class="dropbtn">Show/Hide</button>
+    <div id="myDropdown6" class="dropdown-content">
+      <a href="javascript:Jmol.script(jmolApplet0,'unitcell on; ');">Show Unitcell</a>
+      <a href="javascript:Jmol.script(jmolApplet0,'unitcell off; ');">Hide Unitcell</a>
+      <a href="javascript:Jmol.script(jmolApplet0,'axes on; ');">Show Axes</a>
+      <a href="javascript:Jmol.script(jmolApplet0,'axes off; ');">Hide Axes</a>
+      <a href="javascript:Jmol.script(jmolApplet0,'boundbox on; ');">Show Box</a>
+      <a href="javascript:Jmol.script(jmolApplet0,'boundbox off; ');">Hide Box</a>
+    </div>
+  </div>
+
+  <div class="dropdown">
+    <button onclick="dropFunction('myDropdown7')" class="dropbtn">Advanced</button>
+    <div id="myDropdown7" class="dropdown-content">
+      <a href="javascript:Jmol.script(jmolApplet0,'menu');">All Options</a>
+      <a href="javascript:Jmol.script(jmolApplet0,'console');">Scripting Console</a>
+    </div>
+  </div>
+
+
+
+</div>
+
+<div id="Export" class="tabcontent">
+
+  <div class="dropdown">
+    <button onclick="dropFunction('myDropdownE1')" class="dropbtn">As PNG</button>
+    <div id="myDropdownE1" class="dropdown-content">
+      <a href="javascript:Jmol.script(jmolApplet0,'write IMAGE 512 384 PNG 2 StructFile.png;');">512x384</a>
+      <a href="javascript:Jmol.script(jmolApplet0,'write IMAGE 1024 768 PNG 2 StructFile.png;');">1024x768</a>
+      <a href="javascript:Jmol.script(jmolApplet0,'write IMAGE 2048 1536 PNG 2 StructFile.png;');">2048x1536</a>
+      <a href="javascript:Jmol.script(jmolApplet0,'write IMAGE 4096 3072 PNG 2 StructFile.png;');">4096x3072</a>
+    </div>
+  </div>
+
+  <div class="dropdown">
+    <button onclick="dropFunction('myDropdownE2')" class="dropbtn">As JPG</button>
+    <div id="myDropdownE2" class="dropdown-content">
+      <a href="javascript:Jmol.script(jmolApplet0,'write IMAGE 512 384 JPG 100 StructFile.jpg;');">512x384</a>
+      <a href="javascript:Jmol.script(jmolApplet0,'write IMAGE 1024 768 JPG 100 StructFile.jpg;');">1024x768</a>
+      <a href="javascript:Jmol.script(jmolApplet0,'write IMAGE 2048 1536 JPG 100 StructFile.jpg;');">2048x1536</a>
+      <a href="javascript:Jmol.script(jmolApplet0,'write IMAGE 4096 3072 JPG 100 StructFile.jpg;');">4096x3072</a>
+    </div>
+  </div>
+
+  <div class="dropdown">
+    <button onclick="dropFunction('myDropdownE3')" class="dropbtn">As Text</button>
+    <div id="myDropdownE3" class="dropdown-content">
+      <a href="javascript:Jmol.script(jmolApplet0,'write StructFile.cif;');">CIF</a>
+      <a href="javascript:Jmol.script(jmolApplet0,'write XYZ StructFile.xyz;');">XYZ</a>
+    </div>
+  </div>
+
+
+
+</div>
+
+
+
+
+<div id="Tips" class="tabcontent">
+  <p style="background-color:white;">Your data used for plotting will not be stored in OQMD servers to 
+                                    respect researchers' privacy. So it is recommended to export both crystal 
+                                    structure data and the plotted image to avoid a loss of data</p>
+  <p style="background-color:white;">Right-click on the plot for advanced options</p>
+  <p style="background-color:white;"><a href="https://chemapps.stolaf.edu/jmol/docs/">Click here for JMol scripting documentation</a> </p>
+  <p style="background-color:white;">The unitcell data provided on the left-top side of the plot can be
+                                     removed by clicking <i>Hide Unitcell</i> in the <i>Plot</i> 
+                                     customization options</p>
+  <p style="background-color:white;">Any suggestions for improving this Visualization page will be highly 
+                                     appreciated. Feel free to contact us via e-mail</p>
+</div>
+
+<script>
+function openOption(evt, cityName) {
+  var i, tabcontent, tablinks;
+  tabcontent = document.getElementsByClassName("tabcontent");
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
+  }
+  tablinks = document.getElementsByClassName("tablinks");
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" active", "");
+  }
+  document.getElementById(cityName).style.display = "block";
+  evt.currentTarget.className += " active";
+}
+
+// Get the element with id="defaultOpen" and click on it
+document.getElementById("defaultOpen").click();
+</script>
+
 </div>
 {% endblock %}
