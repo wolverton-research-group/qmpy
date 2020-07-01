@@ -899,8 +899,6 @@ def write_resources():
     #       - user2
     # project2: ...
     """
-    
-
     ######
     # list of values that need to be written into the configuration files
     ######
@@ -914,7 +912,6 @@ def write_resources():
     
     project_values = ['allocations', 'priority', 'users']
     
-
     ######
     # a function to 'clean' the values from type unicode/ long/ etc. to string/ int
     ######
@@ -925,7 +922,6 @@ def write_resources():
             val = int(val)
         return val
      
-
     ######
     # write host configurations into hosts.yml
     ######

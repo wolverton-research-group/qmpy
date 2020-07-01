@@ -135,6 +135,8 @@ class Calculation(models.Model):
     dos = models.ForeignKey('DOS', blank=True, null=True, on_delete=models.SET_NULL)
     band_gap = models.FloatField(blank=True, null=True)
     irreducible_kpoints = models.FloatField(blank=True, null=True)
+    #_lattice_vectors = models.FloatField(blank=True, null=True)
+
 
     #= progress/completion =#
     attempt = models.IntegerField(default=0, blank=True, null=True)
@@ -656,6 +658,7 @@ class Calculation(models.Model):
                 for n in range(3):
                     tlv.append(read_fortran_array(self.outcar[i+n+1], 6)[:3])
                 lattice_vectors.append(tlv)
+        #self._lattice_vectors = lattice_vectors
         return np.array(lattice_vectors)
 
     def read_charges(self):
@@ -834,7 +837,6 @@ class Calculation(models.Model):
         all_forces = self.read_forces()
         magmoms = self.read_magmoms()
         charges = self.read_charges()
-
 
         if len(self.energies) > 0:
             self.energy = self.energies[-1]

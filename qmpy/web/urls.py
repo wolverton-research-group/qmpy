@@ -10,6 +10,7 @@ from qmpy.web import views
 #router = routers.DefaultRouter()
 #router.register(r'users', views.UserViewSet)
 
+<<<<<<< HEAD
 
 urlpatterns = [
     url(r'^$', views.home_page),
@@ -49,25 +50,25 @@ urlpatterns += [
     url(r'^analysis/calculation/(?P<calculation_id>.*)$', views.calculation_view),
 
     ## computing
-    url(r'^computing/$',             views.computing_view),
-    url(r'^computing/projects$',     views.projects_view),
-    url(r'^computing/hosts$',        views.hosts_view),
-    url(r'^computing/queue$',        views.queue_view),
-    url(r'^computing/onlinesubmit$', views.online_view),
+    #url(r'^computing/$',             views.computing_view),
+    #url(r'^computing/projects$',     views.projects_view),
+    #url(r'^computing/hosts$',        views.hosts_view),
+    #url(r'^computing/queue$',        views.queue_view),
+    #url(r'^computing/onlinesubmit$', views.online_view),
 
-    url(r'^computing/create/host$',    views.new_host_view),
+    #url(r'^computing/create/host$',    views.new_host_view),
     #url(r'^computing/create/project', views.new_project_view),
     #url(r'^computing/create/user',    views.new_user_view),
     #url(r'^computing/create/',        views.new_user_view),
 
-    url(r'^computing/project/(?P<state>.*)/(?P<project_id>.*)$', views.project_state_view),
-    url(r'^computing/project/(?P<project_id>.*)$',               views.project_view),
-    url(r'^computing/host/(?P<host_id>.*)$',                     views.host_view),
-    url(r'^computing/user/(?P<user_id>.*)$',                     views.user_view),
-    url(r'^computing/allocation/(?P<allocation_id>.*)$',         views.allocation_view),
+    #url(r'^computing/project/(?P<state>.*)/(?P<project_id>.*)$', views.project_state_view),
+    #url(r'^computing/project/(?P<project_id>.*)$',               views.project_view),
+    #url(r'^computing/host/(?P<host_id>.*)$',                     views.host_view),
+    #url(r'^computing/user/(?P<user_id>.*)$',                     views.user_view),
+    #url(r'^computing/allocation/(?P<allocation_id>.*)$',         views.allocation_view),
 
-    url(r'^computing/task/(?P<task_id>.*)$', views.task_view),
-    url(r'^computing/job/(?P<job_id>.*)$',   views.job_view),
+    #url(r'^computing/task/(?P<task_id>.*)$', views.task_view),
+    #url(r'^computing/job/(?P<job_id>.*)$',   views.job_view),
 
     ## analysis
     url(r'^analysis/$',                             views.analysis_view),
@@ -108,6 +109,6 @@ urlpatterns += [
 
     ## other
     url(r'^faq',        views.faq_view),
-    url(r'^playground', views.play_view)
+    #url(r'^playground', views.play_view)
 ]
 

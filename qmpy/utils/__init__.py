@@ -19,6 +19,17 @@ def mkdir(path):
     if not os.path.exists(path):
         os.mkdir(path)
 
+def mkdir(path):
+    """
+    Makes the specified folder, including required folders "below"
+    """
+    if not path:
+        return
+    bpath = os.path.split(path)[0]
+    mkdir(bpath)
+    if not os.path.exists(path):
+        os.mkdir(path)
+
 def assign_type(string):
     res = string
     try:

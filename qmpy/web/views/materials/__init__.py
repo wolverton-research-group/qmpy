@@ -8,4 +8,3 @@ from .deposit import *
 
 def common_materials_view(request):
     return render(request,'materials/index.html', {})
-

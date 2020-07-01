@@ -470,7 +470,6 @@ def unstable(p,name=None,**kwargs):
         fo.write('# save the plot in a PDF\n')
         fo.write('plt.savefig("%s_hull.pdf", bbox_inches="tight", dpi=300)\n' %(prefix))
 
-
     def write_phase_coordinates(self, **kwargs):
         prefixes = {0:'unary', 1:'binary', 2:'ternary', 3:'quaternary',
                 4:'graph'}

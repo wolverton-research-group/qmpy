@@ -453,7 +453,6 @@ class Entry(models.Model):
             return None
         return any([ f.stability <= 1E-3 for f in forms ])
         
-
     _history = None
     @property
     def history_graph(self):

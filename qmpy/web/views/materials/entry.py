@@ -26,16 +26,16 @@ def entry_view(request, entry_id):
         p = request.POST
 
         data['primitive'] = bool(int(p.get('primitive', '0')))
-        if p.get('calculate'):
-            t = Task.create(entry, 'static')
-            t.save()
+        #if p.get('calculate'):
+        #    t = Task.create(entry, 'static')
+        #    t.save()
 
-        if p.get('add_keyword'):
-            kw = MetaData.get('Keyword', p['add_keyword'])
-            kw.entry_set.add(entry)
-        if p.get('add_hold'):
-            hold = MetaData.get('Hold', p['add_hold'])
-            hold.entry_set.add(entry)
+        #if p.get('add_keyword'):
+        #    kw = MetaData.get('Keyword', p['add_keyword'])
+        #    kw.entry_set.add(entry)
+        #if p.get('add_hold'):
+        #    hold = MetaData.get('Hold', p['add_hold'])
+        #    hold.entry_set.add(entry)
 
     #pdf = get_pdf(entry.input)
     #data['pdf'] = pdf.get_flot_script()
