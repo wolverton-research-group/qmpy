@@ -628,6 +628,8 @@ class Calculation(models.Model):
                 for n, e in zip(counts, elt_list):
                     elements += [e]*n
                 break
+        if len(elements) == 0:
+            raise VaspError('OUTCAR is wrong')
         self.elements = elements
 
     def read_lattice_vectors(self):
@@ -1325,7 +1327,7 @@ class Calculation(models.Model):
         return new_calc
 
     def compress(self, files=['OUTCAR', 'CHGCAR', 'CHG', 
-                                'PROCAR', 'LOCPOT', 'ELFCAR', 'vasprun.xml']):
+                                'PROCAR', 'DOSCAR', 'EIGENVAL', 'LOCPOT', 'ELFCAR', 'vasprun.xml']):
         """
         gzip every file in `files`
 
@@ -1335,7 +1337,7 @@ class Calculation(models.Model):
         Return: None
         """
         for file in os.listdir(self.path):
-            if file in ['OUTCAR', 'CHGCAR', 'CHG', 'PROCAR', 'LOCPOT', 'ELFCAR', 'vasprun.xml']:
+            if file in ['OUTCAR', 'CHGCAR', 'CHG', 'PROCAR', 'DOSCAR', 'EIGENVAL', 'LOCPOT', 'ELFCAR', 'vasprun.xml']:
                 os.system('gzip -f %s' % self.path+'/'+file)
 
     def copy(self):
@@ -1503,7 +1505,7 @@ class Calculation(models.Model):
                     'mpi':'mpirun -machinefile $PBS_NODEFILE -np $NPROCS',
                     'binary':'vasp_53', 
                     'pipes':' > stdout.txt 2> stderr.txt',
-                    'footer':'\n'.join(['gzip -f CHGCAR OUTCAR PROCAR ELFCAR vasprun.xml',
+                    'footer':'\n'.join(['gzip -f CHGCAR OUTCAR PROCAR DOSCAR EIGENVAL LOCPOT ELFCAR vasprun.xml',
                         'rm -f WAVECAR CHG',
                         'date +%s'])}
 

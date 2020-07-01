@@ -45,6 +45,7 @@ setup(
         "django-crispy-forms",
         "lark-parser",
         "requests",
-        "pygraphviz"
+        "pygraphviz",
+        "Jinja2 < 3.0"
     ],
 )
