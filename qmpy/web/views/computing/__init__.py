@@ -2,6 +2,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from io import BytesIO
@@ -13,11 +14,12 @@ from .resources import *
 from .queue import *
 from .new import *
 
+
 def icsd_progress():
     n = 60
-    tasks = Task.objects.filter(project_set='icsd', entry__natoms__lte=n)
+    tasks = Task.objects.filter(project_set="icsd", entry__natoms__lte=n)
 
-    data = tasks.values_list('entry__natoms', 'state')
+    data = tasks.values_list("entry__natoms", "state")
     done = []
     failed = []
     idle = []
@@ -32,32 +34,36 @@ def icsd_progress():
         elif task[1] == -1:
             failed.append(task[0])
 
-    plt.hist([ done, running, failed, idle], histtype='barstacked',
-            label=['done', 'running' ,'failed', 'waiting'],
-            bins=n)#, cumulative=True)
-    plt.legend(loc='best')
+    plt.hist(
+        [done, running, failed, idle],
+        histtype="barstacked",
+        label=["done", "running", "failed", "waiting"],
+        bins=n,
+    )  # , cumulative=True)
+    plt.legend(loc="best")
 
-    plt.xlabel('# of atoms in primitive cell')
-    plt.ylabel('# of entries')
+    plt.xlabel("# of atoms in primitive cell")
+    plt.ylabel("# of entries")
 
     img = BytesIO()
-    plt.savefig(img, dpi=75, bbox_inches='tight',format='png')
+    plt.savefig(img, dpi=75, bbox_inches="tight", format="png")
     img.seek(0)
     data_uri = img.getvalue()
     img.close()
 
     data_uri = base64.b64encode(data_uri)
-    data_uri = data_uri.decode('utf-8')
+    data_uri = data_uri.decode("utf-8")
     plt.close()
     return data_uri
 
-def computing_view(request):
-    data = {'jobs':Job.objects.filter(state=1),
-            'hosts': Host.objects.all(),
-            'users': User.objects.all(),
-            'projects': Project.objects.all(),
-            'allocations': Allocation.objects.all(),
-            'icsd':icsd_progress()}
-    return render(request,'computing/index.html', 
-            data)
 
+def computing_view(request):
+    data = {
+        "jobs": Job.objects.filter(state=1),
+        "hosts": Host.objects.all(),
+        "users": User.objects.all(),
+        "projects": Project.objects.all(),
+        "allocations": Allocation.objects.all(),
+        "icsd": icsd_progress(),
+    }
+    return render(request, "computing/index.html", data)

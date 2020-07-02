@@ -6,6 +6,7 @@ from .renderable import *
 
 logger = logging.getLogger(__name__)
 
+
 class Line(Renderable):
     def __init__(self, pts, label=None, fill=False, **kwargs):
         if isinstance(pts, Line):
@@ -13,7 +14,7 @@ class Line(Renderable):
             return
         self.label = label
         self.fill = fill
-        self.points = [ point.Point(pt) for pt in pts ]
+        self.points = [point.Point(pt) for pt in pts]
         self.options = kwargs
 
     @property
@@ -22,28 +23,25 @@ class Line(Renderable):
 
     @property
     def as_pairs(self):
-        return [ pt.coord for pt in self.points ]
+        return [pt.coord for pt in self.points]
 
     @property
     def as_axes(self):
-        return [ [ pt.coord[i] for pt in self.points ] 
-                   for i in range(self.dim) ]
+        return [[pt.coord[i] for pt in self.points] for i in range(self.dim)]
 
     def draw_in_matplotlib(self, **kwargs):
-        if not kwargs.get('axes'):
+        if not kwargs.get("axes"):
             axes = plt.gca()
         else:
-            axes = kwargs['axes']
+            axes = kwargs["axes"]
 
         options = dict(self.options)
         axes.plot(*self.as_axes, **options)
 
     def get_flot_series(self, **kwargs):
-        series = {'data': self.as_pairs, 'lines': {'show':True,
-            'fill':self.fill}}
+        series = {"data": self.as_pairs, "lines": {"show": True, "fill": self.fill}}
         if self.label:
-            series['label'] = self.label
+            series["label"] = self.label
         series.update(self.options)
         series.update(kwargs)
         return series
-

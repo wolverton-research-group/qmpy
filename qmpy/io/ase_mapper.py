@@ -16,6 +16,7 @@ if qmpy.FOUND_ASE:
     import ase
     import ase.io
 
+
 def structure_to_atoms(structure):
     """
     Convert a qmpy.Structure to an ase.Atoms
@@ -28,14 +29,16 @@ def structure_to_atoms(structure):
 
     """
     if not qmpy.FOUND_ASE:
-        print('ASE must be installed to convert a Structure to an Atoms object')
+        print("ASE must be installed to convert a Structure to an Atoms object")
         return
     atoms = ase.Atoms(
-            structure.name,
-            cell=structure.cell,
-            scaled_positions=structure.coords, 
-            magmoms=structure.magmoms)
+        structure.name,
+        cell=structure.cell,
+        scaled_positions=structure.coords,
+        magmoms=structure.magmoms,
+    )
     return atoms
+
 
 def atoms_to_structure(atoms):
     """
@@ -49,11 +52,11 @@ def atoms_to_structure(atoms):
 
     """
     if not qmpy.FOUND_ASE:
-        print('ASE must be installed to convert Atoms object to a Structure')
+        print("ASE must be installed to convert Atoms object to a Structure")
         return
     struct = Structure()
     struct.cell = atoms.get_cell()
-    for a in atoms: 
+    for a in atoms:
         atom = Atom()
         atom.coord = a.position
         atom.symbol = a.symbol
@@ -61,6 +64,7 @@ def atoms_to_structure(atoms):
         atom.direct = False
         struct.add_atom(atom)
     return struct
+
 
 def read(filename, **kwargs):
     """
@@ -70,11 +74,12 @@ def read(filename, **kwargs):
 
     """
     if not qmpy.FOUND_ASE:
-        print('ASE must be installed to convert Atoms object to a Structure')
+        print("ASE must be installed to convert Atoms object to a Structure")
         return
 
     atoms = ase.io.read(filename, **kwargs)
     return atoms_to_structure(atoms)
+
 
 def write(structure, **kwargs):
     atoms = structure_to_atoms(structure)

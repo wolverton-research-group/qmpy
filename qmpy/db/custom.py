@@ -6,6 +6,7 @@ import numpy as np
 import ast
 import urllib.request, urllib.error, urllib.parse
 
+
 class TagField(models.TextField):
     description = "Stores tags in a single database column."
 
@@ -30,6 +31,7 @@ class TagField(models.TextField):
     def get_prep_value(self, value):
         return self.delimiter.join(value)
 
+
 class NumpyArrayField(models.TextField):
     description = "Stores a Numpy ndarray."
 
@@ -39,7 +41,7 @@ class NumpyArrayField(models.TextField):
     def from_db_value(self, value, expression, connection, context):
         if not value:
             return np.array([])
-        return np.array(pickle.loads( bytes(str(value),'latin-1') ))
+        return np.array(pickle.loads(bytes(str(value), "latin-1")))
 
     def to_python(self, value):
         if isinstance(value, list):
@@ -49,15 +51,16 @@ class NumpyArrayField(models.TextField):
 
         if not value:
             return np.array([])
-        return np.array(pickle.loads( bytes(str(value),'latin-1') ))
+        return np.array(pickle.loads(bytes(str(value), "latin-1")))
 
     def get_prep_value(self, value):
         if isinstance(value, list):
-            return str(pickle.dumps(value, protocol=0),'latin-1')
+            return str(pickle.dumps(value, protocol=0), "latin-1")
         elif isinstance(value, np.ndarray):
-            return str(pickle.dumps(value.tolist(), protocol=0),'latin-1')
+            return str(pickle.dumps(value.tolist(), protocol=0), "latin-1")
         else:
-            raise TypeError('%s is not a list or numpy array' % value)
+            raise TypeError("%s is not a list or numpy array" % value)
+
 
 class DictField(models.TextField):
     description = "Stores a python dictionary"
@@ -71,7 +74,6 @@ class DictField(models.TextField):
         if isinstance(value, dict):
             return value
         return ast.literal_eval(value)
-
 
     def to_python(self, value):
         if not value:
@@ -95,6 +97,7 @@ class DictField(models.TextField):
         value = self._get_val_from_obj(obj)
         return self.get_db_prep_value(value)
 
+
 class JSONField(models.TextField):
     description = "Stores a python dictionary"
 
@@ -114,8 +117,9 @@ class JSONField(models.TextField):
         return json.loads(value)
 
     def get_prep_value(self, value):
-        print('get prep value', value)
+        print("get prep value", value)
         return json.dumps(value)
+
 
 class DictModel(models.Model):
     data = DictField(max_length=255, primary_key=True)
@@ -142,22 +146,22 @@ class DictModel(models.Model):
     def items(self):
         return list(self.data.items())
 
+
 def sync_database():
-    print('This will download a *very* large database.')
-    ans = input('  Are you sure you want to proceed? (y/n) [n]: ')
-    if ans.lower()[0] != 'y':
+    print("This will download a *very* large database.")
+    ans = input("  Are you sure you want to proceed? (y/n) [n]: ")
+    if ans.lower()[0] != "y":
         return
 
-    loc = input('Where should the database be downloaded to?'+
-            '[/tmp]: ' )
+    loc = input("Where should the database be downloaded to?" + "[/tmp]: ")
     if not loc:
-        loc = '/tmp'
+        loc = "/tmp"
 
     url = "http://oqmd.org/static/downloads/database.tgz"
 
-    file_name = loc + '/' + url.split('/')[-1]
+    file_name = loc + "/" + url.split("/")[-1]
     u = urllib.request.urlopen(url)
-    f = open(file_name, 'wb')
+    f = open(file_name, "wb")
     meta = u.info()
     file_size = int(meta.getheaders("Content-Length")[0])
     print("Downloading: %s Bytes: %s" % (file_name, file_size))
@@ -171,19 +175,18 @@ def sync_database():
 
         file_size_dl += len(buffer)
         f.write(buffer)
-        status = r"%10d  [%3.2f%%]" % (file_size_dl, file_size_dl * 100. / file_size)
-        status = status + chr(8)*(len(status)+1)
-        print(status, end=' ')
+        status = r"%10d  [%3.2f%%]" % (file_size_dl, file_size_dl * 100.0 / file_size)
+        status = status + chr(8) * (len(status) + 1)
+        print(status, end=" ")
     print()
     f.close()
 
-    msg = 'The database has been successfully downloaded.'
-    msg += 'To include in mysql, issue the following commands as root:'
-    msg += 'mv /tmp/database.tgz /var/lib/mysql'
-    msg += 'cd /var/lib/mysql && tar -xvf database.tgz'
-    msg += '\n'
+    msg = "The database has been successfully downloaded."
+    msg += "To include in mysql, issue the following commands as root:"
+    msg += "mv /tmp/database.tgz /var/lib/mysql"
+    msg += "cd /var/lib/mysql && tar -xvf database.tgz"
+    msg += "\n"
     msg += 'Note: if you already have a database named "qmdb" this process'
-    msg += ' will overwrite the existing oqmd database.'
+    msg += " will overwrite the existing oqmd database."
 
     print(msg)
-

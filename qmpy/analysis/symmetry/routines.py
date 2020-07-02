@@ -10,6 +10,7 @@ from qmpy.utils import *
 
 try:
     import spglib
+
     _FOUND_SPGLIB = True
 except ImportError:
     _FOUND_SPGLIB = False
@@ -20,13 +21,11 @@ logger = logging.getLogger(__name__)
 def _check_spglib_install():
     """Imports `spglib`, raises :exc:`ImportError` if unsuccessful."""
     if not _FOUND_SPGLIB:
-        error_message = 'Could not import `spglib`. Is it installed?'
+        error_message = "Could not import `spglib`. Is it installed?"
         raise ImportError(error_message)
 
 
-def _check_spglib_success(cell,
-                          func='standardize_cell',
-                          verbosity=0):
+def _check_spglib_success(cell, func="standardize_cell", verbosity=0):
     """
     Checks if `spglib` was successful, log error messages if not.
 
@@ -74,7 +73,7 @@ def _structure_to_cell(structure):
 
     """
     if not isinstance(structure, qmpy.Structure):
-        raise qmpy.StructureError('Input is not of type `qmpy.Structure`')
+        raise qmpy.StructureError("Input is not of type `qmpy.Structure`")
     lattice = structure.cell.copy()
     positions = structure.site_coords.copy()
     numbers = structure.site_comp_indices.copy()
@@ -100,7 +99,7 @@ def _cell_to_structure(cell, structure, rev_lookup):
 
     """
     if not isinstance(structure, qmpy.Structure):
-        raise qmpy.StructureError('Input is not of type `qmpy.Structure`')
+        raise qmpy.StructureError("Input is not of type `qmpy.Structure`")
     structure.cell = cell[0]
     nsites = len(cell[1])
     structure.set_nsites(nsites)
@@ -109,8 +108,7 @@ def _cell_to_structure(cell, structure, rev_lookup):
     structure.site_compositions = site_comps
 
 
-def get_structure_symmetry(structure,
-                           symprec=1e-3):
+def get_structure_symmetry(structure, symprec=1e-3):
     """
     Gets symmetry operations for `structure` using `spglib`.
 
@@ -130,14 +128,10 @@ def get_structure_symmetry(structure,
 
     """
     _check_spglib_install()
-    return spglib.get_symmetry(
-        _structure_to_cell(structure),
-        symprec=symprec
-    )
+    return spglib.get_symmetry(_structure_to_cell(structure), symprec=symprec)
 
 
-def get_symmetry_dataset(structure,
-                         symprec=1e-3):
+def get_symmetry_dataset(structure, symprec=1e-3):
     """
     Get complete symmetry information for `structure` using `spglib`.
 
@@ -182,15 +176,10 @@ def get_symmetry_dataset(structure,
 
     """
     _check_spglib_install()
-    return spglib.get_symmetry_dataset(
-        _structure_to_cell(structure),
-        symprec=symprec
-    )
+    return spglib.get_symmetry_dataset(_structure_to_cell(structure), symprec=symprec)
 
 
-def get_spacegroup(structure,
-                   symprec=1e-3,
-                   symbol_type=0):
+def get_spacegroup(structure, symprec=1e-3, symbol_type=0):
     """
     Get the space group symbol and number of a crystal structure.
 
@@ -210,9 +199,7 @@ def get_spacegroup(structure,
     """
     _check_spglib_install()
     return spglib.get_spacegroup(
-        _structure_to_cell(structure),
-        symprec=symprec,
-        symbol_type=symbol_type
+        _structure_to_cell(structure), symprec=symprec, symbol_type=symbol_type
     )
 
 
@@ -269,14 +256,12 @@ def get_pointgroup(structure):
     if data is None:
         return None
     else:
-        return spglib.get_pointgroup(data['rotations'])
+        return spglib.get_pointgroup(data["rotations"])
 
 
-def standardize_cell(structure,
-                     to_primitive=True,
-                     no_idealize=False,
-                     symprec=1e-3,
-                     verbosity=0):
+def standardize_cell(
+    structure, to_primitive=True, no_idealize=False, symprec=1e-3, verbosity=0
+):
     """
     Standardizes the input crystal structure using `spglib`.
 
@@ -294,24 +279,22 @@ def standardize_cell(structure,
 
     """
     _check_spglib_install()
-    rev_lookup = dict(list(zip(structure.site_comp_indices,
-                          structure.site_compositions)))
+    rev_lookup = dict(
+        list(zip(structure.site_comp_indices, structure.site_compositions))
+    )
     cell = spglib.standardize_cell(
         _structure_to_cell(structure),
         to_primitive=to_primitive,
         no_idealize=no_idealize,
-        symprec=symprec
+        symprec=symprec,
     )
-    if not _check_spglib_success(cell,
-                                 verbosity=verbosity):
+    if not _check_spglib_success(cell, verbosity=verbosity):
         return structure
     _cell_to_structure(cell, structure, rev_lookup)
     return structure
 
 
-def refine_cell(structure,
-                symprec=1e-3,
-                verbosity=0):
+def refine_cell(structure, symprec=1e-3, verbosity=0):
     """
     Refines the input crystal structure to within a tolerance using `spglib`.
 
@@ -325,23 +308,17 @@ def refine_cell(structure,
 
     """
     _check_spglib_install()
-    rev_lookup = dict(list(zip(structure.site_comp_indices,
-                          structure.site_compositions)))
-    cell = spglib.refine_cell(
-        _structure_to_cell(structure),
-        symprec=symprec
+    rev_lookup = dict(
+        list(zip(structure.site_comp_indices, structure.site_compositions))
     )
-    if not _check_spglib_success(cell,
-                                 func='refine_cell',
-                                 verbosity=verbosity):
+    cell = spglib.refine_cell(_structure_to_cell(structure), symprec=symprec)
+    if not _check_spglib_success(cell, func="refine_cell", verbosity=verbosity):
         return structure
     _cell_to_structure(cell, structure, rev_lookup)
     return structure
 
 
-def find_primitive(structure,
-                   symprec=1e-3,
-                   verbosity=0):
+def find_primitive(structure, symprec=1e-3, verbosity=0):
     """
     Finds the primitive unit cell of the crystal structure.
 
@@ -355,15 +332,11 @@ def find_primitive(structure,
 
     """
     _check_spglib_install()
-    rev_lookup = dict(list(zip(structure.site_comp_indices,
-                          structure.site_compositions)))
-    cell = spglib.find_primitive(
-        _structure_to_cell(structure),
-        symprec=symprec
+    rev_lookup = dict(
+        list(zip(structure.site_comp_indices, structure.site_compositions))
     )
-    if not _check_spglib_success(cell,
-                                 func='find_primitive',
-                                 verbosity=verbosity):
+    cell = spglib.find_primitive(_structure_to_cell(structure), symprec=symprec)
+    if not _check_spglib_success(cell, func="find_primitive", verbosity=verbosity):
         return structure
     _cell_to_structure(cell, structure, rev_lookup)
     return structure
@@ -390,18 +363,15 @@ def get_symmetry_from_database(hall_number):
     return spglib.get_symmetry_from_database(hall_number)
 
 
-def niggli_reduce(structure,
-                  symprec=1e-3):
+def niggli_reduce(structure, symprec=1e-3):
     """
     TODO: Get the Niggli reduced cell of the input structure.
     """
     raise NotImplementedError
 
 
-def delauney_reduce(structure,
-                    symprec=1e-3):
+def delauney_reduce(structure, symprec=1e-3):
     """
     TODO: Get the Delauney reduced cell of the input structure.
     """
     raise NotImplementedError
-

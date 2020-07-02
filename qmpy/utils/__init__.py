@@ -8,16 +8,6 @@ from .rendering import *
 from .daemon import Daemon
 from .rest_query_parser import *
 
-def mkdir(path):
-    """
-    Makes the specified folder, including required folders "below"
-    """
-    if not path:
-        return
-    bpath = os.path.split(path)[0]
-    mkdir(bpath)
-    if not os.path.exists(path):
-        os.mkdir(path)
 
 def mkdir(path):
     """
@@ -29,6 +19,19 @@ def mkdir(path):
     mkdir(bpath)
     if not os.path.exists(path):
         os.mkdir(path)
+
+
+def mkdir(path):
+    """
+    Makes the specified folder, including required folders "below"
+    """
+    if not path:
+        return
+    bpath = os.path.split(path)[0]
+    mkdir(bpath)
+    if not os.path.exists(path):
+        os.mkdir(path)
+
 
 def assign_type(string):
     res = string
@@ -40,13 +43,14 @@ def assign_type(string):
         res = int(string)
     except ValueError:
         pass
-    if string.lower() == 'true':
+    if string.lower() == "true":
         res = True
-    elif string.lower() == 'false':
+    elif string.lower() == "false":
         res = False
-    elif string.lower() == 'none':
+    elif string.lower() == "none":
         res = None
     return res
+
 
 def combinations_with_replacement(iterable, r):
     # combinations_with_replacement('ABC', 2) --> AA AB AC BB BC CC
@@ -65,30 +69,32 @@ def combinations_with_replacement(iterable, r):
         indices[i:] = [indices[i] + 1] * (r - i)
         yield tuple(pool[i] for i in indices)
 
+
 def atom_sort(atoms):
     atoms = np.array(atoms)
-    x = [ a.x for a in atoms ]
-    y = [ a.y for a in atoms ]
-    z = [ a.z for a in atoms ]
-    ox = [ a.ox for a in atoms ]
-    elt = [ a.element_id for a in atoms ]
+    x = [a.x for a in atoms]
+    y = [a.y for a in atoms]
+    z = [a.z for a in atoms]
+    ox = [a.ox for a in atoms]
+    elt = [a.element_id for a in atoms]
     comps = []
-    for l in [x, y, z, ox, elt ]:
+    for l in [x, y, z, ox, elt]:
         if any(l):
             comps.append(l)
     if len(comps) == 0:
         return atoms
     return atoms[np.lexsort(comps)].tolist()
 
+
 def get_docstring(model):
     names = model._meta.get_all_field_names()
     longest = max(list(map(len, names)))
 
-    print("+-" + '-'*longest + '-+')
+    print("+-" + "-" * longest + "-+")
     for n in names:
-        print('| '+ n.ljust(longest) + ' |')
-        print("+-" + '-'*longest + '-+')
+        print("| " + n.ljust(longest) + " |")
+        print("+-" + "-" * longest + "-+")
+
 
 def get_field_list(model):
-    print(', '.join(model._meta.get_all_field_names()))
-
+    print(", ".join(model._meta.get_all_field_names()))

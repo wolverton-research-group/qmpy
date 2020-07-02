@@ -1,14 +1,14 @@
 from qmpy import *
 
-elts = element_groups['all-sub']
+elts = element_groups["all-sub"]
 
 for e1, e2 in itertools.combinations(elts, r=2):
     # do logic
     if e1 == e2:
         break
     try:
-        ps = PhaseSpace([e1,e2])
-        k = frozenset([e1,e2])
+        ps = PhaseSpace([e1, e2])
+        k = frozenset([e1, e2])
         bonds = []
         for p in ps.stable:
             s = p.calculation.input

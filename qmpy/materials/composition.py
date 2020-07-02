@@ -8,6 +8,7 @@ from qmpy.data import elements
 from qmpy.utils import *
 import qmpy.analysis.thermodynamics as thermo
 
+
 class Composition(models.Model):
     """
     Base class for a composition.
@@ -31,12 +32,13 @@ class Composition(models.Model):
         | ntypes: Number of elements. 
 
     """
+
     formula = models.CharField(primary_key=True, max_length=255)
     generic = models.CharField(max_length=255, blank=True, null=True)
     element_list = models.CharField(max_length=255, blank=True, null=True)
-    meta_data = models.ManyToManyField('MetaData')
+    meta_data = models.ManyToManyField("MetaData")
 
-    element_set = models.ManyToManyField('Element', blank=True)
+    element_set = models.ManyToManyField("Element", blank=True)
     ntypes = models.IntegerField(null=True)
 
     ### other stuff
@@ -44,16 +46,16 @@ class Composition(models.Model):
 
     ### thermodyanamic stuff
     meidema = models.FloatField(blank=True, null=True)
-    structure = models.ForeignKey('Structure', blank=True, on_delete=models.SET_NULL,
-            null=True,
-            related_name='+')
+    structure = models.ForeignKey(
+        "Structure", blank=True, on_delete=models.SET_NULL, null=True, related_name="+"
+    )
 
     _unique = None
     _duplicates = None
 
     class Meta:
-        app_label = 'qmpy'
-        db_table = 'compositions'
+        app_label = "qmpy"
+        db_table = "compositions"
 
     def __str__(self):
         return self.name
@@ -85,7 +87,7 @@ class Composition(models.Model):
         if isinstance(composition, str):
             composition = parse_comp(composition)
         comp = reduce_comp(composition)
-        f = ' '.join(['%s%g' % (k, comp[k]) for k in sorted(comp.keys())])
+        f = " ".join(["%s%g" % (k, comp[k]) for k in sorted(comp.keys())])
         comps = cls.objects.filter(formula=f)
         if comps.exists():
             return comps[0]
@@ -93,7 +95,7 @@ class Composition(models.Model):
             comp = Composition(formula=f)
             comp.ntypes = len(comp.comp)
             comp.generic = format_generic_comp(comp.comp)
-            comp.element_list = '_'.join(list(comp.comp.keys()))+'_'
+            comp.element_list = "_".join(list(comp.comp.keys())) + "_"
             comp.save()
             comp.element_set.set(list(comp.comp.keys()))
             return comp
@@ -120,7 +122,7 @@ class Composition(models.Model):
         """
         space = set()
         if isinstance(bounds, str):
-            bounds = bounds.split('-')
+            bounds = bounds.split("-")
         if len(bounds) == 1:
             return [Composition.get(bounds[0])]
         for b in bounds:
@@ -128,8 +130,9 @@ class Composition(models.Model):
             space |= set(bound.keys())
         in_elts = Element.objects.filter(symbol__in=space)
         out_elts = Element.objects.exclude(symbol__in=space)
-        comps = Composition.objects.filter(element_set__in=in_elts,
-                ntypes__lte=len(space))
+        comps = Composition.objects.filter(
+            element_set__in=in_elts, ntypes__lte=len(space)
+        )
         comps = Composition.objects.exclude(element_set__in=out_elts)
         comps = comps.exclude(entry=None)
         if calculated:
@@ -143,8 +146,7 @@ class Composition(models.Model):
         entries = self.entry_set.filter(id=F("duplicate_of__id"))
         if not entries.exists():
             return []
-        return sorted(entries, key=lambda x:
-                     100 if x.energy is None else x.energy )
+        return sorted(entries, key=lambda x: 100 if x.energy is None else x.energy)
 
     @property
     def ground_state(self):
@@ -155,6 +157,7 @@ class Composition(models.Model):
         return self.entries[0]
 
     _elements = None
+
     @property
     def elements(self):
         if self._elements is None:
@@ -168,30 +171,30 @@ class Composition(models.Model):
 
     @property
     def total_energy(self):
-        calcs = self.calculation_set.filter(converged=True, label='static')
+        calcs = self.calculation_set.filter(converged=True, label="static")
         if not calcs.exists():
-            calcs = self.calculation_set.filter(converged=True, label='standard')
+            calcs = self.calculation_set.filter(converged=True, label="standard")
             if not calcs.exists():
                 return
-        return min( c.energy_pa for c in calcs )
-
+        return min(c.energy_pa for c in calcs)
 
     @property
     def energy(self):
-        calcs = self.calculation_set.filter(converged=True, 
-                            label__in=['standard', 'static'])
+        calcs = self.calculation_set.filter(
+            converged=True, label__in=["standard", "static"]
+        )
         if not calcs.exists():
             return
-        return min( c.formation_energy() for c in calcs )
+        return min(c.formation_energy() for c in calcs)
 
     @property
     def delta_e(self):
         """Return the lowest formation energy."""
         formations = self.formationenergy_set.exclude(delta_e=None)
-        formations = formations.filter(fit='standard')
+        formations = formations.filter(fit="standard")
         if not formations.exists():
             return
-        return min(formations.values_list('delta_e', flat=True))
+        return min(formations.values_list("delta_e", flat=True))
 
     @property
     def icsd_delta_e(self):
@@ -200,10 +203,10 @@ class Composition(models.Model):
         measured structures - i.e. excluding prototypes.
         """
         calcs = self.calculation_set.exclude(delta_e=None)
-        calcs = calcs.filter(path__contains='icsd')
+        calcs = calcs.filter(path__contains="icsd")
         if not calcs.exists():
             return
-        return min(calcs.values_list('delta_e', flat=True))
+        return min(calcs.values_list("delta_e", flat=True))
 
     @property
     def ndistinct(self):
@@ -252,27 +255,27 @@ class Composition(models.Model):
         expts = self.exptformationenergy_set.filter(dft=False)
         if not expts.exists():
             return
-        return min(expts.values_list('delta_e', flat=True))
+        return min(expts.values_list("delta_e", flat=True))
 
-    def relative_stability_plot(self,data=data):
+    def relative_stability_plot(self, data=data):
         if not self.energy:
             return Renderer()
 
         if data:
-            ps = thermo.PhaseSpace(self.name,data=data)
+            ps = thermo.PhaseSpace(self.name, data=data)
         else:
             ps = thermo.PhaseSpace(self.name)
         return ps.phase_diagram
 
     def get_mass(self):
-        return sum([elements[k]['mass']*v for k, v in list(self.unit_comp.items()) ])
+        return sum([elements[k]["mass"] * v for k, v in list(self.unit_comp.items())])
 
     def get_similar(self):
         return Composition.objects.filter(generic=self.generic)
 
     def find_unique(self):
         unique = []
-        #vih
+        # vih
         for e1 in self.entry_set.all():
             for i, e2 in enumerate(unique):
                 if e1.structure == e2.structure:
@@ -297,7 +300,7 @@ class Composition(models.Model):
                 s1.entry.duplicate_of = None
                 unique[ind] = s1
 
-        self.unique = dict([(s.entry, []) for s in unique ])
+        self.unique = dict([(s.entry, []) for s in unique])
         for s in inputs:
             if not s.entry.duplicate_of is None:
                 self.unique[s.entry.duplicate_of].append(s.entry)

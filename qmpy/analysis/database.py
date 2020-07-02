@@ -5,6 +5,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 def apply_filter(words, keyword):
     """
     Assign a keyword to all entries whose references contain any of the given
@@ -16,16 +17,12 @@ def apply_filter(words, keyword):
     entries = qmpy.Entry.objects.none()
     for word in words:
         entries |= qmpy.Entry.objects.filter(title__contains=word)
-    kw = qmpy.MetaData.get('keyword', keyword)
+    kw = qmpy.MetaData.get("keyword", keyword)
     kw.entry_set.add(*entries)
 
+
 def is_likely_high_pressure(structure):
-    pressure_words = [
-            'pressure',
-            'anvil cell',
-            'dac',
-            'mpa', 'gpa',
-            'mbar', 'kbar']
+    pressure_words = ["pressure", "anvil cell", "dac", "mpa", "gpa", "mbar", "kbar"]
 
     # add test for volume deviation from vagards law
 

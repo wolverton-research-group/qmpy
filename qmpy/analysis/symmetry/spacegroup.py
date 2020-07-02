@@ -56,13 +56,14 @@ class Translation(models.Model):
         array([ 0. ,  0. ,  0.5])
 
     """
+
     x = models.FloatField()
     y = models.FloatField()
     z = models.FloatField()
 
     class Meta:
-        app_label = 'qmpy'
-        db_table = 'translations'
+        app_label = "qmpy"
+        db_table = "translations"
 
     @property
     def vector(self):
@@ -74,7 +75,7 @@ class Translation(models.Model):
 
     @classmethod
     def get(cls, vector):
-        fields = ['x', 'y', 'z']
+        fields = ["x", "y", "z"]
         arr_dict = dict(list(zip(fields, vector)))
         obj, new = cls.objects.get_or_create(**arr_dict)
         if new:
@@ -85,13 +86,13 @@ class Translation(models.Model):
         ops = []
         for t in self.vector:
             if t == 0:
-                s = '0'
+                s = "0"
             elif t < 0:
-                s = '{}'.format(frac.Fraction(str(t)))
+                s = "{}".format(frac.Fraction(str(t)))
             else:
-                s = '+{}'.format(frac.Fraction(str(t)))
+                s = "+{}".format(frac.Fraction(str(t)))
             ops.append(s)
-        return ','.join(ops)
+        return ",".join(ops)
 
 
 class Rotation(models.Model):
@@ -121,6 +122,7 @@ class Rotation(models.Model):
 
 
     """
+
     a11 = models.FloatField()
     a12 = models.FloatField()
     a13 = models.FloatField()
@@ -132,15 +134,18 @@ class Rotation(models.Model):
     a33 = models.FloatField()
 
     class Meta:
-        app_label = 'qmpy'
-        db_table = 'rotations'
+        app_label = "qmpy"
+        db_table = "rotations"
 
-    @property 
+    @property
     def matrix(self):
-        return np.array([ 
-            [self.a11, self.a12, self.a13],
-            [self.a21, self.a22, self.a23],
-            [self.a31, self.a32, self.a33]])
+        return np.array(
+            [
+                [self.a11, self.a12, self.a13],
+                [self.a21, self.a22, self.a23],
+                [self.a31, self.a32, self.a33],
+            ]
+        )
 
     @matrix.setter
     def matrix(self, matrix):
@@ -150,9 +155,7 @@ class Rotation(models.Model):
 
     @classmethod
     def get(cls, matrix):
-        fields = ['a11', 'a12', 'a13',
-                  'a21', 'a22', 'a23',
-                  'a31', 'a32', 'a33']
+        fields = ["a11", "a12", "a13", "a21", "a22", "a23", "a31", "a32", "a33"]
         matrix = np.ravel(matrix)
         mat_dict = dict(list(zip(fields, matrix)))
         obj, new = cls.objects.get_or_create(**mat_dict)
@@ -162,22 +165,22 @@ class Rotation(models.Model):
 
     def __str__(self):
         ops = []
-        indict = {0: 'x', 1: 'y', 2: 'z'}
+        indict = {0: "x", 1: "y", 2: "z"}
         for r in self.matrix:
-            s = ''
+            s = ""
             for i, x in enumerate(r):
                 if x == 0:
                     continue
                 elif x == 1:
-                    s += '+{}'.format(indict[i])
+                    s += "+{}".format(indict[i])
                 elif x == -1:
-                    s += '-{}'.format(indict[i])
+                    s += "-{}".format(indict[i])
                 elif x > 0:
-                    s += '+{}{}'.format(frac.Fraction(str(x)), indict[i])
+                    s += "+{}{}".format(frac.Fraction(str(x)), indict[i])
                 else:
-                    s += '{}{}'.format(frac.Fraction(str(x)), indict[i])
+                    s += "{}{}".format(frac.Fraction(str(x)), indict[i])
             ops.append(s)
-        return ','.join(ops)
+        return ",".join(ops)
 
 
 class Operation(models.Model):
@@ -198,12 +201,13 @@ class Operation(models.Model):
         <Operation: +x+y+1/2,-y-z+1/2,+x-z+1/2>
 
     """
-    rotation = models.ForeignKey('Rotation', on_delete=models.CASCADE)
-    translation = models.ForeignKey('Translation', on_delete=models.CASCADE)
+
+    rotation = models.ForeignKey("Rotation", on_delete=models.CASCADE)
+    translation = models.ForeignKey("Translation", on_delete=models.CASCADE)
 
     class Meta:
-        app_label = 'qmpy'
-        db_table = 'operations'
+        app_label = "qmpy"
+        db_table = "operations"
 
     @classmethod
     def get(cls, value):
@@ -222,8 +226,7 @@ class Operation(models.Model):
         elif isinstance(value, tuple):
             rot, trans = value
         else:
-            err_msg = ('Operation needs to be string or'
-                       ' (rotation, translation) tuple')
+            err_msg = "Operation needs to be string or" " (rotation, translation) tuple"
             raise OperationError(err_msg)
         rot = Rotation.get(rot)
         trans = Translation.get(trans)
@@ -234,29 +237,28 @@ class Operation(models.Model):
 
     def __str__(self):
         ops = []
-        indict = {0: 'x', 1: 'y', 2: 'z'}
-        for r, t in zip(self.rotation.matrix,
-                        self.translation.vector):
-            s = ''
+        indict = {0: "x", 1: "y", 2: "z"}
+        for r, t in zip(self.rotation.matrix, self.translation.vector):
+            s = ""
             for i, x in enumerate(r):
                 if x == 0:
                     continue
                 elif x == 1:
-                    s += '+{}'.format(indict[i])
+                    s += "+{}".format(indict[i])
                 elif x == -1:
-                    s += '-{}'.format(indict[i])
+                    s += "-{}".format(indict[i])
                 elif x > 0:
-                    s += '+{}{}'.format(frac.Fraction(str(x)), indict[i])
+                    s += "+{}{}".format(frac.Fraction(str(x)), indict[i])
                 else:
-                    s += '{}{}'.format(frac.Fraction(str(x)), indict[i])
+                    s += "{}{}".format(frac.Fraction(str(x)), indict[i])
             if t == 0:
                 pass
             elif t < 0:
-                s += '-{}'.format(frac.Fraction('%08f' % t))
+                s += "-{}".format(frac.Fraction("%08f" % t))
             else:
-                s += '+{}'.format(frac.Fraction('%08f' % t))
+                s += "+{}".format(frac.Fraction("%08f" % t))
             ops.append(s)
-        return ','.join(ops)
+        return ",".join(ops)
 
 
 class WyckoffSite(models.Model):
@@ -275,24 +277,26 @@ class WyckoffSite(models.Model):
         | x, y, z: Coordinate symbols.
 
     """
-    spacegroup = models.ForeignKey('Spacegroup', related_name='site_set', on_delete=models.CASCADE)
+
+    spacegroup = models.ForeignKey(
+        "Spacegroup", related_name="site_set", on_delete=models.CASCADE
+    )
     symbol = models.CharField(max_length=1)
     multiplicity = models.IntegerField(blank=True, null=True)
     x = models.CharField(max_length=8)
     y = models.CharField(max_length=8)
     z = models.CharField(max_length=8)
-    
+
     class Meta:
-        app_label = 'qmpy'
-        db_table = 'wyckoffsites'
+        app_label = "qmpy"
+        db_table = "wyckoffsites"
 
     def __str__(self):
-        return '%s%d' % (self.symbol, self.multiplicity)
+        return "%s%d" % (self.symbol, self.multiplicity)
 
     @classmethod
     def get(cls, symbol, spacegroup):
-        site, new = cls.objects.get_or_create(spacegroup=spacegroup, 
-                symbol=symbol)
+        site, new = cls.objects.get_or_create(spacegroup=spacegroup, symbol=symbol)
         if new:
             site.save()
         return site
@@ -319,6 +323,7 @@ class Spacegroup(models.Model):
         | schoenflies: Schoenflies symbol.
 
     """
+
     number = models.IntegerField(primary_key=True)
     hm = models.CharField(max_length=30, blank=True, null=True)
     hall = models.CharField(max_length=30, blank=True, null=True)
@@ -334,8 +339,8 @@ class Spacegroup(models.Model):
     _trans = None
 
     class Meta:
-        app_label = 'qmpy'
-        db_table = 'spacegroups'
+        app_label = "qmpy"
+        db_table = "spacegroups"
 
     def save(self, *args, **kwargs):
         super(Spacegroup, self).save(*args, **kwargs)
@@ -351,7 +356,7 @@ class Spacegroup(models.Model):
     def sym_ops(self):
         """List of (rotation, translation) pairs for the spacegroup"""
         if self._sym_ops is None:
-            self._sym_ops = [ op for op in self.operations.all() ]
+            self._sym_ops = [op for op in self.operations.all()]
         return self._sym_ops
 
     @sym_ops.setter
@@ -362,14 +367,14 @@ class Spacegroup(models.Model):
     def rotations(self):
         """List of rotation operations for the spacegroup."""
         if self._rots is None:
-            self._rots = np.array([ op.rotation.matrix for op in self.sym_ops ])
+            self._rots = np.array([op.rotation.matrix for op in self.sym_ops])
         return self._rots
 
     @property
     def translations(self):
         """List of translation operations for the spacegroup."""
         if self._trans is None:
-            self._trans = np.array([ op.translation.vector for op in self.sym_ops ])
+            self._trans = np.array([op.translation.vector for op in self.sym_ops])
         return self._trans
 
     def __str__(self):
@@ -378,7 +383,7 @@ class Spacegroup(models.Model):
     @property
     def wyckoff_sites(self):
         """List of WyckoffSites."""
-        return self.site_set.all().order_by('symbol')
+        return self.site_set.all().order_by("symbol")
 
     @property
     def symbol(self):
@@ -389,8 +394,9 @@ class Spacegroup(models.Model):
         equiv = []
         for rot, trans in zip(self.rotations, self.translations):
             new = utils.wrap(np.dot(rot, point) + trans)
-            if not any([ all([ abs(o-n) < tol for o, n in zip(old, new)])
-                                              for old in equiv]):
+            if not any(
+                [all([abs(o - n) < tol for o, n in zip(old, new)]) for old in equiv]
+            ):
                 equiv.append(new)
         return equiv
 
@@ -404,6 +410,5 @@ class Spacegroup(models.Model):
 
     def get_site(self, symbol):
         """Gets WyckoffSite by symbol."""
-        symbol = symbol.strip('0123456789')
+        symbol = symbol.strip("0123456789")
         return self.site_set.get(symbol__exact=symbol)
-
