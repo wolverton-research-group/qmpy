@@ -8,6 +8,7 @@ from qmpy.analysis.vasp import Calculation
 
 from .calculation import CalculationRawSerializer
 
+
 class EntrySerializer(serializers.ModelSerializer):
     icsd_id = serializers.SerializerMethodField()
 
@@ -15,7 +16,6 @@ class EntrySerializer(serializers.ModelSerializer):
     composition_generic = serializers.SerializerMethodField()
     spacegroup = serializers.SerializerMethodField()
     volume = serializers.SerializerMethodField()
-
 
     unit_cell = serializers.SerializerMethodField()
     sites = serializers.SerializerMethodField()
@@ -26,13 +26,13 @@ class EntrySerializer(serializers.ModelSerializer):
 
     stability = serializers.SerializerMethodField()
 
-    calculations = serializers.SerializerMethodField('get_calc')
+    calculations = serializers.SerializerMethodField("get_calc")
 
     def get_icsd_id(self, entry):
-        if 'icsd' in entry.keywords:
+        if "icsd" in entry.keywords:
             try:
-                assert 'icsd' in entry.path
-                return entry.path.split('/')[-1]
+                assert "icsd" in entry.path
+                return entry.path.split("/")[-1]
             except:
                 pass
 
@@ -44,41 +44,43 @@ class EntrySerializer(serializers.ModelSerializer):
 
     def get_spacegroup(self, entry):
         try:
-            if 'static' in entry.structures:
-                return entry.structures['static'].spacegroup.hm
+            if "static" in entry.structures:
+                return entry.structures["static"].spacegroup.hm
             else:
-                return entry.structures['input'].spacegroup.hm
+                return entry.structures["input"].spacegroup.hm
         except:
-            return 
+            return
 
     def get_volume(self, entry):
         try:
-            if 'static' in entry.structures:
-                return entry.structures['static'].volume
+            if "static" in entry.structures:
+                return entry.structures["static"].volume
             else:
-                return entry.structures['input'].volume
+                return entry.structures["input"].volume
         except:
-            return 
+            return
 
     def get_unit_cell(self, entry):
         try:
-            if 'static' in entry.structures:
-                strct = entry.structures['static']
+            if "static" in entry.structures:
+                strct = entry.structures["static"]
             else:
-                strct = entry.structures['input']
+                strct = entry.structures["input"]
 
-            return [[strct.x1, strct.x2, strct.x3],
-                    [strct.y1, strct.y2, strct.y3],
-                    [strct.z1, strct.z2, strct.z3]]
+            return [
+                [strct.x1, strct.x2, strct.x3],
+                [strct.y1, strct.y2, strct.y3],
+                [strct.z1, strct.z2, strct.z3],
+            ]
         except:
             return
 
     def get_sites(self, entry):
         try:
-            if 'static' in entry.structures:
-                strct = entry.structures['static']
+            if "static" in entry.structures:
+                strct = entry.structures["static"]
             else:
-                strct = entry.structures['input']
+                strct = entry.structures["input"]
 
             sites = [str(s) for s in strct.sites]
 
@@ -86,55 +88,66 @@ class EntrySerializer(serializers.ModelSerializer):
         except:
             return
 
-
     def get_energy_per_atom(self, entry):
         try:
-            return entry.calculation_set.get(label='static', \
-                                             converged=True).energy_pa
+            return entry.calculation_set.get(label="static", converged=True).energy_pa
         except:
             try:
-                return entry.calculation_set.get(label='standard', \
-                                                 converged=True).energy_pa
+                return entry.calculation_set.get(
+                    label="standard", converged=True
+                ).energy_pa
             except:
-                return 
+                return
 
     def get_band_gap(self, entry):
         try:
-            return entry.calculation_set.get(label='static', \
-                                             converged=True).band_gap
+            return entry.calculation_set.get(label="static", converged=True).band_gap
         except:
             try:
-                return entry.calculation_set.get(label='standard', \
-                                                 converged=True).band_gap
+                return entry.calculation_set.get(
+                    label="standard", converged=True
+                ).band_gap
             except:
-                return 
+                return
 
     def get_formation_energy(self, entry):
         try:
-            return entry.formationenergy_set.get(fit_id='standard').delta_e
+            return entry.formationenergy_set.get(fit_id="standard").delta_e
         except:
             return
 
     def get_stability(self, entry):
         try:
-            return entry.formationenergy_set.get(fit_id='standard').stability
+            return entry.formationenergy_set.get(fit_id="standard").stability
         except:
             return
 
     def get_calc(self, entry):
-        qs = Calculation.objects.filter(converged=True, 
-                                        entry=entry)
+        qs = Calculation.objects.filter(converged=True, entry=entry)
         serializer = CalculationRawSerializer(instance=qs, many=True)
         return serializer.data
 
     class Meta:
         model = Entry
-        fields = ('id', 'name', 'path', 'icsd_id',
-                  'composition', 'composition_generic', 
-                  'prototype', 'spacegroup', 'volume', 
-                  'ntypes', 'natoms', 
-                  'unit_cell', 'sites',
-                  'energy_per_atom', 'band_gap', 
-                  'formation_energy', 'stability',
-                  'keywords', 'holds',
-                  'calculations')
+        fields = (
+            "id",
+            "name",
+            "path",
+            "icsd_id",
+            "composition",
+            "composition_generic",
+            "prototype",
+            "spacegroup",
+            "volume",
+            "ntypes",
+            "natoms",
+            "unit_cell",
+            "sites",
+            "energy_per_atom",
+            "band_gap",
+            "formation_energy",
+            "stability",
+            "keywords",
+            "holds",
+            "calculations",
+        )

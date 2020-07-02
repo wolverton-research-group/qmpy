@@ -11,13 +11,13 @@ from qmpy.utils import *
 
 logger = logging.getLogger(__name__)
 
-__all__ = ['Miedema']
-# data rows: 
+__all__ = ["Miedema"]
+# data rows:
 # Element_name Phi Rho Vol Z Valence TM? RtoP Htrans
-params = yaml.safe_load(open(qmpy.INSTALL_PATH+'/data/miedema.yml').read())
+params = yaml.safe_load(open(qmpy.INSTALL_PATH + "/data/miedema.yml").read())
+
 
 class Miedema(object):
-
     def __init__(self, composition):
         """
         Takes a variety of composition representations and returns the miedema
@@ -48,12 +48,12 @@ class Miedema(object):
         elif isinstance(composition, dict):
             pass
         else:
-            raise TypeError('Unrecognized composition:', composition)
+            raise TypeError("Unrecognized composition:", composition)
 
         if len(composition) != 2:
             return None
 
-        if not all( params[k] for k in composition ):
+        if not all(params[k] for k in composition):
             self.energy = None
             return
 
@@ -75,7 +75,7 @@ class Miedema(object):
             only one of A and B is a TM
             neither are TMs.
         """
-        possibleP = [14.2,12.35,10.7]
+        possibleP = [14.2, 12.35, 10.7]
         if (self.A[5] + self.B[5]) == 2:
             # Both elementA and elementB are Transition Metals.
             return possibleP[0]
@@ -91,33 +91,31 @@ class Miedema(object):
         """Calculate and return the value of RtoP based on the transition metal
         status of elements A and B, and the elemental values of RtoP for elements A
         and B."""
-        # List of Transition Metals as given in Fig 2.28 of 
+        # List of Transition Metals as given in Fig 2.28 of
         # de Boer, et al., Cohesion in Metals (1988) (page 66).
         tmrange = []
-        tmrange.extend(list(range(20,30)))
-        tmrange.extend(list(range(38,48)))
-        tmrange.extend(list(range(56,58)))
-        tmrange.extend(list(range(72,80)))
-        tmrange.extend([90,92,94])
-        # List of Non-Transition Metals as given in Fig 2.28 of 
+        tmrange.extend(list(range(20, 30)))
+        tmrange.extend(list(range(38, 48)))
+        tmrange.extend(list(range(56, 58)))
+        tmrange.extend(list(range(72, 80)))
+        tmrange.extend([90, 92, 94])
+        # List of Non-Transition Metals as given in Fig 2.28 of
         # de Boer, et al., Cohesion in Metals (1988) (page 66).
         nontmrange = []
-        nontmrange.extend(list(range(3,8)))
-        nontmrange.extend(list(range(11,16)))
+        nontmrange.extend(list(range(3, 8)))
+        nontmrange.extend(list(range(11, 16)))
         nontmrange.extend([19])
-        nontmrange.extend(list(range(30,34)))
+        nontmrange.extend(list(range(30, 34)))
         nontmrange.extend([37])
-        nontmrange.extend(list(range(48,52)))
+        nontmrange.extend(list(range(48, 52)))
         nontmrange.extend([55])
-        nontmrange.extend(list(range(80,84)))
+        nontmrange.extend(list(range(80, 84)))
         # If one of A,B is in tmrange and the other is in nontmrange, set RtoP
         # to the product of elemental values, otherwise set RtoP to zero.
-        if (self.A[3] in tmrange) and (self.B[3] in
-                nontmrange):
-            RtoP = self.A[6]*self.B[6]
-        elif (self.A[3] in nontmrange) and (self.B[3] in
-                tmrange):
-            RtoP = self.A[6]*self.B[6]
+        if (self.A[3] in tmrange) and (self.B[3] in nontmrange):
+            RtoP = self.A[6] * self.B[6]
+        elif (self.A[3] in nontmrange) and (self.B[3] in tmrange):
+            RtoP = self.A[6] * self.B[6]
         else:
             RtoP = 0.0
         return RtoP
@@ -132,7 +130,7 @@ class Miedema(object):
 
     def pick_a(self, elt):
         """Choose a value of a based on the valence of element A."""
-        possible_a = [0.14,0.1,0.07,0.04]
+        possible_a = [0.14, 0.1, 0.07, 0.04]
         if elt == self.elt_a:
             params = self.A
         else:
@@ -143,8 +141,8 @@ class Miedema(object):
             return possible_a[1]
         elif params[4] == 3:
             return possible_a[2]
-        #elif elementA in ["Ag","Au","Ir","Os","Pd","Pt","Rh","Ru"]:
-        elif elt in ["Ag","Au","Cu"]:
+        # elif elementA in ["Ag","Au","Ir","Os","Pd","Pt","Rh","Ru"]:
+        elif elt in ["Ag", "Au", "Cu"]:
             return possible_a[2]
         else:
             return possible_a[3]
@@ -158,8 +156,8 @@ class Miedema(object):
         rho = [self.A[1], self.B[1]]
         d_phi = phi[0] - phi[1]
         d_rho = rho[0] - rho[1]
-        m_rho = (1/rho[0] + 1/rho[1])/2.
-        gamma = self.P*(QtoP*d_rho**2 - d_phi**2 - self.RtoP)/m_rho
+        m_rho = (1 / rho[0] + 1 / rho[1]) / 2.0
+        gamma = self.P * (QtoP * d_rho ** 2 - d_phi ** 2 - self.RtoP) / m_rho
         return int(round(gamma))
 
     def H_form_ord(self):
@@ -171,27 +169,34 @@ class Miedema(object):
         htrans = [self.A[7], self.B[7]]
         # Determine volume scale parameter a.
         # Calculate surface concentrations using original volumes.
-        c_S_A = (1-self.x)*vol0_A/((1-self.x)*vol0_A+self.x*vol0_B)
-        c_S_B = self.x*vol0_B/((1-self.x)*vol0_A+self.x*vol0_B)
+        c_S_A = (1 - self.x) * vol0_A / ((1 - self.x) * vol0_A + self.x * vol0_B)
+        c_S_B = self.x * vol0_B / ((1 - self.x) * vol0_A + self.x * vol0_B)
         # Calculate surface fractions for ordered compounds using original volumes.
-        f_BA = c_S_B*(1+8*(c_S_A*c_S_B)**2)
-        f_AB = c_S_A*(1+8*(c_S_A*c_S_B)**2)
+        f_BA = c_S_B * (1 + 8 * (c_S_A * c_S_B) ** 2)
+        f_AB = c_S_A * (1 + 8 * (c_S_A * c_S_B) ** 2)
         # Calculate new volumes using surface fractions (which use original
         # volumes).
-        vol_A = vol0_A*(1+self.a_A*f_BA*(phi[0]-phi[1]))
-        vol_B = vol0_B*(1+self.a_B*f_AB*(phi[1]-phi[0]))
+        vol_A = vol0_A * (1 + self.a_A * f_BA * (phi[0] - phi[1]))
+        vol_B = vol0_B * (1 + self.a_B * f_AB * (phi[1] - phi[0]))
         # Recalculate surface concentrations using new volumes.
-        c_S_A = (1-self.x)*vol_A/((1-self.x)*vol_A+self.x*vol_B)
-        c_S_B = self.x*vol_B/((1-self.x)*vol_A+self.x*vol_B)
+        c_S_A = (1 - self.x) * vol_A / ((1 - self.x) * vol_A + self.x * vol_B)
+        c_S_B = self.x * vol_B / ((1 - self.x) * vol_A + self.x * vol_B)
         # Recalculate surface fractions for ordered compounds using new volumes.
-        f_BA = c_S_B*(1+8*(c_S_A*c_S_B)**2)
-        f_AB = c_S_A*(1+8*(c_S_A*c_S_B)**2)
-        D_htrans = self.x*htrans[1]+(1-self.x)*htrans[0]
-        H_ord = (self.gamma*(1-self.x)*self.x*vol_A*vol_B*(1+8*(c_S_A*c_S_B)**2)/
-                ((1-self.x)*vol_A+self.x*vol_B) + D_htrans)
-        return round(H_ord*0.01036427, 2)
+        f_BA = c_S_B * (1 + 8 * (c_S_A * c_S_B) ** 2)
+        f_AB = c_S_A * (1 + 8 * (c_S_A * c_S_B) ** 2)
+        D_htrans = self.x * htrans[1] + (1 - self.x) * htrans[0]
+        H_ord = (
+            self.gamma
+            * (1 - self.x)
+            * self.x
+            * vol_A
+            * vol_B
+            * (1 + 8 * (c_S_A * c_S_B) ** 2)
+            / ((1 - self.x) * vol_A + self.x * vol_B)
+            + D_htrans
+        )
+        return round(H_ord * 0.01036427, 2)
 
     @staticmethod
     def get(composition):
         return Miedema(composition).energy
-

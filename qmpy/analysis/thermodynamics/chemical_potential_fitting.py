@@ -8,6 +8,7 @@ from qmpy.data import *
 
 logger = logging.getLogger(__name__)
 
+
 def fit(name, calculations=None, experiments=None, fit_for=[]):
     f = qmpy.Fit.get(name)
     f.save()
@@ -17,15 +18,16 @@ def fit(name, calculations=None, experiments=None, fit_for=[]):
     hub_data = []
 
     elements = set()  # list of all elements in any compound in fit
-    hubbards = set() # list of all hubbards in any calc in fit
+    hubbards = set()  # list of all hubbards in any calc in fit
     fit_set = set(fit_for)
     expts = {}
     calcs = {}
 
-    expt_data = experiments.values_list('composition_id', 'delta_e')
-    calc_data = calculations.values_list('composition_id', 'energy_pa')
-    base_mus = dict( (elt, qmpy.Composition.get(elt).total_energy) for elt in
-            element_groups['all'])
+    expt_data = experiments.values_list("composition_id", "delta_e")
+    calc_data = calculations.values_list("composition_id", "energy_pa")
+    base_mus = dict(
+        (elt, qmpy.Composition.get(elt).total_energy) for elt in element_groups["all"]
+    )
 
     for (name, delta_e), expt in zip(expt_data, experiments):
         if expt.delta_e is None:
@@ -60,14 +62,14 @@ def fit(name, calculations=None, experiments=None, fit_for=[]):
         else:
             hub_data.append(name)
             for hub in calcs[name].hubbards:
-                if hub: 
+                if hub:
                     hubbards.add(hub)
 
     elements = list(elements)
     hubbards = list(hubbards)
     f.elements = elements
     f.hubbards = hubbards
-    hubbard_elements = [ hub.element.symbol for hub in hubbards ]
+    hubbard_elements = [hub.element.symbol for hub in hubbards]
 
     A = []
     b = []
@@ -75,10 +77,17 @@ def fit(name, calculations=None, experiments=None, fit_for=[]):
     for name in data:
         uc = unit_comp(parse_comp(name))
         # remove non-fitting elements
-        b.append(calcs[name].energy_pa - expts[name].delta_e - sum( base_mus[elt]*amt 
-                for elt, amt in list(uc.items()) if elt not in fit_for ))
-        A.append([ uc.get(elt,0) for elt in fit_for ])
-    
+        b.append(
+            calcs[name].energy_pa
+            - expts[name].delta_e
+            - sum(
+                base_mus[elt] * amt
+                for elt, amt in list(uc.items())
+                if elt not in fit_for
+            )
+        )
+        A.append([uc.get(elt, 0) for elt in fit_for])
+
     A = np.array(A)
     b = np.array(b)
     i = 0
@@ -87,7 +96,7 @@ def fit(name, calculations=None, experiments=None, fit_for=[]):
     else:
         old_std = 1000
         std = 0
-        while int(old_std*1000) - int(std*1000) != 0:
+        while int(old_std * 1000) - int(std * 1000) != 0:
             old_std = std
 
             result = np.linalg.lstsq(A, b)[0]
@@ -97,9 +106,9 @@ def fit(name, calculations=None, experiments=None, fit_for=[]):
             errs = b - b_hats
             std = np.std(errs)
             print("iter %s: std: %0.3f" % (i, std))
-            inds = np.argwhere(np.abs(errs) < std*4)
-            A = A[np.abs(errs) < std*4]
-            b = b[np.abs(errs) < std*4]
+            inds = np.argwhere(np.abs(errs) < std * 4)
+            A = A[np.abs(errs) < std * 4]
+            b = b[np.abs(errs) < std * 4]
             i += 1
 
         element_mus = dict(list(zip(fit_for, result)))
@@ -109,13 +118,17 @@ def fit(name, calculations=None, experiments=None, fit_for=[]):
     b = []
     for name in hub_data:
         uc = unit_comp(parse_comp(name))
-        b.append(calcs[name].energy_pa - expts[name].delta_e -
-                sum( base_mus[elt]*amt
-                    for elt, amt in list(uc.items()) 
-                    if elt not in fit_for) - 
-                sum( element_mus.get(elt, 0)*amt
-                    for elt, amt in list(uc.items())))
-        A.append([ uc.get(elt, 0) for elt in hubbard_elements ])
+        b.append(
+            calcs[name].energy_pa
+            - expts[name].delta_e
+            - sum(
+                base_mus[elt] * amt
+                for elt, amt in list(uc.items())
+                if elt not in fit_for
+            )
+            - sum(element_mus.get(elt, 0) * amt for elt, amt in list(uc.items()))
+        )
+        A.append([uc.get(elt, 0) for elt in hubbard_elements])
 
     A = np.array(A)
     b = np.array(b)
@@ -125,7 +138,7 @@ def fit(name, calculations=None, experiments=None, fit_for=[]):
         old_std = 1000
         std = 0
         i = 0
-        while int(old_std*1000) - int(std*1000) != 0:
+        while int(old_std * 1000) - int(std * 1000) != 0:
             old_std = std
 
             result = np.linalg.lstsq(A, b)[0]
@@ -134,8 +147,8 @@ def fit(name, calculations=None, experiments=None, fit_for=[]):
             errs = b - b_hats
             std = np.std(errs)
             print("iter %s: std: %0.3f" % (i, std))
-            A = A[np.abs(errs) < std*4]
-            b = b[np.abs(errs) < std*4]
+            A = A[np.abs(errs) < std * 4]
+            b = b[np.abs(errs) < std * 4]
             i += 1
 
         hubbard_mus = dict(list(zip(hubbards, result)))
@@ -147,8 +160,8 @@ def fit(name, calculations=None, experiments=None, fit_for=[]):
         if abs(element_mus.get(qmpy.Element.get(elt), 0.0)) > 100:
             element_mus[qmpy.Element.get(elt)] = float(mu)
 
-    #element_mus = dict( (str(e), float(val)) for e, val in element_mus.items())
-    #hubbard_mus = dict( (str(h.key), float(val)) for h, val in hubbard_mus.items())
+    # element_mus = dict( (str(e), float(val)) for e, val in element_mus.items())
+    # hubbard_mus = dict( (str(h.key), float(val)) for h, val in hubbard_mus.items())
 
     new_e_mus = {}
     for elt, val in list(element_mus.items()):
@@ -164,4 +177,3 @@ def fit(name, calculations=None, experiments=None, fit_for=[]):
         f.hubbard_correction_set.add(hm)
         new_h_corrs[str(hub.key)] = float(val)
     return new_e_mus, new_h_corrs
-

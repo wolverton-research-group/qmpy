@@ -7,12 +7,12 @@ from sklearn import grid_search
 
 from qmpy import *
 
-elts = Element.objects.filter(symbol__in=element_groups['simple-metals'])
-out_elts = Element.objects.exclude(symbol__in=element_groups['simple-metals'])
-models = Calculation.objects.filter(path__contains='icsd')
-models = models.filter(converged=True, label__in=['static', 'standard'])
+elts = Element.objects.filter(symbol__in=element_groups["simple-metals"])
+out_elts = Element.objects.exclude(symbol__in=element_groups["simple-metals"])
+models = Calculation.objects.filter(path__contains="icsd")
+models = models.filter(converged=True, label__in=["static", "standard"])
 models = models.exclude(composition__element_set=out_elts)
-data = models.values_list('composition_id', 'output__volume_pa')
+data = models.values_list("composition_id", "output__volume_pa")
 
 y = []
 X = []
@@ -26,11 +26,12 @@ X = np.array(X)
 X2 = np.array(X)
 y = np.array(y)
 
-#pca = PCA(n_components=10, whiten=True)
-#X = pca.fit_transform(X)
+# pca = PCA(n_components=10, whiten=True)
+# X = pca.fit_transform(X)
 
 train_x, test_x, train_y, test_y = cross_validation.train_test_split(
-        X, y, train_size=0.5)
+    X, y, train_size=0.5
+)
 
 clf = linear_model.LinearRegression()
 
@@ -38,12 +39,13 @@ clf.fit(train_x, train_y)
 train_y -= clf.predict(train_x)
 
 parameters = {
-    'n_estimators': [10, 100, 500],
-    'max_depth': [2,3,4], 
-    'min_samples_split': [1,2,3,4] ,
-    'learning_rate': [0.001, 0.01, 0.1]}
-#gbr = GradientBoostingRegressor()
-#clf = grid_search.GridSearchCV(gbr, parameters)
+    "n_estimators": [10, 100, 500],
+    "max_depth": [2, 3, 4],
+    "min_samples_split": [1, 2, 3, 4],
+    "learning_rate": [0.001, 0.01, 0.1],
+}
+# gbr = GradientBoostingRegressor()
+# clf = grid_search.GridSearchCV(gbr, parameters)
 clf = SVR()
 
 clf.fit(train_x, train_y)

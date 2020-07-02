@@ -1,6 +1,7 @@
 from contextlib import contextmanager
 import os
 
+
 @contextmanager
 def change_directory(new_dir):
     prev_dir = os.getcwd()
@@ -9,4 +10,3 @@ def change_directory(new_dir):
         yield
     finally:
         os.chdir(prev_dir)
-

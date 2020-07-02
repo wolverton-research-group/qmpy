@@ -29,18 +29,19 @@ from functools import reduce
 logger = logging.getLogger(__name__)
 
 ## regex's
-re_comp = re.compile('({[^}]*}[,0-9x\.]*|[A-Z][a-wyz]?)([,0-9x\.]*)')
-spec_comp = re.compile('([A-Z][a-z]?)([0-9\.]*)([+-]?)')
-re_formula = re.compile('([A-Z][a-z]?)([0-9\.]*)')
-alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+re_comp = re.compile("({[^}]*}[,0-9x\.]*|[A-Z][a-wyz]?)([,0-9x\.]*)")
+spec_comp = re.compile("([A-Z][a-z]?)([0-9\.]*)([+-]?)")
+re_formula = re.compile("([A-Z][a-z]?)([0-9\.]*)")
+alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 ## Parsing
+
 
 def is_comp(value):
     new_value = str(value)
     for elt, amt in re_formula.findall(value):
-        new_value = new_value.replace(elt, '')
-        new_value = new_value.replace(amt, '')
+        new_value = new_value.replace(elt, "")
+        new_value = new_value.replace(amt, "")
     if new_value:
         return False
     else:
@@ -48,10 +49,10 @@ def is_comp(value):
 
 
 def parse_mu(value):
-    if '=' in value:
-        elt, pot = value.split('=')
-        if ':' in pot:
-            pot = list(map(float, pot.split(':')))[:2]
+    if "=" in value:
+        elt, pot = value.split("=")
+        if ":" in pot:
+            pot = list(map(float, pot.split(":")))[:2]
         else:
             pot = float(pot)
     else:
@@ -59,12 +60,13 @@ def parse_mu(value):
         pot = 0.0
     return {elt: pot}
 
+
 def parse_comp(value):
     comp = defaultdict(float)
     for elt, amt in re_formula.findall(value):
-        if elt in ['D', 'T']:
-            elt = 'H'
-        if amt == '':
+        if elt in ["D", "T"]:
+            elt = "H"
+        if amt == "":
             comp[elt] = 1
         elif is_integer(amt):
             comp[elt] += int(round(float(amt)))
@@ -72,77 +74,83 @@ def parse_comp(value):
             comp[elt] += float(amt)
     return dict(comp)
 
+
 def parse_space(value):
     if isinstance(value, str):
-        space = re.sub('[-,_]', ' ', value)
-        space = [ unit_comp(parse_comp(b)) for b in space.split()]
-    elif isinstance(value, (list,set)):
-        space = [ {elt:1} for elt in value ]
+        space = re.sub("[-,_]", " ", value)
+        space = [unit_comp(parse_comp(b)) for b in space.split()]
+    elif isinstance(value, (list, set)):
+        space = [{elt: 1} for elt in value]
     elif isinstance(value, dict):
-        space = [ {elt:1} for elt in value ]
+        space = [{elt: 1} for elt in value]
     elif not value:
         space = None
     else:
         raise ValueError("Failed to parse space: %s" % value)
     return space
 
-def parse_sitesym(sitesym, sep=','):
-    rot = np.zeros((3, 3), dtype='int')
+
+def parse_sitesym(sitesym, sep=","):
+    rot = np.zeros((3, 3), dtype="int")
     trans = np.zeros(3)
-    for i, s in enumerate (sitesym.split(sep)):
+    for i, s in enumerate(sitesym.split(sep)):
         s = s.lower().strip()
         while s:
             sign = 1
-            if s[0] in '+-':
-                if s[0] == '-':
+            if s[0] in "+-":
+                if s[0] == "-":
                     sign = -1
                 s = s[1:]
-            if s[0] in 'xyz':
-                j = ord(s[0]) - ord('x')
+            if s[0] in "xyz":
+                j = ord(s[0]) - ord("x")
                 rot[i, j] = sign
                 s = s[1:]
-            elif s[0].isdigit() or s[0] == '.':
+            elif s[0].isdigit() or s[0] == ".":
                 n = 0
-                while n < len(s) and (s[n].isdigit() or s[n] in '/.'):
+                while n < len(s) and (s[n].isdigit() or s[n] in "/."):
                     n += 1
                 t = s[:n]
                 s = s[n:]
                 trans[i] = float(frac.Fraction(t))
             else:
-                raise ValueError('Failed to parse symmetry of %s' % (sitesym))
+                raise ValueError("Failed to parse symmetry of %s" % (sitesym))
     return rot, trans
+
 
 def parse_species(value):
     elt, charge, sign = spec_comp.findall(value)[0]
-    if charge == '':
+    if charge == "":
         return elt, None
     elif is_integer(charge):
         charge = int(charge)
     else:
         charge = float(charge)
 
-    if sign in ['+', '']:
+    if sign in ["+", ""]:
         return elt, charge
-    elif sign == '-':
-        return elt, -1*charge
+    elif sign == "-":
+        return elt, -1 * charge
+
 
 ## Formatting
 
+
 def format_mus(mus):
-    name = ''
+    name = ""
     for k, v in list(mus.items()):
         if name:
-            name += ' '
+            name += " "
         name += k
         if v is None:
             continue
         if isinstance(v, (float, int)):
-            name += '=%.3g' % v
+            name += "=%.3g" % v
         elif isinstance(v, list):
-            name += '=%.3g:%.3g' % tuple(v)
+            name += "=%.3g:%.3g" % tuple(v)
         else:
-            raise TypeError('Unrecognized format for mus:', mus)
+            raise TypeError("Unrecognized format for mus:", mus)
     return name
+
 
 def format_species(element, value):
     if value is None:
@@ -150,13 +158,14 @@ def format_species(element, value):
     if is_integer(value):
         ox = str(abs(int(value)))
     else:
-        ox = str(abs(float(value))).rstrip('0.')
-    name = '%s%s' % (element, ox)
+        ox = str(abs(float(value))).rstrip("0.")
+    name = "%s%s" % (element, ox)
     if value < 0:
-        name += '-'
+        name += "-"
     else:
-        name += '+'
+        name += "+"
     return name
+
 
 def get_coeffs(values):
     wasdict = False
@@ -167,88 +176,103 @@ def get_coeffs(values):
     coeffs = []
     for v in values:
         if v == 1:
-            coeffs.append('')
+            coeffs.append("")
         elif is_integer(v):
-            coeffs.append('%d' % v)
+            coeffs.append("%d" % v)
         else:
-            coeffs.append(('%.8f' % v).rstrip('0'))
+            coeffs.append(("%.8f" % v).rstrip("0"))
 
     if wasdict:
         return dict(list(zip(keys, coeffs)))
     else:
         return coeffs
 
+
 def electronegativity(elt):
     if not elt in data.elements:
         return 0.0
     else:
-        if not 'electronegativity' in data.elements[elt]:
+        if not "electronegativity" in data.elements[elt]:
             return 0.0
-        return data.elements[elt]['electronegativity']
+        return data.elements[elt]["electronegativity"]
 
-def format_comp(comp, template='{elt}{amt}', delimiter='',
-        key=lambda x: (electronegativity(x), x)):
+
+def format_comp(
+    comp, template="{elt}{amt}", delimiter="", key=lambda x: (electronegativity(x), x)
+):
     elts = sorted(list(comp.keys()), key=key)
     coeffs = get_coeffs(comp)
     return delimiter.join(template.format(elt=k, amt=coeffs[k]) for k in elts)
 
+
 def format_generic_comp(comp):
     amts = get_coeffs(sorted(comp.values()))
     gen_comp = list(zip(alphabet, amts))
-    return ''.join('{elt}{amt}'.format(elt=elt, amt=amt) for elt, amt in
-            gen_comp)
+    return "".join("{elt}{amt}".format(elt=elt, amt=amt) for elt, amt in gen_comp)
+
 
 def format_html(comp):
-    return format_comp(comp, template='{elt}<sub>{amt}</sub>').replace('<sub></sub>', '')
+    return format_comp(comp, template="{elt}<sub>{amt}</sub>").replace(
+        "<sub></sub>", ""
+    )
+
 
 def format_latex(comp):
-    return format_comp(comp, template='{elt}$_{{{amt}}}$')
+    return format_comp(comp, template="{elt}$_{{{amt}}}$")
+
 
 def format_bold_latex(comp):
-    return format_comp(comp, template='{elt}$_{{\mathbf{{{amt}}}}}$')
+    return format_comp(comp, template="{elt}$_{{\mathbf{{{amt}}}}}$")
+
 
 def format_gnuplot(comp):
-    return format_comp(comp, template='{elt}_{{{amt}}}')
+    return format_comp(comp, template="{elt}_{{{amt}}}")
+
 
 def normalize_dict(dictionary):
     tot = float(sum(dictionary.values()))
-    return dict((k, v/tot) for k,v in list(dictionary.items()))
+    return dict((k, v / tot) for k, v in list(dictionary.items()))
+
 
 def unit_comp(comp):
     return normalize_dict(comp)
 
+
 def reduce_by_gcd(values, tol=5e-2):
-    least = min([ v for v in values if v ])
-    ints = [roundclose(v/least, tol) for v in values ]
-    gcd = reduce(frac.gcd, [roundclose(v, tol) for v in values if v ])
-    return [ v/gcd for v in values ]
+    least = min([v for v in values if v])
+    ints = [roundclose(v / least, tol) for v in values]
+    gcd = reduce(frac.gcd, [roundclose(v, tol) for v in values if v])
+    return [v / gcd for v in values]
+
 
 def reduce_by_partial_gcd(values):
     ints = [roundclose(v) for v in values if is_integer(v)]
     if not ints:
         return values
     least = min(ints)
-    ints = [ v/least for v in ints ]
+    ints = [v / least for v in ints]
     gcd = reduce(frac.gcd, ints)
-    return [ v/gcd for v in values ]
+    return [v / gcd for v in values]
+
 
 def reduce_by_any_means(values):
     i = 0
     d = 0
-    vals = np.array([ roundclose(v) for v in values])
+    vals = np.array([roundclose(v) for v in values])
     primes = list(range(1, 10))
     while d < 1e-6:
-        if i > len(primes)-1:
-            vals = np.round(vals*10**3)/10**3
+        if i > len(primes) - 1:
+            vals = np.round(vals * 10 ** 3) / 10 ** 3
             break
         i += 1
-        p = primes[i-1]
-        d = reduce(frac.gcd, [ roundclose(v, 5e-2) for v in vals*p ])
+        p = primes[i - 1]
+        d = reduce(frac.gcd, [roundclose(v, 5e-2) for v in vals * p])
     else:
-        vals = np.round(vals*p/d)
+        vals = np.round(vals * p / d)
     return vals.tolist()
 
-def reduce_comp(values, method='auto'):
+
+def reduce_comp(values, method="auto"):
     """
     Attempt to construct a 'pretty' composition string.
 
@@ -274,7 +298,7 @@ def reduce_comp(values, method='auto'):
     """
 
     if not values:
-        return ''
+        return ""
 
     wasdict = False
     if isinstance(values, dict):
@@ -288,19 +312,20 @@ def reduce_comp(values, method='auto'):
             return values
 
     first = reduce_by_gcd(values)
-    if all( v < 1000 for v in first):
+    if all(v < 1000 for v in first):
         return make_return(first)
 
-    ints = [ v for v in values if is_integer(v) ]
+    ints = [v for v in values if is_integer(v)]
     second = reduce_by_partial_gcd(values)
     if len(ints) == len(values) - 1:
         return make_return(second)
 
     if sum(values) <= 1.005:
         third = reduce_by_any_means(values)
-        if all( v < 1000 for v in third):
+        if all(v < 1000 for v in third):
             return make_return(third)
     return make_return(second)
+
 
 def normalize_comp(values):
     wasdict = False
@@ -315,6 +340,7 @@ def normalize_comp(values):
         return dict(list(zip(keys, vals)))
     else:
         return vals.tolist()
+
 
 def parse_formula_regex(formula):
     """Take in a generalized expression for a composition. Use symbols for
@@ -339,31 +365,33 @@ def parse_formula_regex(formula):
 
     """
     formulae = []
-    sfind = re.compile('({[^}]*}[,0-9x\.]*|[A-Z][a-wyz]?[,0-9x\.]*)')
+    sfind = re.compile("({[^}]*}[,0-9x\.]*|[A-Z][a-wyz]?[,0-9x\.]*)")
     matches = sfind.findall(formula)
     for term in matches:
-        if '{' in term:
-            symbols, amt = term.replace('{','').split('}')
-            symbols = symbols.split(',')
+        if "{" in term:
+            symbols, amt = term.replace("{", "").split("}")
+            symbols = symbols.split(",")
             elts = []
             for symbol in symbols:
                 if symbol in list(data.element_groups.keys()):
-                    elts += [ e for e in data.element_groups[symbol] ]
+                    elts += [e for e in data.element_groups[symbol]]
                 else:
-                    elts += [ symbol ]
-            formulae.append([ e+amt for e in elts ])
+                    elts += [symbol]
+            formulae.append([e + amt for e in elts])
         else:
             formulae.append([term])
-    return [ parse_comp(''.join(ref)) for ref in itertools.product(*formulae) ]
+    return [parse_comp("".join(ref)) for ref in itertools.product(*formulae)]
+
 
 def read_compressed_array(string):
-    if '-' in string:
-        first = string.startswith('-')
-        string = string.lstrip('-')
-        vals = [-float(x) for x in string.split('-')]
+    if "-" in string:
+        first = string.startswith("-")
+        string = string.lstrip("-")
+        vals = [-float(x) for x in string.split("-")]
         if not first:
             vals[0] = -vals[0]
         return vals
+
 
 def read_fortran_array(string, expected_cols=None):
     """

@@ -24,11 +24,14 @@ from functools import total_ordering
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
+
 class AtomError(qmpy.qmpyBaseError):
     pass
 
+
 class SiteError(qmpy.qmpyBaseError):
     pass
+
 
 @total_ordering
 class Atom(models.Model):
@@ -52,11 +55,18 @@ class Atom(models.Model):
         | volume: Volume occupied by the atom
 
     """
-    structure = models.ForeignKey('qmpy.Structure', related_name='atom_set', null=True, on_delete=models.CASCADE)
-    site = models.ForeignKey('Site', related_name='atom_set', null=True, on_delete=models.CASCADE)
+
+    structure = models.ForeignKey(
+        "qmpy.Structure", related_name="atom_set", null=True, on_delete=models.CASCADE
+    )
+    site = models.ForeignKey(
+        "Site", related_name="atom_set", null=True, on_delete=models.CASCADE
+    )
 
     # species
-    element = models.ForeignKey('qmpy.Element', blank=True, null=True, on_delete=models.CASCADE)
+    element = models.ForeignKey(
+        "qmpy.Element", blank=True, null=True, on_delete=models.CASCADE
+    )
     ox = models.IntegerField(default=None, blank=True, null=True)
 
     # position
@@ -76,18 +86,19 @@ class Atom(models.Model):
 
     # symmetry
     occupancy = models.FloatField(default=1)
-    wyckoff = models.ForeignKey(WyckoffSite, blank=True, null=True, on_delete=models.SET_NULL)
+    wyckoff = models.ForeignKey(
+        WyckoffSite, blank=True, null=True, on_delete=models.SET_NULL
+    )
 
     dist = None
     copy_of = None
 
     class Meta:
-        app_label = 'qmpy'
-        db_table = 'atoms'
+        app_label = "qmpy"
+        db_table = "atoms"
 
     def __str__(self):
-        return '%s @ %0.3g %0.3g %0.3g' % (self.element_id, 
-                self.x, self.y, self.z)
+        return "%s @ %0.3g %0.3g %0.3g" % (self.element_id, self.x, self.y, self.z)
 
     def __eq__(self, other):
         if self.element_id != other.element_id:
@@ -95,16 +106,19 @@ class Atom(models.Model):
         return (self.x, self.y, self.z) == (other.x, other.y, other.z)
 
     def __lt__(self, other):
-        comp_arr = [[ self.x, other.x ],
-                    [ self.y, other.y ],
-                    [ self.z, other.z ],
-                    [ self.ox, other.ox ],
-                    [ qmpy.elements[self.element_id]['z'], 
-                      qmpy.elements[other.element_id]['z'] ]]
-        comp_arr = np.array([ row for row in comp_arr if 
-                                  all( not x is None for x in row ) ])
-        comp_arr = np.array([ row for row in comp_arr if 
-                                  not abs(row[0] - row[1]) < 1e-10 ]).T
+        comp_arr = [
+            [self.x, other.x],
+            [self.y, other.y],
+            [self.z, other.z],
+            [self.ox, other.ox],
+            [qmpy.elements[self.element_id]["z"], qmpy.elements[other.element_id]["z"]],
+        ]
+        comp_arr = np.array(
+            [row for row in comp_arr if all(not x is None for x in row)]
+        )
+        comp_arr = np.array(
+            [row for row in comp_arr if not abs(row[0] - row[1]) < 1e-10]
+        ).T
 
         if len(comp_arr) == 0:
             raise AtomError
@@ -112,23 +126,24 @@ class Atom(models.Model):
         if all(abs(comp_arr[0] - comp_arr[1]) < 1e-3):
             return 0
         ind = np.lexsort(comp_arr.T)
-        return (ind[0] < 0.5)
+        return ind[0] < 0.5
 
     @property
     def forces(self):
         """Forces on the Atom in [x, y, z] directions."""
-        return np.array([self.fx , self.fy, self.fz])
+        return np.array([self.fx, self.fy, self.fz])
 
     @forces.setter
     def forces(self, values):
         self.fx, self.fy, self.fz = values
 
     _coord = None
+
     @property
     def coord(self):
         """[x,y,z] coordinates."""
         if self._coord is None:
-            self._coord = np.array([self.x, self.y, self.z], dtype='float64')
+            self._coord = np.array([self.x, self.y, self.z], dtype="float64")
         return self._coord
 
     @coord.setter
@@ -138,6 +153,7 @@ class Atom(models.Model):
         self._coord = None
 
     _cart = None
+
     @property
     def cart_coord(self):
         """Cartesian coordinates of the Atom."""
@@ -165,7 +181,7 @@ class Atom(models.Model):
         None if not in a :mod:`~qmpy.Structure`, otherwise the index of the atom 
         in the structure.
         """
-        if not self.structure: 
+        if not self.structure:
             return None
         return self.structure.atoms.index(self)
 
@@ -200,8 +216,15 @@ class Atom(models.Model):
         atom = Atom()
         atom.element_id = element
         atom.coord = coord
-        valid_keys = ['ox', 'occupancy', 'wyckoff', 'charge', 
-                'magmom', 'volume', 'forces']
+        valid_keys = [
+            "ox",
+            "occupancy",
+            "wyckoff",
+            "charge",
+            "magmom",
+            "volume",
+            "forces",
+        ]
         for key in valid_keys:
             if key in kwargs:
                 setattr(atom, key, kwargs[key])
@@ -226,9 +249,16 @@ class Atom(models.Model):
         
         """
         atom = Atom()
-        keys = ['ox', 'occupancy', 'charge', 
-                'magmom', 'volume', 'forces',
-                'coord', 'element_id']
+        keys = [
+            "ox",
+            "occupancy",
+            "charge",
+            "magmom",
+            "volume",
+            "forces",
+            "coord",
+            "element_id",
+        ]
         for key in keys:
             setattr(atom, key, getattr(self, key))
         atom.base_atom = self
@@ -253,6 +283,7 @@ class Atom(models.Model):
         return s
 
     _dist = None
+
     @property
     def dist(self):
         if self._dist is None:
@@ -282,8 +313,6 @@ class Atom(models.Model):
         return dist < tol
 
 
-
-
 class Site(models.Model):
     """
     A lattice site. 
@@ -300,40 +329,51 @@ class Site(models.Model):
         | x, y, z: Coordinate of the Site
 
     """
-    structure = models.ForeignKey('qmpy.Structure', related_name='site_set', blank=True, null=True, on_delete=models.CASCADE)
-    wyckoff = models.ForeignKey(WyckoffSite, blank=True, null=True, on_delete=models.SET_NULL)
+
+    structure = models.ForeignKey(
+        "qmpy.Structure",
+        related_name="site_set",
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+    )
+    wyckoff = models.ForeignKey(
+        WyckoffSite, blank=True, null=True, on_delete=models.SET_NULL
+    )
     x = models.FloatField()
     y = models.FloatField()
     z = models.FloatField()
 
     class Meta:
-        app_label = 'qmpy'
-        db_table = 'sites'
+        app_label = "qmpy"
+        db_table = "sites"
 
     def __eq__(self, other):
         return (self.x, self.y, self.z) == (other.x, other.y, other.z)
 
     def __str__(self):
-        coord_str = ''
-        comp_str = ''
+        coord_str = ""
+        comp_str = ""
         if not self.coord is None:
-            coord_str = '%0.3g %0.3g %0.3g' % tuple(self.coord)
+            coord_str = "%0.3g %0.3g %0.3g" % tuple(self.coord)
 
         if len(self.atoms) == 1:
             comp_str = self.atoms[0].element_id
         elif len(self.atoms) > 1:
-            elts = [ str(a.element) for a in self.atoms ]
-            specs = [ str(a.species) for a in self.atoms ]
-            if ( len(set(elts)) == len(set(specs)) and 
-                    len(set([ a.ox for a in self.atoms ])) == 1):
-                comp_str = '('+','.join(elts)+')'
+            elts = [str(a.element) for a in self.atoms]
+            specs = [str(a.species) for a in self.atoms]
+            if (
+                len(set(elts)) == len(set(specs))
+                and len(set([a.ox for a in self.atoms])) == 1
+            ):
+                comp_str = "(" + ",".join(elts) + ")"
             else:
-                comp_str = '('+','.join(specs)+')'
+                comp_str = "(" + ",".join(specs) + ")"
 
         if coord_str and comp_str:
             return "%s @ %s" % (comp_str, coord_str)
         elif coord_str:
-            return 'Vac @ %s' % (coord_str)
+            return "Vac @ %s" % (coord_str)
         elif comp_str:
             return comp_str
 
@@ -344,6 +384,7 @@ class Site(models.Model):
         return len(self.atoms)
 
     _dist = None
+
     @property
     def dist(self):
         if self._dist is None:
@@ -352,7 +393,7 @@ class Site(models.Model):
         return self._dist
 
     @transaction.atomic
-    def save(self,*args, **kwargs):
+    def save(self, *args, **kwargs):
         super(Site, self).save(*args, **kwargs)
         if not self._atoms is None:
             for a in self.atoms:
@@ -361,6 +402,7 @@ class Site(models.Model):
                 self.atom_set.add(a)
 
     _atoms = None
+
     @property
     def atoms(self):
         """List of Atoms on the Site."""
@@ -375,17 +417,17 @@ class Site(models.Model):
     def atoms(self, atoms):
         if isinstance(atoms, Atom):
             self._atoms = [atoms]
-        elif all([ isinstance(a, Atom) for a in atoms ]):
+        elif all([isinstance(a, Atom) for a in atoms]):
             self._atoms = atoms
         else:
-            raise TypeError('atoms must be a sequence of Atoms')
+            raise TypeError("atoms must be a sequence of Atoms")
 
     @property
     def coord(self):
         """[Site.x, Site.y, Site.z]"""
-        if any([ self.x is None, self.y is None, self.z is None]):
+        if any([self.x is None, self.y is None, self.z is None]):
             return None
-        return np.array([self.x, self.y, self.z], dtype='float64')
+        return np.array([self.x, self.y, self.z], dtype="float64")
 
     @coord.setter
     def coord(self, coord):
@@ -396,13 +438,14 @@ class Site(models.Model):
         self._cart = None
 
     _cart = None
+
     @property
     def cart_coord(self):
         """Cartesian coordinates of the Atom."""
         if self.structure is None:
             raise AtomError("Cannot determine cartesian coordinate")
         if self._cart is None:
-            self._cart =  np.dot(self.coord, self.structure.cell)
+            self._cart = np.dot(self.coord, self.structure.cell)
         return self._cart
 
     @cart_coord.setter
@@ -504,7 +547,7 @@ class Site(models.Model):
             elif isinstance(comp, Atom):
                 site.add_atom(comp)
             elif isinstance(comp, dict):
-                for k,v in list(comp.items()):
+                for k, v in list(comp.items()):
                     a = Atom.create(k, coord, occupancy=v)
             else:
                 raise TypeError("Unknown datatype")
@@ -513,7 +556,7 @@ class Site(models.Model):
     def copy(self):
         new = Site()
         new.coord = self.coord
-        new.atoms = [ atom.copy() for atom in self.atoms ]
+        new.atoms = [atom.copy() for atom in self.atoms]
         new.base_site = self
         return new
 
@@ -542,7 +585,7 @@ class Site(models.Model):
     @comp.setter
     def comp(self, comp):
         atoms = []
-        for k,v in list(comp.items()):
+        for k, v in list(comp.items()):
             a = Atom.create(k, self.coord, occupancy=v)
             atoms.append(a)
         self.atoms = atoms
@@ -599,7 +642,7 @@ class Site(models.Model):
         """
         if not self.coord is None:
             if not tol is None:
-                if self.structure.get_distance(self, atom, limit=2*tol) > tol:
+                if self.structure.get_distance(self, atom, limit=2 * tol) > tol:
                     raise SiteError("%s is too far from %s to add" % (atom, self))
                 else:
                     if not atom in self.atoms:
@@ -619,10 +662,10 @@ class Site(models.Model):
         """
         try:
             if self.atoms:
-                mag = sum([ a.magmom*a.occupancy for a in self.atoms ])
-                return mag/self.occupancy
+                mag = sum([a.magmom * a.occupancy for a in self.atoms])
+                return mag / self.occupancy
         except TypeError:
-                return None
+            return None
 
     @property
     def ox(self):
@@ -636,8 +679,8 @@ class Site(models.Model):
         """
         try:
             if self.atoms:
-                ox = sum([ a.ox*a.occupancy for a in self.atoms ])
-                return ox/self.occupancy
+                ox = sum([a.ox * a.occupancy for a in self.atoms])
+                return ox / self.occupancy
         except TypeError:
             return None
 
@@ -650,8 +693,8 @@ class Site(models.Model):
           float or None
         """
         if self.atoms:
-            return sum([ a.occupancy for a in self.atoms ])
+            return sum([a.occupancy for a in self.atoms])
 
     @property
     def partial(self):
-        return any([ a.occupancy != 1.0 for a in self ])
+        return any([a.occupancy != 1.0 for a in self])

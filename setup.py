@@ -1,22 +1,22 @@
 import os
 from setuptools import setup, find_packages
 
-with open(os.path.join(os.path.dirname(__file__), 'qmpy', 'VERSION.txt')) as fr:
+with open(os.path.join(os.path.dirname(__file__), "qmpy", "VERSION.txt")) as fr:
     version = fr.read().strip()
 
 setup(
-    name='qmpy',
+    name="qmpy",
     version=version,
-    author='The OQMD Development Team',
-    author_email='oqmd.questions@gmail.com',
-    license='LICENSE.txt',
+    author="The OQMD Development Team",
+    author_email="oqmd.questions@gmail.com",
+    license="LICENSE.txt",
     classifiers=["Programming Language :: Python :: 3.7"],
     packages=find_packages(),
-    scripts=['bin/oqmd', 'bin/qmpy'],
-    url='http://pypi.python.org/pypi/qmpy',
-    description='Suite of computational materials science tools',
+    scripts=["bin/oqmd", "bin/qmpy"],
+    url="http://pypi.python.org/pypi/qmpy",
+    description="Suite of computational materials science tools",
     include_package_data=True,
-    long_description=open('README.md').read(),
+    long_description=open("README.md").read(),
     install_requires=[
         "Django == 2.2",
         "PuLP",
@@ -46,6 +46,6 @@ setup(
         "lark-parser",
         "requests",
         "pygraphviz",
-        "Jinja2 < 3.0"
+        "Jinja2 < 3.0",
     ],
 )
