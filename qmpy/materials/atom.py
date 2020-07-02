@@ -660,11 +660,13 @@ class Site(models.Model):
         Returns:
           float or None
         """
-        try:
-            if self.atoms:
+        if self.atoms:
+            try:
                 mag = sum([a.magmom * a.occupancy for a in self.atoms])
                 return mag / self.occupancy
-        except TypeError:
+            except TypeError:
+                return None
+        else:
             return None
 
     @property
@@ -677,11 +679,13 @@ class Site(models.Model):
           float or None
 
         """
-        try:
-            if self.atoms:
+        if self.atoms:
+            try:
                 ox = sum([a.ox * a.occupancy for a in self.atoms])
                 return ox / self.occupancy
-        except TypeError:
+            except TypeError:
+                return None
+        else:
             return None
 
     @property
