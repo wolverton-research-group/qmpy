@@ -1,7 +1,6 @@
 import networkx as nx
 import itertools
 import numpy as np
-import matplotlib.pylab as plt
 import random
 import logging
 

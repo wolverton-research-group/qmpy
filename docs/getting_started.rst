@@ -2,6 +2,8 @@
 Installation
 ============
 
+*Note: It is recommended to install and use the qmpy within a python virtual environment. See,* :ref:`virtual-env`.
+    
 ---------
 From repo
 ---------
@@ -23,6 +25,9 @@ or::
 
         $ sudo apt-get install libatlas-dev libatlas-base-dev 
         $ sudo apt-get install liblapack-dev gfortran
+        
+    Some of the common installation problems are addressed in the FAQs 
+    section of the documentation
 
 ----------------
 From GitHub repo
@@ -119,4 +124,19 @@ permissions, run::
 
 The number may not match what is shown above, but as long as you don't recieve
 any errors, your database should be working properly.
+
+
+
+.. _virtual-env:
+
+-------------------------
+Virtual Environment Setup
+-------------------------
+It is recommended to run `qmpy` within a python virtual environment to avoid any potential incompatibility between dependent packages for multiple software packages which are already installed, or will be installed in future inside the system's own default python environment. A `conda` virtual envirnment may be set up as::
+
+    $ pip install conda
+    $ conda create -n qmpy_env python=2.7
+    $ conda activate qmpy_env
+    
+For more details: https://docs.conda.io/projects/conda/en/latest/index.html
 

@@ -194,24 +194,44 @@ class Task(models.Model):
 
         # Special case: Adjustments for certain clusters
         if not allocation is None:
-            if allocation.name == 'b1004':
-                # Can only run parallel VASP on b1004 allocation
-                calc.instructions['serial'] = False
-                calc.instructions['binary'] = 'vasp_53'
-                calc.instructions['mpi'] = 'mpirun -machinefile $PBS_NODEFILE -np $NPROCS'
+            if host.name == 'quest':
+                # Special MPI call for quest Slurm
+                calc.instructions['mpi'] = 'mpirun -np $NPROCS'
+
+                if allocation.name == 'b1004':
+                    # Can only run parallel VASP on b1004 allocation
+                    calc.instructions['serial'] = False
+                    calc.instructions['binary'] = 'vasp_53'
+                    calc.instructions['queuetype'] = 'buyin' # queue type for b1004 is 'buyin'
+                elif allocation.name == 'd20829':
+                    # Sheel doesn't have access to b1004 binaries
+                    calc.instructions['binary'] = '~/vasp_53'
+                    calc.instructions['queuetype'] = 'normal' 
+                elif allocation.name == 'p30919':
+                    calc.instructions['queuetype'] = 'short'
+                    calc.instructions['serial'] = False
+                    calc.instructions['nodes'] = 1
+                    calc.instructions['ntasks'] = 4
+                    calc.instructions['walltime'] = 3600*4
+                    calc.instructions['binary'] = 'vasp_53'
+                else:
+                    calc.instructions['queuetype'] = 'normal'
+
+            if allocation.name == 'bebop':
+                # Special MPI call for bebop
+                calc.instructions['mpi'] = 'mpirun -psm2 -np $NPROCS'
+            
+            if allocation.name == 'xsede':
+                # Special MPI call for xsede
+                calc.instructions['mpi'] = 'mpirun -np $NPROCS'
 
             if allocation.name == 'babbage':
                 # Check if calculation is parallel
                 if 'serial' in calc.instructions and not calc.instructions['serial']:
-    
                     # Different MPI call on Babbage
                     calc.instructions['mpi'] = 'mpirun -np $NPROCS -machinefile $PBS_NODEFILE -tmpdir /scratch'
-            if allocation.name == 'd20829':
-                # Sheel doesn't have access to b1004 binaries
-                calc.instructions['binary'] = '~/vasp_53'
 
         jobs = []
-        #for calc in calcs:
         if calc.instructions:
             self.state = 1
             new_job = Job.create(
@@ -285,13 +305,11 @@ class Job(models.Model):
         db_table = 'jobs'
 
     @staticmethod
-    def create(task=None, allocation=None, entry=None,
-            account=None,
-            path=None, 
-            walltime=3600, serial=None,
-            header=None,
-            mpi=None, binary=None, pipes=None,
-            footer=None):
+    def create(task=None,
+               allocation=None, entry=None, account=None,
+               path=None, serial=None,
+               walltime=3600, queuetype=None, nodes=None, ntasks=None,
+               header=None, mpi=None, binary=None, pipes=None, footer=None):
 
         if entry is None:
             entry = task.entry
@@ -322,33 +340,61 @@ class Job(models.Model):
             ppn = 1
             nodes = 1
             walltime = 3600*24*4
+
+            # change queuetype to long for quest machine
+            if job.allocation.host.name == 'quest':
+                queuetype = 'long'
+
             if job.allocation.name == 'p20746':
                 walltime = 3600*24
             if job.allocation.name == 'p20747':
                 walltime = 3600*24
         else:
-            nodes = 1
+            if nodes is None:
+                nodes = 1
             ppn = job.account.host.ppn
-            walltime = job.account.host.walltime
+            if job.allocation.name == 'b1004':
+                ppn = 4
+            if walltime is None:
+                walltime = job.account.host.walltime
+
+            # < Mohan
+            # Set a HARD upper bound for walltime
+            # If longer walltime is needed, please modify the following codes!
+            walltime = min(walltime, job.account.host.walltime)
+            # Mohan >
             
         binary = job.account.host.get_binary(binary)
         if not binary:
             raise AllocationError
 
+
         sec = timedelta(seconds=walltime)
         d = datetime(1,1,1) + sec
         job.walltime = d
-        walltime = '%02d:%02d:%02d:%02d' % (
-                d.day-1, 
-                d.hour, 
-                d.minute,
-                d.second)
+
+        ## walltime format for quest is hh:mm:ss (Mohan)
+        if job.allocation.host.name == 'quest':
+            walltime = '%d:%02d:%02d' % (
+                    (d.day-1)*24+d.hour, 
+                    d.minute,
+                    d.second)
+        else:
+            walltime = '%02d:%02d:%02d:%02d' % (
+                    d.day-1, 
+                    d.hour, 
+                    d.minute,
+                    d.second)
+
+        if not ntasks and job.allocation.host.name == 'quest':
+            ntasks = nodes*ppn
 
         qp = qmpy.INSTALL_PATH + '/configuration/qfiles/'
         text = open(qp+job.account.host.sub_text+'.q', 'r').read()
         qfile = text.format(
                 host=allocation.host.name,
                 key=allocation.key, name=job.description,
+                queuetype=queuetype, ntasks=ntasks,
                 walltime=walltime, nodes=nodes, ppn=ppn,
                 header=header,
                 mpi=mpi, binary=binary, pipes=pipes,

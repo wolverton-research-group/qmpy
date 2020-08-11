@@ -1,8 +1,9 @@
+import os
+
 from qmpy import *
 from django.test import TestCase
 
-peak_locations = [
-        ]
+peak_locations = []
 
 class MiedemaTestCase(TestCase):
     def setUp(self):
@@ -30,9 +31,10 @@ class NearestNeighborTestCase(TestCase):
     def setUp(self):
         read_elements()
 
-        self.fcc = io.read(INSTALL_PATH+'/io/files/POSCAR_FCC')
-        self.bcc = io.read(INSTALL_PATH+'/io/files/POSCAR_BCC')
-        self.sc = io.read(INSTALL_PATH+'/io/files/POSCAR_SC')
+        sample_files_loc = os.path.join(INSTALL_PATH, 'io', 'files')
+        self.fcc = io.poscar.read(os.path.join(sample_files_loc, 'POSCAR_FCC'))
+        self.bcc = io.poscar.read(os.path.join(sample_files_loc, 'POSCAR_BCC'))
+        self.sc = io.poscar.read(os.path.join(sample_files_loc, 'POSCAR_SC'))
 
     def test_heuristic(self):
         self.fcc.find_nearest_neighbors()

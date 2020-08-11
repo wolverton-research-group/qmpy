@@ -70,14 +70,22 @@ def export_structure(request, structure_id, convention='primitive', format='posc
 
 def prototype_view(request, name):
     proto = Prototype.objects.get(pk=name)
+    n_stable = 0
+    for entry in proto.entry_set.all():
+        if entry.stable:
+            n_stable += 1
     data = get_globals()
     data['prototype'] = proto
-    example = proto.entry_set.all()
+    data['n_stable'] = n_stable
     if request.method == 'POST':
         data['primitive'] = request.POST.get('primitive')
 
-    if example.exists():
-        data['structure'] = example[0].structure
+    structure = proto.structure
+    if not structure:
+        example = proto.entry_set.all()
+        if example.exists():
+            structure = example[0].structure
+    data['structure'] = structure
 
     data.update(csrf(request))
     return render_to_response('materials/prototype.html', 

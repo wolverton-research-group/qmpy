@@ -9,11 +9,8 @@ from tools import get_globals
 def home_page(request):
     data = get_globals()
     data.update({
-        'done':Entry.objects.filter(
-            formationenergy__fit='standard').distinct(),
-        'running':Task.objects.filter(state=1),
-        'recent':Calculation.objects.filter(label='static',
-            converged=True).order_by('-id')[:5]})
+        'done': '{:,}'.format(Formation.objects.filter(fit='standard').count()),
+                 })
     request.session.set_test_cookie()
     return render_to_response('index.html',
             data,

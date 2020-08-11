@@ -78,7 +78,7 @@ class User(AbstractUser):
     def create():
         username = raw_input("Username: ")
         email = raw_input("E-mail address: ")
-        user, new = User.objects.get_or_create(username=username)
+        user, new = User.objects.get_or_create(username=username,last_login=datetime.now())
         if not new:
             print 'User by that name exists!'
             print 'Please try a new name, or exit with Ctrl-x'
@@ -233,7 +233,21 @@ class Host(models.Model):
         self.utilization = util
         return util
 
-    def get_project(self):
+    # < Jiahong
+    #def get_project(self):
+    #    """
+    #    Out of the active projects able to run on this host,
+    #      select one at random
+
+    #    Output:
+    #        Project, Active project able to run on this host
+    #    """
+    #    proj = Project.objects.filter(allocations__host=self, state=1)
+    #    proj = proj.filter(task__state=0)
+    #    if proj.exists():
+    #        return random.choice(list(proj.distinct()))
+
+    def get_project(self, maxuse=400):
         """
         Out of the active projects able to run on this host,
           select one at random
@@ -244,7 +258,10 @@ class Host(models.Model):
         proj = Project.objects.filter(allocations__host=self, state=1)
         proj = proj.filter(task__state=0)
         if proj.exists():
-            return random.choice(list(proj.distinct()))
+            proj_list = list(proj.distinct())
+            proj_list = [p for p in proj_list if p.running.count() < maxuse]
+            if len(proj_list) > 0:
+                return random.choice(proj_list)
 
     def get_tasks(self, project=None):
         tasks = queue.Task.objects.filter(state=0)
@@ -339,25 +356,45 @@ class Host(models.Model):
         running = {}
         if not raw_data:
             return
-        for line in raw_data.split('\n'):
-            if 'Active Jobs' in line:
-                continue
-            line = line.split()
-            if len(line) != 9:
-                continue
-            try:
-                # < Mohan
-                if 'Moab' in line[0]:
-                    qid = int(line[0].strip().split('.')[1])
-                else:
+
+        ## < Mohan
+        if 'squeue' in self.check_queue:
+            for line in raw_data.strip().split('\n'):
+                if 'JOBID' in line:
+                    continue
+                line = line.split()
+
+                try:
                     qid = int(line[0])
-                running[qid] = {
-                        'user':line[1],
-                        'state':line[2],
-                        'proc':int(line[3])}
-                # Mohan >
-            except:
-                pass
+                    running[qid] = {
+                            'user':line[3],
+                            'state':line[4],
+                            'proc':int(line[6])*self.ppn}
+                except:
+                    pass
+
+        else:
+            for line in raw_data.strip().split('\n'):
+                if 'Active Jobs' in line:
+                    continue
+                line = line.split()
+                if len(line) != 9:
+                    continue
+                try:
+                    # < Mohan
+                    if 'Moab' in line[0]:
+                        qid = int(line[0].strip().split('.')[1])
+                    else:
+                        qid = int(line[0])
+                    running[qid] = {
+                            'user':line[1],
+                            'state':line[2],
+                            'proc':int(line[3])}
+                    # Mohan >
+                except:
+                    pass
+        ## Mohan >
+
         self.running = running
         self.save()
         
@@ -508,17 +545,26 @@ class Account(models.Model):
                 sub=self.host.sub_script,
                 qfile=qfile)
         stdout = self.execute(cmd)
-        # < Mohan
-        tmp = stdout.strip().split()[0]
-        if 'Moab' in tmp:
-            jid = int(tmp.split('.')[1])
+
+        ## < Mohan
+        if 'sbatch' in self.host.sub_script:
+            jid = int(stdout.strip().split()[-1])
+            return jid
+
         else:
-            jid = int(tmp.split('.')[0])
-        # Mohan >
+            # < Mohan
+            tmp = stdout.strip().split()[0]
+            if 'Moab' in tmp:
+                jid = int(tmp.split('.')[1])
+            else:
+                jid = int(tmp.split('.')[0])
+            # Mohan >
+        ## Mohan >
+
         return jid
 
     def execute(self, command='exit 0', ignore_output=False):
-        ssh = 'ssh {user}@{host} "{cmd}"'.format(
+        ssh = 'ssh {user}@{host} \'{cmd}\''.format(
                 user=self.username,
                 host=self.host.ip_address,
                 cmd=command)
@@ -530,10 +576,10 @@ class Account(models.Model):
                 stderr=subprocess.PIPE)
         stdout, stderr = call.communicate()
 
-        logging.debug('stdout: %s', stdout)
-        logging.debug('stderr: %s', stderr)
+        logging.debug('stdout: %s' % stdout)
+        logging.debug('stderr: %s' % stderr)
         if stderr and not ignore_output:
-            logging.warn('WARNING: %s', stderr)
+            logging.warn('WARNING: %s' % stderr)
             logging.warn('(u, h, cmd) = {}, {}, {}'.format(self.username, self.host, command))
         return stdout
 
@@ -564,13 +610,13 @@ class Account(models.Model):
         
         if clear_dest_dir:
             if to == 'local':
-                command = subprocess.Popen('rm -f %s/*' % destination,
+                command = subprocess.Popen('rm -f "%s"/*' % destination,
                                                   stderr=subprocess.PIPE,
                                                   stdout=subprocess.PIPE)
                 stdout, stderr = command.communicate()
             else:
-                stdout, stderr = self.execute('rm -f %/*' % destination)
-            logging.debug('stdout: %s', stdout)
+                stdout, stderr = self.execute('rm -f "%/"*' % destination)
+            logging.debug('stdout: %s' % stdout)
             
         if fr == 'local':
             scp = 'scp '
@@ -582,36 +628,36 @@ class Account(models.Model):
             scp += '-r '
 
         if send_dir:
-            scp += os.path.abspath(folder)
+            scp += os.path.abspath("{}".format(folder))
         else:
-            scp += '{path}/{file}'.format(
+            scp += '"{path}"/{file}'.format(
                     path=os.path.abspath(folder), file=file)
 
         if to == 'local':
             scp += ' '+destination
         else:
-            scp += ' {user}@{host}:{path}'.format(
+            scp += ' {user}@{host}:"{path}"'.format(
                 user=to.username, host=to.host.ip_address, 
                 path=os.path.abspath(destination))
 
-        logging.debug('copy command: %s', scp)
+        logging.debug('copy command: %s' % scp)
         cmd = subprocess.Popen(scp,
                 shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE)
         stdout, stderr = cmd.communicate()
-        logging.debug('stdout: %s', stdout)
-        logging.debug('stderr: %s', stderr)
+        logging.debug('stdout: %s' % stdout)
+        logging.debug('stderr: %s' % stderr)
 
         if move:
             if send_dir:
-                rmcmd = 'rm -rf {path}'.format(path=os.path.abspath(folder))
+                rmcmd = 'rm -rf "{path}"'.format(path=os.path.abspath(folder))
             else:
-                rmcmd = 'rm -f {path}/{file}'.format(file=file,
+                rmcmd = 'rm -f "{path}/"{file}'.format(file=file,
                         path=os.path.abspath(folder))
-            logging.debug('wiping source: %s', rmcmd)
+            logging.debug('wiping source: %s' % rmcmd)
             stdout = fr.execute(rmcmd)
-            logging.debug('output: %s', stdout)
+            logging.debug('output: %s' % stdout)
 
 #===============================================================================#
 

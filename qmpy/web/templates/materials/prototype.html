@@ -52,9 +52,10 @@
 {% block content %}
 <h1> Summary </h1>
 <ul>
+  <li># of hypothetical decorations of this prototype that have been calculated: </li>
+    {{prototype.entry_set.count}}
   <li># of stable compounds in this structure: </li>
-  <li># of compounds in this strucutre that have been calculated: </li>
-  <li>Total number of compounds measured at this structure: </li>
+    {{n_stable}}
 </ul>
 
 <h2> Entries with this structure </h2>
@@ -62,18 +63,25 @@
 <table>
 	<thead>
 		<tr>
+            <th>OQMD ID</th>
 			<th>Composition</th>
+            <th>Formation energy</th>
 			<th>Stable?</th>
 		</tr>
 	</thead>
 	<tbody>
 		{% for entry in prototype.entry_set.all %}
-		{% if not entry.duplicate_of_id %}
 		<tr class=clickableRow href="/materials/entry/{{ entry.id }}">
-			<td>{{entry.composition.name}}</th>
-			<td>{{entry.stable}}</th>
+            <td>{{entry.id}}</td>
+			<td>{{entry.composition.name}}</td>
+            {% if not entry.energy %}
+            <td>--</td>
+            <td>--</td>
+            {% else %}
+            <td>{{entry.energy | floatformat:3}}</td>
+			<td>{{entry.stable}}</td>
+            {% endif %}
 		</tr>
-		{% endif %}
 		{% endfor %}
 	</tbody>
 </table>

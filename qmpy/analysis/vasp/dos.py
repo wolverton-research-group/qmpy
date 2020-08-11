@@ -67,7 +67,7 @@ class DOS(models.Model):
             dos.read_doscar(dos.file)
             dos.efermi = efermi
         except ValueError:
-            raise VaspError('Could not parse DOSCAR')
+            raise qmpy.analysis.vasp.calculation.VaspError('Could not parse DOSCAR')
         return dos
 
     @property
@@ -167,7 +167,7 @@ class DOS(models.Model):
                 ))
 
             p = bkp.figure(width=500, height=300,
-                           x_range=(-10, 10),
+                           x_range=(-6, 6),
                            tools=['pan', 'box_zoom', 'hover', 'reset', 'save', 'help'])
 
             p.title.text = 'Density of States'

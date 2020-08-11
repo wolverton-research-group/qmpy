@@ -5,8 +5,10 @@
 {% block title %} OQMD | The Open Quantum Materials Database {% endblock %}
 
 {% block branding %}
-<h1> OQMD:</h1>
-<h2> An Open Quantum Materials Database</h2>
+<a href="/">
+<img src="{% static "img/new_logo_oqmd.png" %}" width=300 alt="New logo">
+</a>
+
 {% endblock %}
 
 {% block global-warning %}
@@ -38,7 +40,8 @@ Welcome, {{ user.username }}.<br>
 
 	<li><a href="/materials/">Materials</a>
   <ul>
-    <li> <a href="/materials/composition">Search</a></li>
+    <li> <a href="/materials/composition">Search Compositions</a></li>
+    <li> <a href="/api/search">Query Materials</a></li>
     <li> <a href="/materials/discovery">Compound discovery</a> </li>
   </ul>
   <li><a href="/computing/">Computing</a>
@@ -70,10 +73,17 @@ Welcome, {{ user.username }}.<br>
 	<li><a href="/documentation/overview">Documentation</a>
   <ul>
     <li> <a href="/documentation/vasp">DFT settings</a></li>
-    <li> <a href="{% static "docs/index.html" %}">python API</a></li>
+    <li> <a href="{% static "docs/index.html" %}">Python API</a></li>
     <li> <a href="/documentation/structures">Structure sources</a></li>
     <li> <a href="/documentation/publications">Publications</a></li>
-    <li> <a href="/faq">FAQ</a></li>
+    <li> <a href="{% static "docs/faqs.html" %}">FAQ</a></li>
+  </ul>
+
+	<li><a href="/api">API</a>
+  <ul>
+    <li> <a href="/oqmdapi/formationenergy">OQMD API</a></li>
+    <li> <a href="/optimade/structures">Optimade API</a></li>
+    <li> <a href="{% static "docs/restful.html" %}">RESTful API Documentation</a></li>
   </ul>
 
 	<li><a href="/download/">Download</a></li>
@@ -83,7 +93,8 @@ Welcome, {{ user.username }}.<br>
 {% block footer %}
 <hr>
 <div style="width:200px;float:left">
-	Contact us by <a href="mailto:openqmd@gmail.com">e-mail</a></div>
+	Contact us by <a href="mailto:oqmd.questions@gmail.com">e-mail</a></div>
 <div style="width:400px;float:right;text-align:right">
-	If you are using any results from this website, please reference this work as shown <a href="/documentation/pubs">here</a></div>
+	If you are using any results from this website, 
+        please reference this work as shown <a href="/documentation/publications">here</a></div>
 {% endblock %}

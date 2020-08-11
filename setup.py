@@ -1,10 +1,14 @@
+import os
 from setuptools import setup, find_packages
+
+with open(os.path.join(os.path.dirname(__file__), 'qmpy', 'VERSION.txt')) as fr:
+    version = fr.read().strip()
 
 setup(
     name='qmpy',
-    version='1.1.0.post1',
-    author='S. Kirklin',
-    author_email='scott.kirklin@gmail.com',
+    version=version,
+    author='The OQMD Development Team',
+    author_email='oqmd.questions@gmail.com',
     license='LICENSE.txt',
     classifiers=["Programming Language :: Python :: 2.7"],
     packages=find_packages(),
@@ -14,24 +18,34 @@ setup(
     include_package_data=True,
     long_description=open('README.md').read(),
     install_requires=[
-        "Django >=1.6.2, <1.7",
+        "Django == 1.8.18",
         "PuLP",
-        "numpy",
-        "scipy",
+        "numpy < 1.17",
+        "scipy < 1.3",
         "MySQL-python",
-        "matplotlib",
-        "networkx",
-        "pytest",
+        "matplotlib < 3.0",
+        "networkx < 2.3",
+        "pytest < 5.0",
         "python-memcached",
-        "ase",
+        "ase < 3.18",
         "django-extensions < 1.6.8",
         "lxml",
-        "pyspglib == 1.8.3.1",
+        "spglib > 1.10",
         "PyCifRW >= 4.3",
         "pexpect",
         "pyparsing",
         "PyYAML",
-        "scikit-learn",
-        "bokeh == 0.12.15"
+        "scikit-learn < 0.21",
+        "bokeh == 0.12.15",
+        "djangorestframework == 3.6.4",
+        "djangorestframework-xml",
+        "djangorestframework-yaml",
+        "djangorestframework-queryfields == 1.0.0",
+        "djangorestframework-filters == 0.11.1",
+        "django-crispy-forms",
+        "lark-parser",
+        "requests",
+        "pygraphviz",
+        "Jinja2 < 3.0"
     ],
 )

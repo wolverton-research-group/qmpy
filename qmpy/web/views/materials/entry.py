@@ -13,6 +13,14 @@ from ..tools import get_globals
 def entry_view(request, entry_id):
     entry = Entry.objects.get(pk=entry_id)
     data = {'entry': entry}
+
+    if entry.calculation_set.filter(label='static').count() != 0:
+        data['entry_structure'] = entry.calculation_set.filter(label='static')[0].output
+    elif entry.calculation_set.filter(label='standard').count() != 0:
+        data['entry_structure'] = entry.calculation_set.filter(label='standard')[0].output
+    else:
+        data['entry_structure'] = entry.input
+
     data = get_globals(data)
     if request.method == 'POST':
         p = request.POST

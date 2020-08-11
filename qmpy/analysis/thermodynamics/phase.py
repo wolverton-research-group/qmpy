@@ -8,8 +8,9 @@ import StringIO
 import fractions as frac
 import logging
 
-import qmpy
 from qmpy.utils import *
+from django.db.models import F, Q
+import operator
 
 logger = logging.getLogger(__name__)
 
@@ -178,6 +179,7 @@ class PhaseData(object):
         from qmpy.materials.element import Element
         logger.debug('Loading Phases from the OQMD')
         data = FormationEnergy.objects.all()
+        ##data = data.filter(entry__id=F('entry__duplicate_of__id'))
 
         if fit:
             data = data.filter(fit=fit)
@@ -194,9 +196,23 @@ class PhaseData(object):
             data = data.exclude(**exclude)
 
         if space:
-            space_qs = Element.objects.exclude(symbol__in=space)
-            data = data.filter(composition__element_set__in=space)
-            data = data.exclude(composition__element_set__in=space_qs)
+            ## Query phase space using element_list
+            dim = len(space)+1
+
+            element_q_lst = [Q(composition__element_list__contains=s+'_') for s in space]
+            combined_q = reduce(operator.or_, element_q_lst)
+            combined_q = reduce(operator.and_, [combined_q, Q(composition__ntypes__lt=dim)])
+
+            exclude_element_q_lst = [Q(composition__element_list__contains=e.symbol+'_') 
+                                        for e in Element.objects.exclude(symbol__in=space)]
+            combined_q_not = reduce(operator.or_, exclude_element_q_lst)
+
+            data = data.filter(combined_q).exclude(combined_q_not)
+
+            ## The following is old method (will be removed in future)
+            #space_qs = Element.objects.exclude(symbol__in=space)
+            #data = data.filter(composition__element_set__in=space)
+            #data = data.exclude(composition__element_set__in=space_qs)
 
         data = data.distinct()
         columns = [ 'id', 'composition_id', 'stability',
@@ -213,17 +229,18 @@ class PhaseData(object):
                 energy = row['calculation__energy_pa']
             else:
                 energy = row['delta_e']
-            ##try:
-            phase = Phase(energy=energy,
-                    composition=parse_comp(row['composition_id']),
-                    description=row['calculation__input__spacegroup'],
-                    stability=row['stability'],
-                    per_atom=True,
-                    total=total)
-            phase.id = row['id']
-            self.add_phase(phase)
-            ##except TypeError:
-            ##    print row['composition_id'], row['id']
+            try:
+                phase = Phase(energy=energy,
+                        composition=parse_comp(row['composition_id']),
+                        description=row['calculation__input__spacegroup'],
+                        stability=row['stability'],
+                        per_atom=True,
+                        total=total)
+                phase.id = row['id']
+                self.add_phase(phase)
+            except TypeError:
+                raise PhaseError('Something went wrong with Formation object\
+                                 {}. No composition?'.format(row['id']))
 
     def read_file(self, filename, per_atom=True):
         """
@@ -425,7 +442,8 @@ class Phase(object):
     def link(self):
         if self.id:
             link = '<a href="/materials/entry/{id}">{name}</a>'
-            return link.format(id=self.calculation.entry_id, name=self.name)
+            return link.format(id=self.calculation.entry_id, 
+                               name=format_html(self.comp))
         else:
             return ''
 

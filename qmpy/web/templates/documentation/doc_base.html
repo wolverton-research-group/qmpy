@@ -1,4 +1,5 @@
 {% extends "base_site.html" %}
+{% load admin_static %}
 
 {% block title %}
 OQMD | Documentation
@@ -13,6 +14,7 @@ OQMD | Documentation
     <li><a href="/static/docs/index.html">API Documentation</a> - Documentation for qmpy</li>
     <li><a href="/documentation/structures">Structures</a> - Sources of structures in the OQMD</li>
     <li><a href="/documentation/publications">Publications</a> - Publications using the OQMD</li>
+    <li><a href="{% static "docs/faqs.html" %}">FAQ</a> - Frequently Asked Questions</li>
   </ul>
 </div>
 {% endblock %} 

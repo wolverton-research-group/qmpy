@@ -20,8 +20,8 @@ logger = logging.getLogger(__name__)
 jlogger = logging.getLogger('JobManager')
 tlogger = logging.getLogger('TaskManager')
 
-jfile = qmpy.LOG_PATH+'/job_manager.log'
-tfile = qmpy.LOG_PATH+'/task_manager.log'
+jfile = os.path.join(qmpy.LOG_PATH, 'job_manager.log')
+tfile = os.path.join(qmpy.LOG_PATH, 'task_manager.log')
 
 jlog_file = logging.handlers.WatchedFileHandler(jfile)
 tlog_file = logging.handlers.WatchedFileHandler(tfile)
@@ -38,7 +38,7 @@ tlogger.setLevel(logging.INFO)
 def check_die(n=None):
     if n is None:
         if os.path.exists('/home/oqmd/controls/stop/running'):
-            exit(0)
+            sys.exit(0)
     else:
         for i in range(n):
             time.sleep(1)
@@ -125,7 +125,7 @@ class TaskManager(daemon.Daemon):
         except Exception, err:
             task.hold()
             task.save()
-            tlogger.warn('Unknown error processing task: %s' % err)
+            tlogger.warn('Unknown error while getting jobs: %s' % err)
             return
 
         if not jobs:
@@ -160,5 +160,5 @@ class TaskManager(daemon.Daemon):
             except Exception, err:
                 task.hold()
                 task.save()
-                tlogger.warn('Unknown error processing task: %s' % err)
+                tlogger.warn('Unknown error while saving Entry: %s' % err)
 

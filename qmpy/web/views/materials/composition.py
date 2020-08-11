@@ -48,21 +48,53 @@ def composition_view(request, search=None):
         comp = Composition.get(composition)
         ps = PhaseSpace('-'.join(comp.comp.keys()))
         ps.infer_formation_energies()
+        if ps.shape == (3, 0):
+            data['pd3d'] = ps.phase_diagram.get_plotly_script_3d("phasediagram")
         data['pd'] = ps.phase_diagram.get_flot_script("phasediagram")
         data['search'] = composition
         data['composition'] = comp
-        data['plot'] = comp.relative_stability_plot.get_flot_script()
-        data['results'] = comp.entries
-        energy, gs = ps.gclp(comp.name)
-        data['gs'] = Phase.from_phases(gs)
-        data['phases'] = gs
-        data['compound'] = comp.ground_state
-        if len(gs) == 1:
-            data['singlephase'] = True 
-        else:
-            data['singlephase'] = False
-        #data['singlephase'] = ( len(gs) == 1 )
+        data['plot'] = comp.relative_stability_plot(data=ps.data).get_flot_script()
+
+        data['results'] = FormationEnergy.objects.filter(composition=comp,
+                                                         fit='standard').order_by('delta_e')
+        pro_name = [None if len(fe.entry.projects)==0 else fe.entry.projects[0].name for fe in data['results']]
+        data['results_project'] = zip(data['results'], pro_name)
+        data['running'] = Entry.objects.filter(composition=comp,formationenergy=
+                             None).filter(id=F("duplicate_of__id"))
         data['space'] = '-'.join(comp.comp.keys())
+
+        if comp.ntypes == 1:
+            energy, gs = ps.gclp(comp.name)
+            data['gs'] = Phase.from_phases(gs)
+            data['gclp_phases'] = gs.keys()
+            data['phase_links'] = [p.link for p in data['gclp_phases']]
+            data['current_phase'] = ps.phase_dict[comp.name]
+            data['phase_type'] = 'stable'
+            data['delta_h'] = data['gs'].energy 
+            data['decomp_en'] = - data['current_phase'].stability
+        elif comp.name in ps.phase_dict:
+            energy, gclp_phases = ps.compute_stability(comp)
+
+            data['gs'] = Phase.from_phases(gclp_phases)
+            data['current_phase'] = ps.phase_dict[comp.name]
+            data['gclp_phases'] = gclp_phases.keys()
+            data['phase_links'] = [p.link for p in data['gclp_phases']]
+
+            if ps.phase_dict[comp.name].stability <= 0:
+                data['phase_type'] = 'stable'
+                data['delta_h'] = data['gs'].energy + data['current_phase'].stability
+                data['decomp_en'] = - data['current_phase'].stability
+            else:
+                data['phase_type'] = 'unstable'
+                data['delta_h'] = data['gs'].energy 
+                data['hull_dis'] = data['current_phase'].stability
+        else:
+            energy, gs = ps.gclp(comp.name)
+            data['gs'] = Phase.from_phases(gs)
+            data['gclp_phases'] = gs.keys()
+            data['phase_links'] = [p.link for p in data['gclp_phases']]
+            data['phase_type'] = 'nophase'
+            data['delta_h'] = data['gs'].energy 
         return render_to_response('materials/composition.html', 
                 data,
                 RequestContext(request))
@@ -70,6 +102,8 @@ def composition_view(request, search=None):
         ps = PhaseSpace(space)
         ps.infer_formation_energies()
         data['search'] = space
+        if ps.shape == (3, 0):
+            data['pd3d'] = ps.phase_diagram.get_plotly_script_3d("phasediagram")
         data['pd'] = ps.phase_diagram.get_flot_script("phasediagram")
         ##data['stable'] = []
         ##for p in ps.stable:
@@ -77,14 +111,30 @@ def composition_view(request, search=None):
         ##        continue
         ##    data['stable'].append(p.formation.energy)
         ## Fe-Ti-Sb: what's the problem?
-        data['stable'] = [ p.formation.entry for p in ps.stable ]
-        comps = Composition.get_list(space)
+        data['stable'] = [ p.formation for p in ps.stable ]
+        pro_name = [None if len(fe.entry.projects)==0 else fe.entry.projects[0].name for fe in data['stable']]
+        data['stable'] = zip(data['stable'], pro_name)
+
+        
+        ## The following step is really slow. Will be removed in future! 
+        ## < Mohan
+        # results = defaultdict(list)
+        # comps = Composition.get_list(space) 
+        # for c in comps:
+        #     results['-'.join(sorted(c.space))] += c.entries
+
+        ## Updated code to get entries in a phase space
         results = defaultdict(list)
-        for c in comps:
-            results['-'.join(sorted(c.space))] += c.entries
+        for p in ps.phases:
+            c = p.formation.composition
+            results['-'.join(sorted(c.space))] += [p.formation]
+        ## Mohan >
+
         for k,v in results.items():
             results[k] = sorted(v, key=lambda x:
-                    1000 if x.energy is None else x.energy)
+                    1000 if x.stability is None else x.stability)
+            pro_name = [None if len(fe.entry.projects)==0 else fe.entry.projects[0].name for fe in results[k]]
+            results[k] = zip(results[k], pro_name)
         results = sorted(results.items(), key=lambda x: -len(x[0].split('-')))
         data['results'] = results
         return render_to_response('materials/phasespace.html', 

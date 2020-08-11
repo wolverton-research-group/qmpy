@@ -21,11 +21,11 @@ and all of the commands shown below should work.
 Database entries
 ----------------
 
-Once the database is `installed <getting_started>`_, you can query it very
+Once the database is `installed <getting_started.html>`_, you can query it very
 flexibly and easily. In this section we will explore the data structure of
 entries in the OQMD and provide several examples of how to make queries.
 For deeper understanding of how django models work, you should check out the
-(excellent) `django documentation <http://docs.djangoproject.com/en/1.6/>`_.
+(excellent) `django documentation <http://docs.djangoproject.com/en/1.8/>`_.
 
 First, lets look at how to access an entry from the database. As an example,
 lets pull up an entry for an :mod:`~qmpy.Element`::
@@ -817,7 +817,7 @@ demonstrate these and other tasks.
 +------------------------------+----------------------------------------------+
 | database/discovery_rate.py   | Using reference information from the ICSD    |
 |                              | and measures of structural uniqueness find   |
-|                              | the nominal year of `discovery' for all ICSD |
+|                              | the nominal year of 'discovery' for all ICSD |
 |                              | structures.                                  |
 +------------------------------+----------------------------------------------+
 | database/precipitates.py     | Screen for good precipitate strengtheners.   |
