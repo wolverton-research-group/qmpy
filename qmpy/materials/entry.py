@@ -139,6 +139,8 @@ class Entry(models.Model):
 
         """
         source_file = os.path.abspath(source)
+        if 'libraries_v2_0/libraries_v1_overflow' in source_file:
+            source_file = source_file.replace("libraries_v2_0/libraries_v1_overflow", "libraries")
         path = os.path.dirname(source_file)
 
         # Step 1
