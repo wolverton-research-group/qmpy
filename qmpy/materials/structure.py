@@ -252,6 +252,7 @@ class Structure(models.Model, object):
         if not self.spacegroup:
             self.symmetrize()
 
+        super(Structure, self).save(*args, **kwargs)
 
     _atoms = None
     @property
@@ -1818,11 +1819,11 @@ class Structure(models.Model, object):
         volume_sum_atom = self.get_volume_sum_of_elements()
         for atom in self:
             if atom.element_id in replace:
-                final_vol -= atom.element.volume/volume_sum_atom*init_vol
+                final_vol -= atom.element.volume/volume_sum_atom*final_vol
                 volume_sum_atom -= atom.element.volume
                 atom.element = Element.get(replace[atom.element_id])
                 volume_sum_atom += atom.element.volume
-                final_vol += atom.element.volume/volume_sum_atom*init_vol
+                final_vol += atom.element.volume/volume_sum_atom*final_vol
         if rescale and rescale_method == "relative":
             self.set_volume(final_vol)
         elif rescale and rescale_method == "absolute":
