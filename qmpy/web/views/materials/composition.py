@@ -47,6 +47,8 @@ def composition_view(request, search=None):
     if composition:
         comp = Composition.get(composition)
         ps = PhaseSpace('-'.join(comp.comp.keys()))
+        if None in  [p.formation.stability for p in ps.phases]:
+            ps.compute_stabilities(save=True, reevaluate=True)
         ps.infer_formation_energies()
         if ps.shape == (3, 0):
             data['pd3d'] = ps.phase_diagram.get_plotly_script_3d("phasediagram")
@@ -54,13 +56,17 @@ def composition_view(request, search=None):
         data['search'] = composition
         data['composition'] = comp
         data['plot'] = comp.relative_stability_plot(data=ps.data).get_flot_script()
-
         data['results'] = FormationEnergy.objects.filter(composition=comp,
                                                          fit='standard').order_by('delta_e')
         pro_name = [None if len(fe.entry.projects)==0 else fe.entry.projects[0].name for fe in data['results']]
-        data['results_project'] = zip(data['results'], pro_name)
-        data['running'] = Entry.objects.filter(composition=comp,formationenergy=
+        finish_time = [None if len(fe.entry.tasks)==0 else fe.entry.tasks[0].finished for fe in data['results']]
+        data['results_project'] = zip(data['results'], pro_name, finish_time)
+        
+        run_entry = Entry.objects.filter(composition=comp,formationenergy=
                              None).filter(id=F("duplicate_of__id"))
+        run_pro = [None if len(en.projects)==0 else en.projects[0].name for en in run_entry]
+        create_time = [None if len(en.tasks)==0 else en.tasks[0].created for en in run_entry]
+        data['running'] = zip(run_entry, run_pro, create_time)
         data['space'] = '-'.join(comp.comp.keys())
 
         if comp.ntypes == 1:
@@ -100,6 +106,9 @@ def composition_view(request, search=None):
                 RequestContext(request))
     elif space:
         ps = PhaseSpace(space)
+        if None in [p.formation.stability for p in ps.phases]:
+            ps.compute_stabilities(save=True, reevaluate=True)
+            ps = PhaseSpace(space)
         ps.infer_formation_energies()
         data['search'] = space
         if ps.shape == (3, 0):
@@ -113,7 +122,9 @@ def composition_view(request, search=None):
         ## Fe-Ti-Sb: what's the problem?
         data['stable'] = [ p.formation for p in ps.stable ]
         pro_name = [None if len(fe.entry.projects)==0 else fe.entry.projects[0].name for fe in data['stable']]
-        data['stable'] = zip(data['stable'], pro_name)
+        finish_time = [None if len(fe.entry.tasks)==0 else fe.entry.tasks[0].finished for fe in
+                       data['stable']]
+        data['stable'] = zip(data['stable'], pro_name, finish_time)
 
         
         ## The following step is really slow. Will be removed in future! 
@@ -134,7 +145,9 @@ def composition_view(request, search=None):
             results[k] = sorted(v, key=lambda x:
                     1000 if x.stability is None else x.stability)
             pro_name = [None if len(fe.entry.projects)==0 else fe.entry.projects[0].name for fe in results[k]]
-            results[k] = zip(results[k], pro_name)
+            finish_time = [None if len(fe.entry.tasks)==0 else fe.entry.tasks[0].finished for fe in
+                          results[k]]
+            results[k] = zip(results[k], pro_name, finish_time)
         results = sorted(results.items(), key=lambda x: -len(x[0].split('-')))
         data['results'] = results
         return render_to_response('materials/phasespace.html', 
