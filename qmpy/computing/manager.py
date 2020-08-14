@@ -60,10 +60,14 @@ class JobManager(daemon.Daemon):
             jobs = queue.Job.objects.filter(state=1, account__host__state=1,
                     created__lt=datetime.now() - timedelta(seconds=-200000000))
             for job in jobs:
-                check_die()
-                if job.is_done():
-                    jlogger.info('Collected %s' % job)
-                    job.collect()
+                try:
+                    check_die()
+                    if job.is_done():
+                        jlogger.info('Collected %s' % job)
+                        job.collect()
+                except:
+                    jlogger.warn('Job collection error!')
+                    break
             check_die(20)
 
 class TaskManager(daemon.Daemon):
