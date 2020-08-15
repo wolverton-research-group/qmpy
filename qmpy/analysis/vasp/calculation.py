@@ -348,7 +348,7 @@ class Calculation(models.Model):
             incar += ' LDAUL = %s\n' % lvals
 
         incar += '\n#= Parallelization =#\n'
-        for key in ['lplane', 'nsim', 'ncore', 'lscalu', 'npar']:
+        for key in ['lplane', 'nsim', 'ncore', 'lscalu', 'npar','kpar']:
             if key in s:
                 incar += ' %s\n' % vasp_format(key, s.pop(key))
 

@@ -17,6 +17,7 @@ lcharg: True
 lelf: False
 lhvar: False
 lvtot: False
+kpar: 1
 potentials: vasp_rec
 hubbards: wang
 magnetism: ferro

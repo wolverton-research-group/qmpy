@@ -2013,6 +2013,9 @@ class Structure(models.Model, object):
                 continue
             break
 
+        if trans == array([[-1.,  0.,  0.], [ 0., -1.,  0.], [ 0.,  0., -1.]]):
+            trans = array([[1.,  0.,  0.], [ 0., 1.,  0.], [ 0.,  0., 1.]])
+
         # temporarily stored transformations
         self._original_cell = self.cell.copy()
         self._unit_to_reduced = trans.T
