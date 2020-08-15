@@ -2013,8 +2013,8 @@ class Structure(models.Model, object):
                 continue
             break
 
-        if trans == array([[-1.,  0.,  0.], [ 0., -1.,  0.], [ 0.,  0., -1.]]):
-            trans = array([[1.,  0.,  0.], [ 0., 1.,  0.], [ 0.,  0., 1.]])
+        if trans == np.array([[-1.,  0.,  0.], [ 0., -1.,  0.], [ 0.,  0., -1.]]):
+            trans = np.array([[1.,  0.,  0.], [ 0., 1.,  0.], [ 0.,  0., 1.]])
 
         # temporarily stored transformations
         self._original_cell = self.cell.copy()
