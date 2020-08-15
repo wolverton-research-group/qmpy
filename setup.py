@@ -48,6 +48,8 @@ setup(
         "pygraphviz < 1.6",
         "Jinja2 < 3.0",
         "MarkupSafe == 1.1.1",
+        "kiwisolver == 1.1.0",
+        "itsdangerous == 1.1.0",
         "pytz == 2019.3"
     ],
 )
