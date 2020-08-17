@@ -10,18 +10,18 @@ import django.db as ddb
 from django.db import transaction
 
 import qmpy
-import queue
-import resources as rsc
+from . import queue
+from . import resources as rsc
 import qmpy.utils.daemon as daemon
 import qmpy.analysis.vasp.calculation as vasp
 
 logger = logging.getLogger(__name__)
 
-jlogger = logging.getLogger('JobManager')
-tlogger = logging.getLogger('TaskManager')
+jlogger = logging.getLogger("JobManager")
+tlogger = logging.getLogger("TaskManager")
 
-jfile = os.path.join(qmpy.LOG_PATH, 'job_manager.log')
-tfile = os.path.join(qmpy.LOG_PATH, 'task_manager.log')
+jfile = os.path.join(qmpy.LOG_PATH, "job_manager.log")
+tfile = os.path.join(qmpy.LOG_PATH, "task_manager.log")
 
 jlog_file = logging.handlers.WatchedFileHandler(jfile)
 tlog_file = logging.handlers.WatchedFileHandler(tfile)
@@ -35,14 +35,16 @@ tlogger.addHandler(tlog_file)
 jlogger.setLevel(logging.INFO)
 tlogger.setLevel(logging.INFO)
 
+
 def check_die(n=None):
     if n is None:
-        if os.path.exists('/home/oqmd/controls/stop/running'):
+        if os.path.exists("/home/oqmd/controls/stop/running"):
             sys.exit(0)
     else:
         for i in range(n):
             time.sleep(1)
             check_die()
+
 
 class JobManager(daemon.Daemon):
     """
@@ -53,18 +55,23 @@ class JobManager(daemon.Daemon):
     will stop cleanly.
 
     """
+
     def run(self):
-        os.umask(022)
+        os.umask(0o22)
         while True:
             ddb.reset_queries()
-            jobs = queue.Job.objects.filter(state=1, account__host__state=1,
-                    created__lt=datetime.now() - timedelta(seconds=-200000000))
+            jobs = queue.Job.objects.filter(
+                state=1,
+                account__host__state=1,
+                created__lt=datetime.now() - timedelta(seconds=-200000000),
+            )
             for job in jobs:
                 check_die()
                 if job.is_done():
-                    jlogger.info('Collected %s' % job)
+                    jlogger.info("Collected %s" % job)
                     job.collect()
             check_die(20)
+
 
 class TaskManager(daemon.Daemon):
     """
@@ -83,8 +90,9 @@ class TaskManager(daemon.Daemon):
         - if the manager is called with the path keyword, only Tasks whose
           entry contain the path or path fragment will be run.
     """
+
     def run(self, project=None):
-        os.umask(022)
+        os.umask(0o22)
         while True:
             check_die()
             ddb.reset_queries()
@@ -95,43 +103,41 @@ class TaskManager(daemon.Daemon):
     def fill_host(self, host, project=None):
         host.get_utilization()
         host.save()
-        tlogger.debug('starting host %s', host.name)
+        tlogger.debug("starting host %s", host.name)
         while True:
             check_die()
-            if host.utilization >= 1.5*host.nodes*host.ppn:
-                tlogger.debug('Host utilization reached 100%')
+            if host.utilization >= 1.5 * host.nodes * host.ppn:
+                tlogger.debug("Host utilization reached 100%")
                 return
             tasks = host.get_tasks(project=project)
             if not tasks:
-                tlogger.debug('No tasks remaining')
-                return 
+                tlogger.debug("No tasks remaining")
+                return
             task = tasks[0]
             self.handle_task(task, host)
 
     def handle_task(self, task, host):
-        os.umask(022)
+        os.umask(0o22)
         t0 = time.time()
-        tlogger.info('Processing: Task %s (Entry %s)' % 
-                (task.id, task.entry.id))
+        tlogger.info("Processing: Task %s (Entry %s)" % (task.id, task.entry.id))
         try:
             jobs = task.get_jobs(host=host)
         except queue.ResourceUnavailableError:
             raise
-        except vasp.VaspError, err:
+        except vasp.VaspError as err:
             task.fail()
             task.save()
-            tlogger.warn('VASP error: %s', err)
+            tlogger.warn("VASP error: %s", err)
             return
-        except Exception, err:
+        except Exception as err:
             task.hold()
             task.save()
-            tlogger.warn('Unknown error while getting jobs: %s' % err)
+            tlogger.warn("Unknown error while getting jobs: %s" % err)
             return
 
         if not jobs:
             task.complete()
-            tlogger.info('Finished: Task %s (Entry %s)' %
-                    (task.id, task.entry.id))
+            tlogger.info("Finished: Task %s (Entry %s)" % (task.id, task.entry.id))
 
         for job in jobs:
             nattempts = 1
@@ -141,24 +147,25 @@ class TaskManager(daemon.Daemon):
                 check_die()
                 try:
                     job.submit()
-                    if job.account.host == 'quest':
+                    if job.account.host == "quest":
                         time.sleep(50)
                 except Exception:
-                    tlogger.warn('Submission error, waiting 30 seconds'
-                            ' (Host %s), Task: %s, Entry: %s' % (host.name,
-                                task.id, task.entry.id))
+                    tlogger.warn(
+                        "Submission error, waiting 30 seconds"
+                        " (Host %s), Task: %s, Entry: %s"
+                        % (host.name, task.id, task.entry.id)
+                    )
                     check_die(60)
                     nattempts += 1
             job.save()
             host.utilization += job.ncpus
-            tlogger.info('Submitted: %s (Entry %s)' % (task.id, task.entry.id))
+            tlogger.info("Submitted: %s (Entry %s)" % (task.id, task.entry.id))
 
         task.save()
         with transaction.atomic():
             try:
                 task.entry.save()
-            except Exception, err:
+            except Exception as err:
                 task.hold()
                 task.save()
-                tlogger.warn('Unknown error while saving Entry: %s' % err)
-
+                tlogger.warn("Unknown error while saving Entry: %s" % err)

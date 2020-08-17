@@ -10,7 +10,8 @@ from qmpy.utils import *
 
 logger = logging.getLogger(__name__)
 
-__all__ = ['LatticePoint', 'LatticeNetwork']
+__all__ = ["LatticePoint", "LatticeNetwork"]
+
 
 class LatticePoint:
     def __init__(self, position, spin=None):
@@ -18,15 +19,16 @@ class LatticePoint:
         self.spin = spin
 
     def __str__(self):
-        return '(%s)' % (' '.join([ '%0.3f' % c for c in self.coord ]))
+        return "(%s)" % (" ".join(["%0.3f" % c for c in self.coord]))
 
     def __repr__(self):
-        return '<LatticePoint %s>' % (self.__str__())
+        return "<LatticePoint %s>" % (self.__str__())
 
     @staticmethod
     def from_atom(atom):
         self.coord = atom.coord
         self.spin = atom.spin
+
 
 class LatticeNetwork:
     spin_states = 2
@@ -39,7 +41,7 @@ class LatticeNetwork:
         self.graph.add_edges_from(pairs)
         self.lattice_points = self.graph.nodes()
         self.pairs = self.graph.edges()
-        
+
         self.interaction = -1
         self.field = 0
         self.energy = None
@@ -57,17 +59,17 @@ class LatticeNetwork:
         for i in range(n):
             row = []
             for j in range(n):
-                lp = LatticePoint([i,j])
+                lp = LatticePoint([i, j])
                 row.append(lp)
             nodes.append(row)
         nodes = np.array(nodes)
-        
+
         for i in range(n):
             for j in range(n):
-                edges.append((nodes[i,j], nodes[(i-1)%n, j]))
-                edges.append((nodes[i,j], nodes[(i+1)%n, j]))
-                edges.append((nodes[i,j], nodes[i,(j-1)%n]))
-                edges.append((nodes[i,j], nodes[i,(j+1)%n]))
+                edges.append((nodes[i, j], nodes[(i - 1) % n, j]))
+                edges.append((nodes[i, j], nodes[(i + 1) % n, j]))
+                edges.append((nodes[i, j], nodes[i, (j - 1) % n]))
+                edges.append((nodes[i, j], nodes[i, (j + 1) % n]))
 
         sl = LatticeNetwork(edges)
         sl.square_lattice = nodes
@@ -75,16 +77,16 @@ class LatticeNetwork:
 
     @property
     def up_spins(self):
-        return [ s for s in self if s.spin == 1 ]
+        return [s for s in self if s.spin == 1]
 
     @property
     def down_spins(self):
-        return [ s for s in self if s.spin == -1 ]
+        return [s for s in self if s.spin == -1]
 
     @property
     def fraction(self):
         try:
-            return len(self.up_spins)/float(len(self))
+            return len(self.up_spins) / float(len(self))
         except AttributeError:
             return None
 
@@ -92,22 +94,21 @@ class LatticeNetwork:
         for s in self:
             s.spin = -1
 
-        upper = np.ceil(fraction*len(self))
-        lower = np.floor(fraction*len(self))
-        du = upper/float(len(self)) - fraction
-        dl = lower/float(len(self)) - fraction
+        upper = np.ceil(fraction * len(self))
+        lower = np.floor(fraction * len(self))
+        du = upper / float(len(self)) - fraction
+        dl = lower / float(len(self)) - fraction
         if abs(du) <= abs(dl):
             t = upper
         else:
             t = lower
 
-        order = range(len(self))
+        order = list(range(len(self)))
         random.shuffle(order)
         for i, j in enumerate(order):
             if i >= t:
                 break
             self[j].spin = 1
-
 
     def compute_total_lattice_energy(self):
         """
@@ -127,7 +128,7 @@ class LatticeNetwork:
                 energy -= self.interaction
             else:
                 energy += self.interaction
-        self.energy = energy/2.0
+        self.energy = energy / 2.0
         return self.energy
 
     def randomize_spins(self):
@@ -144,8 +145,8 @@ class LatticeNetwork:
         dE = 2*J*sum(neighboring spins)
         """
         lp1 = random.choice(self.lattice_points)
-        de = 2*self.interaction*sum([ lp2.spin for lp2 in self.graph[lp1] ])
-        if de > 0 and np.exp(-self.temperature*de) < random.random():
+        de = 2 * self.interaction * sum([lp2.spin for lp2 in self.graph[lp1]])
+        if de > 0 and np.exp(-self.temperature * de) < random.random():
             return
         else:
             self.energy += de
@@ -158,11 +159,17 @@ class LatticeNetwork:
         if lp1.spin == lp2.spin:  # no self swaps
             return self.attempt_swap()
 
-        de = 2*self.interaction*sum([ lp3.spin for lp3 in self.graph[lp1] 
-                                     if not lp3 == lp2 ])
-        de += 2*self.interaction*sum([ lp3.spin for lp3 in self.graph[lp2] 
-                                     if not lp3 == lp1 ])
-        if de > 0 and np.exp(-self.temperature*de) < random.random():
+        de = (
+            2
+            * self.interaction
+            * sum([lp3.spin for lp3 in self.graph[lp1] if not lp3 == lp2])
+        )
+        de += (
+            2
+            * self.interaction
+            * sum([lp3.spin for lp3 in self.graph[lp2] if not lp3 == lp1])
+        )
+        if de > 0 and np.exp(-self.temperature * de) < random.random():
             return
         else:
             self.energy += de
@@ -179,7 +186,7 @@ class LatticeNetwork:
         >>> sl.run_GCMC(-1)
         >>> sl.run_GCMC(1)
         """
-        
+
         steps = self.steps * len(self.lattice_points)
 
         self.randomize_spins()

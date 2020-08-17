@@ -1,33 +1,39 @@
 #!/usr/bin/python
-#read_file v1.0 5-3-2011 Jeff Doak jwd686@u.northwestern.edu
+# read_file v1.0 5-3-2011 Jeff Doak jwd686@u.northwestern.edu
 import sys
 
-#Module to read in a space-delineated file of arbitrary size.
+# Module to read in a space-delineated file of arbitrary size.
 
-def read_file(filename,type="",transpose=False,sep=None,quiet=False,delr=None,
-        delc=None):
+
+def read_file(
+    filename, type="", transpose=False, sep=None, quiet=False, delr=None, delc=None
+):
     """Function to read in a space-delineated file of arbitrary size."""
     # Helper functions for a switch-like statement.
     def _default(line):
         return line
+
     def _string(line):
         temp = str(line)
         return temp
+
     def _float(line):
         temp = float(line)
         return temp
+
     def _integer(line):
         temp = int(line)
         return temp
-    
+
     # Dictionary for performing switch-like statement.
-    case = { "" : _default,
-            "str" : _string,
-            "float" : _float,
-            "int" : _integer,
+    case = {
+        "": _default,
+        "str": _string,
+        "float": _float,
+        "int": _integer,
     }
     try:
-        file = open(filename,'r')
+        file = open(filename, "r")
     except IOError:
         if quiet is True:
             return []
@@ -43,7 +49,7 @@ def read_file(filename,type="",transpose=False,sep=None,quiet=False,delr=None,
         for j in range(len(line)):
             try:
                 contents[i].append(case[type](line[j]))
-            except (KeyError,ValueError):
+            except (KeyError, ValueError):
                 contents[i].append(_default(line[j]))
         i += 1
     file.close()
@@ -60,6 +66,7 @@ def read_file(filename,type="",transpose=False,sep=None,quiet=False,delr=None,
         contents = temp
     return contents
 
+
 def main(argv):
     flag = 0
     filename = argv[1]
@@ -73,19 +80,20 @@ def main(argv):
         if transpose == "True":
             transpose = True
     elif flag == 0:
-        contents = read_file(filename,type)
+        contents = read_file(filename, type)
         flag = 1
     if len(argv) > 4:
         quiet = argv[4]
         if quiet == "True":
             quiet = True
     elif flag == 0:
-        contents = read_file(filename,type,transpose)
+        contents = read_file(filename, type, transpose)
         flag = 1
     if flag == 0:
-        contents = read_file(filename,type,transpose,quiet)
+        contents = read_file(filename, type, transpose, quiet)
     return contents
+
 
 if __name__ == "__main__":
     contents = main(sys.argv)
-    print contents
+    print(contents)

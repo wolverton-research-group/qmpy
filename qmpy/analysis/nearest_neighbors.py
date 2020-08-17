@@ -11,8 +11,8 @@ from qmpy.utils import *
 
 logger = logging.getLogger(__name__)
 
-def find_nearest_neighbors(structure, method='closest', limit=5, tol=2e-1,
-        **kwargs):
+
+def find_nearest_neighbors(structure, method="closest", limit=5, tol=2e-1, **kwargs):
     """
     For each atom in the `structure` assign the nearest neighbors.
 
@@ -55,56 +55,57 @@ def find_nearest_neighbors(structure, method='closest', limit=5, tol=2e-1,
 
     """
 
-    if method == 'closest':
+    if method == "closest":
         return _heuristic(structure, tol=tol, limit=limit)
-    elif method == 'voronoi':
+    elif method == "voronoi":
         return _voronoi(structure, tol=tol, limit=limit)
     else:
         raise ValueError("keyword 'method' must be 'closest' or 'voronoi'")
+
 
 def _get_facet_area(vertices):
     area = 0
     vertices = vertices[np.lexsort(vertices.T)]
     if not vertices.shape[1] == 3:
-        raise ValueError('vertices must be an Nx3 array')
-    for i in range(len(vertices)-2):
+        raise ValueError("vertices must be an Nx3 array")
+    for i in range(len(vertices) - 2):
         a = vertices[i]
-        b = vertices[i+1]
-        c = vertices[i+2]
-        ab = b-a
-        ac = c-a
+        b = vertices[i + 1]
+        c = vertices[i + 2]
+        ab = b - a
+        ac = c - a
         area += linalg.norm(np.cross(ab, ac))
     return area
+
 
 def _heuristic(structure, limit=5, tol=2e-1):
     lat_params = structure.lat_params
 
     # Create a new cell large enough to find neighbors at least `limit` away.
-    limits = [ int(np.ceil(limit/lat_params[i])) for i in range(3) ]
+    limits = [int(np.ceil(limit / lat_params[i])) for i in range(3)]
     new_struct = structure.transform(limits, in_place=False)
 
     # construct a distance matrix between the original structure and supercell
     # structure.
-    distances = np.zeros((len(structure.sites), 
-                          structure.natoms*np.product(limits)))
+    distances = np.zeros((len(structure.sites), structure.natoms * np.product(limits)))
     for i, site in enumerate(structure.sites):
         for j, atom in enumerate(new_struct.sites):
             dist = new_struct.get_distance(i, j, limit=limit, wrap_self=True)
             if dist is None or dist < 1e-4:
                 dist = min(structure.lat_params[:3])
-            distances[i,j] = dist
+            distances[i, j] = dist
 
     nns = {}
     for i, site in enumerate(structure.sites):
         site.neighbors = []
         dists = np.array(distances[i])
-        dists /= min([d for d in dists ])
+        dists /= min([d for d in dists])
         # get neighbors within `tol` % of the shortest bond length
         inds = np.ravel(np.argwhere((dists - 1) < tol))
-        inds = np.array([ ii for ii in inds if ii != i ])
+        inds = np.array([ii for ii in inds if ii != i])
         # map index back into the original cell
         inds %= structure.natoms
-        site.neighbors = [ structure.sites[j] for j in inds ]
+        site.neighbors = [structure.sites[j] for j in inds]
         ## nns[site] = site.neighbors
         ## `qmpy.Site` objects that are not saved are not hashable, and hence
         ## cannot be used as dictionary keys. Unit tests will fail.
@@ -115,12 +116,13 @@ def _heuristic(structure, limit=5, tol=2e-1):
                 atom.neighbors += n.atoms
     return nns
 
+
 def _voronoi(structure, limit=5, tol=1e-2):
     lps = structure.lat_params
-    limits = np.array([ int(np.ceil(limit/lps[i])) for i in range(3)])
+    limits = np.array([int(np.ceil(limit / lps[i])) for i in range(3)])
 
     # Create a new cell large enough to find neighbors at least `limit` away.
-    new_struct = structure.transform(limits+1, in_place=False)
+    new_struct = structure.transform(limits + 1, in_place=False)
     nns = defaultdict(list)
 
     # look for neighbors for each atom in the structure
@@ -131,7 +133,7 @@ def _voronoi(structure, limit=5, tol=1e-2):
         new_struct.recenter(atom, middle=True)
         tess = Voronoi(new_struct.cartesian_coords)
         for j, r in enumerate(tess.ridge_points):
-            if not i in r: # only ridges involving the specified atom matter
+            if not i in r:  # only ridges involving the specified atom matter
                 continue
             inds = tess.ridge_vertices[j]
             verts = tess.vertices[inds]
@@ -141,12 +143,11 @@ def _voronoi(structure, limit=5, tol=1e-2):
                 continue
 
             # Get the indices of all points which this atom shares a ridge with
-            ind = [k for k in tess.ridge_points[j] if k != i ][0]
-            # map the atom index back into the original cell. 
+            ind = [k for k in tess.ridge_points[j] if k != i][0]
+            # map the atom index back into the original cell.
             atom.neighbors.append(atom)
         ## nns[atom] = atom.neighbors
         ## `qmpy.Atom` objects that are not saved are not hashable, and hence
         ## cannot be used as dictionary keys. Unit tests will fail.
         nns[i] = atom.neighbors
     return nns
-

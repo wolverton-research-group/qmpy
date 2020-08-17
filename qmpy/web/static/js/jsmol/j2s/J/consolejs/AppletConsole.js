@@ -9,11 +9,11 @@ function () {
 Clazz.superConstructor (this, J.consolejs.AppletConsole, []);
 });
 Clazz.overrideMethod (c$, "start", 
-function (viewer) {
-this.setViewer (viewer);
+function (vwr) {
+this.setViewer (vwr);
 this.setLabels ();
 this.displayConsole ();
-}, "J.api.JmolViewer");
+}, "JV.Viewer");
 Clazz.overrideMethod (c$, "layoutWindow", 
 function (enabledButtons) {
 {
@@ -22,15 +22,12 @@ this.jsConsole = new Jmol.Console.JSConsole(this);
 }, "~S");
 Clazz.overrideMethod (c$, "setTitle", 
 function () {
-{
-if (this.jsConsole)
-this.jsConsole.setTitle(this.getLabel("title"));
-}});
+if (this.jsConsole != null) this.jsConsole.setTitle (J.console.GenericConsole.getLabel ("title"));
+});
 Clazz.overrideMethod (c$, "setVisible", 
 function (visible) {
-{
-this.jsConsole.setVisible(visible);
-}}, "~B");
+this.jsConsole.setVisible (visible);
+}, "~B");
 Clazz.overrideMethod (c$, "setButton", 
 function (text) {
 {
@@ -52,4 +49,12 @@ Clazz.overrideMethod (c$, "nextFileName",
 function (stub, nTab) {
 return null;
 }, "~S,~N");
+Clazz.overrideMethod (c$, "newJMenu", 
+function (key) {
+return null;
+}, "~S");
+Clazz.overrideMethod (c$, "newJMenuItem", 
+function (key) {
+return null;
+}, "~S");
 });

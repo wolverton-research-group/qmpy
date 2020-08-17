@@ -1,15 +1,19 @@
 #!/usr/bin/env python
 
 import sys
-if not 'matplotlib' in sys.modules:
+
+if not "matplotlib" in sys.modules:
     import matplotlib
+
     try:
-        matplotlib.use('WXAgg')
+        matplotlib.use("WXAgg")
     except:
-        matplotlib.use('Agg')
+        matplotlib.use("Agg")
+
 
 class RenderingError(Exception):
     pass
+
 
 class Renderable(object):
     def draw_in_matplotlib(self, **kwargs):
@@ -20,4 +24,3 @@ class Renderable(object):
 
     def get_matplotlib_script(self, **kwargs):
         raise NotImplementedError
-

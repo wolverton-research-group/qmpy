@@ -4,7 +4,8 @@ import numpy as np
 import numpy.linalg as la
 import itertools
 
-__all__ = ['InterfaceFinder']
+__all__ = ["InterfaceFinder"]
+
 
 class InterfaceFinder(object):
     """
@@ -33,8 +34,8 @@ class InterfaceFinder(object):
         >>> finder.interfaces[0]
 
     """
-    def __init__(self, A, B, 
-            max_dist=10, max_strain=0.1, **kwargs):
+
+    def __init__(self, A, B, max_dist=10, max_strain=0.1, **kwargs):
         assert isinstance(A, Structure)
         assert isinstance(B, Structure)
         self._A = A.make_primitive(in_place=False)
@@ -49,16 +50,16 @@ class InterfaceFinder(object):
     def surf_B(self):
         saved = []
         for element in itertools.combinations(self._lp_B, r=2):
-            if all([ e == 0 for e in element[0]]):
+            if all([e == 0 for e in element[0]]):
                 continue
-            if all([ e == 0 for e in element[1]]):
+            if all([e == 0 for e in element[1]]):
                 continue
             v1 = np.dot(self._B.cell, element[0])
             v2 = np.dot(self._B.cell, element[1])
             element = Surface(v1, v2)
             yield element
             saved.append(element)
-        #while saved:
+        # while saved:
         #    for element in saved:
         #        yield element
 
@@ -66,26 +67,27 @@ class InterfaceFinder(object):
     def surf_A(self):
         saved = []
         for element in itertools.combinations(self._lp_A, r=2):
-            if all([ e == 0 for e in element[0]]):
+            if all([e == 0 for e in element[0]]):
                 continue
-            if all([ e == 0 for e in element[1]]):
+            if all([e == 0 for e in element[1]]):
                 continue
             v1 = np.dot(self._A.cell, element[0])
             v2 = np.dot(self._A.cell, element[1])
             element = Surface(v1, v2)
             yield element
             saved.append(element)
-        #while saved:
+        # while saved:
         #    for element in saved:
         #        yield element
 
     def find_interfaces(self):
         acceptable = []
         for sa, sb in itertools.product(self.surf_A, self.surf_B):
-            e = sa*sb
+            e = sa * sb
             if e < self.tol:
                 acceptable.append((sa, sb, e))
         self.interfaces = sorted(acceptable, key=lambda x: x[2])
+
 
 class Surface:
     def __init__(self, v1, v2):
@@ -93,12 +95,11 @@ class Surface:
         self.v2 = v2
         self.a = la.norm(v1)
         self.b = la.norm(v2)
-        self.alpha = np.arcsin(np.dot(v1,v2)/(self.a*self.b))
+        self.alpha = np.arcsin(np.dot(v1, v2) / (self.a * self.b))
         self.area = self.v1.dot(self.v2)
 
     def __mul__(self, other):
-        e1 = 2*(self.a - other.a)/(self.a + other.a)
-        e2 = 2*(self.b - other.b)/(self.b + other.b)
-        g = (self.b - other.b)/(self.b + other.b) 
+        e1 = 2 * (self.a - other.a) / (self.a + other.a)
+        e2 = 2 * (self.b - other.b) / (self.b + other.b)
+        g = (self.b - other.b) / (self.b + other.b)
         return abs(e1) + abs(e2) + abs(g)
-

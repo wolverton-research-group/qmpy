@@ -4,23 +4,28 @@ import numpy as np
 from collections import defaultdict
 import os.path
 import qmpy
-import StringIO
+from io import StringIO
 import fractions as frac
 import logging
 
 from qmpy.utils import *
 from django.db.models import F, Q
 import operator
+from functools import reduce
+from functools import total_ordering
 
 logger = logging.getLogger(__name__)
 
-THERMOPY_LIB_PATH = qmpy.INSTALL_PATH+'/data/thermodynamic/'
+THERMOPY_LIB_PATH = qmpy.INSTALL_PATH + "/data/thermodynamic/"
+
 
 class PhaseError(Exception):
     pass
 
+
 class PhaseDataError(Exception):
     pass
+
 
 class PhaseData(object):
     """
@@ -29,11 +34,12 @@ class PhaseData(object):
     and it is undesirable to access the database for every space you want to
     consider.
     """
+
     def __init__(self):
         self.clear()
 
     def __str__(self):
-        return '%d Phases' % len(self.phases)
+        return "%d Phases" % len(self.phases)
 
     @property
     def phases(self):
@@ -111,8 +117,8 @@ class PhaseData(object):
             >>> pd.read_file(INSTALL_PATH+'/data/thermodata/%s' % library)
 
         """
-        logger.debug('Loading Phases from %s' % library)
-        self.read_file(qmpy.INSTALL_PATH+'/data/thermodata/'+library)
+        logger.debug("Loading Phases from %s" % library)
+        self.read_file(qmpy.INSTALL_PATH + "/data/thermodata/" + library)
 
     def dump(self, filename=None, minimal=True):
         """
@@ -133,26 +139,32 @@ class PhaseData(object):
         pr = False
         if filename is None:
             pr = True
-            print 'Composition Energy'
+            print("Composition Energy")
         else:
-            f = open(os.path.abspath(filename), 'w')
-            f.write('Composition Energy\n')
+            f = open(os.path.abspath(filename), "w")
+            f.write("Composition Energy\n")
 
         if minimal:
-            phases = self.phase_dict.values()
+            phases = list(self.phase_dict.values())
         else:
             phases = self.phases
 
         for p in phases:
-            l = '%s %s' % (format_comp(p.comp), p.energy)
+            l = "%s %s" % (format_comp(p.comp), p.energy)
             if pr:
-                print l
+                print(l)
             else:
-                f.write(l+'\n')
+                f.write(l + "\n")
 
-    def load_oqmd(self, space=None, search={}, exclude={},
-            stable=False, fit='standard',
-            total=False):
+    def load_oqmd(
+        self,
+        space=None,
+        search={},
+        exclude={},
+        stable=False,
+        fit="standard",
+        total=False,
+    ):
         """
         Load data from the OQMD.
 
@@ -177,7 +189,8 @@ class PhaseData(object):
         """
         from qmpy.materials.formation_energy import FormationEnergy
         from qmpy.materials.element import Element
-        logger.debug('Loading Phases from the OQMD')
+
+        logger.debug("Loading Phases from the OQMD")
         data = FormationEnergy.objects.all()
         ##data = data.filter(entry__id=F('entry__duplicate_of__id'))
 
@@ -197,50 +210,66 @@ class PhaseData(object):
 
         if space:
             ## Query phase space using element_list
-            dim = len(space)+1
+            dim = len(space) + 1
 
-            element_q_lst = [Q(composition__element_list__contains=s+'_') for s in space]
+            element_q_lst = [
+                Q(composition__element_list__contains=s + "_") for s in space
+            ]
             combined_q = reduce(operator.or_, element_q_lst)
-            combined_q = reduce(operator.and_, [combined_q, Q(composition__ntypes__lt=dim)])
+            combined_q = reduce(
+                operator.and_, [combined_q, Q(composition__ntypes__lt=dim)]
+            )
 
-            exclude_element_q_lst = [Q(composition__element_list__contains=e.symbol+'_') 
-                                        for e in Element.objects.exclude(symbol__in=space)]
+            exclude_element_q_lst = [
+                Q(composition__element_list__contains=e.symbol + "_")
+                for e in Element.objects.exclude(symbol__in=space)
+            ]
             combined_q_not = reduce(operator.or_, exclude_element_q_lst)
 
             data = data.filter(combined_q).exclude(combined_q_not)
 
             ## The following is old method (will be removed in future)
-            #space_qs = Element.objects.exclude(symbol__in=space)
-            #data = data.filter(composition__element_set__in=space)
-            #data = data.exclude(composition__element_set__in=space_qs)
+            # space_qs = Element.objects.exclude(symbol__in=space)
+            # data = data.filter(composition__element_set__in=space)
+            # data = data.exclude(composition__element_set__in=space_qs)
 
         data = data.distinct()
-        columns = [ 'id', 'composition_id', 'stability',
-                'calculation__input__spacegroup']
+        columns = [
+            "id",
+            "composition_id",
+            "stability",
+            "calculation__input__spacegroup",
+        ]
         if total:
-            columns.append('calculation__energy_pa')
+            columns.append("calculation__energy_pa")
         else:
-            columns.append('delta_e')
+            columns.append("delta_e")
 
         values = data.values(*columns)
 
         for row in values:
             if total:
-                energy = row['calculation__energy_pa']
+                energy = row["calculation__energy_pa"]
             else:
-                energy = row['delta_e']
+                energy = row["delta_e"]
             try:
-                phase = Phase(energy=energy,
-                        composition=parse_comp(row['composition_id']),
-                        description=row['calculation__input__spacegroup'],
-                        stability=row['stability'],
-                        per_atom=True,
-                        total=total)
-                phase.id = row['id']
+                phase = Phase(
+                    energy=energy,
+                    composition=parse_comp(row["composition_id"]),
+                    description=row["calculation__input__spacegroup"],
+                    stability=row["stability"],
+                    per_atom=True,
+                    total=total,
+                )
+                phase.id = row["id"]
                 self.add_phase(phase)
             except TypeError:
-                raise PhaseError('Something went wrong with Formation object\
-                                 {}. No composition?'.format(row['id']))
+                raise PhaseError(
+                    "Something went wrong with Formation object\
+                                 {}. No composition?".format(
+                        row["id"]
+                    )
+                )
 
     def read_file(self, filename, per_atom=True):
         """
@@ -263,45 +292,58 @@ class PhaseData(object):
             formula unit. Defaults to True.
 
         """
-        if isinstance(filename, basestring):
+        if isinstance(filename, str):
             fileobj = open(filename)
         elif isinstance(filename, file):
             fileobj = filename
-        elif isinstance(filename, type(StringIO.StringIO())):
+        elif isinstance(filename, type(StringIO())):
             fileobj = filename
             fileobj.name = None
         thermodata = fileobj.readlines()
-        headers = [ h.lower() for h in thermodata.pop(0).strip().split() ]
-        if 'composition' not in headers:
-            raise PhaseDataError("Found columns: %s. Must provide composition in\
-                                  a column labelled composition." % 
-                                  (', '.join(headers)))
-        if ('energy' not in headers and 'delta_e' not in headers):
-            raise PhaseDataError("Found columns: %s. Must provide energies in\
-                                  a column labelled delta_e or energy." % 
-                                  (', '.join(headers)))
+        headers = [h.lower() for h in thermodata.pop(0).strip().split()]
+        if "composition" not in headers:
+            raise PhaseDataError(
+                "Found columns: %s. Must provide composition in\
+                                  a column labelled composition."
+                % (", ".join(headers))
+            )
+        if "energy" not in headers and "delta_e" not in headers:
+            raise PhaseDataError(
+                "Found columns: %s. Must provide energies in\
+                                  a column labelled delta_e or energy."
+                % (", ".join(headers))
+            )
 
-        keywords = {'energy':'energy', 'composition':'composition', 
-                'delta_e':'energy', 'delta_h':'energy', 'delta_g':'energy',
-                'comp':'composition', 'name':'composition', 
-                'desc':'description', 'description':'description'}
+        keywords = {
+            "energy": "energy",
+            "composition": "composition",
+            "delta_e": "energy",
+            "delta_h": "energy",
+            "delta_g": "energy",
+            "comp": "composition",
+            "name": "composition",
+            "desc": "description",
+            "description": "description",
+        }
 
-        headers = [ keywords[h] for h in headers if h in keywords ]
+        headers = [keywords[h] for h in headers if h in keywords]
 
-        name = filename.split('/')[-1]
+        name = filename.split("/")[-1]
 
         for i, line in enumerate(thermodata):
             line = line.strip().split()
             if not line:
                 continue
-            ddict = dict(zip(headers, line))
-            phase = Phase(composition=ddict['composition'],
-                          energy=float(ddict['energy']),
-                          description=ddict.get('description', 
-                              '{file}:{line}'.format(file=name, line=i)),
-                          per_atom=per_atom)
+            ddict = dict(list(zip(headers, line)))
+            phase = Phase(
+                composition=ddict["composition"],
+                energy=float(ddict["energy"]),
+                description=ddict.get(
+                    "description", "{file}:{line}".format(file=name, line=i)
+                ),
+                per_atom=per_atom,
+            )
             self.add_phase(phase)
-
 
     def get_phase_data(self, space):
         """
@@ -331,6 +373,7 @@ class PhaseData(object):
         pd.phases = phases
         return pd
 
+
 class Phase(object):
     """
     A Phase object is a point in composition-energy space.
@@ -356,18 +399,21 @@ class Phase(object):
     _calculation = None
     custom_name = None
     phase_dict = {}
-    def __init__(self,
-            composition=None,
-            energy=None,
-            description='',
-            per_atom=True,
-            stability=None,
-            total=False,
-            name=''):
+
+    def __init__(
+        self,
+        composition=None,
+        energy=None,
+        description="",
+        per_atom=True,
+        stability=None,
+        total=False,
+        name="",
+    ):
 
         if composition is None or energy is None:
             raise PhaseError("Composition and/or energy missing.")
-        if isinstance(composition, basestring):
+        if isinstance(composition, str):
             composition = parse_comp(composition)
 
         self.description = description
@@ -388,20 +434,17 @@ class Phase(object):
         composite phase of unit composition.
         """
         if len(phase_dict) == 1:
-            return phase_dict.keys()[0]
+            return list(phase_dict.keys())[0]
 
-        pkeys = sorted(phase_dict.keys(), key=lambda x: x.name)
-        energy = sum([ amt*p.energy for p, amt in phase_dict.items() ])
+        pkeys = sorted(list(phase_dict.keys()), key=lambda x: x.name)
+        energy = sum([amt * p.energy for p, amt in list(phase_dict.items())])
 
         comp = defaultdict(float)
-        for p, factor in phase_dict.items():
-            for e, amt in p.unit_comp.items():
-                comp[e] += amt*factor
+        for p, factor in list(phase_dict.items()):
+            for e, amt in list(p.unit_comp.items()):
+                comp[e] += amt * factor
 
-        phase = Phase(
-                composition=comp,
-                energy=energy,
-                per_atom=False)
+        phase = Phase(composition=comp, energy=energy, per_atom=False)
         phase.phase_dict = phase_dict
         return phase
 
@@ -411,14 +454,27 @@ class Phase(object):
 
     def __str__(self):
         if self.description:
-            return '{name} ({description}): {energy:0.3g}'.format(
-                    name=self.name, energy=self.energy, description=self.description)
+            return "{name} ({description}): {energy:0.3g}".format(
+                name=self.name, energy=self.energy, description=self.description
+            )
         else:
-            return '{name} : {energy:0.3g}'.format(
-                    name=self.name, energy=self.energy)
+            return "{name} : {energy:0.3g}".format(name=self.name, energy=self.energy)
 
     def __repr__(self):
-        return '<Phase %s>' % self
+        return "<Phase %s>" % self
+
+    def __hash__(self):
+        return hash(
+            tuple(
+                [str(self.comp), float(self.energy)]
+                + [str(self.unit_comp[key]) for key in self.comp]
+            )
+        )
+
+    @total_ordering
+    def __lt__(self, other):
+        "Phase-comparison is done based on energy value"
+        return self.energy < other.energy
 
     def __eq__(self, other):
         """
@@ -428,55 +484,64 @@ class Phase(object):
         if set(self.comp) != set(other.comp):
             return False
         if abs(self.energy - other.energy) > 1e-6:
-           return False
+            return False
         for key in self.comp:
-           if abs(self.unit_comp[key]-other.unit_comp[key]) > 1e-6:
+            if abs(self.unit_comp[key] - other.unit_comp[key]) > 1e-6:
                 return False
         return True
 
     @property
     def label(self):
-        return '%s: %0.3f eV/atom' % (self.name, self.energy)
+        return "%s: %0.3f eV/atom" % (self.name, self.energy)
 
     @property
     def link(self):
         if self.id:
             link = '<a href="/materials/entry/{id}">{name}</a>'
-            return link.format(id=self.calculation.entry_id, 
-                               name=format_html(self.comp))
+            return link.format(
+                id=self.calculation.entry_id, name=format_html(self.comp)
+            )
         else:
-            return ''
+            return ""
 
     @property
     def name(self):
         if self.custom_name:
             return self.custom_name
         if self.phase_dict:
-            name_dict = dict((p, v/p.natoms) for p, v in
-                    self.phase_dict.items())
-            return ' + '.join('%.3g %s' % (v, p.name) for p, v in name_dict.items())
+            name_dict = dict(
+                (p, v / p.natoms) for p, v in list(self.phase_dict.items())
+            )
+            return " + ".join(
+                "%.3g %s" % (v, p.name) for p, v in list(name_dict.items())
+            )
         return format_comp(self.nom_comp)
 
     @property
     def latex(self):
         if self.phase_dict:
-            return ' + '.join('%.3g %s' % (v, p.latex) for p, v in
-                    self.phase_dict.items())
+            return " + ".join(
+                "%.3g %s" % (v, p.latex) for p, v in list(self.phase_dict.items())
+            )
         return format_latex(self.nom_comp)
 
     @property
     def volume(self):
         if self.phase_dict:
-            return sum( phase.calculation.volume_pa*amt for phase, amt in
-                    self.phase_dict.items() )
+            return sum(
+                phase.calculation.volume_pa * amt
+                for phase, amt in list(self.phase_dict.items())
+            )
         else:
             return self.calculation.volume_pa
 
     @property
     def mass(self):
         if self.phase_dict:
-            return sum( phase.calculation.composition.get_mass()*amt for phase, amt in
-                    self.phase_dict.items() )
+            return sum(
+                phase.calculation.composition.get_mass() * amt
+                for phase, amt in list(self.phase_dict.items())
+            )
         else:
             return self.calculation.composition.get_mass()
 
@@ -485,8 +550,7 @@ class Phase(object):
         """
         Set of elements in the phase.
         """
-        return set([ k for k, v in self.unit_comp.items()
-            if abs(v) > 1e-6 ])
+        return set([k for k, v in list(self.unit_comp.items()) if abs(v) > 1e-6])
 
     @property
     def n(self):
@@ -545,7 +609,7 @@ class Phase(object):
     @total_energy.setter
     def total_energy(self, energy):
         self._total_energy = energy
-        self._energy = energy/sum(self.comp.values())
+        self._energy = energy / sum(self.comp.values())
         self._energy_pfu = energy / sum(self.nom_comp.values())
 
     @property
@@ -559,8 +623,8 @@ class Phase(object):
     def energy_pfu(self, energy):
         self._energy_pfu = energy
 
-
     _gap = None
+
     @property
     def band_gap(self):
         if not self._gap:
@@ -571,10 +635,10 @@ class Phase(object):
         if not self.phase_dict:
             self._gap = self.calculation.band_gap
         else:
-            self._gap = min([ p.calculation.band_gap for p in
-                self.phase_dict ])
+            self._gap = min([p.calculation.band_gap for p in self.phase_dict])
 
     _formation = None
+
     @property
     def formation(self):
         if self.id is None:
@@ -591,10 +655,12 @@ class Phase(object):
         if self.id is None:
             return
         from qmpy.analysis.vasp.calculation import Calculation
+
         return self.formation.calculation
 
     def set_stability(self):
         from qmpy.analysis.vasp import Calculation
+
         if self.id is None:
             return
         Calculation.objects.filter(id=self.id).update(stability=self.stability)
@@ -604,7 +670,7 @@ class Phase(object):
         Free energy function for the phase, can be defined to be anything, by
         default it just returns the phase's ground state energy.
         """
-        #global environment
+        # global environment
         return self.energy
 
     def amt(self, comp):
@@ -621,16 +687,16 @@ class Phase(object):
         """
         if isinstance(comp, Phase):
             comp = comp.comp
-        elif isinstance(comp, basestring):
+        elif isinstance(comp, str):
             comp = parse_comp(comp)
         residual = defaultdict(float, self.comp)
         tot = sum(residual.values())
-        for c, amt in dict(comp).items():
-            pres = residual[c]/amt
-            for c2, amt2 in comp.items():
-                residual[c2] -= pres*amt2
-        residual['var'] = (tot - sum(residual.values()))
-        residual['var'] /= float(sum(comp.values()))
+        for c, amt in list(dict(comp).items()):
+            pres = residual[c] / amt
+            for c2, amt2 in list(comp.items()):
+                residual[c2] -= pres * amt2
+        residual["var"] = tot - sum(residual.values())
+        residual["var"] /= float(sum(comp.values()))
         return residual
 
     def fraction(self, comp):
@@ -648,14 +714,14 @@ class Phase(object):
         """
         if isinstance(comp, Phase):
             comp = comp.unit_comp
-        elif isinstance(comp, basestring):
+        elif isinstance(comp, str):
             comp = unit_comp(parse_comp(comp))
         residual = defaultdict(float, self.unit_comp)
         tot = sum(residual.values())
-        for c, amt in dict(comp).items():
-            pres = residual[c]/amt
-            for c2, amt2 in comp.items():
-                residual[c2] -= pres*amt2
-        residual['var'] = (tot - sum(residual.values()))
-        residual['var'] /= float(sum(comp.values()))
+        for c, amt in list(dict(comp).items()):
+            pres = residual[c] / amt
+            for c2, amt2 in list(comp.items()):
+                residual[c2] -= pres * amt2
+        residual["var"] = tot - sum(residual.values())
+        residual["var"] /= float(sum(comp.values()))
         return residual
