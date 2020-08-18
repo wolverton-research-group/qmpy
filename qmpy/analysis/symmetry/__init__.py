@@ -1,2 +1,2 @@
-from routines import *
-from spacegroup import *
+from .routines import *
+from .spacegroup import *

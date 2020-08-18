@@ -4,15 +4,15 @@ c$ = Clazz.declareType (J.render, "BallsRenderer", J.render.ShapeRenderer);
 Clazz.overrideMethod (c$, "render", 
 function () {
 var needTranslucent = false;
-if (this.isExport || this.viewer.checkMotionRendering (1141899265)) {
-var atoms = this.modelSet.atoms;
+if (this.isExport || this.vwr.checkMotionRendering (1140850689)) {
+var atoms = this.ms.at;
 var colixes = (this.shape).colixes;
-var bsOK = this.viewer.getRenderableBitSet ();
+var bsOK = this.vwr.shm.bsRenderableAtoms;
 for (var i = bsOK.nextSetBit (0); i >= 0; i = bsOK.nextSetBit (i + 1)) {
 var atom = atoms[i];
-if (atom.screenDiameter > 0 && (atom.getShapeVisibilityFlags () & this.myVisibilityFlag) != 0) {
-if (this.g3d.setColix (colixes == null ? atom.getColix () : J.shape.Shape.getColix (colixes, i, atom))) {
-this.g3d.drawAtom (atom);
+if (atom.sD > 0 && (atom.shapeVisibilityFlags & this.myVisibilityFlag) != 0) {
+if (this.g3d.setC (colixes == null ? atom.colixAtom : J.shape.Shape.getColix (colixes, i, atom))) {
+this.g3d.drawAtom (atom, 0);
 } else {
 needTranslucent = true;
 }}}

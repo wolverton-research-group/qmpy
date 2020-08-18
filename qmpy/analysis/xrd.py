@@ -22,16 +22,19 @@ class Peak(object):
         Number of HKL indices which generate the peak.
 
     """
-    def __init__(self,
-                 angle,
-                 multiplicity=None,
-                 intensity=None,
-                 hkl=None,
-                 xrd=None,
-                 width=None,
-                 measured=False):
+
+    def __init__(
+        self,
+        angle,
+        multiplicity=None,
+        intensity=None,
+        hkl=None,
+        xrd=None,
+        width=None,
+        measured=False,
+    ):
         self.angle = angle
-        self.two_theta = angle*360/np.pi
+        self.two_theta = angle * 360 / np.pi
         self.hkl = hkl
         self.multiplicity = multiplicity
         self.intensity = intensity
@@ -48,9 +51,9 @@ class Peak(object):
         
         http://reference.iucr.org/dictionary/Lorentz%E2%80%93polarization_correction
         """
-        num = (1+np.cos(2*self.angle)**2)
-        den = np.cos(self.angle)*np.sin(self.angle)**2
-        return num/den
+        num = 1 + np.cos(2 * self.angle) ** 2
+        den = np.cos(self.angle) * np.sin(self.angle) ** 2
+        return num / den
 
     def calculate_intensity(self, bfactors=None, scale=None):
         intensity = self.structure_factor_squared(bfactors)
@@ -65,24 +68,25 @@ class Peak(object):
 
         http://en.wikipedia.org/wiki/Debye-Waller_factor
         """
-        return np.exp(-bfactor*(np.sin(self.angle)/self.xrd.wavelength)**2)
+        return np.exp(-bfactor * (np.sin(self.angle) / self.xrd.wavelength) ** 2)
 
     def atomic_scattering_factor(self, element):
-        asfp = elements[element]['scattering_factors']
+        asfp = elements[element]["scattering_factors"]
         s = np.sin(self.angle) / self.xrd.wavelength
-        s2 = s*s
+        s2 = s * s
         if s > 2:
-            msg = 'Atomic scattering factors are not optimized for'
-            msg += ' s greater than 2'
+            msg = "Atomic scattering factors are not optimized for"
+            msg += " s greater than 2"
             logger.warn(msg)
 
-        factors = [ asfp['a'+str(i)]*np.exp(-asfp['b'+str(i)]*s2) 
-                                              for i in range(1,5) ]
-        return sum(factors) + asfp['c']
+        factors = [
+            asfp["a" + str(i)] * np.exp(-asfp["b" + str(i)] * s2) for i in range(1, 5)
+        ]
+        return sum(factors) + asfp["c"]
 
     def structure_factor_squared(self, bfactors=None):
         if bfactors is None:
-            bfactors = [ 1.0 for o in self.xrd.structure.orbits ]
+            bfactors = [1.0 for o in self.xrd.structure.orbits]
 
         real = 0.0
         imag = 0.0
@@ -92,14 +96,14 @@ class Peak(object):
             for site in orbit:
                 for atom in site:
                     sf = self.atomic_scattering_factor(atom.element_id)
-                    dot = 2*np.pi*np.dot(self.hkl[0], atom.coord)
+                    dot = 2 * np.pi * np.dot(self.hkl[0], atom.coord)
                     pre = sf * tf * atom.occupancy
-                    real += pre*np.cos(dot) 
-                    imag += pre*np.sin(dot)
+                    real += pre * np.cos(dot)
+                    imag += pre * np.sin(dot)
 
         self.real = real
         self.imag = imag
-        return real*real + imag*imag
+        return real * real + imag * imag
 
 
 class XRD(object):
@@ -121,8 +125,16 @@ class XRD(object):
         Minimum 2theta angle the XRD will distinguish between.
 
     """
-    def __init__(self, structure=None, measured=False, wavelength=1.5418,
-            min_2th=10, max_2th=60, resolution=1e-2):
+
+    def __init__(
+        self,
+        structure=None,
+        measured=False,
+        wavelength=1.5418,
+        min_2th=10,
+        max_2th=60,
+        resolution=1e-2,
+    ):
         self.peaks = []
         self.structure = structure
         self.measured = measured
@@ -141,18 +153,18 @@ class XRD(object):
         self.peaks.append(peak)
 
     def d_thermal_factor(self, angle, bfactor):
-        temp = (np.sin(angle) / self.wavelength)**2
-        return -temp * np.exp(-bfactor*temp)
+        temp = (np.sin(angle) / self.wavelength) ** 2
+        return -temp * np.exp(-bfactor * temp)
 
     def bragg_angle(self, hkl):
-        ratio = np.linalg.norm(self.structure.inv.dot(hkl))/2
+        ratio = np.linalg.norm(self.structure.inv.dot(hkl)) / 2
         ratio *= self.wavelength
-        if (ratio >= -1 and ratio <= 1):
+        if ratio >= -1 and ratio <= 1:
             return np.arcsin(ratio)
-        elif angle < -1:
-            return -np.pi/2
+        elif ratio < -1:
+            return -np.pi / 2
         else:
-            return np.pi/2
+            return np.pi / 2
 
     def get_intensities(self, bfactors=None, scale=None):
         """
@@ -180,7 +192,7 @@ class XRD(object):
                 p.intensity /= m
 
     def get_peaks(self):
-        max_mag = 2*np.sin(self.max_2th*np.pi/90) / self.wavelength
+        max_mag = 2 * np.sin(self.max_2th * np.pi / 90) / self.wavelength
         self.structure.symmetrize()
         rots = []
         for r in self.structure.rotations:
@@ -189,12 +201,11 @@ class XRD(object):
             if not any([np.allclose(r, rr) for rr in rots]):
                 rots.append(r)
 
-        im, jm, km = map(lambda x: int(np.ceil(max_mag*x)),
-                         self.structure.lat_params[:3])
+        im, jm, km = [int(np.ceil(max_mag * x)) for x in self.structure.lat_params[:3]]
 
-        for h, k, l in itertools.product(range(-im, im+1),
-                                         range(-jm, jm+1),
-                                         range(-km, km+1)):
+        for h, k, l in itertools.product(
+            list(range(-im, im + 1)), list(range(-jm, jm + 1)), list(range(-km, km + 1))
+        ):
             if [h, k, l] == [0, 0, 0]:
                 continue
 
@@ -206,10 +217,10 @@ class XRD(object):
                 thkl = np.dot(rot, hkl)
                 if thkl[0] < hkl[0] - 1e-4:
                     repeat = True
-                elif abs(thkl[0]-hkl[0]) < 1e-4:
+                elif abs(thkl[0] - hkl[0]) < 1e-4:
                     if thkl[1] < hkl[1] - 1e-4:
                         repeat = True
-                    elif abs(thkl[1]-hkl[1]) < 1e-4:
+                    elif abs(thkl[1] - hkl[1]) < 1e-4:
                         if thkl[2] < hkl[2] - 1e-4:
                             repeat = True
                 if repeat:
@@ -220,7 +231,7 @@ class XRD(object):
                     mult += 1
 
             angle = self.bragg_angle(hkl)
-            two_theta = angle*360/np.pi
+            two_theta = angle * 360 / np.pi
 
             if two_theta > self.max_2th or two_theta < self.min_2th:
                 continue
@@ -232,8 +243,7 @@ class XRD(object):
         renderer = Renderer()
 
         for p in self.peaks:
-            l = Line([[p.two_theta, 0], 
-                      [p.two_theta, p.intensity]], color='grey')
+            l = Line([[p.two_theta, 0], [p.two_theta, p.intensity]], color="grey")
             renderer.add(l)
 
         renderer.xaxis.label = "2&Theta;"
@@ -241,4 +251,3 @@ class XRD(object):
         renderer.xaxis.min = self.min_2th
         renderer.xaxis.max = self.max_2th
         return renderer
-

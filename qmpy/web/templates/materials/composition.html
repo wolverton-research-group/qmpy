@@ -1,5 +1,5 @@
 {% extends "base_site.html" %}
-{% load admin_static %}
+{% load static %}
 {% load i18n %}
 
 
@@ -104,6 +104,36 @@ function openWindow() {
 {% if gs %}
   <h1> Composition: {{ composition.html |safe }}</h1>
   {% if phase_type == 'stable' %}
+<script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Dataset",
+      "name": "OQMD Material Phase Data",
+      "url": "http://www.oqmd.org/materials/composition/{{ composition.html |safe }}",
+      "description":"Computational stability data of {{ composition.html |safe }}  from Density Functional Theory calculations",
+      "keywords": "{{ composition.html |safe }}, CONVEX HULL, STABILITY",
+      "license" : "https://creativecommons.org/licenses/by/4.0/",
+      "variableMeasured": [
+                             {
+                               "@type": "PropertyValue",
+                                "name": "Composition",
+                                "value": "{{ composition.html |safe }}"
+                             },
+                             {
+                               "@type": "PropertyValue",
+                               "name": "Stability",
+                               "value": "0 ev/atom",
+                               "measurementTechnique": "Computational, DFT"
+                             },
+                             {
+                               "@type": "PropertyValue",
+                               "name": "Decomposition Energy",
+                               "value": "{{ decomp_en | floatformat:-3}} eV/atom"
+                             }
+                           ]
+     
+    }
+</script>
   <p><span style="font-size:25px;background-color:green;color:white;font-weight:800;margin-left:15px">
       &nbsp;Stable Phase&nbsp;</span></p>
   <p class="comp"> 
@@ -118,6 +148,32 @@ function openWindow() {
   <p class="comp"> <b>Competing Phases: </b> {{ phase_links |safeseq |join:" + " }} </p>
 
   {% elif phase_type == 'unstable' %}
+<script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Dataset",
+      "name": "OQMD Material Phase Data",
+      "url": "http://www.oqmd.org/materials/composition/{{ composition.html |safe }}",
+      "description":"Computational stability data of {{ composition.html |safe }}  from Density Functional Theory calculations",
+      "keywords": " {{ composition.html |safe }}, CONVEX HULL, STABILITY",
+      "license" : "https://creativecommons.org/licenses/by/4.0/",
+      "variableMeasured": [
+                             { 
+                               "@type": "PropertyValue",
+                                "name": "Composition",
+                                "value": "{{ composition.html |safe }}"
+                             },
+                             {
+                               "@type": "PropertyValue",
+                               "name": "Stability",
+                               "value": "{{ hull_dis | floatformat:-3}} eV/atom",
+                               "measurementTechnique": "Computational, DFT"
+                             }
+                           ]
+     
+    }
+</script>
+
   <p class="comp"> 
     <b>Entry Link:</b> 
     <a href="/materials/entry/{{current_phase.formation.entry.id}}"
@@ -128,7 +184,9 @@ function openWindow() {
   <p class="comp"><b>&Delta;H:</b> {{delta_h | floatformat:-3}} eV/atom </p>
   <p class="comp"><b>Hull Distance<button onClick="openWindow()" class="question">?</button>:</b> {{ hull_dis | floatformat:-3}} eV/atom </p>
   <p class="comp"> <b>Decompose Into: </b> {{ phase_links |safeseq |join:" + " }} </p>
+
   {% elif phase_type == 'nophase' %}
+
   <p class="comp"><b>No Calculated Phase</b></p>
   <p class="comp"><b>&Delta;H:</b> {{delta_h | floatformat:-3}} eV/atom </p>
   <p class="comp"> <b>Decompose Into: </b> {{ phase_links |safeseq |join:" + " }} </p>
@@ -249,6 +307,19 @@ function openWindow() {
 {% endblock %}
 
 {% block sidebar %}
+<script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Dataset",
+      "name": "OQMD Materials Composition Search Engine",
+      "url": "http://www.oqmd.org/materials/composition",
+      "description":"Search and view OQMD materials composition data along with its corresponding convex hull, and computational stability",
+      "keywords": "MATERIALS DATA, COMPUTATIONAL MATERIALS, DFT, DENSITY FUNCTIONAL THEORY, THERMODYNAMIC PROPERTIES, INORGANIC MATERIALS, CONVEX HULL, MATERIAL STABILITY, FORMATION ENERGY, PHASE DIAGRAM",
+      "license" : "https://creativecommons.org/licenses/by/4.0/"
+     
+    }
+</script>
+
 <div id="sidebar" class="box">
   <h2 class="subhead"> Search for a composition or region </h2>
   <form id="theForm">

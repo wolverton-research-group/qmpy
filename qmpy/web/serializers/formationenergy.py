@@ -2,6 +2,7 @@ from rest_framework import serializers
 from qmpy.materials.formation_energy import FormationEnergy
 from drf_queryfields import QueryFieldsMixin
 
+
 class FormationEnergySerializer(QueryFieldsMixin, serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
     entry_id = serializers.SerializerMethodField()
@@ -15,7 +16,7 @@ class FormationEnergySerializer(QueryFieldsMixin, serializers.ModelSerializer):
     composition_generic = serializers.SerializerMethodField()
     spacegroup = serializers.SerializerMethodField()
     prototype = serializers.SerializerMethodField()
-    
+
     volume = serializers.SerializerMethodField()
     unit_cell = serializers.SerializerMethodField()
     sites = serializers.SerializerMethodField()
@@ -46,10 +47,10 @@ class FormationEnergySerializer(QueryFieldsMixin, serializers.ModelSerializer):
 
     def get_icsd_id(self, formationenergy):
         entry = formationenergy.entry
-        if 'icsd' in entry.keywords:
+        if "icsd" in entry.keywords:
             try:
-                assert 'icsd' in entry.path
-                return int(entry.path.split('/')[-1])
+                assert "icsd" in entry.path
+                return int(entry.path.split("/")[-1])
             except:
                 pass
 
@@ -58,10 +59,10 @@ class FormationEnergySerializer(QueryFieldsMixin, serializers.ModelSerializer):
 
     def get_composition(self, formationenergy):
         return formationenergy.composition.formula
-    
+
     def get_composition_generic(self, formationenergy):
         return formationenergy.composition.generic
-    
+
     def get_spacegroup(self, formationenergy):
         try:
             return formationenergy.calculation.output.spacegroup.hm
@@ -69,29 +70,31 @@ class FormationEnergySerializer(QueryFieldsMixin, serializers.ModelSerializer):
             return
 
     def get_prototype(self, formationenergy):
-        if formationenergy.entry.prototype: 
+        if formationenergy.entry.prototype:
             return formationenergy.entry.prototype.name
         else:
             return
 
     def get_volume(self, formationenergy):
-        if formationenergy.calculation.output: 
+        if formationenergy.calculation.output:
             return formationenergy.calculation.output.volume
         else:
             return
 
     def get_unit_cell(self, formationenergy):
-        if formationenergy.calculation.output: 
+        if formationenergy.calculation.output:
             strct = formationenergy.calculation.output
 
-            return [[strct.x1, strct.x2, strct.x3],
-                    [strct.y1, strct.y2, strct.y3],
-                    [strct.z1, strct.z2, strct.z3]]
+            return [
+                [strct.x1, strct.x2, strct.x3],
+                [strct.y1, strct.y2, strct.y3],
+                [strct.z1, strct.z2, strct.z3],
+            ]
         else:
             return
 
     def get_sites(self, formationenergy):
-        if formationenergy.calculation.output: 
+        if formationenergy.calculation.output:
             strct = formationenergy.calculation.output
             sites = [str(s) for s in strct.sites]
 
@@ -116,10 +119,25 @@ class FormationEnergySerializer(QueryFieldsMixin, serializers.ModelSerializer):
 
     class Meta:
         model = FormationEnergy
-        fields = ('name', 'entry_id', 'calculation_id', 
-                  'icsd_id', 'formationenergy_id', 'duplicate_entry_id',
-                  'composition', 'composition_generic', 
-                  'prototype', 'spacegroup', 'volume', 
-                  'ntypes', 'natoms', 
-                  'unit_cell', 'sites', 'band_gap', 
-                  'delta_e', 'stability', 'fit', 'calculation_label')
+        fields = (
+            "name",
+            "entry_id",
+            "calculation_id",
+            "icsd_id",
+            "formationenergy_id",
+            "duplicate_entry_id",
+            "composition",
+            "composition_generic",
+            "prototype",
+            "spacegroup",
+            "volume",
+            "ntypes",
+            "natoms",
+            "unit_cell",
+            "sites",
+            "band_gap",
+            "delta_e",
+            "stability",
+            "fit",
+            "calculation_label",
+        )

@@ -1,6 +1,6 @@
 ase == 3.11.0
 bokeh == 0.12.15
-Django == 1.8.18
+Django == 2.2
 django-crispy-forms == 1.7.2
 django-extensions == 1.2.5
 djangorestframework == 3.6.4

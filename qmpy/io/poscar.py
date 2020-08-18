@@ -7,7 +7,7 @@ import gzip
 import os
 from os.path import exists, isfile, isdir
 import time
-import StringIO
+from io import StringIO
 
 from django.db import models
 import numpy as np
@@ -20,11 +20,20 @@ from qmpy.utils import *
 
 logger = logging.getLogger(__name__)
 
+
 class POSCARError(Exception):
     pass
 
-def write(struct, filename=None, comments=None, direct=True,
-            distinct_by_ox=False, vasp4=False, **kwargs):
+
+def write(
+    struct,
+    filename=None,
+    comments=None,
+    direct=True,
+    distinct_by_ox=False,
+    vasp4=False,
+    **kwargs,
+):
     """
     Write a :mod:`~qmpy.Structure` to a file or string.
 
@@ -75,41 +84,41 @@ def write(struct, filename=None, comments=None, direct=True,
         ordered_keys = sorted(comp.keys())
         for a in struct:
             cdict[a.element_id] += 1
-        counts = [ int(cdict[k]) for k in ordered_keys ]
+        counts = [int(cdict[k]) for k in ordered_keys]
     else:
         for a in struct.atoms:
             if int(a.oxidation_state) != a.oxidation_state:
-                cdict['%s%+f' % (a.element_id, a.oxidation_state)] += 1
+                cdict["%s%+f" % (a.element_id, a.oxidation_state)] += 1
             else:
-                cdict['%s%+d' % (a.element_id, a.oxidation_state)] += 1
-        ordered_keys = sorted([ k for k in cdict.keys() ])
-        counts = [ int(cdict[k]) for k in ordered_keys ]
+                cdict["%s%+d" % (a.element_id, a.oxidation_state)] += 1
+        ordered_keys = sorted([k for k in list(cdict.keys())])
+        counts = [int(cdict[k]) for k in ordered_keys]
 
     if comments is not None:
-        poscar = '# %s \n1.0\n' %(comments)
+        poscar = "# %s \n1.0\n" % (comments)
     else:
-        poscar = ' '.join(set(a.element_id for a in struct.atoms)) + '\n1.0\n'
-    cell = '\n'.join([ ' '.join([ '%16.12f' % v  for v in vec ]) for vec in
-        struct.cell ])
-    poscar += cell +'\n'
-    names = ' '.join( a for a in ordered_keys ) + '\n'
-    ntypes = ' '.join( str(n) for n in counts ) + '\n'
+        poscar = " ".join(set(a.element_id for a in struct.atoms)) + "\n1.0\n"
+    cell = "\n".join([" ".join(["%16.12f" % v for v in vec]) for vec in struct.cell])
+    poscar += cell + "\n"
+    names = " ".join(a for a in ordered_keys) + "\n"
+    ntypes = " ".join(str(n) for n in counts) + "\n"
     if not vasp4:
         poscar += names
     poscar += ntypes
     if direct:
-        poscar += 'Direct\n'
-        for x,y,z in struct.coords:
-            poscar += '%16.12f %16.12f %16.12f\n' % (x,y,z)
+        poscar += "Direct\n"
+        for x, y, z in struct.coords:
+            poscar += "%16.12f %16.12f %16.12f\n" % (x, y, z)
     else:
-        poscar += 'Cartesian\n'
+        poscar += "Cartesian\n"
         for x, y, z in struct.cartesian_coords:
-            poscar += ' %16.12f %16.12f %16.12f\n' % (x,y,z)
+            poscar += " %16.12f %16.12f %16.12f\n" % (x, y, z)
 
     if filename:
-        open(filename, 'w').write(poscar)
+        open(filename, "w").write(poscar)
     else:
         return poscar
+
 
 def read(poscar, species=None):
     """
@@ -136,26 +145,28 @@ def read(poscar, species=None):
     struct = st.Structure()
 
     # Read in the title block, and system sell
-    if isinstance(poscar, StringIO.StringIO):
+    if isinstance(poscar, StringIO):
         poscar = poscar
     else:
-        poscar = open(poscar,'r')
+        poscar = open(poscar, "r")
     title = poscar.readline().strip()
     scale = float(poscar.readline().strip())
     s = float(scale)
-    cell = [[ float(v) for v in poscar.readline().split() ],
-            [ float(v) for v in poscar.readline().split() ],
-            [ float(v) for v in poscar.readline().split() ]]
+    cell = [
+        [float(v) for v in poscar.readline().split()],
+        [float(v) for v in poscar.readline().split()],
+        [float(v) for v in poscar.readline().split()],
+    ]
     cell = np.array(cell)
 
     if s > 0:
-        struct.cell = cell*s
+        struct.cell = cell * s
     else:
         struct.cell = cell
-        struct.volume = -1*s
+        struct.volume = -1 * s
 
     # Determine whether POSCAR is in VASP 5 format
-    #   VASP 5 has the elements listed after the 
+    #   VASP 5 has the elements listed after the
     #   the cell parameters
     vasp5 = False
     _species = poscar.readline().strip().split()
@@ -163,17 +174,17 @@ def read(poscar, species=None):
         float(_species[0])
     except:
         vasp5 = True
-        counts = [ int(v) for v in poscar.readline().split() ]
+        counts = [int(v) for v in poscar.readline().split()]
 
     # If the format is not VASP 5, the elements should
     #  have been listed in the title
     if not vasp5:
-        counts = map(int, _species)
+        counts = list(map(int, _species))
         if not species:
             _species = title.strip().split()
             for s in _species:
-                if not s in qmpy.elements.keys():
-                    msg = 'In VASP4.x format, title line MUST be species present'
+                if not s in list(qmpy.elements.keys()):
+                    msg = "In VASP4.x format, title line MUST be species present"
                     raise POSCARError
         else:
             _species = species
@@ -181,18 +192,18 @@ def read(poscar, species=None):
 
     # Prepare a list of numbers of atom types
     atom_types = []
-    for n,e in zip(counts, species):
-        atom_types += [e]*n
+    for n, e in zip(counts, species):
+        atom_types += [e] * n
 
     # Determine whether coordinates are in direct or cartesian
     direct = False
     style = poscar.readline()
 
-    if style[0].lower() == 's':
+    if style[0].lower() == "s":
         # The POSCAR contains selective dynamics info
         style = poscar.readline()
 
-    if style[0] in ['D', 'd']:
+    if style[0] in ["D", "d"]:
         direct = True
 
     # Read in the atom coordinates
@@ -204,9 +215,9 @@ def read(poscar, species=None):
         atom = st.Atom()
         atom.element_id = atom_types[i]
         if direct:
-            atom.coord = [ float(v) for v in poscar.readline().split()[0:3] ]
+            atom.coord = [float(v) for v in poscar.readline().split()[0:3]]
         else:
-            cart = [ float(v) for v in poscar.readline().split()[0:3] ]
+            cart = [float(v) for v in poscar.readline().split()[0:3]]
             atom.coord = np.dot(inv, cart)
         struct.add_atom(atom)
     struct.get_volume()

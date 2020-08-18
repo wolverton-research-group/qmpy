@@ -6,6 +6,7 @@ import qmpy.materials.element as elt
 
 logger = logging.getLogger(__name__)
 
+
 class Potential(models.Model):
     """
     Class for storing a VASP potential.
@@ -31,7 +32,7 @@ class Potential(models.Model):
     """
 
     potcar = models.TextField()
-    element = models.ForeignKey(elt.Element)
+    element = models.ForeignKey(elt.Element, on_delete=models.PROTECT)
 
     name = models.CharField(max_length=10)
     xc = models.CharField(max_length=3)
@@ -44,22 +45,22 @@ class Potential(models.Model):
     electrons = models.TextField(blank=True, null=True)
 
     class Meta:
-        app_label = 'qmpy'
-        db_table = 'vasp_potentials'
+        app_label = "qmpy"
+        db_table = "vasp_potentials"
 
     def __str__(self):
-        ident = '%s %s' % (self.name, self.xc)
+        ident = "%s %s" % (self.name, self.xc)
         if self.paw:
-            ident += ' PAW'
+            ident += " PAW"
         if self.us:
-            ident += ' US'
+            ident += " US"
         if self.gw:
-            ident += ' GW'
+            ident += " GW"
         return ident
 
     @classmethod
     def read_potcar(cls, potfile):
-        '''
+        """
         Import pseudopotential(s) from VASP POTCAR. 
 
         Make sure to save each of them after importing
@@ -70,13 +71,13 @@ class Potential(models.Model):
 
         Output:
             List of Potential objects
-        '''
+        """
 
         # Read entire POTCAR file
         pots = open(potfile).read()
 
         # Split into the component POTCARs
-        pots = pots.strip().split('End of Dataset')
+        pots = pots.strip().split("End of Dataset")
 
         # Parse each file
         potobjs = []
@@ -86,46 +87,47 @@ class Potential(models.Model):
 
             # Get key information from POTCAR
             potcar = {}
-            for line in pot.split('\n'):
+            for line in pot.split("\n"):
 
                 # Get element name
-                if 'TITEL' in line:
-                    potcar['name'] = line.split()[3]
-                    telt = potcar['name'].split('_')[0]
-                    date = potcar['name'].split('_')[-1]
+                if "TITEL" in line:
+                    potcar["name"] = line.split()[3]
+                    telt = potcar["name"].split("_")[0]
+                    date = potcar["name"].split("_")[-1]
                     try:
-                        potcar['element'] = elt.Element.objects.get(symbol=telt)
+                        potcar["element"] = elt.Element.objects.get(symbol=telt)
                     except:
-                        print "Unknown element in potcar", telt
+                        print("Unknown element in potcar", telt)
                         raise
-                    if 'GW' in line:
-                        potcar['gw'] = True
-                    if 'PAW' in line:
-                        potcar['paw'] = True
-                    if 'US' in line:
-                        potcar['us'] = True
+                    if "GW" in line:
+                        potcar["gw"] = True
+                    if "PAW" in line:
+                        potcar["paw"] = True
+                    if "US" in line:
+                        potcar["us"] = True
 
-                if 'ENMAX' in line:
+                if "ENMAX" in line:
                     data = line.split()
-                    potcar['enmax'] = float(data[2].rstrip(';'))
-                    potcar['enmin'] = float(data[5])
+                    potcar["enmax"] = float(data[2].rstrip(";"))
+                    potcar["enmin"] = float(data[5])
 
-                if 'VRHFIN' in line:
-                    potcar['electrons'] = line.split(':')[1]
+                if "VRHFIN" in line:
+                    potcar["electrons"] = line.split(":")[1]
 
-                if 'LEXCH' in line:
+                if "LEXCH" in line:
                     key = line.split()[-1]
-                    if key == '91':
-                        potcar['xc'] = 'GGA'
-                    elif key == 'CA':
-                        potcar['xc'] = 'LDA'
-                    elif key == 'PE':
-                        potcar['xc'] = 'PBE'
+                    if key == "91":
+                        potcar["xc"] = "GGA"
+                    elif key == "CA":
+                        potcar["xc"] = "LDA"
+                    elif key == "PE":
+                        potcar["xc"] = "PBE"
             potobj, created = cls.objects.get_or_create(**potcar)
             if created:
                 potobj.potcar = pot
             potobjs.append(potobj)
         return potobjs
+
 
 class Hubbard(models.Model):
     """
@@ -143,20 +145,24 @@ class Hubbard(models.Model):
         | u
 
     """
-    element = models.ForeignKey(elt.Element, related_name='hubbards')
+
+    element = models.ForeignKey(
+        elt.Element, related_name="hubbards", on_delete=models.CASCADE
+    )
     convention = models.CharField(max_length=20)
     ox = models.FloatField(default=None, null=True)
-    ligand = models.ForeignKey(elt.Element, related_name='+',
-            null=True, blank=True)
+    ligand = models.ForeignKey(
+        elt.Element, related_name="+", on_delete=models.CASCADE, null=True, blank=True
+    )
 
     u = models.FloatField(default=0)
     l = models.IntegerField(default=-1)
 
     class Meta:
-        app_label = 'qmpy'
-        db_table = 'hubbards'
+        app_label = "qmpy"
+        db_table = "hubbards"
 
-    def __nonzero__(self):
+    def __bool__(self):
         if self.u > 0 and self.l != -1:
             return True
         else:
@@ -176,22 +182,24 @@ class Hubbard(models.Model):
     def __str__(self):
         retval = self.element_id
         if self.ox:
-            retval += '+%d' % (self.ox)
+            retval += "+%d" % (self.ox)
         if self.ligand:
-            retval += '-'+self.ligand_id
-        retval += ', U=%0.2f, L=%d' % (self.u, self.l)
+            retval += "-" + self.ligand_id
+        retval += ", U=%0.2f, L=%d" % (self.u, self.l)
         return retval
+
+    def __hash__(self):
+        return hash(self.__str__())
 
     @property
     def key(self):
-        return '%s_%s' % (self.element_id, self.u)
+        return "%s_%s" % (self.element_id, self.u)
 
     @classmethod
     def get(cls, elt, ox=None, u=0, l=-1, lig=None):
         hub, new = Hubbard.objects.get_or_create(
-                element_id=elt,
-                ligand=lig, ox=ox,
-                l=l, u=u)
+            element_id=elt, ligand=lig, ox=ox, l=l, u=u
+        )
         if new:
             hub.save()
         return hub
