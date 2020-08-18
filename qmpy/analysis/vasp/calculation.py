@@ -1903,8 +1903,9 @@ class Calculation(models.Model):
 
         # Read all outputs
         calc.read_stdout()
-        calc.read_outcar()
-        calc.read_doscar()
+        if not 'edddav' in calc.errors:
+            calc.read_outcar()
+            calc.read_doscar()
 
         # Did the calculation finish without errors?
         if calc.converged:
