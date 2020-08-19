@@ -13,6 +13,7 @@ lwave: False
 lvtot: True
 lelf: True
 lhvar: True
+kpar: 1
 kppra: 8000
 gamma: True
 potentials: vasp_rec
