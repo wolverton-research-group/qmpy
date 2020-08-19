@@ -18,50 +18,76 @@ import datetime
 
 BASE_URL = qmpy_rester.REST_OPTIMADE
 
+
 class OptimadeStructureDetail(generics.RetrieveAPIView):
-    queryset = FormationEnergy.objects.filter(fit='standard')
+    queryset = FormationEnergy.objects.filter(fit="standard")
     serializer_class = OptimadeStructureSerializer
+
 
 class OptimadePagination(LimitOffsetPagination):
     default_limit = 50
+
     def get_paginated_response(self, page_data):
         data = page_data["data"]
         request = page_data["request"]
 
         full_url = request.build_absolute_uri()
-        representation = full_url.replace(BASE_URL, '')
+        representation = full_url.replace(BASE_URL, "")
 
         time_now = time.time()
         time_stamp = datetime.datetime.fromtimestamp(time_now).strftime(
-            '%Y-%m-%d %H:%M:%S'
+            "%Y-%m-%d %H:%M:%S"
         )
 
-        return Response(OrderedDict([
-            ('links', 
-             OrderedDict([('next', self.get_next_link()),
-                          ('previous', self.get_previous_link()),
-              ('base_url', {
-                  "href": BASE_URL,
-                  "meta":{'_oqmd_version': "1.0"}
-              })
-             ])
-            ),
-            ('resource', {}),
-            ('data', data),
-            ('meta', 
-             OrderedDict([
-                 ("query", {"representation": representation}),
-                 ("api_version", "1.0"),
-                 ("time_stamp", time_stamp), 
-                 ("data_returned", min(self.get_limit(request), 
-                                       self.count-self.get_offset(request))),
-                 ("data_available", self.count),
-                 ("more_data_available", (self.get_next_link() != None) or \
-                                         (self.get_previous_link() != None))
-             ])
-            ),
-            ("response_message", "OK")
-        ]))
+        return Response(
+            OrderedDict(
+                [
+                    (
+                        "links",
+                        OrderedDict(
+                            [
+                                ("next", self.get_next_link()),
+                                ("previous", self.get_previous_link()),
+                                (
+                                    "base_url",
+                                    {
+                                        "href": BASE_URL,
+                                        "meta": {"_oqmd_version": "1.0"},
+                                    },
+                                ),
+                            ]
+                        ),
+                    ),
+                    ("resource", {}),
+                    ("data", data),
+                    (
+                        "meta",
+                        OrderedDict(
+                            [
+                                ("query", {"representation": representation}),
+                                ("api_version", "1.0"),
+                                ("time_stamp", time_stamp),
+                                (
+                                    "data_returned",
+                                    min(
+                                        self.get_limit(request),
+                                        self.count - self.get_offset(request),
+                                    ),
+                                ),
+                                ("data_available", self.count),
+                                (
+                                    "more_data_available",
+                                    (self.get_next_link() != None)
+                                    or (self.get_previous_link() != None),
+                                ),
+                            ]
+                        ),
+                    ),
+                    ("response_message", "OK"),
+                ]
+            )
+        )
+
 
 class OptimadeStructureList(generics.ListAPIView):
     serializer_class = OptimadeStructureSerializer
@@ -87,20 +113,20 @@ class OptimadeStructureList(generics.ListAPIView):
     def filter(self, fes):
         request = self.request
 
-        filters = request.GET.get('filter', False)
+        filters = request.GET.get("filter", False)
 
         if not filters:
             return fes
 
         # shortcut to get all stable phases
-        filters = filters.replace('stability=0', 'stability<=0')
+        filters = filters.replace("stability=0", "stability<=0")
 
-        filters = filters.replace('&', ' AND ')
-        filters = filters.replace('|', ' OR ')
-        filters = filters.replace('~', ' NOT ')
+        filters = filters.replace("&", " AND ")
+        filters = filters.replace("|", " OR ")
+        filters = filters.replace("~", " NOT ")
         q = query_to_Q(filters)
         if not q:
-            return [] 
+            return []
         fes = fes.filter(q)
 
         return fes

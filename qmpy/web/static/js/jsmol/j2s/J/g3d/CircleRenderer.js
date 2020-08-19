@@ -2,17 +2,13 @@ Clazz.declarePackage ("J.g3d");
 Clazz.load (["J.g3d.G3DRenderer"], "J.g3d.CircleRenderer", null, function () {
 c$ = Clazz.decorateAsClass (function () {
 this.g3d = null;
-this.xCenter = 0;
-this.yCenter = 0;
-this.zCenter = 0;
-this.sizeCorrection = 0;
 Clazz.instantialize (this, arguments);
 }, J.g3d, "CircleRenderer", null, J.g3d.G3DRenderer);
 Clazz.makeConstructor (c$, 
 function () {
 });
 Clazz.overrideMethod (c$, "set", 
-function (g3d) {
+function (g3d, gdata) {
 try {
 this.g3d = g3d;
 } catch (e) {
@@ -22,22 +18,30 @@ throw e;
 }
 }
 return this;
-}, "J.api.JmolRendererInterface");
-$_M(c$, "plotCircleCenteredClipped", 
+}, "J.api.JmolRendererInterface,JU.GData");
+Clazz.defineMethod (c$, "plotCircleCenteredClipped", 
 function (xCenter, yCenter, zCenter, diameter) {
-if (this.g3d.isClippedXY (diameter, xCenter, yCenter)) return;
+var g = this.g3d;
+var c = g.argbCurrent;
+var width = g.width;
+var zbuf = g.zbuf;
+var p = g.pixel;
 var r = Clazz.doubleToInt (diameter / 2);
-this.sizeCorrection = 1 - (diameter & 1);
-this.xCenter = xCenter;
-this.yCenter = yCenter;
-this.zCenter = zCenter;
+var sizeCorrection = 1 - (diameter & 1);
 var x = r;
 var y = 0;
 var xChange = 1 - 2 * r;
 var yChange = 1;
 var radiusError = 0;
 while (x >= y) {
-this.plot8CircleCenteredClipped (x, y);
+g.plotPixelClippedArgb (c, xCenter + x - sizeCorrection, yCenter + y - sizeCorrection, zCenter, width, zbuf, p);
+g.plotPixelClippedArgb (c, xCenter + x - sizeCorrection, yCenter - y, zCenter, width, zbuf, p);
+g.plotPixelClippedArgb (c, xCenter - x, yCenter + y - sizeCorrection, zCenter, width, zbuf, p);
+g.plotPixelClippedArgb (c, xCenter - x, yCenter - y, zCenter, width, zbuf, p);
+g.plotPixelClippedArgb (c, xCenter + y - sizeCorrection, yCenter + x - sizeCorrection, zCenter, width, zbuf, p);
+g.plotPixelClippedArgb (c, xCenter + y - sizeCorrection, yCenter - x, zCenter, width, zbuf, p);
+g.plotPixelClippedArgb (c, xCenter - y, yCenter + x - sizeCorrection, zCenter, width, zbuf, p);
+g.plotPixelClippedArgb (c, xCenter - y, yCenter - x, zCenter, width, zbuf, p);
 ++y;
 radiusError += yChange;
 yChange += 2;
@@ -47,20 +51,29 @@ radiusError += xChange;
 xChange += 2;
 }}
 }, "~N,~N,~N,~N");
-$_M(c$, "plotCircleCenteredUnclipped", 
+Clazz.defineMethod (c$, "plotCircleCenteredUnclipped", 
 function (xCenter, yCenter, zCenter, diameter) {
 var r = Clazz.doubleToInt (diameter / 2);
-this.sizeCorrection = 1 - (diameter & 1);
-this.xCenter = xCenter;
-this.yCenter = yCenter;
-this.zCenter = zCenter;
+var sizeCorrection = 1 - (diameter & 1);
 var x = r;
 var y = 0;
 var xChange = 1 - 2 * r;
 var yChange = 1;
 var radiusError = 0;
+var g = this.g3d;
+var p = g.pixel;
+var width = g.width;
+var zbuf = g.zbuf;
+var c = g.argbCurrent;
 while (x >= y) {
-this.plot8CircleCenteredUnclipped (x, y);
+g.plotPixelUnclipped (c, xCenter + x - sizeCorrection, yCenter + y - sizeCorrection, zCenter, width, zbuf, p);
+g.plotPixelUnclipped (c, xCenter + x - sizeCorrection, yCenter - y, zCenter, width, zbuf, p);
+g.plotPixelUnclipped (c, xCenter - x, yCenter + y - sizeCorrection, zCenter, width, zbuf, p);
+g.plotPixelUnclipped (c, xCenter - x, yCenter - y, zCenter, width, zbuf, p);
+g.plotPixelUnclipped (c, xCenter + y - sizeCorrection, yCenter + x - sizeCorrection, zCenter, width, zbuf, p);
+g.plotPixelUnclipped (c, xCenter + y - sizeCorrection, yCenter - x, zCenter, width, zbuf, p);
+g.plotPixelUnclipped (c, xCenter - y, yCenter + x - sizeCorrection, zCenter, width, zbuf, p);
+g.plotPixelUnclipped (c, xCenter - y, yCenter - x, zCenter, width, zbuf, p);
 ++y;
 radiusError += yChange;
 yChange += 2;
@@ -70,20 +83,26 @@ radiusError += xChange;
 xChange += 2;
 }}
 }, "~N,~N,~N,~N");
-$_M(c$, "plotFilledCircleCenteredClipped", 
+Clazz.defineMethod (c$, "plotFilledCircleCenteredClipped", 
 function (xCenter, yCenter, zCenter, diameter) {
 var r = Clazz.doubleToInt (diameter / 2);
-this.sizeCorrection = 1 - (diameter & 1);
-this.xCenter = xCenter;
-this.yCenter = yCenter;
-this.zCenter = zCenter;
+var sizeCorrection = 1 - (diameter & 1);
 var x = r;
 var y = 0;
 var xChange = 1 - 2 * r;
 var yChange = 1;
 var radiusError = 0;
+var g = this.g3d;
+var c = g.argbCurrent;
+var width = g.width;
+var height = g.height;
+var zbuf = g.zbuf;
+var p = g.pixel;
 while (x >= y) {
-this.plot8FilledCircleCenteredClipped (x, y);
+this.plotPixelsClipped (c, 2 * x + 1 - sizeCorrection, xCenter - x, yCenter + y - sizeCorrection, zCenter, width, height, zbuf, p);
+this.plotPixelsClipped (c, 2 * x + 1 - sizeCorrection, xCenter - x, yCenter - y, zCenter, width, height, zbuf, p);
+this.plotPixelsClipped (c, 2 * y + 1 - sizeCorrection, xCenter - y, yCenter + x - sizeCorrection, zCenter, width, height, zbuf, p);
+this.plotPixelsClipped (c, 2 * y + 1 - sizeCorrection, xCenter - y, yCenter - x, zCenter, width, height, zbuf, p);
 ++y;
 radiusError += yChange;
 yChange += 2;
@@ -93,19 +112,39 @@ radiusError += xChange;
 xChange += 2;
 }}
 }, "~N,~N,~N,~N");
-$_M(c$, "plotFilledCircleCenteredUnclipped", 
+Clazz.defineMethod (c$, "plotPixelsClipped", 
+ function (argb, count, x, y, z, width, height, zbuf, p) {
+if (y < 0 || y >= height || x >= width) return;
+if (x < 0) {
+count += x;
+x = 0;
+}if (count + x > width) count = width - x;
+if (count <= 0) return;
+var offsetPbuf = y * width + x;
+var offsetMax = offsetPbuf + count;
+while (offsetPbuf < offsetMax) {
+if (z < zbuf[offsetPbuf]) p.addPixel (offsetPbuf, z, argb);
+offsetPbuf++;
+}
+}, "~N,~N,~N,~N,~N,~N,~N,~A,J.g3d.Pixelator");
+Clazz.defineMethod (c$, "plotFilledCircleCenteredUnclipped", 
 function (xCenter, yCenter, zCenter, diameter) {
 var r = Clazz.doubleToInt (diameter / 2);
-this.xCenter = xCenter;
-this.yCenter = yCenter;
-this.zCenter = zCenter;
 var x = r;
 var y = 0;
 var xChange = 1 - 2 * r;
 var yChange = 1;
 var radiusError = 0;
+var g = this.g3d;
+var c = g.argbCurrent;
+var width = g.width;
+var zbuf = g.zbuf;
+var p = g.pixel;
 while (x >= y) {
-this.plot8FilledCircleCenteredUnclipped (x, y);
+g.plotPixelsUnclippedCount (c, 2 * x + 1, xCenter - x, yCenter + y, zCenter, width, zbuf, p);
+g.plotPixelsUnclippedCount (c, 2 * x + 1, xCenter - x, yCenter - y, zCenter, width, zbuf, p);
+g.plotPixelsUnclippedCount (c, 2 * y + 1, xCenter - y, yCenter + x, zCenter, width, zbuf, p);
+g.plotPixelsUnclippedCount (c, 2 * y + 1, xCenter - y, yCenter - x, zCenter, width, zbuf, p);
 ++y;
 radiusError += yChange;
 yChange += 2;
@@ -115,40 +154,4 @@ radiusError += xChange;
 xChange += 2;
 }}
 }, "~N,~N,~N,~N");
-$_M(c$, "plot8CircleCenteredClipped", 
-($fz = function (dx, dy) {
-this.g3d.plotPixelClippedXYZ (this.xCenter + dx - this.sizeCorrection, this.yCenter + dy - this.sizeCorrection, this.zCenter);
-this.g3d.plotPixelClippedXYZ (this.xCenter + dx - this.sizeCorrection, this.yCenter - dy, this.zCenter);
-this.g3d.plotPixelClippedXYZ (this.xCenter - dx, this.yCenter + dy - this.sizeCorrection, this.zCenter);
-this.g3d.plotPixelClippedXYZ (this.xCenter - dx, this.yCenter - dy, this.zCenter);
-this.g3d.plotPixelClippedXYZ (this.xCenter + dy - this.sizeCorrection, this.yCenter + dx - this.sizeCorrection, this.zCenter);
-this.g3d.plotPixelClippedXYZ (this.xCenter + dy - this.sizeCorrection, this.yCenter - dx, this.zCenter);
-this.g3d.plotPixelClippedXYZ (this.xCenter - dy, this.yCenter + dx - this.sizeCorrection, this.zCenter);
-this.g3d.plotPixelClippedXYZ (this.xCenter - dy, this.yCenter - dx, this.zCenter);
-}, $fz.isPrivate = true, $fz), "~N,~N");
-$_M(c$, "plot8CircleCenteredUnclipped", 
-($fz = function (dx, dy) {
-this.g3d.plotPixelUnclipped (this.xCenter + dx - this.sizeCorrection, this.yCenter + dy - this.sizeCorrection, this.zCenter);
-this.g3d.plotPixelUnclipped (this.xCenter + dx - this.sizeCorrection, this.yCenter - dy, this.zCenter);
-this.g3d.plotPixelUnclipped (this.xCenter - dx, this.yCenter + dy - this.sizeCorrection, this.zCenter);
-this.g3d.plotPixelUnclipped (this.xCenter - dx, this.yCenter - dy, this.zCenter);
-this.g3d.plotPixelUnclipped (this.xCenter + dy - this.sizeCorrection, this.yCenter + dx - this.sizeCorrection, this.zCenter);
-this.g3d.plotPixelUnclipped (this.xCenter + dy - this.sizeCorrection, this.yCenter - dx, this.zCenter);
-this.g3d.plotPixelUnclipped (this.xCenter - dy, this.yCenter + dx - this.sizeCorrection, this.zCenter);
-this.g3d.plotPixelUnclipped (this.xCenter - dy, this.yCenter - dx, this.zCenter);
-}, $fz.isPrivate = true, $fz), "~N,~N");
-$_M(c$, "plot8FilledCircleCenteredClipped", 
-($fz = function (dx, dy) {
-this.g3d.plotPixelsClipped (2 * dx + 1 - this.sizeCorrection, this.xCenter - dx, this.yCenter + dy - this.sizeCorrection, this.zCenter);
-this.g3d.plotPixelsClipped (2 * dx + 1 - this.sizeCorrection, this.xCenter - dx, this.yCenter - dy, this.zCenter);
-this.g3d.plotPixelsClipped (2 * dy + 1 - this.sizeCorrection, this.xCenter - dy, this.yCenter + dx - this.sizeCorrection, this.zCenter);
-this.g3d.plotPixelsClipped (2 * dy + 1 - this.sizeCorrection, this.xCenter - dy, this.yCenter - dx, this.zCenter);
-}, $fz.isPrivate = true, $fz), "~N,~N");
-$_M(c$, "plot8FilledCircleCenteredUnclipped", 
-($fz = function (dx, dy) {
-this.g3d.plotPixelsUnclippedCount (2 * dx + 1 - this.sizeCorrection, this.xCenter - dx, this.yCenter + dy - this.sizeCorrection, this.zCenter);
-this.g3d.plotPixelsUnclippedCount (2 * dx + 1 - this.sizeCorrection, this.xCenter - dx, this.yCenter - dy, this.zCenter);
-this.g3d.plotPixelsUnclippedCount (2 * dy + 1 - this.sizeCorrection, this.xCenter - dy, this.yCenter + dx - this.sizeCorrection, this.zCenter);
-this.g3d.plotPixelsUnclippedCount (2 * dy + 1 - this.sizeCorrection, this.xCenter - dy, this.yCenter - dx, this.zCenter);
-}, $fz.isPrivate = true, $fz), "~N,~N");
 });

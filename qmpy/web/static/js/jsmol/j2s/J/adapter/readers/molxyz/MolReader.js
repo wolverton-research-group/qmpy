@@ -1,230 +1,275 @@
 Clazz.declarePackage ("J.adapter.readers.molxyz");
-Clazz.load (["J.adapter.smarter.AtomSetCollectionReader"], "J.adapter.readers.molxyz.MolReader", ["java.lang.Exception", "$.Float", "J.adapter.smarter.Atom", "J.api.JmolAdapter", "J.util.Logger"], function () {
+Clazz.load (["J.adapter.smarter.AtomSetCollectionReader"], "J.adapter.readers.molxyz.MolReader", ["java.lang.Exception", "java.util.Hashtable", "JU.Lst", "$.PT", "J.adapter.smarter.Atom", "J.api.JmolAdapter", "JU.Logger"], function () {
 c$ = Clazz.decorateAsClass (function () {
-this.is2D = false;
-this.isV3000 = false;
-this.dimension = null;
+this.optimize2D = false;
+this.haveAtomSerials = false;
 this.allow2D = true;
+this.iatom0 = 0;
+this.vr = null;
+this.atomCount = 0;
+this.atomData = null;
+this.is2D = false;
 Clazz.instantialize (this, arguments);
 }, J.adapter.readers.molxyz, "MolReader", J.adapter.smarter.AtomSetCollectionReader);
 Clazz.overrideMethod (c$, "initializeReader", 
 function () {
-this.is2D = this.checkFilterKey ("2D");
+this.optimize2D = this.checkFilterKey ("2D");
 });
 Clazz.overrideMethod (c$, "checkLine", 
 function () {
 var isMDL = (this.line.startsWith ("$MDL"));
 if (isMDL) {
 this.discardLinesUntilStartsWith ("$HDR");
-this.readLine ();
+this.rd ();
 if (this.line == null) {
-J.util.Logger.warn ("$HDR not found in MDL RG file");
+JU.Logger.warn ("$HDR not found in MDL RG file");
 this.continuing = false;
 return false;
-}}if (this.doGetModel (++this.modelNumber, null)) {
+}} else if (this.line.equals ("M  END")) {
+return true;
+}if (this.doGetModel (++this.modelNumber, null)) {
+this.iatom0 = this.asc.ac;
 this.processMolSdHeader ();
 this.processCtab (isMDL);
+this.vr = null;
 if (this.isLastModel (this.modelNumber)) {
 this.continuing = false;
 return false;
-}return true;
-}this.discardLinesUntilStartsWith ("$$$$");
+}}if (this.line != null && this.line.indexOf ("$$$$") < 0) this.discardLinesUntilStartsWith ("$$$$");
 return true;
 });
-$_M(c$, "readUserData", 
-($fz = function (atom0) {
-if (this.isV3000) return;
-while (this.readLine () != null && this.line.indexOf ("$$$$") != 0) {
-if (this.line.toUpperCase ().contains ("_PARTIAL_CHARGES")) {
-try {
-var atoms = this.atomSetCollection.getAtoms ();
-for (var i = this.parseIntStr (this.readLine ()); --i >= 0; ) {
-var tokens = J.adapter.smarter.AtomSetCollectionReader.getTokensStr (this.readLine ());
-var atomIndex = this.parseIntStr (tokens[0]) + atom0 - 1;
-var partialCharge = this.parseFloatStr (tokens[1]);
-if (!Float.isNaN (partialCharge)) atoms[atomIndex].partialCharge = partialCharge;
-}
-} catch (e) {
-if (Clazz.exceptionOf (e, Exception)) {
-return;
-} else {
-throw e;
-}
-}
-}}
-}, $fz.isPrivate = true, $fz), "~N");
-Clazz.overrideMethod (c$, "finalizeReader", 
+Clazz.overrideMethod (c$, "finalizeSubclassReader", 
 function () {
 this.finalizeReaderMR ();
 });
-$_M(c$, "finalizeReaderMR", 
+Clazz.defineMethod (c$, "finalizeReaderMR", 
 function () {
-if (this.is2D) this.set2D ();
+if (this.optimize2D) this.set2D ();
 this.isTrajectory = false;
 this.finalizeReaderASCR ();
 });
-$_M(c$, "processMolSdHeader", 
-($fz = function () {
+Clazz.defineMethod (c$, "processMolSdHeader", 
+ function () {
 var header = "";
-var thisDataSetName = this.line;
+var thisDataSetName = this.line.trim ();
+this.asc.setCollectionName (thisDataSetName);
 header += this.line + "\n";
-this.atomSetCollection.setCollectionName (this.line);
-this.readLine ();
+this.rd ();
 if (this.line == null) return;
 header += this.line + "\n";
-this.dimension = (this.line.length < 22 ? "3D" : this.line.substring (20, 22));
-if (!this.allow2D && this.dimension.equals ("2D")) throw  new Exception ("File is 2D, not 3D");
-this.atomSetCollection.setAtomSetCollectionAuxiliaryInfo ("dimension", this.dimension);
-this.readLine ();
+this.set2D (this.line.length >= 22 && this.line.substring (20, 22).equals ("2D"));
+if (this.is2D) {
+if (!this.allow2D) throw  new Exception ("File is 2D, not 3D");
+this.appendLoadNote ("This model is 2D. Its 3D structure has not been generated.");
+}this.rd ();
 if (this.line == null) return;
+this.line = this.line.trim ();
 header += this.line + "\n";
-J.util.Logger.info (header);
+JU.Logger.info (header);
 this.checkCurrentLineForScript ();
-this.atomSetCollection.setAtomSetCollectionAuxiliaryInfo ("fileHeader", header);
+this.asc.setInfo ("fileHeader", header);
 this.newAtomSet (thisDataSetName);
-}, $fz.isPrivate = true, $fz));
-$_M(c$, "processCtab", 
-($fz = function (isMDL) {
-var tokens = null;
+});
+Clazz.defineMethod (c$, "processCtab", 
+ function (isMDL) {
 if (isMDL) this.discardLinesUntilStartsWith ("$CTAB");
-this.isV3000 = (this.readLine () != null && this.line.indexOf ("V3000") >= 0);
-if (this.isV3000) {
-this.is2D = (this.dimension.equals ("2D"));
+if (this.rd () == null) return;
+if (this.line.indexOf ("V3000") >= 0) {
+this.optimize2D = this.is2D;
+this.vr = (this.getInterface ("J.adapter.readers.molxyz.V3000Rdr")).set (this);
 this.discardLinesUntilContains ("COUNTS");
-tokens = this.getTokens ();
-}if (this.line == null) return;
-var atomCount = (this.isV3000 ? this.parseIntStr (tokens[3]) : this.parseIntRange (this.line, 0, 3));
-var bondCount = (this.isV3000 ? this.parseIntStr (tokens[4]) : this.parseIntRange (this.line, 3, 6));
-var atom0 = this.atomSetCollection.getAtomCount ();
-this.readAtoms (atomCount);
-this.readBonds (bondCount);
-this.readUserData (atom0);
-if (this.isV3000) this.discardLinesUntilContains ("END CTAB");
-this.applySymmetryAndSetTrajectory ();
-}, $fz.isPrivate = true, $fz), "~B");
-$_M(c$, "readAtoms", 
-($fz = function (atomCount) {
-if (this.isV3000) this.discardLinesUntilContains ("BEGIN ATOM");
-for (var i = 0; i < atomCount; ++i) {
-this.readLine ();
+this.vr.readAtomsAndBonds (this.getTokens ());
+} else {
+this.readAtomsAndBonds (this.parseIntRange (this.line, 0, 3), this.parseIntRange (this.line, 3, 6));
+}this.applySymmetryAndSetTrajectory ();
+}, "~B");
+Clazz.defineMethod (c$, "readAtomsAndBonds", 
+ function (ac, bc) {
+this.atomCount = ac;
+for (var i = 0; i < ac; ++i) {
+this.rd ();
+var len = this.line.length;
 var elementSymbol;
 var x;
 var y;
 var z;
 var charge = 0;
 var isotope = 0;
-var iAtom = i + 1;
-if (this.isV3000) {
-this.checkLineContinuation ();
-var tokens = this.getTokens ();
-iAtom = this.parseIntStr (tokens[2]);
-elementSymbol = tokens[3];
-if (elementSymbol.equals ("*")) continue;
-x = this.parseFloatStr (tokens[4]);
-y = this.parseFloatStr (tokens[5]);
-z = this.parseFloatStr (tokens[6]);
-for (var j = 7; j < tokens.length; j++) {
-var s = tokens[j].toUpperCase ();
-if (s.startsWith ("CHG=")) charge = this.parseIntStr (tokens[j].substring (4));
- else if (s.startsWith ("MASS=")) isotope = this.parseIntStr (tokens[j].substring (5));
-}
-if (isotope > 1 && elementSymbol.equals ("H")) isotope = 1 - isotope;
-} else {
-if (this.line.length > 34) {
-elementSymbol = this.line.substring (31, 34).trim ();
-} else {
-elementSymbol = this.line.substring (31).trim ();
-}x = this.parseFloatRange (this.line, 0, 10);
+var iAtom = -2147483648;
+x = this.parseFloatRange (this.line, 0, 10);
 y = this.parseFloatRange (this.line, 10, 20);
 z = this.parseFloatRange (this.line, 20, 30);
-if (this.line.length >= 39) {
+if (this.is2D && z != 0) this.set2D (false);
+if (len < 34) {
+elementSymbol = this.line.substring (31).trim ();
+} else {
+elementSymbol = this.line.substring (31, 34).trim ();
+if (elementSymbol.equals ("H1")) {
+elementSymbol = "H";
+isotope = 1;
+}if (len >= 39) {
 var code = this.parseIntRange (this.line, 36, 39);
 if (code >= 1 && code <= 7) charge = 4 - code;
 code = this.parseIntRange (this.line, 34, 36);
 if (code != 0 && code >= -3 && code <= 4) {
-isotope = J.api.JmolAdapter.getNaturalIsotope (J.api.JmolAdapter.getElementNumber (elementSymbol));
+isotope = J.api.JmolAdapter.getNaturalIsotope (J.api.JmolAdapter.getElementNumber (elementSymbol)) + code;
+}if (iAtom == -2147483648 && this.haveAtomSerials) iAtom = i + 1;
+}}this.addMolAtom (iAtom, isotope, elementSymbol, charge, x, y, z);
+}
+this.asc.setModelInfoForSet ("dimension", (this.is2D ? "2D" : "3D"), this.asc.iSet);
+this.rd ();
+if (this.line.startsWith ("V  ")) {
+this.readAtomValues ();
+}if (bc == 0) this.asc.setNoAutoBond ();
+for (var i = 0; i < bc; ++i) {
+if (i > 0) this.rd ();
+var iAtom1;
+var iAtom2;
+var stereo = 0;
+iAtom1 = this.line.substring (0, 3).trim ();
+iAtom2 = this.line.substring (3, 6).trim ();
+var order = this.parseIntRange (this.line, 6, 9);
+if (this.optimize2D && order == 1 && this.line.length >= 12) stereo = this.parseIntRange (this.line, 9, 12);
+order = this.fixOrder (order, stereo);
+if (this.haveAtomSerials) this.asc.addNewBondFromNames (iAtom1, iAtom2, order);
+ else this.asc.addNewBondWithOrder (this.iatom0 + this.parseIntStr (iAtom1) - 1, this.iatom0 + this.parseIntStr (iAtom2) - 1, order);
+}
+var molData =  new java.util.Hashtable ();
+var _keyList =  new JU.Lst ();
+this.rd ();
+while (this.line != null && this.line.indexOf ("$$$$") != 0) {
+if (this.line.indexOf (">") == 0) {
+this.readMolData (molData, _keyList);
+continue;
+}if (this.line.startsWith ("M  ISO")) {
+this.readIsotopes ();
+continue;
+}this.rd ();
+}
+if (this.atomData != null) {
+var atomValueName = molData.get ("atom_value_name");
+molData.put (atomValueName == null ? "atom_values" : atomValueName.toString (), this.atomData);
+}if (!molData.isEmpty ()) {
+this.asc.setCurrentModelInfo ("molDataKeys", _keyList);
+this.asc.setCurrentModelInfo ("molData", molData);
+}}, "~N,~N");
+Clazz.defineMethod (c$, "set2D", 
+ function (b) {
+this.is2D = b;
+this.asc.setInfo ("dimension", (b ? "2D" : "3D"));
+}, "~B");
+Clazz.defineMethod (c$, "readAtomValues", 
+ function () {
+this.atomData =  new Array (this.atomCount);
+for (var i = this.atomData.length; --i >= 0; ) this.atomData[i] = "";
+
+while (this.line.indexOf ("V  ") == 0) {
+var iAtom = this.parseIntAt (this.line, 3);
+if (iAtom < 1 || iAtom > this.atomCount) {
+JU.Logger.error ("V  nnn does not evalute to a valid atom number: " + iAtom);
+return;
+}var s = this.line.substring (6).trim ();
+this.atomData[iAtom - 1] = s;
+this.rd ();
+}
+});
+Clazz.defineMethod (c$, "readIsotopes", 
+ function () {
+var n = this.parseIntAt (this.line, 6);
+try {
+var i0 = this.asc.getLastAtomSetAtomIndex ();
+for (var i = 0, pt = 9; i < n; i++) {
+var ipt = this.parseIntAt (this.line, pt);
+var atom = this.asc.atoms[ipt + i0 - 1];
+var iso = this.parseIntAt (this.line, pt + 4);
+pt += 8;
+atom.elementSymbol = "" + iso + JU.PT.replaceAllCharacters (atom.elementSymbol, "0123456789", "");
+}
+} catch (e) {
+}
+this.rd ();
+});
+Clazz.defineMethod (c$, "readMolData", 
+ function (molData, _keyList) {
+var atoms = this.asc.atoms;
+var dataName = JU.PT.trim (this.line, "> <").toLowerCase ();
+var data = "";
+var fdata = null;
+while (this.rd () != null && !this.line.equals ("$$$$") && this.line.length > 0) data += (this.line.length == 81 && this.line.charAt (80) == '+' ? this.line.substring (0, 80) : this.line + "\n");
+
+data = JU.PT.trim (data, "\n");
+JU.Logger.info (dataName + ":" + JU.PT.esc (data));
+molData.put (dataName, data);
+_keyList.addLast (dataName);
+var ndata = 0;
+if (dataName.toUpperCase ().contains ("_PARTIAL_CHARGES")) {
+try {
+fdata = JU.PT.parseFloatArray (data);
+for (var i = this.asc.getLastAtomSetAtomIndex (), n = this.asc.ac; i < n; i++) atoms[i].partialCharge = 0;
+
+var pt = 0;
+for (var i = Clazz.floatToInt (fdata[pt++]); --i >= 0; ) {
+var atomIndex = Clazz.floatToInt (fdata[pt++]) + this.iatom0 - 1;
+var partialCharge = fdata[pt++];
+atoms[atomIndex].partialCharge = partialCharge;
+ndata++;
+}
+} catch (e) {
+for (var i = this.asc.getLastAtomSetAtomIndex (), n = this.asc.ac; i < n; i++) atoms[i].partialCharge = 0;
+
+JU.Logger.error ("error reading " + dataName + " field -- partial charges cleared");
+}
+JU.Logger.info (ndata + " partial charges read");
+} else if (dataName.toUpperCase ().contains ("ATOM_NAMES")) {
+ndata = 0;
+try {
+var tokens = JU.PT.getTokens (data);
+var pt = 0;
+for (var i = this.parseIntStr (tokens[pt++]); --i >= 0; ) {
+var iatom;
+while ((iatom = this.parseIntStr (tokens[pt++])) == -2147483648) {
+}
+var atomIndex = iatom + this.iatom0 - 1;
+var name = tokens[pt++];
+if (!name.equals (".")) atoms[atomIndex].atomName = name;
+ndata++;
+}
+} catch (e) {
+JU.Logger.error ("error reading " + dataName + " field");
+}
+JU.Logger.info (ndata + " atom names read");
+}}, "java.util.Map,JU.Lst");
+Clazz.defineMethod (c$, "addMolAtom", 
+function (iAtom, isotope, elementSymbol, charge, x, y, z) {
 switch (isotope) {
 case 0:
 break;
 case 1:
-isotope = -code;
+elementSymbol = "1H";
 break;
-default:
-isotope += code;
-}
-}}}switch (isotope) {
-case 0:
+case 2:
+elementSymbol = "2H";
 break;
-case -1:
-elementSymbol = "D";
-break;
-case -2:
-elementSymbol = "T";
+case 3:
+elementSymbol = "3H";
 break;
 default:
 elementSymbol = isotope + elementSymbol;
 }
-if (this.is2D && z != 0) this.is2D = false;
+if (this.optimize2D && z != 0) this.optimize2D = false;
 var atom =  new J.adapter.smarter.Atom ();
 atom.elementSymbol = elementSymbol;
 atom.formalCharge = charge;
 this.setAtomCoordXYZ (atom, x, y, z);
-atom.atomSerial = iAtom;
-this.atomSetCollection.addAtomWithMappedSerialNumber (atom);
-}
-if (this.isV3000) this.discardLinesUntilContains ("END ATOM");
-}, $fz.isPrivate = true, $fz), "~N");
-$_M(c$, "checkLineContinuation", 
-($fz = function () {
-while (this.line.endsWith ("-")) {
-var s = this.line;
-this.readLine ();
-this.line = s + this.line;
-}
-}, $fz.isPrivate = true, $fz));
-$_M(c$, "readBonds", 
-($fz = function (bondCount) {
-if (this.isV3000) this.discardLinesUntilContains ("BEGIN BOND");
-for (var i = 0; i < bondCount; ++i) {
-this.readLine ();
-var iAtom1;
-var iAtom2;
-var order;
-var stereo = 0;
-if (this.isV3000) {
-this.checkLineContinuation ();
-var tokens = this.getTokens ();
-order = this.parseIntStr (tokens[3]);
-iAtom1 = this.parseIntStr (tokens[4]);
-iAtom2 = this.parseIntStr (tokens[5]);
-for (var j = 6; j < tokens.length; j++) {
-var s = tokens[j].toUpperCase ();
-if (s.startsWith ("CFG=")) {
-stereo = this.parseIntStr (tokens[j].substring (4));
-break;
-} else if (s.startsWith ("ENDPTS=")) {
-if (this.line.indexOf ("ATTACH=ALL") < 0) continue;
-tokens = J.adapter.smarter.AtomSetCollectionReader.getTokensAt (this.line, this.line.indexOf ("ENDPTS=") + 8);
-var n = this.parseIntStr (tokens[0]);
-order = this.fixOrder (order, 0);
-for (var k = 1; k <= n; k++) {
-iAtom2 = this.parseIntStr (tokens[k]);
-this.atomSetCollection.addNewBondWithMappedSerialNumbers (iAtom1, iAtom2, order);
-}
-break;
-}}
+if (iAtom == -2147483648) {
+this.asc.addAtom (atom);
 } else {
-iAtom1 = this.parseIntRange (this.line, 0, 3);
-iAtom2 = this.parseIntRange (this.line, 3, 6);
-order = this.parseIntRange (this.line, 6, 9);
-if (this.is2D && order == 1 && this.line.length >= 12) stereo = this.parseIntRange (this.line, 9, 12);
-}order = this.fixOrder (order, stereo);
-this.atomSetCollection.addNewBondWithMappedSerialNumbers (iAtom1, iAtom2, order);
-}
-if (this.isV3000) this.discardLinesUntilContains ("END BOND");
-}, $fz.isPrivate = true, $fz), "~N");
-$_M(c$, "fixOrder", 
-($fz = function (order, stereo) {
+this.haveAtomSerials = true;
+atom.atomSerial = iAtom;
+this.asc.addAtomWithMappedSerialNumber (atom);
+}}, "~N,~N,~S,~N,~N,~N,~N");
+Clazz.defineMethod (c$, "fixOrder", 
+function (order, stereo) {
 switch (order) {
 default:
 case 0:
@@ -253,7 +298,19 @@ return 514;
 case 8:
 case 9:
 return 33;
+case 14:
+return 4;
+case 15:
+return 5;
+case 16:
+return 6;
 }
 return order;
-}, $fz.isPrivate = true, $fz), "~N,~N");
+}, "~N,~N");
+Clazz.defineMethod (c$, "addMolBond", 
+function (iAtom1, iAtom2, order, stereo) {
+order = this.fixOrder (order, stereo);
+if (this.haveAtomSerials) this.asc.addNewBondFromNames (iAtom1, iAtom2, order);
+ else this.asc.addNewBondWithOrder (this.iatom0 + this.parseIntStr (iAtom1) - 1, this.iatom0 + this.parseIntStr (iAtom2) - 1, order);
+}, "~S,~S,~N,~N");
 });

@@ -2,9 +2,10 @@ import numpy as np
 import logging
 
 import qmpy
-from renderable import *
+from .renderable import *
 
 logger = logging.getLogger(__name__)
+
 
 class Point(Renderable):
     def __init__(self, coord, label=None, **kwargs):
@@ -30,35 +31,35 @@ class Point(Renderable):
         return len(self.coord)
 
     def draw_in_matplotlib(self, **kwargs):
-        if not kwargs.get('axes'):
+        if not kwargs.get("axes"):
             axes = plt.gca()
         else:
-            axes = kwargs['axes']
+            axes = kwargs["axes"]
         options = dict(self.options)
         options.update(kwargs)
         axes.scatter(*self.coord, **options)
-        #if self.label:
+        # if self.label:
         #    plt.text(x, y, self.label)
 
     def get_flot_series(self, **kwargs):
         pc = PointCollection([self], **self.options)
         return pc.get_flot_series()
 
+
 class PointCollection(Renderable):
     def __init__(self, points, label=None, fill=False, **kwargs):
-        self.points = [ Point(pt) for pt in points ]
+        self.points = [Point(pt) for pt in points]
         self.label = label
         self.fill = fill
         self.options = kwargs
 
     @property
     def as_pairs(self):
-        return [ pt.coord for pt in self.points ]
+        return [pt.coord for pt in self.points]
 
     @property
     def as_axes(self):
-        return [ [ pt.coord[i] for pt in self.points ]
-                   for i in range(self.dim) ]
+        return [[pt.coord[i] for pt in self.points] for i in range(self.dim)]
 
     def draw_in_matplotlib(self, **kwargs):
         options = dict(self.options)
@@ -67,15 +68,14 @@ class PointCollection(Renderable):
             point.draw_in_matplotlib(**options)
 
     def get_flot_series(self, **kwargs):
-        series = {'data': self.as_pairs, 'points':{'show':True,
-            'fill':self.fill}} 
+        series = {"data": self.as_pairs, "points": {"show": True, "fill": self.fill}}
         if self.label:
-            series['label'] = self.label
+            series["label"] = self.label
         series.update(self.options)
-        series['labels'] = [ pt.label for pt in self.points ]
+        series["labels"] = [pt.label for pt in self.points]
         series.update(kwargs)
         return series
 
     @property
     def dim(self):
-        return min([p.dim for p in self.points ])
+        return min([p.dim for p in self.points])

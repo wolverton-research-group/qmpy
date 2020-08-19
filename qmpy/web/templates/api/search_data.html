@@ -1,5 +1,5 @@
 {% load crispy_forms_tags %}
-{% load admin_static %}
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -11,7 +11,20 @@
     <script src="http://code.jquery.com/ui/1.11.0/jquery-ui.js">
     </script>
     <script type="text/javascript" src="{% static "js/bootstrap-tab.js" %}"></script>
-</head> 
+</head>
+<script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Dataset",
+      "name": "OQMD Materials Property Query Engine",
+      "url": "http://www.oqmd.org/api/search",
+      "description":"Search, select and download OQMD materials data with RESTful API backed search-form which supports both simple and complex logical queries",
+      "keywords":"MATERIALS DATA, COMPUTATIONAL MATERIALS, DFT, DENSITY FUNCTIONAL THEORY, THERMODYNAMIC PROPERTIES, CRYSTAL STRUCTURAL DATA, MATERIAL CRYSTAL STRUCTURE, MATERIALS DISCOVERY, INORGANIC MATERIALS",
+      "license" : "https://creativecommons.org/licenses/by/4.0/"
+     
+    }
+</script>
+ 
 <style>
 table {
     border-spacing: 0;

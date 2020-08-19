@@ -2,20 +2,22 @@ from tempfile import mkstemp
 import os.path
 
 from django.http import HttpResponse
-from django.template import RequestContext
-from django.shortcuts import render_to_response
-from django.core.context_processors import csrf
+from django.shortcuts import render
+from django.template.context_processors import csrf
 
-import StringIO
+from io import StringIO
+from qmpy.io import read
 from qmpy import *
 from ..tools import get_globals
 
 global custom_data
 custom_data = None
 
+
 def vis_data(request):
     global custom_data
-    data = {'crystal_data':"""Cr Te O
+    data = {
+        "crystal_data": """Cr Te O
  1.0
 7.016000 0.000000 0.000000
 0.000000 7.545000 0.000000
@@ -56,24 +58,24 @@ direct
  0.672300 0.861800 0.415800
  0.327700 0.361800 0.084200
  0.327700 0.138200 0.584200
- 0.672300 0.638200 0.915800"""}
+ 0.672300 0.638200 0.915800"""
+    }
     p = request.POST
-    if request.method == 'POST':
-        custom_data = p.get('crystal_data', '')
-        data['crystal_data'] = custom_data
-        f = StringIO.StringIO()
+    if request.method == "POST":
+        custom_data = p.get("crystal_data", "")
+        data["crystal_data"] = custom_data
+        f = StringIO()
         f.write(custom_data)
-        s = io.read(f)
+        s = read(f)
         s.symmetrize()
-        data['structure'] = s
+        data["structure"] = s
     data.update(csrf(request))
-    custom_data = data['crystal_data']
-    return render_to_response('analysis/view_data.html',
-            get_globals(data),
-            RequestContext(request))
+    custom_data = data["crystal_data"]
+    return render(request, "analysis/view_data.html", context=get_globals(data))
+
 
 def jsmol(request):
     global custom_data
-    f = StringIO.StringIO()
+    f = StringIO()
     f.write(custom_data)
     return HttpResponse(f.getvalue(), content_type="plain/text")

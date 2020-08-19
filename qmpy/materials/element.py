@@ -9,6 +9,7 @@ from django.db import models
 from qmpy.db.custom import DictField
 from qmpy.utils import *
 
+
 class Element(models.Model):
     """
     Core model for an element.
@@ -66,6 +67,7 @@ class Element(models.Model):
       HHI values from Gaultois, M. et al. Chem. Mater. 25, 2911-2920 (2013).
 
     """
+
     ### Identification
     z = models.IntegerField()
     name = models.CharField(max_length=20)
@@ -104,8 +106,8 @@ class Element(models.Model):
     radioactive = models.BooleanField(default=False)
 
     class Meta:
-        app_label = 'qmpy'
-        db_table = 'elements'
+        app_label = "qmpy"
+        db_table = "elements"
 
     # builtins
     def __str__(self):
@@ -128,10 +130,10 @@ class Element(models.Model):
         if isinstance(value, cls):
             return value
         elif isinstance(value, list):
-            return [ cls.get(v) for v in value ]
+            return [cls.get(v) for v in value]
         elif isinstance(value, int):
             return cls.objects.get(z=value)
-        elif isinstance(value, basestring):
+        elif isinstance(value, str):
             return cls.objects.get(symbol=value)
 
     # methods
@@ -140,6 +142,7 @@ class Element(models.Model):
         for s in self.species_set.all():
             counts[s.ox] = s.structure_set.count()
         return counts
+
 
 class Species(models.Model):
     """
@@ -155,13 +158,16 @@ class Species(models.Model):
       | ox: Oxidation state (float)
 
     """
+
     name = models.CharField(max_length=8, primary_key=True)
-    element = models.ForeignKey(Element, blank=True, null=True)
+    element = models.ForeignKey(
+        Element, blank=True, null=True, on_delete=models.CASCADE
+    )
     ox = models.FloatField(blank=True, null=True)
 
     class Meta:
-        app_label = 'qmpy'
-        db_table = 'species'
+        app_label = "qmpy"
+        db_table = "species"
 
     # builtins
     def __str__(self):
@@ -191,7 +197,7 @@ class Species(models.Model):
         """
         if isinstance(value, cls):
             return value
-        elif isinstance(value, basestring):
+        elif isinstance(value, str):
             spec, new = cls.objects.get_or_create(name=value)
             if new:
                 elt, ox = parse_species(value)
@@ -200,7 +206,7 @@ class Species(models.Model):
                 spec.save()
             return spec
         elif isinstance(value, list):
-            return [ cls.get(value) for value in list ]
+            return [cls.get(value) for value in list]
 
     @property
     def ox_format(self):
@@ -210,4 +216,3 @@ class Species(models.Model):
             return int(self.ox)
         else:
             return float(round(self.ox, 3))
-        

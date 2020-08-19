@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.jvxl.readers");
-Clazz.load (["J.jvxl.readers.AtomDataReader", "J.util.BS"], "J.jvxl.readers.IsoIntersectReader", ["java.lang.Float"], function () {
+Clazz.load (["J.jvxl.readers.AtomDataReader", "JU.BS"], "J.jvxl.readers.IsoIntersectReader", ["java.lang.Float"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.myBsA = null;
 this.myBsB = null;
@@ -11,8 +11,8 @@ this.values = null;
 Clazz.instantialize (this, arguments);
 }, J.jvxl.readers, "IsoIntersectReader", J.jvxl.readers.AtomDataReader);
 Clazz.prepareFields (c$, function () {
-this.myBsA =  new J.util.BS ();
-this.myBsB =  new J.util.BS ();
+this.myBsA =  new JU.BS ();
+this.myBsB =  new JU.BS ();
 this.bsAtomMinMax =  new Array (2);
 this.values =  Clazz.newFloatArray (2, 0);
 });
@@ -32,6 +32,9 @@ this.initializeVolumetricData ();
 this.volumeData.setUnitVectors ();
 this.thisPlaneB =  Clazz.newFloatArray (this.volumeData.getYzCount (), 0);
 this.voxelSource =  Clazz.newIntArray (this.volumeData.nPoints, 0);
+this.vl0 = this.volumeData.volumetricVectorLengths[0];
+this.vl1 = this.volumeData.volumetricVectorLengths[1];
+this.vl2 = this.volumeData.volumetricVectorLengths[2];
 this.getAtomMinMax (this.myBsA, this.bsAtomMinMax[0] =  new Array (this.nPointsX));
 this.getAtomMinMax (this.myBsB, this.bsAtomMinMax[1] =  new Array (this.nPointsX));
 return true;
@@ -43,18 +46,18 @@ this.params.fullyLit = true;
 this.point = this.params.point;
 if (Clazz.instanceOf (this.params.func, String)) {
 this.funcType = (this.params.func.equals ("a-b") ? 2 : this.params.func.equals ("a+b") ? 1 : 3);
-} else if (this.params.func == null || this.atomDataServer == null) {
+} else if (this.params.func == null || this.sg.atomDataServer == null) {
 this.funcType = 2;
 } else {
 this.func = this.params.func;
 }if (this.contactPair == null) {
 var bsA = this.params.intersection[0];
 var bsB = this.params.intersection[1];
-var bsSelected =  new J.util.BS ();
+var bsSelected =  new JU.BS ();
 bsSelected.or (bsA);
 bsSelected.or (bsB);
 this.doUseIterator = true;
-this.getAtoms (bsSelected, this.doAddHydrogens, true, true, false, false, false, NaN);
+this.getAtoms (bsSelected, this.doAddHydrogens, true, true, false, false, false, NaN, null);
 for (var i = bsA.nextSetBit (0); i >= 0; i = bsA.nextSetBit (i + 1)) this.myBsA.set (this.myIndex[i]);
 
 for (var i = bsB.nextSetBit (0); i >= 0; i = bsB.nextSetBit (i + 1)) this.myBsB.set (this.myIndex[i]);
@@ -89,8 +92,8 @@ if (!this.setVoxels ()) this.resetPlane (0);
 if (this.contactPair == null) this.unsetVoxelData ();
 return this.thisPlane;
 }, "~N");
-$_M(c$, "setVoxels", 
-($fz = function () {
+Clazz.defineMethod (c$, "setVoxels", 
+ function () {
 for (var i = 0; i < this.yzCount; i++) {
 var va = this.thisPlane[i];
 var vb = this.thisPlaneB[i];
@@ -99,9 +102,9 @@ if (Float.isNaN (v)) return false;
 this.thisPlane[i] = v;
 }
 return true;
-}, $fz.isPrivate = true, $fz));
-$_M(c$, "getValueAB", 
-($fz = function (va, vb) {
+});
+Clazz.defineMethod (c$, "getValueAB", 
+ function (va, vb) {
 if (va == 3.4028235E38 || vb == 3.4028235E38 || Float.isNaN (va) || Float.isNaN (vb)) return 3.4028235E38;
 switch (this.funcType) {
 case 1:
@@ -114,22 +117,22 @@ return (va > vb ? va : vb);
 default:
 this.values[0] = va;
 this.values[1] = vb;
-return this.atomDataServer.evalFunctionFloat (this.func[0], this.func[1], this.values);
+return this.sg.atomDataServer.evalFunctionFloat (this.func[0], this.func[1], this.values);
 }
-}, $fz.isPrivate = true, $fz), "~N,~N");
+}, "~N,~N");
 Clazz.overrideMethod (c$, "getValueAtPoint", 
 function (pt, getSource) {
 return this.getValueAB (this.getValueAtPoint2 (pt, this.myBsA), this.getValueAtPoint2 (pt, this.myBsB));
-}, "J.util.P3,~B");
-$_M(c$, "getValueAtPoint2", 
-($fz = function (pt, bs) {
+}, "JU.T3,~B");
+Clazz.defineMethod (c$, "getValueAtPoint2", 
+ function (pt, bs) {
 var value = 3.4028235E38;
 for (var iAtom = bs.nextSetBit (0); iAtom >= 0; iAtom = bs.nextSetBit (iAtom + 1)) {
-var r = pt.distance (this.atomXyz[iAtom]) - this.atomRadius[iAtom];
+var r = pt.distance (this.atomXyzTruncated[iAtom]) - this.atomRadius[iAtom];
 if (r < value) value = r;
 }
 return (value == 3.4028235E38 ? NaN : value);
-}, $fz.isPrivate = true, $fz), "J.util.P3,J.util.BS");
+}, "JU.T3,JU.BS");
 Clazz.defineStatics (c$,
 "TYPE_FUNCTION", 0,
 "TYPE_SUM", 1,

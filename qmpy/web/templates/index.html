@@ -1,5 +1,5 @@
 {% extends "base_site.html" %}
-{% load admin_static %}
+{% load static %}
 {% block title %}
 OQMD
 {% endblock %}
@@ -9,6 +9,16 @@ OQMD
 {% endblock %}
 
 {% block content %}
+
+<script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "url": "http://www.oqmd.org",
+      "logo": "http://oqmd.org/static/img/new_logo_oqmd.png",
+      "description":"Open Quantum Materials Database (OQMD) is a database of DFT calculated thermodynamic and structural properties of 600,000+ materials, created in Chris Wolverton's group at Northwestern University"
+    }
+</script>
 
 <div style="width:500px;box-shadow:none;border-color:rgba(2, 128, 144,
     1);min-height:30px;border-width:5px;" class="box">

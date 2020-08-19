@@ -1,17 +1,20 @@
 Clazz.declarePackage ("J.adapter.readers.xtal");
-Clazz.load (["J.adapter.smarter.AtomSetCollectionReader"], "J.adapter.readers.xtal.AbinitReader", ["J.util.TextFormat"], function () {
+Clazz.load (["J.adapter.smarter.AtomSetCollectionReader"], "J.adapter.readers.xtal.AbinitReader", null, function () {
 c$ = Clazz.decorateAsClass (function () {
-this.cellLattice = null;
-this.atomList = null;
+this.znucl = null;
+this.inputOnly = false;
 this.nAtom = 0;
 this.nType = 0;
 this.typeArray = null;
+this.cellLattice = null;
 Clazz.instantialize (this, arguments);
 }, J.adapter.readers.xtal, "AbinitReader", J.adapter.smarter.AtomSetCollectionReader);
 Clazz.overrideMethod (c$, "initializeReader", 
 function () {
 this.setSpaceGroupName ("P1");
 this.doApplySymmetry = true;
+this.setFractionalCoordinates (false);
+this.inputOnly = this.checkFilterKey ("INPUT");
 });
 Clazz.overrideMethod (c$, "checkLine", 
 function () {
@@ -27,93 +30,78 @@ this.readAtomSpecies ();
 this.readSpaceGroup ();
 } else if (this.line.contains ("Real(R)+Recip(G)")) {
 this.readIntiallattice ();
-} else if (this.line.contains ("xred")) {
-this.readIntitfinalCoord ();
+if (this.inputOnly) this.continuing = false;
+} else if (this.line.contains ("xcart")) {
+this.readAtoms ();
 }return true;
 });
-$_M(c$, "readNoatom", 
-($fz = function () {
-var tokens = J.adapter.smarter.AtomSetCollectionReader.getTokensStr (this.line);
+Clazz.defineMethod (c$, "readNoatom", 
+ function () {
+var tokens = this.getTokens ();
 if (tokens.length <= 2) this.nAtom = this.parseIntStr (tokens[1]);
-}, $fz.isPrivate = true, $fz));
-$_M(c$, "readNotypes", 
-($fz = function () {
-var tokens = J.adapter.smarter.AtomSetCollectionReader.getTokensStr (this.line);
+});
+Clazz.defineMethod (c$, "readNotypes", 
+ function () {
+var tokens = this.getTokens ();
 if (tokens.length <= 2) this.nType = this.parseIntStr (tokens[1]);
-}, $fz.isPrivate = true, $fz));
-$_M(c$, "readTypesequence", 
-($fz = function () {
-this.typeArray =  Clazz.newIntArray (this.nAtom, 0);
-var i = 0;
-while (this.line != null && this.line.indexOf ("wtk") < 0) {
-var tmp = this.line;
-if (this.line.contains ("type")) tmp = J.util.TextFormat.simpleReplace (tmp, "type", "");
-if (this.line.contains ("typat")) tmp = J.util.TextFormat.simpleReplace (tmp, "typat", "");
-var tokens = J.adapter.smarter.AtomSetCollectionReader.getTokensStr (tmp);
-for (var j = 0; j < tokens.length; j++) {
-this.typeArray[i] = this.parseIntStr (tokens[j]);
-i++;
-}
-this.readLine ();
-}
-}, $fz.isPrivate = true, $fz));
-$_M(c$, "readAtomSpecies", 
-($fz = function () {
-this.atomList =  new Array (this.nAtom);
-this.readLine ();
-var pseudo = J.adapter.smarter.AtomSetCollectionReader.getTokensStr (this.line);
-var pseudoType = this.parseIntStr (pseudo[4]);
+});
+Clazz.defineMethod (c$, "readTypesequence", 
+ function () {
+this.fillFloatArray (this.line.substring (12), 0, this.typeArray =  Clazz.newFloatArray (this.nAtom, 0));
+});
+Clazz.defineMethod (c$, "readAtomSpecies", 
+ function () {
+this.znucl =  Clazz.newFloatArray (this.nType, 0);
 for (var i = 0; i < this.nType; i++) {
-var tokenIndex = 0;
 this.discardLinesUntilContains ("zion");
-var tmp = J.util.TextFormat.simpleReplace (this.line, ".", " ");
-var tokens = J.adapter.smarter.AtomSetCollectionReader.getTokensStr (tmp);
-if (tokens[0] === "-") tokenIndex = 1;
-var atomicNo = this.parseIntStr (tokens[tokenIndex]);
-if (pseudoType == atomicNo) {
-for (var j = 0; j < this.typeArray.length; j++) {
-this.atomList[j] = J.adapter.smarter.AtomSetCollectionReader.getElementSymbol (atomicNo);
+var tokens = this.getTokens ();
+this.znucl[i] = this.parseFloatStr (tokens[tokens[0] === "-" ? 1 : 0]);
 }
-}}
-}, $fz.isPrivate = true, $fz));
-$_M(c$, "readSpaceGroup", 
-($fz = function () {
-}, $fz.isPrivate = true, $fz));
-$_M(c$, "readIntiallattice", 
-($fz = function () {
+});
+Clazz.defineMethod (c$, "readSpaceGroup", 
+ function () {
+});
+Clazz.defineMethod (c$, "readIntiallattice", 
+ function () {
+var f = 0;
 this.cellLattice =  Clazz.newFloatArray (9, 0);
-var data = "";
-var counter = 0;
-while (this.readLine () != null && this.line.indexOf ("Unit cell volume") < 0) {
-data = this.line;
-data = J.util.TextFormat.simpleReplace (data, "=", "= ");
-var tokens = J.adapter.smarter.AtomSetCollectionReader.getTokensStr (data);
-this.cellLattice[counter++] = this.parseFloatStr (tokens[1]) * 0.5291772;
-this.cellLattice[counter++] = this.parseFloatStr (tokens[2]) * 0.5291772;
-this.cellLattice[counter++] = this.parseFloatStr (tokens[3]) * 0.5291772;
+for (var i = 0; i < 9; i++) {
+if (i % 3 == 0) {
+this.line = this.rd ().substring (6);
+f = this.parseFloatStr (this.line);
+}this.cellLattice[i] = f * 0.5291772;
+f = this.parseFloat ();
 }
-this.setSymmetry ();
-}, $fz.isPrivate = true, $fz));
-$_M(c$, "setSymmetry", 
-($fz = function () {
-this.applySymmetryAndSetTrajectory ();
+this.applySymmetry ();
+});
+Clazz.defineMethod (c$, "applySymmetry", 
+ function () {
+if (this.cellLattice == null) return;
 this.setSpaceGroupName ("P1");
-this.setFractionalCoordinates (false);
-}, $fz.isPrivate = true, $fz));
-$_M(c$, "readIntitfinalCoord", 
-($fz = function () {
-var data = "";
-var count = 0;
-while (this.readLine () != null && this.line.contains ("znucl")) {
-var atom = this.atomSetCollection.addNewAtom ();
-atom.atomName = this.atomList[count++];
-data = this.line;
-if (data.contains ("xred")) J.util.TextFormat.simpleReplace (data, "xred", "");
-var tokens = J.adapter.smarter.AtomSetCollectionReader.getTokensStr (data);
-var x = this.parseFloatStr (tokens[0]);
-var y = this.parseFloatStr (tokens[1]);
-var z = this.parseFloatStr (tokens[2]);
-this.setAtomCoordXYZ (atom, x, y, z);
+for (var i = 0; i < 3; i++) this.addExplicitLatticeVector (i, this.cellLattice, i * 3);
+
+var atoms = this.asc.atoms;
+var i0 = this.asc.getAtomSetAtomIndex (this.asc.iSet);
+if (!this.iHaveFractionalCoordinates) for (var i = this.asc.ac; --i >= i0; ) this.setAtomCoord (atoms[i]);
+
+this.applySymmetryAndSetTrajectory ();
+});
+Clazz.defineMethod (c$, "readAtoms", 
+ function () {
+this.asc.newAtomSet ();
+this.iHaveFractionalCoordinates = false;
+var i0 = this.asc.ac;
+this.line = this.line.substring (12);
+while (this.line != null && !this.line.contains ("x")) {
+var atom = this.asc.addNewAtom ();
+this.setAtomCoordScaled (atom, this.getTokens (), 0, 0.5291772);
+this.rd ();
 }
-}, $fz.isPrivate = true, $fz));
+this.discardLinesUntilContains ("z");
+if (this.znucl == null) this.fillFloatArray (this.line.substring (12), 0, this.znucl =  Clazz.newFloatArray (this.nType, 0));
+var atoms = this.asc.atoms;
+for (var i = 0; i < this.nAtom; i++) atoms[i + i0].elementNumber = Clazz.floatToShort (this.znucl[Clazz.floatToInt (this.typeArray[i]) - 1]);
+
+this.applySymmetry ();
+});
 });

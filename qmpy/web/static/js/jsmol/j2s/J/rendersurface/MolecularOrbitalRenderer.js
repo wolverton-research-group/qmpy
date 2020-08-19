@@ -3,21 +3,22 @@ Clazz.load (["J.rendersurface.IsosurfaceRenderer"], "J.rendersurface.MolecularOr
 c$ = Clazz.declareType (J.rendersurface, "MolecularOrbitalRenderer", J.rendersurface.IsosurfaceRenderer);
 Clazz.overrideMethod (c$, "render", 
 function () {
-this.imageFontScaling = this.viewer.getImageFontScaling ();
+this.imageFontScaling = this.vwr.imageFontScaling;
 this.renderIso ();
 return this.needTranslucent;
 });
 Clazz.overrideMethod (c$, "renderInfo", 
 function () {
-if (this.viewer.getCurrentModelIndex () < 0 || this.mesh.title == null || !this.g3d.setColix (this.viewer.getColixBackgroundContrast ())) return;
-var fid = this.g3d.getFontFidFS ("Serif", 14 * this.imageFontScaling);
-this.g3d.setFontFid (fid);
-var lineheight = Math.round (15 * this.imageFontScaling);
+if (this.isExport || this.vwr.am.cmi < 0 || this.mesh.title == null || !this.g3d.setC (this.vwr.cm.colixBackgroundContrast) || this.vwr.gdata.getTextPosition () != 0) return;
+var ht = this.vwr.getInt (553648147);
+this.vwr.gdata.setFontFid (this.vwr.gdata.getFontFidFS ("Serif", ht * this.imageFontScaling));
+var lineheight = Math.round ((ht + 1) * this.imageFontScaling);
 var x = Math.round (5 * this.imageFontScaling);
 var y = lineheight;
 for (var i = 0; i < this.mesh.title.length; i++) if (this.mesh.title[i].length > 0) {
 this.g3d.drawStringNoSlab (this.mesh.title[i], null, x, y, 0, 0);
 y += lineheight;
 }
+this.vwr.gdata.setTextPosition (y);
 });
 });
