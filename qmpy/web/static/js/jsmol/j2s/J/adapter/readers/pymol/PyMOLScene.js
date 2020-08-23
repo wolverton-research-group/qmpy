@@ -743,7 +743,7 @@ offset = md.text.pymolOffset;
 }var nDigits = Clazz.floatToInt (this.floatSetting (J.adapter.readers.pymol.PyMOLScene.MEAS_DIGITS[nCoord - 2]));
 var strFormat = nCoord + ": " + (drawLabel ? "%0." + (nDigits < 0 ? 1 : nDigits) + "VALUE" : "");
 var text = this.newTextLabel (strFormat, offset, clabel, Clazz.floatToInt (this.floatSetting (328)), this.floatSetting (453));
-md.set (12290, null, null, strFormat, "angstroms", null, false, false, null, false, Clazz.floatToInt (rad * 2000), colix, text);
+md.set (12290, null, null, null, strFormat, "angstroms", null, false, false, null, false, Clazz.floatToInt (rad * 2000), colix, text, NaN);
 this.addJmolObject (6, bs, md);
 }
 return true;

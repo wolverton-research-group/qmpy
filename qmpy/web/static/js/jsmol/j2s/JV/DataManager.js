@@ -46,12 +46,14 @@ var createNew = (matchField != 0 || field != -2147483648 && field != 2147483647)
 var oldData = this.dataValues.get (type);
 var bs;
 var f = (oldData == null || createNew ?  Clazz.newFloatArray (actualAtomCount, 0) : JU.AU.ensureLengthA ((oldData[1]), actualAtomCount));
+var ff = null;
 if (depth == -1) {
 JU.Logger.error ("Cannot determine data type for " + val);
 return;
 }var stringData = (depth == 0 ? val : null);
 var floatData = (depth == 1 ? val : null);
 var strData = null;
+var ffData = (depth == 2 ? val : null);
 if (field == -2147483648 && (strData = JU.PT.getTokens (stringData)).length > 1) field = 0;
 if (field == -2147483648) {
 bs = data[2];
@@ -61,14 +63,22 @@ bs = data[2];
 if (floatData != null) {
 var n = floatData.length;
 if (n == bs.cardinality ()) {
-for (var i = bs.nextSetBit (0), pt = 0; i >= 0; i = bs.nextSetBit (i + 1), pt++) f[i] = floatData[pt];
-
+this.fillSparseArray (floatData, bs, f);
 } else {
 for (var i = bs.nextSetBit (0); i >= 0 && i < n; i = bs.nextSetBit (i + 1)) f[i] = floatData[i];
 
-}} else {
+}} else if (stringData != null) {
 JU.Parser.parseFloatArrayBsData (strData == null ? JU.PT.getTokens (stringData) : strData, bs, f);
-}} else if (matchField <= 0) {
+} else if (ffData != null) {
+var n = ffData.length;
+ff = (oldData == null || createNew ? JU.AU.newFloat2 (actualAtomCount) : JU.AU.ensureLength (oldData[1], actualAtomCount));
+if (n == bs.cardinality ()) {
+for (var i = bs.nextSetBit (0), pt = 0; i >= 0; i = bs.nextSetBit (i + 1), pt++) this.fillSparseArray (ffData[pt], bs, ff[i] =  Clazz.newFloatArray (actualAtomCount, 0));
+
+} else {
+for (var i = bs.nextSetBit (0); i >= 0 && i < n; i = bs.nextSetBit (i + 1)) ff[i] = ffData[i];
+
+}}} else if (matchField <= 0) {
 bs = data[2];
 JU.Parser.parseFloatArrayFromMatchAndField (stringData, bs, 0, 0, null, field, fieldColumnCount, f, 1);
 } else {
@@ -78,10 +88,14 @@ bs =  new JU.BS ();
 for (var i = iData.length; --i >= 0; ) if (iData[i] >= 0) bs.set (iData[i]);
 
 }if (oldData != null && Clazz.instanceOf (oldData[2], JU.BS) && !createNew) bs.or ((oldData[2]));
-data[3] = Integer.$valueOf (1);
 data[2] = bs;
+if (ff == null) {
+data[3] = Integer.$valueOf (1);
 data[1] = f;
-if (type.indexOf ("property_atom.") == 0) {
+} else {
+data[3] = Integer.$valueOf (2);
+data[1] = ff;
+}if (type.indexOf ("property_atom.") == 0) {
 var tok = JS.T.getSettableTokFromString (type = type.substring (14));
 if (tok == 0) {
 JU.Logger.error ("Unknown atom property: " + type);
@@ -94,6 +108,11 @@ this.vwr.setAtomProperty (bs, tok, 0, 0, null, fValues, null);
 return;
 }}this.dataValues.put (type, data);
 }, "~S,~A,~N,~N,~N,~N,~N,~N");
+Clazz.defineMethod (c$, "fillSparseArray", 
+ function (floatData, bs, f) {
+for (var i = bs.nextSetBit (0), pt = 0; i >= 0; i = bs.nextSetBit (i + 1), pt++) f[i] = floatData[pt];
+
+}, "~A,JU.BS,~A");
 Clazz.defineMethod (c$, "getType", 
  function (data) {
 return (data[3]).intValue ();
@@ -124,7 +143,13 @@ default:
 var data = this.dataValues.get (label);
 if (data == null || this.getType (data) != dataType) return null;
 if (bsSelected == null) return data[1];
-var f = data[1];
+if (data[3] === Integer.$valueOf (2)) {
+var ff = data[1];
+var fnew =  Clazz.newFloatArray (bsSelected.cardinality (), 0);
+for (var i = 0, n = ff.length, p = bsSelected.nextSetBit (0); p >= 0 && i < n; p = bsSelected.nextSetBit (p + 1)) fnew[i++] = ff[p];
+
+return fnew;
+}var f = data[1];
 var fnew =  Clazz.newFloatArray (bsSelected.cardinality (), 0);
 for (var i = 0, n = f.length, p = bsSelected.nextSetBit (0); p >= 0 && i < n; p = bsSelected.nextSetBit (p + 1)) fnew[i++] = f[p];
 

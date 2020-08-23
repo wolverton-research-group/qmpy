@@ -241,7 +241,7 @@ return points;
 }, "~N");
 });
 Clazz_declarePackage ("JS");
-Clazz_load (["JS.ScriptExt"], "JS.CmdExt", ["java.lang.Boolean", "$.Float", "$.Long", "java.util.Hashtable", "$.Map", "JU.AU", "$.BS", "$.Base64", "$.Lst", "$.M3", "$.M4", "$.Measure", "$.P3", "$.P4", "$.PT", "$.Quat", "$.SB", "$.V3", "J.api.Interface", "J.atomdata.RadiusData", "J.c.STER", "$.VDW", "J.i18n.GT", "JM.Atom", "$.AtomCollection", "$.BondSet", "$.LabelToken", "JS.SV", "$.ScriptCompiler", "$.ScriptError", "$.ScriptEval", "$.ScriptInterruption", "$.ScriptMathProcessor", "$.ScriptParam", "$.T", "JU.BSUtil", "$.BoxInfo", "$.C", "$.Edge", "$.Elements", "$.Escape", "$.Logger", "$.Parser", "$.Point3fi", "$.SimpleUnitCell", "JV.FileManager", "$.StateManager", "$.Viewer"], function () {
+Clazz_load (["JS.ScriptExt"], "JS.CmdExt", ["java.lang.Boolean", "$.Float", "$.Long", "java.util.Hashtable", "$.Map", "JU.AU", "$.BS", "$.Base64", "$.Lst", "$.M3", "$.M4", "$.Measure", "$.P3", "$.P4", "$.PT", "$.Quat", "$.SB", "$.V3", "J.api.Interface", "J.atomdata.RadiusData", "J.c.STER", "$.VDW", "J.i18n.GT", "JM.Atom", "$.AtomCollection", "$.BondSet", "$.LabelToken", "$.Measurement", "JS.SV", "$.ScriptCompiler", "$.ScriptError", "$.ScriptEval", "$.ScriptInterruption", "$.ScriptMathProcessor", "$.ScriptParam", "$.T", "JU.BSUtil", "$.BoxInfo", "$.C", "$.Edge", "$.Elements", "$.Escape", "$.Logger", "$.Parser", "$.Point3fi", "$.SimpleUnitCell", "JV.FileManager", "$.StateManager", "$.Viewer"], function () {
 c$ = Clazz_declareType (JS, "CmdExt", JS.ScriptExt);
 Clazz_makeConstructor (c$, 
 function () {
@@ -1338,12 +1338,15 @@ var intramolecular = null;
 var tokAction = 268435538;
 var strFormat = null;
 var font = null;
+var property = null;
+var units = null;
 var points =  new JU.Lst ();
 var bs =  new JU.BS ();
 var target = null;
 var tickInfo = null;
 var nBitSets = 0;
 var mad = 0;
+var value = NaN;
 var alignment = null;
 for (var i = 1; i < this.slen; ++i) {
 switch (this.getToken (i).tok) {
@@ -1481,9 +1484,19 @@ target = v;
 i = eval.iToken;
 points.addLast (target);
 break;
-case 4:
-strFormat = this.stringParameter (i);
+case 1715472409:
+property = this.paramAsStr (i);
 break;
+case 1073742188:
+value = this.floatParameter (++i);
+break;
+case 4:
+var s = this.stringParameter (i);
+if (JM.Measurement.isUnits (s)) {
+units = s;
+} else {
+strFormat = s;
+}break;
 case 1073742164:
 tickInfo = eval.tickParamAsStr (i, false, true, true);
 i = eval.iToken;
@@ -1504,14 +1517,14 @@ if (rd == null) rd =  new J.atomdata.RadiusData (rangeMinMax, 0, null, null);
 if (tickInfo != null) tickInfo.id = "default";
 if (isRefreshID) {
 tokAction = 266284;
-} else if (target != null && strFormat != null && tokAction == 268435538) {
+} else if (target != null && (property != null || strFormat != null) && tokAction == 268435538) {
 tokAction = 12290;
 }var text = null;
 if (font != null || alignment != null || colix != 0 || strFormat != null && (isRefreshID || strFormat.indexOf ('\n') >= 0)) text = (J.api.Interface.getInterface ("JM.Text", this.vwr, "script")).newMeasure (this.vwr, font, colix);
 if (text != null) {
 text.pymolOffset = offset;
 text.setAlignmentLCR (alignment);
-}this.setShapeProperty (6, "measure", this.vwr.newMeasurementData (id, points).set (tokAction, null, rd, strFormat, null, tickInfo, isAllConnected, isNotConnected, intramolecular, isAll, mad, colix, text));
+}this.setShapeProperty (6, "measure", this.vwr.newMeasurementData (id, points).set (tokAction, null, rd, property, strFormat, units, tickInfo, isAllConnected, isNotConnected, intramolecular, isAll, mad, colix, text, value));
 return;
 }var propertyValue = (id == null ? countPlusIndexes : id);
 switch (tokAction) {

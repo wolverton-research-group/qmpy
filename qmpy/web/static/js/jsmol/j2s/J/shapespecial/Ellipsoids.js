@@ -7,6 +7,7 @@ this.atomEllipsoids = null;
 this.typeSelected = "1";
 this.selectedAtoms = null;
 this.ellipsoidSet = null;
+this.scale = 0;
 Clazz.instantialize (this, arguments);
 }, J.shapespecial, "Ellipsoids", J.shape.AtomShape);
 Clazz.prepareFields (c$, function () {
@@ -119,6 +120,7 @@ this.setProperty ("thisID", null, null);
 Clazz.overrideMethod (c$, "setProperty", 
 function (propertyName, value, bs) {
 if (propertyName === "thisID") {
+this.scale = NaN;
 if (this.initEllipsoids (value) && this.ellipsoidSet.size () == 0) {
 var id = value;
 var e = J.shapespecial.Ellipsoid.getEmptyEllipsoid (id, this.vwr.am.cmi);
@@ -158,8 +160,9 @@ return;
 }if ("on" === propertyName) {
 var isOn = (value).booleanValue ();
 if (this.selectedAtoms != null) bs = this.selectedAtoms;
-if (isOn) this.setSize (2147483647, bs);
-for (var e, $e = this.atomEllipsoids.values ().iterator (); $e.hasNext () && ((e = $e.next ()) || true);) {
+if (isOn) {
+this.setSize (Float.isNaN (this.scale) ? 2147483647 : Clazz.floatToInt (this.scale * 100), bs);
+}for (var e, $e = this.atomEllipsoids.values ().iterator (); $e.hasNext () && ((e = $e.next ()) || true);) {
 var t = e.tensor;
 if ((t.type.equals (this.typeSelected) || this.typeSelected.equals (t.altType)) && t.isSelected (bs, -1)) {
 e.isOn = isOn;
@@ -182,7 +185,8 @@ this.setSize (50, bs);
 }if ("points" === propertyName) {
 return;
 }if ("scale" === propertyName) {
-this.setSize (Clazz.floatToInt ((value).floatValue () * 100), bs);
+this.scale = (value).floatValue ();
+this.setSize (Clazz.floatToInt (this.scale * 100), bs);
 return;
 }if ("select" === propertyName) {
 this.typeSelected = (value).toLowerCase ();

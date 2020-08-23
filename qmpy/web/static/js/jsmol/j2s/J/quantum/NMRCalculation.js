@@ -385,7 +385,7 @@ return J.quantum.NMRCalculation.calc2or3JorNOE (viewer,  Clazz.newArray (-1, [at
 }, "JV.Viewer,JM.Atom,JM.Atom");
 c$.calc2or3JorNOE = Clazz.defineMethod (c$, "calc2or3JorNOE", 
 function (viewer, atoms, CHEquation, mode) {
-if (CHEquation == null || CHEquation.equals ("none")) mode ^= 4;
+if (CHEquation == null || CHEquation.equals ("none")) mode &= -5;
 var elements =  new Array (4);
 mode = J.quantum.NMRCalculation.getCalcType (atoms, elements, mode);
 switch (mode) {

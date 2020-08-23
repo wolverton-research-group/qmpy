@@ -1135,6 +1135,7 @@ var bsAtom = null;
 var tokenAtom = null;
 var ptT = null;
 var data = null;
+var ffdata = null;
 switch (tok) {
 case 1140850689:
 case 1677721602:
@@ -1186,7 +1187,11 @@ ptT =  new JU.P3 ();
 break;
 case 1715472409:
 data = this.vwr.getDataObj (opValue, null, 1);
-break;
+if (data == null) ffdata = this.vwr.getDataObj (opValue, null, 2);
+if (ffdata != null) {
+minmaxtype = 1073742327;
+vout =  new JU.Lst ();
+}break;
 }
 var n = 0;
 var ivMinMax = 0;
@@ -1204,7 +1209,7 @@ fvMinMax = -3.4028235E38;
 break;
 }
 var modelSet = this.vwr.ms;
-var mode = (isHash ? 4 : isPt ? 3 : isString ? 2 : isInt ? 1 : 0);
+var mode = (ffdata != null ? 5 : isHash ? 4 : isPt ? 3 : isString ? 2 : isInt ? 1 : 0);
 if (isAtoms) {
 var haveBitSet = (bs != null);
 var i0;
@@ -1335,6 +1340,10 @@ if (vout == null) return info[1];
 vout.addLast (info[1]);
 }break;
 }
+break;
+case 5:
+vout.addLast (ffdata[i]);
+break;
 }
 if (haveIndex) break;
 }
@@ -1592,8 +1601,13 @@ var tok = JS.T.getTokFromName (propertyName);
 switch (tok) {
 case 0:
 if (propertyName.startsWith ("property_")) {
-var obj = (tv.tok == 7 ? JS.SV.flistValue (tv, tv.getList ().size () == nbs ? nbs : nAtoms) : tv.asString ());
-this.vwr.setData (propertyName,  Clazz.newArray (-1, [propertyName, obj, JU.BSUtil.copy (bs), Integer.$valueOf (-1)]), nAtoms, 0, 0, tv.tok == 7 ? 2147483647 : -2147483648, 0);
+var obj;
+if (tv.tok == 7) {
+var nmin = (tv.getList ().size () == nbs ? nbs : nAtoms);
+obj = (JS.SV.getArrayDepth (tv) > 1 ? JS.SV.fflistValue (tv, nmin) : JS.SV.flistValue (tv, nmin));
+} else {
+obj = tv.asString ();
+}this.vwr.setData (propertyName,  Clazz.newArray (-1, [propertyName, obj, JU.BSUtil.copy (bs), Integer.$valueOf (-1)]), nAtoms, 0, 0, tv.tok == 7 ? 2147483647 : -2147483648, 0);
 break;
 }this.iToken = pt;
 this.error (56);

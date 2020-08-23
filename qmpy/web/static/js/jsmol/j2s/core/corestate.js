@@ -620,6 +620,8 @@ var commands =  new JU.SB ();
 this.app (commands, "measures delete");
 for (var i = 0; i < measurementCount; i++) {
 var m = mList.get (i);
+var isProperty = (m.property != null);
+if (isProperty && Float.isNaN (m.value)) continue;
 var count = m.count;
 var sb =  new JU.SB ().append ("measure");
 if (m.thisID != null) sb.append (" ID ").append (JU.PT.esc (m.thisID));
@@ -633,10 +635,9 @@ if (m.text.pymolOffset != null) sb.append (" offset ").append (JU.Escape.eAF (m.
 if (tickInfo != null) JV.StateCreator.addTickInfo (sb, tickInfo, true);
 for (var j = 1; j <= count; j++) sb.append (" ").append (m.getLabel (j, true, true));
 
-sb.append ("; # " + shape.getInfoAsString (i));
+if (isProperty) sb.append (" " + m.property + " value " + (Float.isNaN (m.value) ? 0 : m.value)).append (" " + JU.PT.esc (m.getString ()));
 this.app (commands, sb.toString ());
 }
-this.app (commands, "select *; set measures " + this.vwr.g.measureDistanceUnits);
 this.app (commands, J.shape.Shape.getFontCommand ("measures", font3d));
 var nHidden = 0;
 var temp =  new java.util.Hashtable ();
@@ -647,7 +648,6 @@ if (m.isHidden) {
 nHidden++;
 bs.set (i);
 }if (shape.bsColixSet != null && shape.bsColixSet.get (i)) JU.BSUtil.setMapBitSet (temp, i, i, J.shape.Shape.getColorCommandUnk ("measure", m.colix, shape.translucentAllowed));
-if (m.strFormat != null) JU.BSUtil.setMapBitSet (temp, i, i, "measure " + JU.PT.esc (m.strFormat));
 }
 if (nHidden > 0) if (nHidden == measurementCount) this.app (commands, "measures off; # lines and numbers off");
  else for (var i = 0; i < measurementCount; i++) if (bs.get (i)) JU.BSUtil.setMapBitSet (temp, i, i, "measure off");
@@ -1170,120 +1170,6 @@ this.vwr.actionStates.removeItemAt (99);
 }}
 this.undoWorking = !clearRedo;
 }, "~N,~N,~B");
-Clazz_overrideMethod (c$, "syncScript", 
-function (script, applet, port) {
-var sm = this.vwr.sm;
-if ("GET_GRAPHICS".equalsIgnoreCase (script)) {
-sm.setSyncDriver (5);
-sm.syncSend (script, applet, 0);
-this.vwr.setBooleanProperty ("_syncMouse", false);
-this.vwr.setBooleanProperty ("_syncScript", false);
-return;
-}if ("=".equals (applet)) {
-applet = "~";
-sm.setSyncDriver (2);
-}var disableSend = "~".equals (applet);
-if (port > 0 || !disableSend && !".".equals (applet)) {
-sm.syncSend (script, applet, port);
-if (!"*".equals (applet) || script.startsWith ("{")) return;
-}if (script.equalsIgnoreCase ("on") || script.equalsIgnoreCase ("true")) {
-sm.setSyncDriver (1);
-return;
-}if (script.equalsIgnoreCase ("off") || script.equalsIgnoreCase ("false")) {
-sm.setSyncDriver (0);
-return;
-}if (script.equalsIgnoreCase ("slave")) {
-sm.setSyncDriver (2);
-return;
-}var syncMode = sm.getSyncMode ();
-if (syncMode == 0) return;
-if (syncMode != 1) disableSend = false;
-if (JU.Logger.debugging) JU.Logger.debug (this.vwr.htmlName + " syncing with script: " + script);
-if (disableSend) sm.setSyncDriver (3);
-if (script.indexOf ("Mouse: ") != 0) {
-var serviceMode = JV.JC.getServiceCommand (script);
-switch (serviceMode) {
-case 70:
-case 42:
-case 49:
-case 56:
-case 63:
-sm.syncSend (script, ".", port);
-return;
-case -1:
-break;
-case 0:
-case 77:
-case 28:
-case 35:
-if (disableSend) return;
-case 21:
-case 7:
-case 14:
-if ((script = this.vwr.getJSV ().processSync (script, serviceMode)) == null) return;
-}
-this.vwr.evalStringQuietSync (script, true, false);
-return;
-}this.mouseScript (script);
-if (disableSend) this.vwr.setSyncDriver (4);
-}, "~S,~S,~N");
-Clazz_overrideMethod (c$, "mouseScript", 
-function (script) {
-var tokens = JU.PT.getTokens (script);
-var key = tokens[1];
-try {
-key = (key.toLowerCase () + "...............").substring (0, 15);
-switch (("zoombyfactor...zoomby.........rotatezby......rotatexyby.....translatexyby..rotatemolecule.spinxyby.......rotatearcball..").indexOf (key)) {
-case 0:
-switch (tokens.length) {
-case 3:
-this.vwr.zoomByFactor (JU.PT.parseFloat (tokens[2]), 2147483647, 2147483647);
-return;
-case 5:
-this.vwr.zoomByFactor (JU.PT.parseFloat (tokens[2]), JU.PT.parseInt (tokens[3]), JU.PT.parseInt (tokens[4]));
-return;
-}
-break;
-case 15:
-switch (tokens.length) {
-case 3:
-this.vwr.zoomBy (JU.PT.parseInt (tokens[2]));
-return;
-}
-break;
-case 30:
-switch (tokens.length) {
-case 3:
-this.vwr.rotateZBy (JU.PT.parseInt (tokens[2]), 2147483647, 2147483647);
-return;
-case 5:
-this.vwr.rotateZBy (JU.PT.parseInt (tokens[2]), JU.PT.parseInt (tokens[3]), JU.PT.parseInt (tokens[4]));
-}
-break;
-case 45:
-this.vwr.rotateXYBy (JU.PT.parseFloat (tokens[2]), JU.PT.parseFloat (tokens[3]));
-return;
-case 60:
-this.vwr.translateXYBy (JU.PT.parseInt (tokens[2]), JU.PT.parseInt (tokens[3]));
-return;
-case 75:
-this.vwr.rotateSelected (JU.PT.parseFloat (tokens[2]), JU.PT.parseFloat (tokens[3]), null);
-return;
-case 90:
-this.vwr.spinXYBy (JU.PT.parseInt (tokens[2]), JU.PT.parseInt (tokens[3]), JU.PT.parseFloat (tokens[4]));
-return;
-case 105:
-this.vwr.rotateXYBy (JU.PT.parseInt (tokens[2]), JU.PT.parseInt (tokens[3]));
-return;
-}
-} catch (e) {
-if (Clazz_exceptionOf (e, Exception)) {
-} else {
-throw e;
-}
-}
-this.vwr.showString ("error reading SYNC command: " + script, false);
-}, "~S");
 Clazz_defineStatics (c$,
 "MAX_ACTION_UNDO", 100);
 });

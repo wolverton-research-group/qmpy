@@ -11,6 +11,7 @@ this.tickInfo = null;
 this.tokAction = 12290;
 this.radiusData = null;
 this.strFormat = null;
+this.property = null;
 this.note = null;
 this.isAll = false;
 this.colix = 0;
@@ -18,10 +19,12 @@ this.intramolecular = null;
 this.mad = 0;
 this.thisID = null;
 this.text = null;
-this.atoms = null;
 this.units = null;
+this.fixedValue = 0;
+this.atoms = null;
 this.minArray = null;
 this.ms = null;
+this.allowSelf = false;
 this.vwr = null;
 this.iFirstAtom = 0;
 this.justOneModel = true;
@@ -44,13 +47,14 @@ this.ms = m;
 return this;
 }, "JM.ModelSet");
 Clazz.defineMethod (c$, "set", 
-function (tokAction, htMin, radiusData, strFormat, units, tickInfo, mustBeConnected, mustNotBeConnected, intramolecular, isAll, mad, colix, text) {
+function (tokAction, htMin, radiusData, property, strFormat, units, tickInfo, mustBeConnected, mustNotBeConnected, intramolecular, isAll, mad, colix, text, value) {
 this.ms = this.vwr.ms;
 this.tokAction = tokAction;
 if (this.points.size () >= 2 && Clazz.instanceOf (this.points.get (0), JU.BS) && Clazz.instanceOf (this.points.get (1), JU.BS)) {
 this.justOneModel = JU.BSUtil.haveCommon (this.vwr.ms.getModelBS (this.points.get (0), false), this.vwr.ms.getModelBS (this.points.get (1), false));
 }this.htMin = htMin;
 this.radiusData = radiusData;
+this.property = property;
 this.strFormat = strFormat;
 this.units = units;
 this.tickInfo = tickInfo;
@@ -61,8 +65,9 @@ this.isAll = isAll;
 this.mad = mad;
 this.colix = colix;
 this.text = text;
+this.fixedValue = value;
 return this;
-}, "~N,java.util.Map,J.atomdata.RadiusData,~S,~S,JM.TickInfo,~B,~B,Boolean,~B,~N,~N,JM.Text");
+}, "~N,java.util.Map,J.atomdata.RadiusData,~S,~S,~S,JM.TickInfo,~B,~B,Boolean,~B,~N,~N,JM.Text,~N");
 Clazz.defineMethod (c$, "processNextMeasure", 
 function (m) {
 var value = m.getMeasurement (null);
@@ -77,14 +82,15 @@ return;
  else this.measurements.addLast (Float.$valueOf (m.getMeasurement (null)));
 }, "JM.Measurement");
 Clazz.defineMethod (c$, "getMeasurements", 
-function (asArray, asMinArray) {
+function (asFloatArray, asMinArray) {
 if (asMinArray) {
 this.minArray =  Clazz.newFloatArray ((this.points.get (0)).cardinality (), 0);
 for (var i = 0; i < this.minArray.length; i++) this.minArray[i] = -0.0;
 
 this.define (null, this.ms);
 return this.minArray;
-}if (asArray) {
+}if (asFloatArray) {
+this.allowSelf = true;
 this.measurements =  new JU.Lst ();
 this.define (null, this.ms);
 return this.measurements;
@@ -103,6 +109,10 @@ var pts =  new Array (4);
 var indices =  Clazz.newIntArray (5, 0);
 var m =  new JM.Measurement ().setPoints (modelSet, indices, pts, null);
 m.setCount (nPoints);
+m.property = this.property;
+m.strFormat = this.strFormat;
+m.units = this.units;
+m.fixedValue = this.fixedValue;
 var ptLastAtom = -1;
 for (var i = 0; i < nPoints; i++) {
 var obj = this.points.get (i);
@@ -123,7 +133,7 @@ this.nextMeasure (0, ptLastAtom, m, modelIndex);
 Clazz.defineMethod (c$, "nextMeasure", 
  function (thispt, ptLastAtom, m, thisModel) {
 if (thispt > ptLastAtom) {
-if (m.isValid () && (!this.mustBeConnected || m.isConnected (this.atoms, thispt)) && (!this.mustNotBeConnected || !m.isConnected (this.atoms, thispt)) && (this.intramolecular == null || m.isIntramolecular (this.atoms, thispt) == this.intramolecular.booleanValue ())) this.client.processNextMeasure (m);
+if ((this.allowSelf && !this.mustBeConnected && !this.mustNotBeConnected || m.isValid ()) && (!this.mustBeConnected || m.isConnected (this.atoms, thispt)) && (!this.mustNotBeConnected || !m.isConnected (this.atoms, thispt)) && (this.intramolecular == null || m.isIntramolecular (this.atoms, thispt) == this.intramolecular.booleanValue ())) this.client.processNextMeasure (m);
 return;
 }var bs = this.points.get (thispt);
 var indices = m.countPlusIndices;
@@ -133,7 +143,7 @@ this.nextMeasure (thispt + 1, ptLastAtom, m, thisModel);
 return;
 }var haveNext = false;
 for (var i = bs.nextSetBit (0), pt = 0; i >= 0; i = bs.nextSetBit (i + 1), pt++) {
-if (i == thisAtomIndex) continue;
+if (i == thisAtomIndex && !this.allowSelf) continue;
 var modelIndex = this.atoms[i].mi;
 if (thisModel >= 0 && this.justOneModel) {
 if (thispt == 0) thisModel = modelIndex;

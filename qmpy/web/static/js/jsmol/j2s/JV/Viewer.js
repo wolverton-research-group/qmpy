@@ -999,6 +999,7 @@ return ret;
 Clazz.defineMethod (c$, "loadModelFromFile", 
 function (fullPathName, fileName, fileNames, reader, isAppend, htParams, loadScript, sOptions, tokType, filecat) {
 if (htParams == null) htParams = this.setLoadParameters (null, isAppend);
+if (tokType != 0) htParams.put ("dataType", JS.T.nameOf (tokType));
 if (filecat !== " ") htParams.put ("concatenate", Boolean.TRUE);
 var atomSetCollection;
 var saveInfo = this.fm.getFileInfo ();
@@ -5356,7 +5357,7 @@ if (!this.sm.syncingScripts && !this.sm.syncingMouse) this.setSync ();
 }, "~N,~B");
 Clazz.overrideMethod (c$, "syncScript", 
 function (script, applet, port) {
-this.getStateCreator ().syncScript (script, applet, port);
+this.sm.syncScript (script, applet, port);
 }, "~S,~S,~N");
 Clazz.overrideMethod (c$, "getModelIndexFromId", 
 function (id) {

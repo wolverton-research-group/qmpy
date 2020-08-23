@@ -65,7 +65,7 @@
 var $t$;
 //var c$;
 Clazz_declarePackage ("JS");
-Clazz_load (null, "JS.MathExt", ["java.lang.Float", "$.Number", "java.util.Date", "$.Hashtable", "$.Random", "JU.AU", "$.BS", "$.CU", "$.Lst", "$.M4", "$.Measure", "$.OC", "$.P3", "$.P4", "$.PT", "$.Quat", "$.Rdr", "$.SB", "$.V3", "J.api.Interface", "J.atomdata.RadiusData", "J.bspt.PointIterator", "J.c.VDW", "J.i18n.GT", "JM.BondSet", "JS.SV", "$.ScriptParam", "$.T", "JU.BSUtil", "$.Escape", "$.JmolMolecule", "$.Logger", "$.Parser", "$.Point3fi", "$.SimpleUnitCell", "JV.FileManager", "$.JC", "$.Viewer"], function () {
+Clazz_load (null, "JS.MathExt", ["java.lang.Float", "$.Number", "java.util.Date", "$.Hashtable", "$.Random", "JU.AU", "$.BS", "$.CU", "$.Lst", "$.M4", "$.Measure", "$.OC", "$.P3", "$.P4", "$.PT", "$.Quat", "$.Rdr", "$.SB", "$.V3", "J.api.Interface", "J.atomdata.RadiusData", "J.bspt.PointIterator", "J.c.VDW", "J.i18n.GT", "JM.BondSet", "$.Measurement", "JS.SV", "$.ScriptParam", "$.T", "JU.BSUtil", "$.Escape", "$.JmolMolecule", "$.Logger", "$.Parser", "$.Point3fi", "$.SimpleUnitCell", "JV.FileManager", "$.JC", "$.Viewer"], function () {
 c$ = Clazz_decorateAsClass (function () {
 this.vwr = null;
 this.e = null;
@@ -1537,6 +1537,7 @@ Clazz_defineMethod (c$, "evaluateMeasure",
 var nPoints = 0;
 switch (tok) {
 case 1745489939:
+var property = null;
 var points =  new JU.Lst ();
 var rangeMinMax =  Clazz_newFloatArray (-1, [3.4028235E38, 3.4028235E38]);
 var strFormat = null;
@@ -1549,7 +1550,7 @@ var rd = null;
 var nBitSets = 0;
 var vdw = 3.4028235E38;
 var asMinArray = false;
-var asArray = false;
+var asFloatArray = false;
 for (var i = 0; i < args.length; i++) {
 switch (args[i].tok) {
 case 10:
@@ -1571,12 +1572,15 @@ rangeMinMax[rPt++ % 2] = JS.SV.fValue (args[i]);
 break;
 case 4:
 var s = JS.SV.sValue (args[i]);
-if (s.equalsIgnoreCase ("vdw") || s.equalsIgnoreCase ("vanderwaals")) vdw = (i + 1 < args.length && args[i + 1].tok == 2 ? args[++i].asInt () : 100) / 100;
+if (s.startsWith ("property_")) {
+property = s;
+break;
+}if (s.equalsIgnoreCase ("vdw") || s.equalsIgnoreCase ("vanderwaals")) vdw = (i + 1 < args.length && args[i + 1].tok == 2 ? args[++i].asInt () : 100) / 100;
  else if (s.equalsIgnoreCase ("notConnected")) isNotConnected = true;
  else if (s.equalsIgnoreCase ("connected")) isAllConnected = true;
  else if (s.equalsIgnoreCase ("minArray")) asMinArray = (nBitSets >= 1);
- else if (s.equalsIgnoreCase ("asArray")) asArray = (nBitSets >= 1);
- else if (JU.PT.isOneOf (s.toLowerCase (), ";nm;nanometers;pm;picometers;angstroms;ang;au;") || s.endsWith ("hz")) units = s.toLowerCase ();
+ else if (s.equalsIgnoreCase ("asArray") || s.length == 0) asFloatArray = (nBitSets >= 1);
+ else if (JM.Measurement.isUnits (s)) units = s.toLowerCase ();
  else strFormat = nPoints + ":" + s;
 break;
 default:
@@ -1587,7 +1591,8 @@ if (nPoints < 2 || nPoints > 4 || rPt > 2 || isNotConnected && isAllConnected) r
 if (isNull) return mp.addXStr ("");
 if (vdw != 3.4028235E38 && (nBitSets != 2 || nPoints != 2)) return mp.addXStr ("");
 rd = (vdw == 3.4028235E38 ?  new J.atomdata.RadiusData (rangeMinMax, 0, null, null) :  new J.atomdata.RadiusData (null, vdw, J.atomdata.RadiusData.EnumType.FACTOR, J.c.VDW.AUTO));
-return mp.addXObj ((this.vwr.newMeasurementData (null, points)).set (0, null, rd, strFormat, units, null, isAllConnected, isNotConnected, null, true, 0, 0, null).getMeasurements (asArray, asMinArray));
+var obj = (this.vwr.newMeasurementData (null, points)).set (0, null, rd, property, strFormat, units, null, isAllConnected, isNotConnected, null, true, 0, 0, null, NaN).getMeasurements (asFloatArray, asMinArray);
+return mp.addXObj (obj);
 case 134217729:
 if ((nPoints = args.length) != 3 && nPoints != 4) return false;
 break;
@@ -2231,7 +2236,6 @@ return (bsAtoms != null && !bsAtoms.isEmpty () && apt == args.length && mp.addXO
 }, "JS.ScriptMathProcessor,~A,~B");
 Clazz_defineMethod (c$, "evaluateTensor", 
  function (mp, args) {
-System.out.println (args[1].tok + " " + 1275068445);
 var isTensor = (args.length == 2 && args[1].tok == 1275068445);
 var x = (isTensor ? null : mp.getX ());
 if (args.length > 2 || !isTensor && x.tok != 10) return false;
