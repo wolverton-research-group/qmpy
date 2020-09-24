@@ -86,7 +86,7 @@ database MySQL. On a typical linux installation this process will look like::
 .. note::
     Assuming your install is on linux, and assuming you haven't used MySQL at
     all, you will need to enter a mysql session as root ("mysql -u root -p"),
-    create a user within MySQL ("CREATE USER 'newuser'@'localhost';"), grant
+    create a user within MySQL ("CREATE USER 'newuser'@'localhost';"), grant 
     that user permissions ("GRANT ALL PRIVILEGES ON * . * TO
     'newuser'@'localhost'; FLUSH PRIVILEGES;").
 

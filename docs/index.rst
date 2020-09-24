@@ -31,8 +31,8 @@ Contribute
 Support
 =======
 
-If you are having issues, please let us know.
-We can be reached at oqmd.questions@gmail.com.
+If you are having issues, please let us know. We can be reached at
+oqmd.questions@gmail.com.
 
 
 License

@@ -373,7 +373,7 @@ def static(entry, xc_func="PBE", **kwargs):
         calc.save()
         f.calculation = calc
         f.save()
-        
+
         ps = PhaseSpace(list(calc.input.comp.keys()))
         '''
         for p in ps.phases:
