@@ -366,6 +366,7 @@ class Calculation(models.Model):
             incar += " LDAU = .TRUE.\n"
             incar += " LDAUPRINT = 1\n"
             hubbards = sorted(self.hubbards, key=lambda x: x.element_id)
+
             uvals = " ".join(str(hub.u) for hub in hubbards)
             jvals = " ".join("0" for hub in hubbards)
             lvals = " ".join(str(hub.l) for hub in hubbards)
@@ -374,7 +375,8 @@ class Calculation(models.Model):
             incar += " LDAUL = %s\n" % lvals
 
         incar += "\n#= Parallelization =#\n"
-        for key in ["lplane", "nsim", "ncore", "lscalu", "npar"]:
+        for key in ["lplane", "nsim", "ncore", "lscalu", "npar", "kpar"]:
+
             if key in s:
                 incar += " %s\n" % vasp_format(key, s.pop(key))
 
