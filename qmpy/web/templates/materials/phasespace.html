@@ -71,12 +71,14 @@ $(function() {
         <th>Stability [eV/atom]</th>
         <th>Prototype</th>
         <th># of atoms</th>
+        <th>Project</th>
+        <th>Finish Time</th>
         <th>Reference</th>
       </tr>
     </thead>
 
     <tbody>
-      {% for fe in stable %}
+      {% for fe, pro, ftime in stable %}
       <tr class=clickableRow href="/materials/entry/{{ fe.entry.id }}">
         <td>{{ fe.entry.html | safe }}</td>
         <td>{{ fe.calculation.output.spacegroup.hm }}</td>
@@ -88,7 +90,9 @@ $(function() {
         {% endif %}
         <td>{{ fe.entry.prototype.name }}</td>
         <td>{{ fe.entry.natoms }}</td>
-        <td>{{ fe.entry.reference.citation }}</td>
+        <td>{{ pro }}</td>
+        <td width="8%">{{ ftime |date:"M Y" }}</td>
+        <td width="40%">{{ fe.entry.reference.citation }}</td>
       </tr>
       {% endfor %}
     </tbody>
@@ -109,6 +113,8 @@ $(function() {
     <th>Stability [eV/atom]</th>
     <th>Prototype</th>
     <th># of atoms</th>
+    <th>Projects</th>
+    <th>Finish Time</th>
     <th>Reference</th>
   </tr>
 </thead>
@@ -118,7 +124,7 @@ $(function() {
   <tr class=clickableRow href="/materials/composition/{{group}}">
     <td colspan="6"><h2>{{group}}</h2></td>
   </tr>
-  {% for fe in fes %}
+  {% for fe, pro, ftime in fes %}
   <tr class=clickableRow href="/materials/entry/{{ fe.entry.id }}">
     <td>{{ fe.entry.id }}</td>
     <td>{{ fe.entry.html | safe }}</td>
@@ -131,6 +137,8 @@ $(function() {
     {% endif %}
     <td>{{ fe.entry.prototype.name }}</td>
     <td>{{ fe.entry.natoms }}</td>
+    <td>{{ pro }}</td>
+    <td width="8%">{{ ftime |date:"M Y" }}</td>
     <td>{{ fe.entry.reference.citation }}</td>
   </tr>
   {% endfor %}

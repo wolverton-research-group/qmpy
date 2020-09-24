@@ -942,6 +942,7 @@ def write_resources():
     #       - user2
     # project2: ...
     """
+
     ######
     # list of values that need to be written into the configuration files
     ######
