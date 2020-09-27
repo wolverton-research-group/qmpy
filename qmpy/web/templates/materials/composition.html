@@ -237,13 +237,12 @@ function openWindow() {
     <th>Prototype</th>
     <th># of atoms</th>
     <th>Projects</th>
-    <th>Finish Time</th>
     <th>Reference</th>
   </tr>
 </thead>
 
 <tbody>
-  {% for fe, pro, ftime in results_project %}
+  {% for fe, pro in results_project %}
   <tr class=clickableRow href="/materials/entry/{{ fe.entry.id }}">
     <td><a href="/materials/entry/{{ fe.entry.id }}" target="_blank">{{ fe.entry.id  }}</a></td>
     <td>{{ fe.entry.html | safe }}</td>
@@ -257,8 +256,7 @@ function openWindow() {
     <td>{{ fe.entry.prototype.name }}</td>
     <td>{{ fe.calculation.output.natoms }}</td>
     <td>{{ pro }}</td>
-    <td width="8%">{{ ftime |date:"M Y" }}</td>
-    <td width="25%">{{ fe.entry.reference.citation }}</td>
+    <td>{{ fe.entry.reference.citation }}</td>
   </tr>
   {% endfor %}
 </tbody>
@@ -279,22 +277,18 @@ function openWindow() {
     <th>Spacegroup</th>
     <th>Prototype</th>
     <th># of atoms</th>
-    <th>Projects</th>
-    <th>Create Time</th>
     <th>Reference</th>
   </tr>
 </thead>
 
 <tbody>
-  {% for entry, pro, ctime in running %}
+  {% for entry, pro in running %}
   <tr class=clickableRow href="/materials/entry/{{ entry.id }}">
     <td><a href="/materials/entry/{{ entry.id }}" target="_blank">{{ entry.id  }}</a></td>
     <td>{{ entry.html | safe }}</td>
     <td>{{ entry.input.spacegroup.symbol }}</td>
     <td>{{ entry.prototype.name }}</td>
     <td>{{ entry.input.natoms }}</td>
-    <td>{{ pro }}</td>
-    <td>{{ ctime |date:"M Y" }}</td>
     <td>{{ entry.reference.citation }}</td>
   </tr>
   {% endfor %}

@@ -68,26 +68,13 @@ def composition_view(request, search=None):
             None if len(fe.entry.projects) == 0 else fe.entry.projects[0].name
             for fe in data["results"]
         ]
-        finish_time = [
-            None if len(fe.entry.tasks)==0 else fe.entry.tasks[0].finished 
-            for fe in data["results"]
-        ]
-        data['results_project'] = zip(data["results"], pro_name, finish_time)
+        data['results_project'] = zip(data["results"], pro_name)
         
         
-        run_entry = Entry.objects.filter(
+        data['running'] = Entry.objects.filter(
             composition=comp,formationenergy=None
         ).filter(id=F("duplicate_of__id"))
         
-        run_pro = [
-            None if len(en.projects)==0 else en.projects[0].name 
-            for en in run_entry
-        ]
-        create_time = [
-            None if len(en.tasks)==0 else en.tasks[0].created 
-            for en in run_entry
-        ]
-        data['running'] = zip(run_entry, run_pro, create_time)
         data["space"] = "-".join(list(comp.comp.keys()))
         
         if comp.ntypes == 1:
@@ -146,11 +133,7 @@ def composition_view(request, search=None):
             None if len(fe.entry.projects) == 0 else fe.entry.projects[0].name
             for fe in data["stable"]
         ]
-        finish_time = [
-            None if len(fe.entry.tasks)==0 else fe.entry.tasks[0].finished 
-            for fe in data['stable']
-        ]
-        data['stable'] = zip(data['stable'], pro_name, finish_time)
+        data['stable'] = zip(data['stable'], pro_name)
 
         ## The following step is really slow. Will be removed in future!
         ## < Mohan
@@ -174,11 +157,7 @@ def composition_view(request, search=None):
                 None if len(fe.entry.projects) == 0 else fe.entry.projects[0].name
                 for fe in results[k]
             ]
-            finish_time = [
-                None if len(fe.entry.tasks)==0 else fe.entry.tasks[0].finished 
-                for fe in results[k]
-            ]
-            results[k] = zip(results[k], pro_name, finish_time)
+            results[k] = zip(results[k], pro_name)
         results = sorted(list(results.items()), key=lambda x: -len(x[0].split("-")))
         data["results"] = results
         return render_to_response(
