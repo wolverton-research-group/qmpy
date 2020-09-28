@@ -236,13 +236,12 @@ function openWindow() {
     <th>Stability [eV/atom]</th>
     <th>Prototype</th>
     <th># of atoms</th>
-    <th>Projects</th>
     <th>Reference</th>
   </tr>
 </thead>
 
 <tbody>
-  {% for fe, pro in results_project %}
+  {% for fe in results %}
   <tr class=clickableRow href="/materials/entry/{{ fe.entry.id }}">
     <td><a href="/materials/entry/{{ fe.entry.id }}" target="_blank">{{ fe.entry.id  }}</a></td>
     <td>{{ fe.entry.html | safe }}</td>
@@ -255,7 +254,6 @@ function openWindow() {
     {% endif %}
     <td>{{ fe.entry.prototype.name }}</td>
     <td>{{ fe.calculation.output.natoms }}</td>
-    <td>{{ pro }}</td>
     <td>{{ fe.entry.reference.citation }}</td>
   </tr>
   {% endfor %}
@@ -282,7 +280,7 @@ function openWindow() {
 </thead>
 
 <tbody>
-  {% for entry, pro in running %}
+  {% for entry in running %}
   <tr class=clickableRow href="/materials/entry/{{ entry.id }}">
     <td><a href="/materials/entry/{{ entry.id }}" target="_blank">{{ entry.id  }}</a></td>
     <td>{{ entry.html | safe }}</td>

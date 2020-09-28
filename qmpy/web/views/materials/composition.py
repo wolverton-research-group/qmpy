@@ -64,11 +64,6 @@ def composition_view(request, search=None):
         data["results"] = FormationEnergy.objects.filter(
             composition=comp, fit="standard"
         ).order_by("delta_e")
-        pro_name = [
-            None if len(fe.entry.projects) == 0 else fe.entry.projects[0].name
-            for fe in data["results"]
-        ]
-        data['results_project'] = zip(data["results"], pro_name)
         
         
         data['running'] = Entry.objects.filter(
@@ -129,11 +124,6 @@ def composition_view(request, search=None):
         ##    data['stable'].append(p.formation.energy)
         ## Fe-Ti-Sb: what's the problem?
         data["stable"] = [p.formation for p in ps.stable]
-        pro_name = [
-            None if len(fe.entry.projects) == 0 else fe.entry.projects[0].name
-            for fe in data["stable"]
-        ]
-        data['stable'] = zip(data['stable'], pro_name)
 
         ## The following step is really slow. Will be removed in future!
         ## < Mohan
@@ -153,11 +143,6 @@ def composition_view(request, search=None):
             results[k] = sorted(
                 v, key=lambda x: 1000 if x.stability is None else x.stability
             )
-            pro_name = [
-                None if len(fe.entry.projects) == 0 else fe.entry.projects[0].name
-                for fe in results[k]
-            ]
-            results[k] = zip(results[k], pro_name)
         results = sorted(list(results.items()), key=lambda x: -len(x[0].split("-")))
         data["results"] = results
         return render_to_response(
