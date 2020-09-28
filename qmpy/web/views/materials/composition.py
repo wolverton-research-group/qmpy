@@ -51,6 +51,8 @@ def composition_view(request, search=None):
     if composition:
         comp = Composition.get(composition)
         ps = PhaseSpace("-".join(list(comp.comp.keys())))
+        if None in [p.formation.stability for p in ps.phases]:
+            ps.compute_stabilities(save=True, reevaluate=True)
         ps.infer_formation_energies()
         if ps.shape == (3, 0):
             data["pd3d"] = ps.phase_diagram.get_plotly_script_3d("phasediagram")
@@ -62,11 +64,14 @@ def composition_view(request, search=None):
         data["results"] = FormationEnergy.objects.filter(
             composition=comp, fit="standard"
         ).order_by("delta_e")
-        data["running"] = Entry.objects.filter(
-            composition=comp, formationenergy=None
+        
+        
+        data['running'] = Entry.objects.filter(
+            composition=comp,formationenergy=None
         ).filter(id=F("duplicate_of__id"))
+        
         data["space"] = "-".join(list(comp.comp.keys()))
-
+        
         if comp.ntypes == 1:
             energy, gs = ps.gclp(comp.name)
             data["gs"] = Phase.from_phases(gs)
@@ -104,6 +109,9 @@ def composition_view(request, search=None):
         )
     elif space:
         ps = PhaseSpace(space)
+        if None in [p.formation.stability for p in ps.phases]:
+            ps.compute_stabilities(save=True, reevaluate=True)
+            ps = PhaseSpace(space)
         ps.infer_formation_energies()
         data["search"] = space
         if ps.shape == (3, 0):
@@ -133,14 +141,13 @@ def composition_view(request, search=None):
 
         for k, v in list(results.items()):
             results[k] = sorted(
-                v, key=lambda x: 1000 if x.delta_e is None else x.delta_e
+                v, key=lambda x: 1000 if x.stability is None else x.stability
             )
         results = sorted(list(results.items()), key=lambda x: -len(x[0].split("-")))
         data["results"] = results
         return render_to_response(
             "materials/phasespace.html", data, RequestContext(request)
         )
-
 
 def generic_composition_view(request, search=None):
     data = {"search": search}

@@ -8,12 +8,8 @@
 #SBATCH -o jobout.txt
 
 ulimit -s unlimited
-export OMP_NUM_THREADS=1
-
-module purge
-
-module load mpi/intel-mpi-5.1.3.258 
-module swap intel/2016.0 intel/2013.2
+module load mpi/openmpi-1.6.5-intel2013.2
+module load scalapack/2.0.2_gcc483  fftw/3.3.3-gcc
 
 NPROCS={ntasks}
 

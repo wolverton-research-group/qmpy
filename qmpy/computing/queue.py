@@ -212,16 +212,72 @@ class Task(models.Model):
                 elif allocation.name == "d20829":
                     # Sheel doesn't have access to b1004 binaries
                     calc.instructions["binary"] = "~/vasp_53"
-                    calc.instructions["queuetype"] = "normal"
+                    calc.instructions["queuetype"] = "normal" 
                 elif allocation.name == "p30919":
                     calc.instructions["queuetype"] = "short"
                     calc.instructions["serial"] = False
                     calc.instructions["nodes"] = 1
                     calc.instructions["ntasks"] = 4
-                    calc.instructions["walltime"] = 3600 * 4
-                    calc.instructions["binary"] = "vasp_53"
+                    calc.instructions["walltime"] = 3600*4
+                    #calc.instructions["binary"] = "vasp_53"
+                elif allocation.name == "p31151":
+                    calc.instructions["queuetype"] = "short"
+                    calc.instructions["serial"] = False
+                    calc.instructions["nodes"] = 1
+                    calc.instructions["ntasks"] = 4
+                    calc.instructions["walltime"] = 3600*4
+                elif allocation.name == "p30475":
+                    calc.instructions["queuetype"] = "short"
+                    calc.instructions["serial"] = False
+                    calc.instructions["nodes"] = 1
+                    calc.instructions["ntasks"] = 16
+                    calc.instructions["walltime"] = 3600*4
+                elif allocation.name == "p30649":
+                    calc.instructions["queuetype"] = "short"
+                    calc.instructions["serial"] = False
+                    calc.instructions["nodes"] = 1
+                    calc.instructions["ntasks"] = 16
+                    calc.instructions["walltime"] = 3600*4
+                    calc.settings["kpar"] = 4
+                elif allocation.name == "p31102":
+                    calc.instructions["queuetype"] = "short"
+                    calc.instructions["serial"] = False
+                    calc.instructions["nodes"] = 1
+                    calc.instructions["ntasks"] = 16
+                    calc.instructions["walltime"] = 3600*4
+                elif calc.entry.natoms < 9:
+                    calc.instructions["queuetype"] = "short"
+                    calc.instructions["serial"] = False
+                    calc.instructions["nodes"] = 1
+                    calc.instructions["ntasks"] = 4
+                    calc.instructions["walltime"] = 3600*4
+                elif calc.entry.natoms < 13:
+                    calc.instructions["queuetype"] = "short"
+                    calc.instructions["serial"] = False
+                    calc.instructions["nodes"] = 1
+                    calc.instructions["ntasks"] = 16
+                    calc.instructions["walltime"] = 3600*4
+                elif Project.get("pyrochlore") in calc.entry.projects:
+                    calc.instructions["queuetype"] = "short"
+                    calc.instructions["serial"] = False
+                    calc.instructions["nodes"] = 1
+                    calc.instructions["ntasks"] = 16
+                    calc.instructions["walltime"] = 3600*4
+                elif calc.entry.natoms > 19:
+                    calc.instructions["queuetype"] = "normal"
+                    calc.instructions["nodes"] = 1
+                    calc.instructions["ntasks"] = 16
+
                 else:
                     calc.instructions["queuetype"] = "normal"
+
+            if allocation.name == "bebop":
+                # Special MPI call for bebop
+                calc.instructions["mpi"] = "mpirun -psm2 -np $NPROCS"
+
+            if allocation.name == "xsede":
+                # Special MPI call for xsede
+                calc.instructions["mpi"] = "mpirun -np $NPROCS"
 
             if allocation.name == "babbage":
                 # Check if calculation is parallel

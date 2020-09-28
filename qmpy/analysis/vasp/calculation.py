@@ -375,7 +375,7 @@ class Calculation(models.Model):
             incar += " LDAUL = %s\n" % lvals
 
         incar += "\n#= Parallelization =#\n"
-        for key in ["lplane", "nsim", "ncore", "lscalu", "npar"]:
+        for key in ["lplane", "nsim", "ncore", "lscalu", "npar", "kpar"]:
             if key in s:
                 incar += " %s\n" % vasp_format(key, s.pop(key))
 
@@ -655,6 +655,8 @@ class Calculation(models.Model):
                 for n, e in zip(counts, elt_list):
                     elements += [e] * n
                 break
+        if len(elements) == 0:
+            raise VaspError("OUTCAR is wrong")
         self.elements = elements
 
     def read_lattice_vectors(self):
@@ -1366,7 +1368,17 @@ class Calculation(models.Model):
 
     def compress(
         self,
-        files=["OUTCAR", "CHGCAR", "CHG", "PROCAR", "LOCPOT", "ELFCAR", "vasprun.xml"],
+        files=[
+            "OUTCAR",
+            "CHGCAR",
+            "CHG",
+            "PROCAR",
+            "DOSCAR",
+            "EIGENVAL",
+            "LOCPOT",
+            "ELFCAR",
+            "vasprun.xml",
+        ],
     ):
         """
         gzip every file in `files`
@@ -1382,6 +1394,8 @@ class Calculation(models.Model):
                 "CHGCAR",
                 "CHG",
                 "PROCAR",
+                "DOSCAR",
+                "EIGENVAL",
                 "LOCPOT",
                 "ELFCAR",
                 "vasprun.xml",
@@ -1562,7 +1576,7 @@ class Calculation(models.Model):
                 "pipes": " > stdout.txt 2> stderr.txt",
                 "footer": "\n".join(
                     [
-                        "gzip -f CHGCAR OUTCAR PROCAR ELFCAR vasprun.xml",
+                        "gzip -f CHGCAR OUTCAR PROCAR DOSCAR EIGENVAL LOCPOT ELFCAR vasprun.xml",
                         "rm -f WAVECAR CHG",
                         "date +%s",
                     ]
@@ -1891,8 +1905,9 @@ class Calculation(models.Model):
 
         # Read all outputs
         calc.read_stdout()
-        calc.read_outcar()
-        calc.read_doscar()
+        if not 'edddav' in calc.errors:
+            calc.read_outcar()
+            calc.read_doscar()
 
         # Did the calculation finish without errors?
         if calc.converged:

@@ -375,6 +375,7 @@ def static(entry, xc_func="PBE", **kwargs):
         f.save()
 
         ps = PhaseSpace(list(calc.input.comp.keys()))
+        '''
         for p in ps.phases:
             if p in list(ps.phase_dict.values()):
                 ps.compute_stability(p)
@@ -406,7 +407,8 @@ def static(entry, xc_func="PBE", **kwargs):
                     continue
                 fe.stability = p.stability
                 fe.save()
-        # ps.compute_stabilities(reevaluate=True, save=True)
+            '''
+        ps.compute_stabilities(reevaluate=True, save=True)
     else:
         calc.write()
     return calc

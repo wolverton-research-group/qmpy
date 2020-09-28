@@ -10,6 +10,7 @@ from qmpy.web import views
 # router = routers.DefaultRouter()
 # router.register(r'users', views.UserViewSet)
 
+
 urlpatterns = [
     url(r"^$", views.home_page),
 ]
