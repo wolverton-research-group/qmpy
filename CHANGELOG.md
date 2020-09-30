@@ -1,6 +1,30 @@
 qmpy changelog
 ==========================
 
+1.4.0 - 09/29/2020
+------------------
+
+- Python upgrade to 3.7.xx from 2.7.xx
+    - New version of qmpy is tested only against Python 3 
+    - Syntax changes needed to compile in py3
+    - MySQL-python packages is no longer supported. Instead the mysqlclient package dependency is added
+    - The \_\_cmp\_\_ function is deprecated. \_\_lt\_\_ is used instead to compare Model objects
+- Django upgrade to 2.2.xx from 1.8.18
+    - ForeignKey.on\_delete functions are added as it is now mandated
+    - Removed the deprecated SubfieldBase metaclass and added the alternative from\_db\_value function to load data from DB
+    - URL view specifications are changed from strings to model views
+    - Parent import directory changes for multple Django classes (eg: context\_processors)
+    - Several changes in format of settings file params
+    - Defined hash function for Phase objects
+    - Changed the Model field definition to have blank=True instead of null=True
+- Conflict between qmpy.io and python3's default io module are resolved. Now we import subclasses or function individually specified insidethese io modules
+- Visualization page is improved
+    - More customization tools and upgraded Jsmol version
+- Blackened
+    - Reformatted the scripts using Black
+- Added Structured Data scripts to adhere to the definitions in schema.org
+
+
 1.3.0 - 11/05/2019
 ------------------
 
