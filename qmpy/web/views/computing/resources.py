@@ -37,6 +37,7 @@ def host_view(request, host_id):
             host.state = 1
         host.save()
     data = {"host": host}
+    data.update(csrf(request))
     return render_to_response(
         "computing/host.html", get_globals(data), RequestContext(request)
     )
@@ -64,6 +65,7 @@ def allocation_view(request, allocation_id):
     projects = get_marked_list(alloc.project_set.all(), Project.objects.all())
 
     data = {"allocation": alloc, "users": users, "projects": projects}
+    data.update(csrf(request))
     return render_to_response(
         "computing/allocation.html", get_globals(data), RequestContext(request)
     )
@@ -120,14 +122,14 @@ def project_view(request, project_id):
                 for k in list(p.keys())
                 if "alloc_" in k and p.get(k) == "on"
             ]
-            proj.allocations = allocs
+            proj.allocations.set(allocs)
 
             users = [
                 k.split("_")[1]
                 for k in list(p.keys())
                 if "user_" in k and p.get(k) == "on"
             ]
-            proj.users = [User.get(u) for u in users]
+            proj.users.set([User.get(u) for u in users])
 
     allocs = get_marked_list(proj.allocations.all(), Allocation.objects.all())
     users = get_marked_list(proj.users.all(), User.objects.all())
@@ -139,6 +141,7 @@ def project_view(request, project_id):
         "plot": construct_flot(chart),
         "upcoming": upcoming,
     }
+    data.update(csrf(request))
     return render_to_response(
         "computing/project.html", get_globals(data), RequestContext(request)
     )
@@ -214,6 +217,7 @@ def project_state_view(request, state=0, project_id=None):
             en = t.entry
             en.reset()
             logger.info("Web reset: Entry {}".format(en.id))
+        data.update(csrf(request))
 
     return render_to_response(
         "computing/project_state.html", data, RequestContext(request)
