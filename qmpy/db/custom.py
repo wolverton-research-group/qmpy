@@ -5,7 +5,7 @@ import pickle
 import numpy as np
 import ast
 import urllib.request, urllib.error, urllib.parse
-
+import yaml
 
 class TagField(models.TextField):
     description = "Stores tags in a single database column."
@@ -73,7 +73,10 @@ class DictField(models.TextField):
             value = {}
         if isinstance(value, dict):
             return value
-        return ast.literal_eval(value)
+        try:
+            return ast.literal_eval(value)
+        except:
+            return(yaml.load(value))
 
     def to_python(self, value):
         if not value:
@@ -81,8 +84,10 @@ class DictField(models.TextField):
 
         if isinstance(value, dict):
             return value
-
-        return ast.literal_eval(value)
+        try:
+            return ast.literal_eval(value)
+        except:
+            return(yaml.load(value))
 
     def get_prep_value(self, value):
         if value is None:
