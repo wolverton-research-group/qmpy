@@ -16,7 +16,7 @@ FAQs
     from a locally hosted QMDB database by querying for ``qmpy.ExptFormationEnergy`` objects
     of the composition of interest.
     
-3. I am encountering problems with pip installation of the new qmpy release (v1.3.0). What to do?
+3. I am encountering problems with pip installation of the new qmpy release (v1.4.0). What to do?
     
     - Some packages qmpy *depends on* may not play nice with pip. If you encounter errors
       related to other packages while installing qmpy (usual suspects are ``scipy``, ``numpy``,
@@ -26,7 +26,7 @@ FAQs
     
         $ conda install pygraphviz 
     
-    - Import of ``matplotlib.cbook`` is enforced in ``qmpy`` v1.3.0 which may require the 
+    - Import of ``matplotlib.cbook`` is enforced in ``qmpy`` v1.4.0 which may require the 
       user to install/update the python package ``six`` in their python environment. 
       We might be removing this indirect dependency in the future updates. 
       But for now, the ``six`` package may be installed by:
