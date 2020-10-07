@@ -224,9 +224,14 @@ def relaxation(entry, xc_func="PBE", **kwargs):
         in_struct = entry.input.copy()
 
         projects = entry.project_set.all()
-        calc = Calculation.setup(
-            in_struct, entry=entry, configuration=cnfg_name, path=path, **kwargs
-        )
+        if 'fast' in entry.keywords:
+            calc = Calculation.setup(
+                in_struct, entry=entry, configuration=cnfg_name, path=path, settings={'kpar':'4'}, **kwargs
+            )
+        else:
+            calc = Calculation.setup(
+                in_struct, entry=entry, configuration=cnfg_name, path=path, **kwargs
+            )
 
         entry.calculations[cnfg_name] = calc
         entry.Co_lowspin = False
@@ -252,13 +257,15 @@ def relaxation(entry, xc_func="PBE", **kwargs):
             # Get input structure
             in_struct = entry.input.copy()
 
-            calc = Calculation.setup(
-                in_struct,
-                entry=entry,
-                configuration=cnfg_name,
-                path=lowspin_dir,
-                **kwargs,
-            )
+            if 'fast' in entry.keywords:
+                calc = Calculation.setup(
+                    in_struct, entry=entry, configuration=cnfg_name, path=lowspin_dir,
+                    settings={'kpar':'4'}, **kwargs
+                )
+            else:
+                calc = Calculation.setup(
+                    in_struct, entry=entry, configuration=cnfg_name, path=lowspin_dir, **kwargs
+                )
 
             # Return atoms to the low-spin configuration
             for atom in calc.input:
@@ -348,14 +355,16 @@ def static(entry, xc_func="PBE", **kwargs):
     chgcar_path = calc.path
 
     # Set up calculation
-    calc = Calculation.setup(
-        in_struct,
-        entry=entry,
-        configuration=cnfg_name,
-        path=calc_dir,
-        chgcar=chgcar_path,
-        **kwargs,
-    )
+    if 'fast' in entry.keywords:
+        calc = Calculation.setup(
+            in_struct, entry=entry, configuration=cnfg_name, path=calc_dir, chgcar=chgcar_path,
+            settings={'kpar':'4'}, **kwargs
+        )
+    else:
+        calc = Calculation.setup(
+            in_struct, entry=entry, configuration=cnfg_name, path=calc_dir, chgcar=chgcar_path,
+            **kwargs
+        )
 
     # Special Case: Set Co to low-spin configuration
     if use_lowspin:
