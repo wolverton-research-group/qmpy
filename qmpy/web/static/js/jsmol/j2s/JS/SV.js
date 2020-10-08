@@ -1112,6 +1112,28 @@ for (var i = sv.size (); --i >= 0; ) list[i] = JS.SV.sValue (sv.get (i));
 
 return list;
 }, "JS.T");
+c$.getArrayDepth = Clazz.defineMethod (c$, "getArrayDepth", 
+function (x) {
+var n = 0;
+var sv;
+while (x.tok == 7 && (sv = (x).getList ()).size () > 0) {
+n++;
+x = sv.get (0);
+}
+return n;
+}, "JS.T");
+c$.fflistValue = Clazz.defineMethod (c$, "fflistValue", 
+function (x, nMin) {
+if (x.tok != 7) return  Clazz.newArray (-1, [ Clazz.newFloatArray (-1, [JS.SV.fValue (x)])]);
+var sv = (x).getList ();
+var svlen = sv.size ();
+var list;
+list = JU.AU.newFloat2 (svlen);
+if (nMin == 0) nMin = list.length;
+for (var i = list.length; --i >= 0; ) list[i] = JS.SV.flistValue (i >= svlen ? null : sv.get (i), 0);
+
+return list;
+}, "JS.T,~N");
 c$.flistValue = Clazz.defineMethod (c$, "flistValue", 
 function (x, nMin) {
 if (x.tok != 7) return  Clazz.newFloatArray (-1, [JS.SV.fValue (x)]);

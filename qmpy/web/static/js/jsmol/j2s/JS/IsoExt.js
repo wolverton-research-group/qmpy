@@ -243,8 +243,7 @@ break;
 var scale = 1;
 var index = 0;
 if (type.length > 0) {
-++i;
-if (this.isFloatParameter (i + 1)) index = this.intParameter (i++);
+if (this.isFloatParameter (++i)) index = this.intParameter (i++);
 }if (this.tokAt (i) == 1073742138) scale = this.floatParameter (++i);
 if (!this.chk) eval.runScript (this.vwr.ms.getPointGroupAsString (this.vwr.bsA (), type, index, scale, pts, center, thisId == null ? "" : thisId));
 return;

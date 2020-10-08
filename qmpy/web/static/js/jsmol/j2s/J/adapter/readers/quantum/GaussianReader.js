@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.adapter.readers.quantum");
-Clazz.load (["J.adapter.readers.quantum.MOReader", "JU.BS"], "J.adapter.readers.quantum.GaussianReader", ["java.lang.Exception", "$.Float", "java.util.Hashtable", "JU.AU", "$.Lst", "$.PT", "$.V3", "J.adapter.readers.quantum.BasisFunctionReader", "J.adapter.smarter.SmarterJmolAdapter", "J.quantum.QS", "JU.Escape", "$.Logger"], function () {
+Clazz.load (["J.adapter.readers.quantum.MOReader", "JU.BS"], "J.adapter.readers.quantum.GaussianReader", ["java.lang.Exception", "$.Float", "java.util.Hashtable", "JU.AU", "$.Lst", "$.PT", "$.V3", "J.adapter.readers.quantum.BasisFunctionReader", "J.adapter.smarter.SmarterJmolAdapter", "J.quantum.QS", "JU.Escape", "$.Logger", "$.Tensor"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.energyString = "";
 this.energyKey = "";
@@ -56,6 +56,12 @@ return true;
 }if (this.line.startsWith (" SCF Done:")) {
 this.readSCFDone ();
 return true;
+}if (this.line.startsWith (" Calculating GIAO")) {
+this.readCSATensors ();
+return false;
+}if (this.line.startsWith (" Total nuclear spin-spin coupling")) {
+this.readCouplings ();
+return false;
 }if (!this.orientationInput && this.line.startsWith (" Harmonic frequencies")) {
 this.readFrequencies (":", true);
 return true;
@@ -376,6 +382,55 @@ atoms[i].partialCharge = charge;
 }
 JU.Logger.info ("Mulliken charges found for Model " + this.asc.atomSetCount);
 });
+Clazz.defineMethod (c$, "readCSATensors", 
+ function () {
+this.rd ();
+while (this.rd () != null && this.line.indexOf ("Isotropic") >= 0) {
+var iatom = this.parseIntAt (this.line, 0);
+var data = (this.rd () + this.rd () + this.rd ()).$plit ("=");
+this.addTensor (iatom, data);
+}
+this.appendLoadNote ("NMR shift tensors are available for model=" + (this.asc.iSet + 1) + "\n using \"ellipsoids set 'csa'.");
+});
+Clazz.defineMethod (c$, "addTensor", 
+ function (iatom, data) {
+var i0 = this.asc.getLastAtomSetAtomIndex ();
+var a =  Clazz.newDoubleArray (3, 3, 0);
+for (var i = 0, p = 1; i < 3; i++) {
+for (var j = 0; j < 3; j++, p++) {
+a[i][j] = this.parseFloatStr (data[p]);
+}
+}
+var t =  new JU.Tensor ().setFromAsymmetricTensor (a, "csa", "csa" + iatom);
+this.asc.atoms[i0 + iatom - 1].addTensor (t, "csa", false);
+System.out.println ("calc Tensor " + t + "calc isotropy=" + t.getInfo ("isotropy") + " anisotropy=" + t.getInfo ("anisotropy") + "\n");
+}, "~N,~A");
+Clazz.defineMethod (c$, "readCouplings", 
+ function () {
+var type = (this.line.indexOf (" K ") >= 0 ? "K" : "J");
+var i0 = this.asc.getLastAtomSetAtomIndex ();
+var n = this.asc.getLastAtomSetAtomCount ();
+var data =  Clazz.newFloatArray (n, n, 0);
+var k0 = 0;
+while (true) {
+this.rd ();
+for (var i = k0; i < n; i++) {
+this.rd ();
+var tokens = this.getTokens ();
+for (var j = 1, nj = tokens.length; j < nj; j++) {
+var v = this.parseFloatStr (tokens[j]);
+data[i][k0 + j - 1] = data[k0 + j - 1][i] = v;
+}
+}
+k0 += 5;
+if (k0 >= n) break;
+}
+System.out.println (data);
+this.asc.setModelInfoForSet ("NMR_" + type + "_couplings", data, this.asc.iSet);
+if (type === "J") {
+this.asc.setAtomProperties ("J", data, this.asc.iSet, false);
+this.appendLoadNote ("NMR J Couplings saved for model=" + (this.asc.iSet + 1) + " as property_J;\n use set measurementUnits \"+hz\" to measure them.");
+}});
 Clazz.defineStatics (c$,
 "STD_ORIENTATION_ATOMIC_NUMBER_OFFSET", 1);
 });

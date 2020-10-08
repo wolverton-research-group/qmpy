@@ -168,6 +168,9 @@ class Structure(models.Model, object):
     def __str__(self):
         return format_comp(reduce_comp(self.comp))
 
+    def __hash__(self):
+        return hash(self._get_pk_val())
+
     def printf(self):
         res = format_comp(reduce_comp(self.comp)) + "\n"
         res += self.lat_param_string()

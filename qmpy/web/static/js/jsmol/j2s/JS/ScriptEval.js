@@ -909,7 +909,7 @@ sx.message += s;
 sx.untranslated += s;
 }this.resumeViewer (isThrown ? "throw context" : "scriptException");
 if (isThrown || this.thisContext != null || this.chk || msg.indexOf ("NOTE: file recognized as a script file: ") >= 0) return;
-JU.Logger.error ("eval ERROR: " + s + this.toString ());
+JU.Logger.error ("eval ERROR: " + s + "\n" + this.toString ());
 if (this.vwr.autoExit) this.vwr.exitJmol ();
 }, "JS.ScriptException,~S,~S");
 c$.statementAsString = Clazz.defineMethod (c$, "statementAsString", 
@@ -5512,8 +5512,10 @@ if (amount == 0 && type != '\0') return;
 this.iToken = i0 + (type == '\0' ? 2 : 3);
 bs = (isSelected ? this.vwr.bsA () : this.iToken + 1 < this.slen ? this.atomExpressionAt (++this.iToken) : null);
 this.checkLast (this.iToken);
-if (!this.chk) this.vwr.translate (xyz, amount, type, bs);
-}, "~B");
+if (!this.chk) {
+this.vwr.translate (xyz, amount, type, bs);
+this.refresh (false);
+}}, "~B");
 Clazz.defineMethod (c$, "cmdUnbind", 
  function () {
 if (this.slen != 1) this.checkLength23 ();

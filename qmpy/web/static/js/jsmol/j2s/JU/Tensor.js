@@ -26,7 +26,7 @@ c$.getType = Clazz.defineMethod (c$, "getType",
  function (type) {
 var pt = type.indexOf ("_");
 if (pt >= 0) type = type.substring (0, pt);
-pt = ";iso........;adp........;tls-u......;tls-r......;ms.........;efg........;isc........;charge.....;quadrupole.;raman......".indexOf (";" + type.toLowerCase () + ".");
+pt = ";iso........;adp........;tls-u......;tls-r......;ms.........;efg........;isc........;charge.....;quadrupole.;raman......;csa........".indexOf (";" + type.toLowerCase () + ".");
 return (pt < 0 ? -1 : Clazz.doubleToInt (pt / 11));
 }, "~S");
 c$.getInfoIndex = Clazz.defineMethod (c$, "getInfoIndex", 
@@ -278,6 +278,9 @@ this.forThermalEllipsoid = true;
 this.typeFactor = JU.Tensor.ADP_FACTOR;
 this.altType = "1";
 break;
+case 10:
+this.sortIso = true;
+this.typeFactor = 0.01;
 case 4:
 this.sortIso = true;
 this.typeFactor = 0.01;
@@ -339,8 +342,9 @@ c$.ADP_FACTOR = c$.prototype.ADP_FACTOR = (Math.sqrt (0.5) / 3.141592653589793);
 Clazz.defineStatics (c$,
 "MAGNETIC_SUSCEPTIBILITY_FACTOR", 0.01,
 "INTERACTION_FACTOR", 0.04,
+"CHEMICAL_SHIFT_ANISOTROPY_FACTOR", 0.01,
 "tSort", null,
-"KNOWN_TYPES", ";iso........;adp........;tls-u......;tls-r......;ms.........;efg........;isc........;charge.....;quadrupole.;raman......",
+"KNOWN_TYPES", ";iso........;adp........;tls-u......;tls-r......;ms.........;efg........;isc........;charge.....;quadrupole.;raman......;csa........",
 "TYPE_OTHER", -1,
 "TYPE_ISO", 0,
 "TYPE_ADP", 1,
@@ -352,5 +356,6 @@ Clazz.defineStatics (c$,
 "TYPE_CHARGE", 7,
 "TYPE_QUADRUPOLE", 8,
 "TYPE_RAMAN", 9,
+"TYPE_CSA", 10,
 "infoList", ";.............;eigenvalues..;eigenvectors.;asymmatrix...;symmatrix....;value........;isotropy.....;anisotropy...;asymmetry....;eulerzyz.....;eulerzxz.....;quaternion...;indices......;string.......;type.........;id...........;span.........;skew.........");
 });

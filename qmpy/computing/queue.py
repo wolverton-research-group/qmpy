@@ -235,8 +235,12 @@ class Task(models.Model):
                 elif allocation.name == "p30649":
                     calc.instructions["queuetype"] = "short"
                     calc.instructions["serial"] = False
-                    calc.instructions["nodes"] = 1
-                    calc.instructions["ntasks"] = 16
+                    if 'fast' in self.entry.keywords:
+                        calc.instructions["nodes"] = 2
+                        calc.instructions["ntasks"] = 32
+                    else:
+                        calc.instructions["nodes"] = 1
+                        calc.instructions["ntasks"] = 16
                     calc.instructions["walltime"] = 3600*4
                     calc.settings["kpar"] = 4
                 elif allocation.name == "p31102":

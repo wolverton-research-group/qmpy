@@ -5,6 +5,8 @@ this.oc = null;
 this.indent = 0;
 this.modifiedKeys = null;
 this.writeNullAsString = false;
+this.whiteSpace = false;
+this.ws = "";
 Clazz.instantialize (this, arguments);
 }, JU, "JSONWriter");
 Clazz.defineMethod (c$, "setModifyKeys", 
@@ -17,7 +19,8 @@ this.writeNullAsString = b;
 }, "~B");
 Clazz.defineMethod (c$, "append", 
 function (s) {
-if (s != null) this.oc.append ("\t\t\t\t\t\t\t\t\t\t\t\t\t\t".substring (0, Math.min (this.indent, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t".length))).append (s);
+if (s != null) if (this.whiteSpace) this.oc.append ("\t\t\t\t\t\t\t\t\t\t\t\t\t\t".substring (0, Math.min (this.indent, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t".length)));
+this.oc.append (s);
 return this.oc;
 }, "~S");
 Clazz.defineMethod (c$, "setStream", 
@@ -26,6 +29,7 @@ this.oc =  new JU.OC ().setParams (null, null, true, os);
 }, "java.io.OutputStream");
 Clazz.defineMethod (c$, "closeStream", 
 function () {
+this.oc.append ("\n");
 this.oc.closeChannel ();
 return true;
 });
@@ -88,7 +92,7 @@ var value = this.getAndCheckValue (map, key);
 if (value == null) continue;
 this.oc.append (sep);
 this.mapAddKeyValue (key, value, null);
-sep = ",\n";
+sep = "," + this.ws;
 }
 }this.mapClose ();
 }, "java.util.Map");
@@ -98,13 +102,13 @@ return map.get (key);
 }, "java.util.Map,~S");
 Clazz.defineMethod (c$, "mapOpen", 
 function () {
-this.oc.append ("{\n");
+this.oc.append ("{" + this.ws);
 this.indent++;
 });
 Clazz.defineMethod (c$, "mapClose", 
 function () {
 this.indent--;
-this.oc.append ("\n");
+this.oc.append (this.ws);
 this.append ("}");
 });
 Clazz.defineMethod (c$, "mapAddKey", 
@@ -137,7 +141,7 @@ var key1 = entry.getKey ();
 if (JU.PT.isOneOf (key1, except)) continue;
 this.oc.append (sep);
 this.mapAddKeyValue (key1, entry.getValue (), null);
-sep = ",\n";
+sep = "," + this.ws;
 }
 }this.mapClose ();
 }, "~S,java.util.Map,~S");
@@ -176,6 +180,11 @@ if (andIndent) {
 this.indent--;
 this.append ("");
 }this.oc.append ("]");
+}, "~B");
+Clazz.defineMethod (c$, "setWhiteSpace", 
+function (b) {
+this.whiteSpace = b;
+this.ws = (b ? "\n" : "");
 }, "~B");
 Clazz.defineStatics (c$,
 "SPACES", "\t\t\t\t\t\t\t\t\t\t\t\t\t\t");

@@ -15,6 +15,7 @@ def disco_view(request):
         p = request.POST
         search = p.get("search", "")
         data.update(p)
+    data.update(csrf(request))
     if search is None:
         return render_to_response(
             "materials/discovery.html", data, RequestContext(request)

@@ -105,10 +105,14 @@ def online_view(request):
                 os.mkdir(folder)
             with open(os.path.join(folder, "POSCAR"), "w") as f:
                 for c in fl.chunks():
+                    if type(c)==bytes:
+                        c = c.decode()
                     f.write(c)
+            _data = {"uploaded_url": os.path.join(folder, "POSCAR")}
+            _data.update(csrf(request))
             return render_to_response(
                 "computing/online_submit.html",
-                {"uploaded_url": os.path.join(folder, "POSCAR")},
+                _data,
                 RequestContext(request),
             )
 
@@ -148,9 +152,9 @@ def online_view(request):
                     dup_new.write(poscar + "\n")
                     continue
 
-                if en.holds:
-                    dup_new.write(poscar + "\n")
-                    continue
+                #if en.holds:
+                #    dup_new.write(poscar + "\n")
+                #    continue
 
                 en.save()
                 if en.tasks:
@@ -168,6 +172,7 @@ def online_view(request):
             os.rename(
                 os.path.join(folder, "dup_log_new"), os.path.join(folder, "dup_log")
             )
+    data.update(csrf(request))
 
     return render_to_response(
         "computing/online_submit.html", data, RequestContext(request)

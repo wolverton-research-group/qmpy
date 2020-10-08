@@ -23,6 +23,7 @@ def new_host_view(request):
         host = Host.create(**data)
         host = Host(**data)
         host.save()
+        data.update(csrf(request))
     return render_to_response("computing/new_host.html", data, RequestContext(request))
 
 
@@ -30,6 +31,7 @@ def new_project_view(request):
     data = {}
     if request.method == "POST":
         data.update(request.POST)
+        data.update(csrf(request))
     return render_to_response(
         "computing/new_project.html", data, RequestContext(request)
     )

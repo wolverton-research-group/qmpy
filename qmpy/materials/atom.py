@@ -100,6 +100,9 @@ class Atom(models.Model):
     def __str__(self):
         return "%s @ %0.3g %0.3g %0.3g" % (self.element_id, self.x, self.y, self.z)
 
+    def __hash__(self):
+        return hash(self._get_pk_val())
+
     def __eq__(self, other):
         if self.element_id != other.element_id:
             return False
@@ -347,6 +350,9 @@ class Site(models.Model):
     class Meta:
         app_label = "qmpy"
         db_table = "sites"
+
+    def __hash__(self):
+         return hash(self._get_pk_val())
 
     def __eq__(self, other):
         return (self.x, self.y, self.z) == (other.x, other.y, other.z)

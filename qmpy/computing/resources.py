@@ -372,6 +372,8 @@ class Host(models.Model):
         running = {}
         if not raw_data:
             return
+        elif type(raw_data)==bytes:
+            raw_data = raw_data.decode()
 
         ## < Mohan
         if "squeue" in self.check_queue:
@@ -580,6 +582,8 @@ class Account(models.Model):
         else:
             # < Mohan
             tmp = stdout.strip().split()[0]
+            if type(tmp)==bytes:
+                tmp = tmp.decode()
             if "Moab" in tmp:
                 jid = int(tmp.split(".")[1])
             else:

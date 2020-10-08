@@ -562,9 +562,12 @@ class Calculation(models.Model):
         if not exists(self.path):
             return
         elif exists(self.path + "/OUTCAR"):
-            self.outcar = open(self.path + "/OUTCAR").read().splitlines()
+            try:
+                self.outcar = open(self.path + "/OUTCAR","r").readlines()
+            except UnicodeDecodeError:
+                self.outcar = open(self.path + "/OUTCAR","r",encoding='ISO-8859-1').readlines()
         elif exists(self.path + "/OUTCAR.gz"):
-            outcar = gzip.open(self.path + "/OUTCAR.gz", "rb").read()
+            outcar = gzip.open(self.path + "/OUTCAR.gz", "rb").read().decode()
             self.outcar = outcar.splitlines()
         else:
             raise VaspError("No such file exists")
@@ -649,7 +652,7 @@ class Calculation(models.Model):
                 elt_list.append(elt)
             if "ions per type" in line:
                 # there are 2*N occurrences of "POTCAR:" in OUTCAR
-                elt_list = elt_list[: len(elt_list) / 2]
+                elt_list = elt_list[: int(len(elt_list) / 2)]
                 counts = list(map(int, line.split()[4:]))
                 assert len(counts) == len(elt_list)
                 for n, e in zip(counts, elt_list):
@@ -863,20 +866,26 @@ class Calculation(models.Model):
         self.read_n_ionic()
         self.read_convergence()
         self.read_energies()
-        lattice_vectors = self.read_lattice_vectors()
-        stresses = self.read_stresses()
-        positions = self.read_positions()
-        all_forces = self.read_forces()
-        magmoms = self.read_magmoms()
-        charges = self.read_charges()
+        try:
+            lattice_vectors = self.read_lattice_vectors()
+            stresses = self.read_stresses()
+            positions = self.read_positions()
+            all_forces = self.read_forces()
+            magmoms = self.read_magmoms()
+            charges = self.read_charges()
+        except:
+            raise VaspError("OUTCAR is wrong")
 
         if len(self.energies) > 0:
             self.energy = self.energies[-1]
             self.energy_pa = self.energy / self.natoms
 
-        output = strx.Structure()
-        output.cell = lattice_vectors[-1]
-        output.stresses = stresses[-1]
+        try:
+            output = strx.Structure()
+            output.cell = lattice_vectors[-1]
+            output.stresses = stresses[-1]
+        except:
+            raise VaspError("OUTCAR is wrong")
         inv = numpy.linalg.inv(output.cell).T
         atoms = []
         for coord, forces, charge, magmom, elt in zip(
@@ -1205,7 +1214,7 @@ class Calculation(models.Model):
         else:
             f = open("%s/%s" % (self.path, filename), "r")
 
-        d = f.readlines()
+        d = f.read().decode().splitlines()
         # max: scaling added
         scale = float(d[1].strip())
         lattice = np.array([list(map(float, r.split())) for r in d[2:5]]) * scale
@@ -1854,6 +1863,8 @@ class Calculation(models.Model):
         # Has the specified calculation already been created?
         if Calculation.objects.filter(path=path).exists():
             calc = Calculation.objects.get(path=path)
+            if not calc.configuration:
+                calc.configuration = configuration
         else:
             if not os.path.exists(path):
                 os.mkdir(path)
@@ -1885,7 +1896,7 @@ class Calculation(models.Model):
 
         calc.set_potentials(vasp_settings.get("potentials", "vasp_rec"))
         calc.set_hubbards(vasp_settings.get("hubbards", hubbard))
-        calc.set_magmoms(vasp_settings.get("magnetism", "ferro"))
+        #calc.set_magmoms(vasp_settings.get("magnetism", "ferro"))
 
         if "scale_encut" in vasp_settings:
             enmax = max(pot.enmax for pot in calc.potentials)
@@ -1893,6 +1904,7 @@ class Calculation(models.Model):
 
         # aug 18, 2016. i think the following line is the ENCUT culprit
         calc.settings = vasp_settings
+        calc.set_magmoms(vasp_settings.get("magnetism", "ferro"))
         if calc.input.natoms >= 10:
             calc.settings.update({"ncore": 4, "lscalu": False, "lplane": True})
 

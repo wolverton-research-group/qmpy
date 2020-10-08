@@ -4,8 +4,9 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from io import StringIO
-
+from io import BytesIO
+import urllib
+import base64
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 
@@ -29,10 +30,11 @@ def journal_view(request, journal_id):
     plt.hist(dates)
     plt.xlabel("Year")
     plt.ylabel("# of publications with new materials")
-    img = StringIO()
-    plt.savefig(img, dpi=75, bbox_inches="tight")
-    data_uri = "data:image/jpg;base64,"
-    data_uri += img.getvalue().encode("base64").replace("\n", "")
+    img = BytesIO()
+    plt.savefig(img, dpi=75, bbox_inches="tight", format='png')
+    img.seek(0)
+    data_uri = base64.b64encode(img.read())
+    data_uri = 'data:image/png;base64,' + urllib.parse.quote(data_uri)
     plt.close()
 
     some_entries = Entry.objects.filter(reference__journal=journal)[:20]
