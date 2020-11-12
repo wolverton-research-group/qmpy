@@ -5,7 +5,7 @@ this.errorMsg = null;
 Clazz.instantialize (this, arguments);
 }, J.image, "AviCreator", null, J.api.JmolMovieCreatorInterface);
 Clazz.overrideMethod (c$, "createMovie", 
-function (viewer, files, width, height, fps, fileName) {
+function (vwr, files, width, height, fps, fileName) {
 return this.errorMsg;
-}, "J.viewer.Viewer,~A,~N,~N,~N,~S");
+}, "JV.Viewer,~A,~N,~N,~N,~S");
 });

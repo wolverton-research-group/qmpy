@@ -1,14 +1,15 @@
 // BH adjusted to have only one sort method.
+// BH 4/7/2017 1:49:45 PM fixing "instanceof Comparable"
+// BH adding copyOf 7/12/2016 10:35:01 AM
+Clazz.load(["java.util.AbstractList","$.RandomAccess"],"java.util.Arrays",["java.lang.ArrayIndexOutOfBoundsException","$.IllegalArgumentException","$.NullPointerException"],function(){
+c$=Clazz.declareType(java.util,"Arrays");
 
-$_L(["java.util.AbstractList","$.RandomAccess"],"java.util.Arrays",["java.lang.ArrayIndexOutOfBoundsException","$.IllegalArgumentException","$.NullPointerException"],function(){
-c$=$_T(java.util,"Arrays");
-
-c$.sort=$_V(c$,"sort",
+c$.sort=Clazz.overrideMethod(c$,"sort",
 function(a,c,d,e){
   switch (arguments.length) {
   case 1:
     var aux=a.sort(function(o1,o2){
-      if(typeof o1=="string"||o1 instanceof Comparable){
+      if(typeof o1=="string"||Clazz.instanceOf(o1, Comparable)){
         return o1.compareTo(o2);
       }
       return o1-o2;
@@ -21,7 +22,7 @@ function(a,c,d,e){
     var aux=a.sort(function(o1,o2){
       if(c!=null){
         return c.compare(o1,o2);
-      }else if(typeof o1=="string"||o1 instanceof Comparable){
+      }else if(typeof o1=="string"||Clazz.instanceOf(o1, Comparable)){
         return o1.compareTo(o2);
       }
       return o1-o2;
@@ -39,7 +40,7 @@ function(a,c,d,e){
       aux[i-fromIndex]=a[i];
     }
     aux=aux.sort(function(o1,o2){
-      if(typeof o1=="string"||o1 instanceof Comparable){
+      if(typeof o1=="string"||Clazz.instanceOf(o1, Comparable)){
         return o1.compareTo(o2);
       }
       return o1-o2;
@@ -60,7 +61,7 @@ function(a,c,d,e){
     aux=aux.sort(function(o1,o2){
       if(c!=null){
         return c.compare(o1,o2);
-      }else if(typeof o1=="string"||o1 instanceof Comparable){
+      }else if(typeof o1=="string"||Clazz.instanceOf(o1, Comparable)){
         return o1.compareTo(o2);
       }
       return o1-o2;
@@ -71,13 +72,13 @@ function(a,c,d,e){
   }
 });
 
-c$.rangeCheck=$_M(c$,"rangeCheck",
+c$.rangeCheck=Clazz.defineMethod(c$,"rangeCheck",
 ($fz=function(arrayLen,fromIndex,toIndex){
 if(fromIndex>toIndex)throw new IllegalArgumentException("fromIndex("+fromIndex+") > toIndex("+toIndex+")");
 if(fromIndex<0)throw new ArrayIndexOutOfBoundsException(fromIndex);
 if(toIndex>arrayLen)throw new ArrayIndexOutOfBoundsException(toIndex);
 },$fz.isPrivate=true,$fz),"~N,~N,~N");
-c$.binarySearch=$_M(c$,"binarySearch",
+c$.binarySearch=Clazz.defineMethod(c$,"binarySearch",
 function(a,key){
 var low=0;
 var high=a.length-1;
@@ -90,7 +91,7 @@ else return mid;
 }
 return-(low+1);
 },"~A,~N");
-c$.binarySearch=$_M(c$,"binarySearch",
+c$.binarySearch=Clazz.defineMethod(c$,"binarySearch",
 function(a,key){
 var low=0;
 var high=a.length-1;
@@ -104,7 +105,7 @@ else return mid;
 }
 return-(low+1);
 },"~A,~O");
-c$.binarySearch=$_M(c$,"binarySearch",
+c$.binarySearch=Clazz.defineMethod(c$,"binarySearch",
 function(a,key,c){
 if(c==null)return java.util.Arrays.binarySearch(a,key);
 var low=0;
@@ -119,7 +120,7 @@ else return mid;
 }
 return-(low+1);
 },"~A,~O,java.util.Comparator");
-c$.equals=$_M(c$,"equals",
+c$.equals=Clazz.defineMethod(c$,"equals",
 function(a,a2){
 if(a===a2)return true;
 if(a==null||a2==null)return false;
@@ -134,7 +135,7 @@ if(!(o1==null?o2==null:(o1.equals==null?o1==o2:o1.equals(o2))))return false;
 return true;
 },"~A,~A");
 
-c$.fill=$_V(c$,"fill",
+c$.fill=Clazz.overrideMethod(c$,"fill",
 function(a,fromIndex,toIndex,val){
 if (arguments.length == 2) {
 		val = fromIndex;
@@ -145,40 +146,47 @@ if (arguments.length == 2) {
 	for(var i=fromIndex;i<toIndex;i++)a[i]=val;
 });
 
-c$.asList=$_M(c$,"asList",
+c$.copyOf=Clazz.overrideMethod(c$,"copyOf",
+function(a,len){
+  var b = Clazz.newArray(len,null)
+  for(var i=Math.min(a.length, len);--i >= 0;)b[i]=a[i];
+  return b;
+});
+
+c$.asList=Clazz.defineMethod(c$,"asList",
 function(a){
-return new java.util.Arrays.ArrayList(a);
+return new java.util.Arrays.ArrayList(arguments.length == 1 && Clazz.getClassName(a) == "Array" ? a : arguments); // BH must be T...
 },"~A");
-$_H();
-c$=$_C(function(){
+Clazz.pu$h(self.c$);
+c$=Clazz.decorateAsClass(function(){
 this.a=null;
-$_Z(this,arguments);
+Clazz.instantialize(this,arguments);
 },java.util.Arrays,"ArrayList",java.util.AbstractList,[java.util.RandomAccess,java.io.Serializable]);
-$_K(c$,
+Clazz.makeConstructor(c$,
 function(a){
-$_R(this,java.util.Arrays.ArrayList,[]);
+Clazz.superConstructor(this,java.util.Arrays.ArrayList,[]);
 if(a==null)throw new NullPointerException();
 this.a=a;
 },"~A");
-$_V(c$,"size",
+Clazz.overrideMethod(c$,"size",
 function(){
 return this.a.length;
 });
-$_M(c$,"toArray",
+Clazz.defineMethod(c$,"toArray",
 function(){
 return this.a.clone();
 });
-$_V(c$,"get",
+Clazz.overrideMethod(c$,"get",
 function(a){
 return this.a[a];
 },"~N");
-$_V(c$,"set",
+Clazz.overrideMethod(c$,"set",
 function(a,b){
 var c=this.a[a];
 this.a[a]=b;
 return c;
 },"~N,~O");
-$_V(c$,"indexOf",
+Clazz.overrideMethod(c$,"indexOf",
 function(a){
 if(a==null){
 for(var b=0;b<this.a.length;b++)if(this.a[b]==null)return b;
@@ -188,11 +196,11 @@ for(var b=0;b<this.a.length;b++)if(a.equals(this.a[b]))return b;
 
 }return-1;
 },"~O");
-$_V(c$,"contains",
+Clazz.overrideMethod(c$,"contains",
 function(a){
 return this.indexOf(a)!=-1;
 },"~O");
-c$=$_P();
-$_S(c$,
+c$=Clazz.p0p();
+Clazz.defineStatics(c$,
 "INSERTIONSORT_THRESHOLD",7);
 });

@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.adapter.readers.more");
-Clazz.load (["J.adapter.smarter.AtomSetCollectionReader", "java.util.Properties"], "J.adapter.readers.more.ForceFieldReader", ["java.lang.Character", "J.adapter.smarter.Atom"], function () {
+Clazz.load (["J.adapter.smarter.AtomSetCollectionReader", "java.util.Properties"], "J.adapter.readers.more.ForceFieldReader", ["java.lang.Character", "JU.PT", "J.adapter.smarter.Atom"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.userAtomTypes = null;
 this.atomTypes = null;
@@ -8,12 +8,12 @@ Clazz.instantialize (this, arguments);
 Clazz.prepareFields (c$, function () {
 this.atomTypes =  new java.util.Properties ();
 });
-$_M(c$, "setUserAtomTypes", 
+Clazz.defineMethod (c$, "setUserAtomTypes", 
 function () {
 this.userAtomTypes = this.htParams.get ("atomTypes");
 if (this.userAtomTypes != null) this.userAtomTypes = ";" + this.userAtomTypes + ";";
 });
-$_M(c$, "getElementSymbol", 
+Clazz.defineMethod (c$, "getElementSymbol", 
 function (atom, atomType) {
 var elementSymbol = this.atomTypes.get (atomType);
 if (elementSymbol != null) {
@@ -32,17 +32,17 @@ haveSymbol = true;
 } else {
 var ch0 = atomType.charAt (0);
 var ch1 = atomType.charAt (1);
-var isXx = (Character.isUpperCase (ch0) && Character.isLowerCase (ch1));
+var isXx = (JU.PT.isUpperCase (ch0) && JU.PT.isLowerCase (ch1));
 if (" IM IP sz az sy ay ayt ".indexOf (atomType) >= 0) {
 if (ch0 == 'I') {
 elementSymbol = atom.atomName.substring (0, 2);
-if (!Character.isLowerCase (elementSymbol.charAt (1))) elementSymbol = elementSymbol.substring (0, 1);
+if (!JU.PT.isLowerCase (elementSymbol.charAt (1))) elementSymbol = elementSymbol.substring (0, 1);
 } else {
 elementSymbol = (ch0 == 's' ? "Si" : "Al");
 }} else if (nChar == 2 && isXx) {
-} else if (Character.isLetter (ch0) && !Character.isLetter (ch1)) {
+} else if (JU.PT.isLetter (ch0) && !JU.PT.isLetter (ch1)) {
 elementSymbol = "" + Character.toUpperCase (ch0);
-} else if (nChar > 2 && isXx && !Character.isLetter (atomType.charAt (2))) {
+} else if (nChar > 2 && isXx && !JU.PT.isLetter (atomType.charAt (2))) {
 elementSymbol = "" + ch0 + ch1;
 } else {
 ch0 = Character.toUpperCase (ch0);
@@ -62,7 +62,7 @@ haveSymbol = true;
 if (haveSymbol) this.atomTypes.put (atomType, elementSymbol);
 return haveSymbol;
 }, "J.adapter.smarter.Atom,~S");
-c$.deducePdbElementSymbol = $_M(c$, "deducePdbElementSymbol", 
+c$.deducePdbElementSymbol = Clazz.defineMethod (c$, "deducePdbElementSymbol", 
 function (isHetero, XX, group3) {
 var i = XX.indexOf ('\0');
 var atomType = null;
@@ -80,9 +80,9 @@ var ch2 = (i < len ? XX.charAt (i) : ' ');
 var full = group3 + "." + ch1 + ch2;
 if (("OEC.CA ICA.CA OC1.CA OC2.CA OC4.CA").indexOf (full) >= 0) return "Ca";
 if (XX.indexOf ("'") > 0 || XX.indexOf ("*") >= 0 || "HCNO".indexOf (ch1) >= 0 && ch2 <= 'H' || XX.startsWith ("CM")) return "" + ch1;
-if (isHetero && J.adapter.smarter.Atom.isValidElementSymbolNoCaseSecondChar2 (ch1, ch2)) return ("" + ch1 + ch2).trim ();
-if (J.adapter.smarter.Atom.isValidElementSymbol (ch1)) return "" + ch1;
-if (J.adapter.smarter.Atom.isValidElementSymbol (ch2)) return "" + ch2;
+if (isHetero && J.adapter.smarter.Atom.isValidSymNoCase (ch1, ch2)) return ("" + ch1 + ch2).trim ();
+if (J.adapter.smarter.Atom.isValidSym1 (ch1)) return "" + ch1;
+if (J.adapter.smarter.Atom.isValidSym1 (ch2)) return "" + ch2;
 return "Xx";
 }, "~B,~S,~S");
 Clazz.defineStatics (c$,

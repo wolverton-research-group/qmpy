@@ -20,9 +20,9 @@ from django.db import transaction
 
 import qmpy
 import shutil
-from element import Element, Species
-from atom import Atom, Site
-from composition import Composition
+from .element import Element, Species
+from .atom import Atom, Site
+from .composition import Composition
 from qmpy.utils import *
 from qmpy.utils.folder_management import change_directory
 from qmpy.data.meta_data import *
@@ -31,17 +31,20 @@ from qmpy.analysis import *
 
 logger = logging.getLogger(__name__)
 
-#logger.setLevel(logging.DEBUG)
+# logger.setLevel(logging.DEBUG)
 logger.setLevel(logging.INFO)
+
 
 class StructureError(Exception):
     """Structure related problem"""
 
+
 class TMKPointsError(Exception):
     """Problem with TM k-points generation"""
 
-@add_meta_data('comment')
-@add_meta_data('keyword')
+
+@add_meta_data("comment")
+@add_meta_data("keyword")
 class Structure(models.Model, object):
     """
     Structure model. Principal attributes are a lattice and basis set.
@@ -100,18 +103,21 @@ class Structure(models.Model, object):
         >>> s.stresses
 
     """
-    entry = models.ForeignKey('Entry', null=True)
-    element_set = models.ManyToManyField('Element')
-    species_set = models.ManyToManyField('Species')
-    meta_data = models.ManyToManyField('MetaData')
-    reference = models.ForeignKey('Reference', null=True)
+
+    entry = models.ForeignKey("Entry", null=True, on_delete=models.CASCADE)
+    element_set = models.ManyToManyField("Element")
+    species_set = models.ManyToManyField("Species")
+    meta_data = models.ManyToManyField("MetaData")
+    reference = models.ForeignKey("Reference", null=True, on_delete=models.SET_NULL)
     label = models.CharField(blank=True, max_length=63)
-    prototype = models.ForeignKey('Prototype', null=True, blank=True,
-                                               related_name='+')
+    prototype = models.ForeignKey(
+        "Prototype", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
     measured = models.BooleanField(default=False)
 
-    composition = models.ForeignKey('Composition', null=True,
-                                    related_name='structure_set')
+    composition = models.ForeignKey(
+        "Composition", null=True, on_delete=models.CASCADE, related_name="structure_set"
+    )
     natoms = models.IntegerField(null=True, blank=True)
     nsites = models.IntegerField(null=True, blank=True)
     ntypes = models.IntegerField(null=True, blank=True)
@@ -136,8 +142,9 @@ class Structure(models.Model, object):
     syz = models.FloatField(default=0)
     szx = models.FloatField(default=0)
 
-    spacegroup = models.ForeignKey('Spacegroup', blank=True,
-            null=True)
+    spacegroup = models.ForeignKey(
+        "Spacegroup", blank=True, on_delete=models.SET_NULL, null=True
+    )
 
     energy = models.FloatField(blank=True, null=True)
     energy_pa = models.FloatField(blank=True, null=True)
@@ -151,9 +158,9 @@ class Structure(models.Model, object):
     _magmoms = []
 
     class Meta:
-        app_label = 'qmpy'
-        db_table = 'structures'
-        unique_together = ('entry', 'label')
+        app_label = "qmpy"
+        db_table = "structures"
+        unique_together = ("entry", "label")
 
     def __eq__(self, other):
         return self.compare(other)
@@ -161,13 +168,16 @@ class Structure(models.Model, object):
     def __str__(self):
         return format_comp(reduce_comp(self.comp))
 
+    def __hash__(self):
+        return hash(self._get_pk_val())
+
     def printf(self):
-        res = format_comp(reduce_comp(self.comp)) + '\n'
+        res = format_comp(reduce_comp(self.comp)) + "\n"
         res += self.lat_param_string()
         for i, s in enumerate(self.sites):
-            res += '\n - %s' % s
+            res += "\n - %s" % s
             if i == 6:
-                res += '\n ... \n %d more atoms.' % (len(self)-6)
+                res += "\n ... \n %d more atoms." % (len(self) - 6)
                 break
         return res
 
@@ -204,10 +214,10 @@ class Structure(models.Model, object):
         s = Structure(**kwargs)
         if np.shape(cell) == (6,):
             s.lat_params = cell
-        elif np.shape(cell) == (3,3):
+        elif np.shape(cell) == (3, 3):
             s.cell = cell
         elif np.shape(cell) == (3,):
-            s.cell = np.eye(3)*cell
+            s.cell = np.eye(3) * cell
 
         for atom in atoms:
             if len(atom) == 2:
@@ -228,14 +238,14 @@ class Structure(models.Model, object):
 
         self.natoms = len(self.atoms)
         self.nsites = len(self.sites)
-        self.ntypes = len(self.comp.keys())
+        self.ntypes = len(list(self.comp.keys()))
         self.get_volume()
 
         super(Structure, self).save(*args, **kwargs)
 
-        self.element_set = self.elements
-        self.species_set = self.species
-        self.meta_data = self.comment_objects + self.keyword_objects
+        self.element_set.set(self.elements)
+        self.species_set.set(self.species)
+        self.meta_data.set(self.comment_objects + self.keyword_objects)
 
         if not self._sites is None:
             for s in self.sites:
@@ -251,9 +261,10 @@ class Structure(models.Model, object):
 
         if not self.spacegroup:
             self.symmetrize()
-
-
+        super(Structure, self).save(*args, **kwargs)
+        
     _atoms = None
+
     @property
     def atoms(self):
         """
@@ -277,6 +288,7 @@ class Structure(models.Model, object):
         self.ntypes = len(self.comp)
 
     _abc = None
+
     @property
     def atoms_by_coord(self):
         if self._abc is None:
@@ -287,6 +299,7 @@ class Structure(models.Model, object):
         return self._abc
 
     _sbc = None
+
     @property
     def sites_by_coord(self):
         if self._sbc is None:
@@ -297,6 +310,7 @@ class Structure(models.Model, object):
         return self._sbc
 
     _sites = None
+
     @property
     def sites(self):
         """
@@ -319,7 +333,7 @@ class Structure(models.Model, object):
 
     @property
     def site_compositions(self):
-        return [ format_comp(s.comp) for s in self.sites ]
+        return [format_comp(s.comp) for s in self.sites]
 
     @site_compositions.setter
     def site_compositions(self, values):
@@ -341,18 +355,17 @@ class Structure(models.Model, object):
     @property
     def elements(self):
         """List of Elements"""
-        return [ Element.get(e) for e in self.comp.keys() ]
+        return [Element.get(e) for e in list(self.comp.keys())]
 
     @property
     def species(self):
         """List of species"""
-        return [ Species.get(s) for s in self.spec_comp.keys() ]
+        return [Species.get(s) for s in list(self.spec_comp.keys())]
 
     @property
     def stresses(self):
         """Calculated stresses, a numpy.ndarray of shape (6,)"""
-        return np.array([self.sxx, self.syy, self.szz,
-            self.sxy, self.syz, self.szx ])
+        return np.array([self.sxx, self.syy, self.szz, self.sxy, self.syz, self.szx])
 
     @stresses.setter
     def stresses(self, vector):
@@ -363,14 +376,14 @@ class Structure(models.Model, object):
         """Calculates the volume from the triple product of self.cell"""
         b1, b2, b3 = self.cell
         self.volume = abs(np.dot(np.cross(b1, b2), b3))
-        self.volume_pa = self.volume/len(self)
+        self.volume_pa = self.volume / len(self)
         return self.volume
 
     def set_label(self, label):
         self.label = label
         if not self.entry is None:
             self.entry.structures[label] = self
-        #if self.id:
+        # if self.id:
         #    Structure.objects.filter(id=self.id).update(label=label)
 
     def set_volume(self, value):
@@ -379,30 +392,32 @@ class Structure(models.Model, object):
         and relative magnitudes of all lattice vectors the same.
         """
         self.get_volume()
-        scale = value/self.volume
-        self.cell = self.cell * (scale**(1/3.))
-        self.volume_pa = value/self.natoms
+        scale = value / self.volume
+        self.cell = self.cell * (scale ** (1 / 3.0))
+        self.volume_pa = value / self.natoms
         self.volume = value
 
     def get_volume_sum_of_elements(self):
         volume = 0
         for atom in self:
-            volume += atom.element.volume*atom.occupancy
+            volume += atom.element.volume * atom.occupancy
         return volume
 
     def set_volume_to_sum_of_elements(self):
         volume = 0
         for atom in self:
-            volume += atom.element.volume*atom.occupancy
+            volume += atom.element.volume * atom.occupancy
         self.set_volume(volume)
 
     @property
     def lat_param_dict(self):
         """Dictionary of lattice parameters."""
-        return dict(zip( ['a', 'b', 'c', 'alpha', 'beta', 'gamma'], 
-                         self.lat_params))
+        return dict(
+            list(zip(["a", "b", "c", "alpha", "beta", "gamma"], self.lat_params))
+        )
 
     _lat_params = None
+
     @property
     def lat_params(self):
         """Tuple of lattice parameters (a, b, c, alpha, beta, gamma)."""
@@ -415,7 +430,7 @@ class Structure(models.Model, object):
         self.cell = latparams_to_basis(lat_params)
         self._lat_params = lat_params
 
-    def lat_param_string(self, format='screen'):
+    def lat_param_string(self, format="screen"):
         """
         Generates a human friendly representation of the lattice parameters of
         a structure.
@@ -425,55 +440,65 @@ class Structure(models.Model, object):
 
         """
         formats = {
-                'html':{
-                    'keys':['&alpha;', '&beta;', '&gamma'],
-                    'newline':'<br>'},
-                'mathtype':{
-                    'keys':[r'\alpha', r'\beta', r'\gamma'],
-                    'newline':'\n'},
-                'screen':{
-                    'keys':[r'alpha', r'beta', r'gamma'],
-                    'newline':'\n'}
-                }
+            "html": {"keys": ["&alpha;", "&beta;", "&gamma"], "newline": "<br>"},
+            "mathtype": {"keys": [r"\alpha", r"\beta", r"\gamma"], "newline": "\n"},
+            "screen": {"keys": [r"alpha", r"beta", r"gamma"], "newline": "\n"},
+        }
 
         f = formats[format]
 
         lp = self.lat_param_dict
-        if abs(lp['a'] - lp['b']) < 1e-4:
-            if abs(lp['a'] - lp['c']) < 1e-4:
-                lpstr = 'a = b = c = %0.3g' % lp['a']
+        if abs(lp["a"] - lp["b"]) < 1e-4:
+            if abs(lp["a"] - lp["c"]) < 1e-4:
+                lpstr = "a = b = c = %0.3g" % lp["a"]
             else:
-                lpstr = 'a = b = %0.3g, c = %0.3g' % ( lp['a'], lp['c'])
+                lpstr = "a = b = %0.3g, c = %0.3g" % (lp["a"], lp["c"])
         else:
-            lpstr = 'a = %0.3g, b = %0.3g, c = %0.3g' % (lp['a'], lp['b'], lp['c'])
+            lpstr = "a = %0.3g, b = %0.3g, c = %0.3g" % (lp["a"], lp["b"], lp["c"])
 
-        lpstr += f['newline']
+        lpstr += f["newline"]
 
-        if abs(lp['alpha'] - lp['beta']) < 1e-2:
-            if abs(lp['alpha'] - lp['gamma']) < 1e-2:
-                lpstr += '%s = %s = %s = %0.3g' % (
-                    f['keys'][0], f['keys'][1], f['keys'][2], lp['alpha'])
+        if abs(lp["alpha"] - lp["beta"]) < 1e-2:
+            if abs(lp["alpha"] - lp["gamma"]) < 1e-2:
+                lpstr += "%s = %s = %s = %0.3g" % (
+                    f["keys"][0],
+                    f["keys"][1],
+                    f["keys"][2],
+                    lp["alpha"],
+                )
             else:
-                lpstr += '%s = %s = %0.3g, %s = %0.3g' % (
-                    f['keys'][0], f['keys'][1], lp['alpha'], 
-                    f['keys'][2], lp['gamma'])
+                lpstr += "%s = %s = %0.3g, %s = %0.3g" % (
+                    f["keys"][0],
+                    f["keys"][1],
+                    lp["alpha"],
+                    f["keys"][2],
+                    lp["gamma"],
+                )
         else:
-            lpstr += '&alpha; = %0.3g, &beta; = %0.3g, &gamma; = %0.3g' % (
-                f['keys'][0], lp['alpha'],  
-                f['keys'][1], lp['beta'],
-                f['keys'][2], lp['gamma'])
+            lpstr += "&alpha; = %0.3g, &beta; = %0.3g, &gamma; = %0.3g" % (
+                f["keys"][0],
+                lp["alpha"],
+                f["keys"][1],
+                lp["beta"],
+                f["keys"][2],
+                lp["gamma"],
+            )
         return lpstr
 
     lp = lat_params
     _cell = None
+
     @property
     def cell(self):
         """Lattice vectors, 3x3 numpy.ndarray."""
         if self._cell is None:
-            self._cell = np.array([
-                            [self.x1, self.x2, self.x3],
-                            [self.y1, self.y2, self.y3],
-                            [self.z1, self.z2, self.z3]])
+            self._cell = np.array(
+                [
+                    [self.x1, self.x2, self.x3],
+                    [self.y1, self.y2, self.y3],
+                    [self.z1, self.z2, self.z3],
+                ]
+            )
         return self._cell
 
     @cell.setter
@@ -491,6 +516,7 @@ class Structure(models.Model, object):
         self._cell = None
 
     _metrical_matrix = None
+
     @property
     def metrical_matrix(self):
         """np.dot(self.cell.T, self.cell)"""
@@ -500,42 +526,42 @@ class Structure(models.Model, object):
 
     @metrical_matrix.setter
     def metrical_matrix(self, G):
-        a = np.sqrt(abs(G[0,0]))
-        b = np.sqrt(abs(G[1,1]))
-        c = np.sqrt(abs(G[2,2]))
-        al = np.arccos(G[1,2]/abs(b*c))*180/np.pi
-        be = np.arccos(G[0,2]/abs(a*c))*180/np.pi
-        ga = np.arccos(G[0,1]/abs(a*b))*180/np.pi
+        a = np.sqrt(abs(G[0, 0]))
+        b = np.sqrt(abs(G[1, 1]))
+        c = np.sqrt(abs(G[2, 2]))
+        al = np.arccos(G[1, 2] / abs(b * c)) * 180 / np.pi
+        be = np.arccos(G[0, 2] / abs(a * c)) * 180 / np.pi
+        ga = np.arccos(G[0, 1] / abs(a * b)) * 180 / np.pi
         self.cell = latparams_to_basis([a, b, c, al, be, ga])
 
     @property
     def atomic_numbers(self):
         """List of atomic numbers, length equal to number of atoms."""
-        return np.array([ atom.element.z for atom in self.atoms ])
+        return np.array([atom.element.z for atom in self.atoms])
 
     @property
     def atom_types(self):
         """List of atomic symbols, length equal to number of atoms."""
-        return np.array([ atom.element_id for atom in self.atoms ])
+        return np.array([atom.element_id for atom in self.atoms])
 
     @atom_types.setter
     def atom_types(self, elements):
         if isinstance(elements, list):
             for a, e in zip(self.atoms, elements):
                 a.element_id = e
-        elif isinstance(elements, basestring):
+        elif isinstance(elements, str):
             for a in self.atoms:
                 a.element_id = elements
         elif isinstance(elements, qmpy.Element):
             for a in self.atoms:
                 a.element = elements
         else:
-            raise ValueError('Unrecognized type for atom type assignment')
+            raise ValueError("Unrecognized type for atom type assignment")
 
     @property
     def species_types(self):
         """List of species, length equal to number of atoms."""
-        return np.array([ atom.species for atom in self.atoms ])
+        return np.array([atom.species for atom in self.atoms])
 
     @property
     def species_id_types(self):
@@ -564,14 +590,14 @@ class Structure(models.Model, object):
         dataset = get_symmetry_dataset(self, symprec=tol)
         if not dataset:
             return
-        self.spacegroup = Spacegroup.objects.get(pk=dataset['number'])
+        self.spacegroup = Spacegroup.objects.get(pk=dataset["number"])
         for i, site in enumerate(self.sites):
-            site.wyckoff = self.spacegroup.get_site(dataset['wyckoffs'][i])
+            site.wyckoff = self.spacegroup.get_site(dataset["wyckoffs"][i])
             site.structure = self
         counts = defaultdict(int)
         orbits = defaultdict(list)
         origins = {}
-        for i, e in enumerate(dataset['equivalent_atoms']):
+        for i, e in enumerate(dataset["equivalent_atoms"]):
             counts[e] += 1
             ##origins[self.sites[i]] = self.sites[e]
             ## Dictionary keys cannot be objects that are not stored (only
@@ -580,24 +606,24 @@ class Structure(models.Model, object):
             origins[i] = e
             orbits[e].append(self.sites[i])
         self.origins = origins
-        self.operations = zip(dataset['rotations'], dataset['translations'])
+        self.operations = list(zip(dataset["rotations"], dataset["translations"]))
         rots = []
-        for r in dataset['rotations']:
-            if not any([ np.allclose(r, x) for x in rots ]):
+        for r in dataset["rotations"]:
+            if not any([np.allclose(r, x) for x in rots]):
                 rots.append(r)
         self.rotations = rots
         trans = []
-        for t in dataset['translations']:
-            if not any([ np.allclose(t, x) for x in trans ]):
+        for t in dataset["translations"]:
+            if not any([np.allclose(t, x) for x in trans]):
                 trans.append(t)
         self.translations = trans
-        self.orbits = orbits.values()
+        self.orbits = list(orbits.values())
         ##self.duplicates = dict((self.sites[e], v) for e, v in orbits.items())
         ## See comment about hashes and Dictionary keys
-        self.duplicates = dict((e, v) for e, v in orbits.items())
+        self.duplicates = dict((e, v) for e, v in list(orbits.items()))
         self._uniq_sites = []
         self._uniq_atoms = []
-        for ind, mult in counts.items():
+        for ind, mult in list(counts.items()):
             site = self.sites[ind]
             ##for site2 in self.duplicates[site]:
             ## See comment about hashes and Dictionary keys
@@ -610,6 +636,7 @@ class Structure(models.Model, object):
                 self._uniq_atoms.append(a)
 
     _uniq_atoms = None
+
     @property
     def uniq_atoms(self):
         if self._uniq_atoms is None:
@@ -617,6 +644,7 @@ class Structure(models.Model, object):
         return self._uniq_atoms
 
     _uniq_sites = None
+
     @property
     def uniq_sites(self):
         if self._uniq_sites is None:
@@ -629,23 +657,27 @@ class Structure(models.Model, object):
         for all pairs of species.
         """
 
-        elts = list(set([a.element_id for a in self ])) 
+        elts = list(set([a.element_id for a in self]))
         dists = get_pair_distances(self)
         odists = get_pair_distances(other)
-        for e1, e2 in itertools.combinations(elts,2):
-            d1 = dists[frozenset([e1,e2])]
-            d2 = odists[frozenset([e1,e2])]
+        for e1, e2 in itertools.combinations(elts, 2):
+            d1 = dists[frozenset([e1, e2])]
+            d2 = odists[frozenset([e1, e2])]
             for x, y in zip(d1, d2):
-                if abs(x-y) > tol:
+                if abs(x - y) > tol:
                     return False
         return True
 
-    def compare(self, other, tol=0.01,
-                             atom_tol=10,
-                             volume=False, 
-                             allow_distortions=False, 
-                             check_spacegroup=False,
-                             wildcard=None):
+    def compare(
+        self,
+        other,
+        tol=0.01,
+        atom_tol=10,
+        volume=False,
+        allow_distortions=False,
+        check_spacegroup=False,
+        wildcard=None,
+    ):
         """
         Credit to K. Michel for the algorithm.
 
@@ -699,7 +731,7 @@ class Structure(models.Model, object):
         """
 
         # 1
-        #if len(self) > 80 or len(other) > 80:
+        # if len(self) > 80 or len(other) > 80:
         #    return False
         me = self.copy()
         you = other.copy()
@@ -725,7 +757,7 @@ class Structure(models.Model, object):
         # 5 (optional)
         if volume:
             v1, v2 = me.get_volume(), you.get_volume()
-            if abs(v1 - v2)/min(v1, v2) > tol:
+            if abs(v1 - v2) / min(v1, v2) > tol:
                 logger.debug("Structure comparison: volume mismatch")
                 return False
 
@@ -733,7 +765,7 @@ class Structure(models.Model, object):
         me.reduce()
         you.reduce()
 
-        #6b
+        # 6b
         if check_spacegroup:
             me.symmetrize()
             you.symmetrize()
@@ -743,56 +775,56 @@ class Structure(models.Model, object):
         # 7
         try_again = False
         for a, b in zip(me.lat_params[3:], you.lat_params[3:]):
-            if abs((a-b)/min(a,b)) > tol:
-                you.transform([1,-1,-1])
-                logger.debug('Tranforming other from type II to type I.')
+            if abs((a - b) / min(a, b)) > tol:
+                you.transform([1, -1, -1])
+                logger.debug("Tranforming other from type II to type I.")
                 try_again = True
 
         if try_again:
             try_again = False
             for a, b in zip(me.lat_params[3:], you.lat_params[3:]):
-                if abs((a-b)/min(a,b)) > tol:
-                    you.transform([-1,-1,1])
-                    logger.debug('Tranforming other from type II to type I.')
+                if abs((a - b) / min(a, b)) > tol:
+                    you.transform([-1, -1, 1])
+                    logger.debug("Tranforming other from type II to type I.")
                     try_again = True
 
         if try_again:
             try_again = False
             for a, b in zip(me.lat_params[3:], you.lat_params[3:]):
-                if abs((a-b)/min(a,b)) > tol:
+                if abs((a - b) / min(a, b)) > tol:
                     logger.debug("Structure comparison: lat param mismatch")
                     return False
 
         # 8
         if not allow_distortions:
-            ratios = [ x/y for x,y in zip(me.lp[:3], you.lp[:3])]
-            for a,b in itertools.combinations(ratios, r=2):
-                if abs(a-b)/min(a,b) > tol:
+            ratios = [x / y for x, y in zip(me.lp[:3], you.lp[:3])]
+            for a, b in itertools.combinations(ratios, r=2):
+                if abs(a - b) / min(a, b) > tol:
                     logger.debug("Structure comparison: lattice vector ratio mismatch")
                     return False
 
         # 9
         min_elt = sorted(me.comp, key=lambda x: me.comp[x])[0]
-        test_atom = [ a for a in me.atoms if a.element_id == min_elt ][0]
+        test_atom = [a for a in me.atoms if a.element_id == min_elt][0]
         me.coords -= test_atom.coord
-        
+
         # get all rotational symmetries of the lattice
         test_struct = Structure()
         test_struct.cell = me.cell
-        test_struct.atoms = [Atom.create('Fe', [0,0,0])]
+        test_struct.atoms = [Atom.create("Fe", [0, 0, 0])]
         test_struct.symmetrize()
         rotations = test_struct.rotations
 
         test_struct = you.copy()
 
-        eps = 2*tol*atom_tol#*me.volume**(1./3)
-        eps2 = eps**2
+        eps = 2 * tol * atom_tol  # *me.volume**(1./3)
+        eps2 = eps ** 2
 
         for rot in rotations:
             # loop over all possible re-orientations of the cell
             inv = la.inv(rot)
             test_struct.cell = rot.dot(you.cell)
-            test_struct.coords = np.array([ inv.dot(c) for c in you.coords ])
+            test_struct.coords = np.array([inv.dot(c) for c in you.coords])
             for i, atom in enumerate(you.atoms):
                 # loop over atoms
                 if atom.element_id != min_elt:
@@ -813,7 +845,7 @@ class Structure(models.Model, object):
                         if atom2.element_id != atom3.element_id:
                             continue
                         d = me._get_vector(atom2, atom3)
-                        if any([ abs(dd) > eps for dd in d ]):
+                        if any([abs(dd) > eps for dd in d]):
                             continue
                         d2 = d.dot(d)
                         if d2 > eps2:
@@ -836,9 +868,9 @@ class Structure(models.Model, object):
                 vecs = np.array(vecs)
                 err = np.average(vecs, 0)
                 vecs -= err
-                if all([ d.dot(d)**0.5 < tol*atom_tol for d in vecs ]):
+                if all([d.dot(d) ** 0.5 < tol * atom_tol for d in vecs]):
                     return True
-                #else:
+                # else:
                 #    print vecs
 
         logger.debug("Atoms don't match.")
@@ -857,11 +889,15 @@ class Structure(models.Model, object):
             atom2.structure = self
             if not atom2.element_id == atom.element_id:
                 continue
-            if abs(shortest_dist(atom2, self.cell) - shortest_dist(atom, self.cell)) > tol:
+            if (
+                abs(shortest_dist(atom2, self.cell) - shortest_dist(atom, self.cell))
+                > tol
+            ):
                 continue
             d = self.get_distance(atom, atom2, limit=1)
-            if d < tol and not d is None:
-                return True
+            if not d is None:
+                if d < tol:
+                    return True
         return False
 
     def get_distance(self, atom1, atom2, limit=None, wrap_self=True):
@@ -893,28 +929,28 @@ class Structure(models.Model, object):
         """
         if isinstance(atom1, int):
             a1 = self.atoms[atom1].coord
-        elif isinstance(atom1, (Atom,Site)):
+        elif isinstance(atom1, (Atom, Site)):
             a1 = atom1.coord
         if isinstance(atom2, int):
             a2 = self.atoms[atom2].coord
-        elif isinstance(atom2, (Atom,Site)):
+        elif isinstance(atom2, (Atom, Site)):
             a2 = atom2.coord
 
         x, y, z = self.cell
-        xx = self.metrical_matrix[0,0]
-        yy = self.metrical_matrix[1,1]
-        zz = self.metrical_matrix[2,2]
+        xx = self.metrical_matrix[0, 0]
+        yy = self.metrical_matrix[1, 1]
+        zz = self.metrical_matrix[2, 2]
 
         vec = a2 - a1
         vec -= np.round(vec)
         dist = np.dot(vec, self.cell)
 
-        dist -= np.round(dist.dot(x)/xx)*x
-        dist -= np.round(dist.dot(y)/yy)*y
-        dist -= np.round(dist.dot(z)/zz)*z
+        dist -= np.round(dist.dot(x) / xx) * x
+        dist -= np.round(dist.dot(y) / yy) * y
+        dist -= np.round(dist.dot(z) / zz) * z
 
         if limit:
-            if any([ abs(d) > limit for d in dist]):
+            if any([abs(d) > limit for d in dist]):
                 return None
 
         dist = la.norm(dist)
@@ -930,17 +966,17 @@ class Structure(models.Model, object):
 
     def _get_vector(self, atom1, atom2):
         x, y, z = self.cell
-        xx = self.metrical_matrix[0,0]
-        yy = self.metrical_matrix[1,1]
-        zz = self.metrical_matrix[2,2]
+        xx = self.metrical_matrix[0, 0]
+        yy = self.metrical_matrix[1, 1]
+        zz = self.metrical_matrix[2, 2]
 
         vec = atom2.coord - atom1.coord
         vec -= np.round(vec)
         dist = np.dot(vec, self.cell)
 
-        dist -= round(dist.dot(x)/xx)*x
-        dist -= round(dist.dot(y)/yy)*y
-        dist -= round(dist.dot(z)/zz)*z
+        dist -= round(dist.dot(x) / xx) * x
+        dist -= round(dist.dot(y) / yy) * y
+        dist -= round(dist.dot(z) / zz) * z
         return dist
 
     def add_site(self, site):
@@ -992,7 +1028,7 @@ class Structure(models.Model, object):
             self.composition = Composition.get(self.comp)
         return self.composition
 
-    def set_magnetism(self, order, elements=None, scheme='primitive'):
+    def set_magnetism(self, order, elements=None, scheme="primitive"):
         """
         Assigns magnetic moments to all atoms in accordance with the specified
         magnetism scheme.
@@ -1017,12 +1053,12 @@ class Structure(models.Model, object):
         +---------+-------------------------------------+
 
         """
-        if order == 'none':
+        if order == "none":
             for atom in self.atoms:
                 atom.magmom = 0
                 if atom.id is not None:
                     atom.save()
-        if order == 'ferro':
+        if order == "ferro":
             for atom in self.atoms:
                 if atom.element.d_elec > 0 and atom.element.d_elec < 10:
                     atom.magmom = 5
@@ -1032,7 +1068,7 @@ class Structure(models.Model, object):
                     atom.magmom = 0
                 if atom.id is not None:
                     atom.save()
-        elif order == 'anti-ferro':
+        elif order == "anti-ferro":
             if not elements:
                 raise NotImplementedError
             ln = self.get_lattice_network(elements)
@@ -1074,12 +1110,12 @@ class Structure(models.Model, object):
     @property
     def coords(self):
         """numpy.ndarray of atom coordinates."""
-        return np.array([ atom.coord for atom in self.atoms ])
+        return np.array([atom.coord for atom in self.atoms])
 
     @property
     def site_coords(self):
         """numpy.ndarray of site coordinates."""
-        return np.array([ site.coord for site in self.sites ])
+        return np.array([site.coord for site in self.sites])
 
     @site_coords.setter
     def site_coords(self, coords):
@@ -1090,21 +1126,21 @@ class Structure(models.Model, object):
 
     @property
     def site_types(self):
-        return sorted(set([ format_comp(s.comp) for s in self.sites]))
+        return sorted(set([format_comp(s.comp) for s in self.sites]))
 
     @coords.setter
     def coords(self, coords):
         if len(coords) != len(self.atoms):
-            raise ValueError('%s != %s' % (len(coords), len(self)))
+            raise ValueError("%s != %s" % (len(coords), len(self)))
         for a, c in zip(self.atoms, coords):
-            c = np.array(map(float,c))
+            c = np.array(list(map(float, c)))
             a.coord = wrap(c)
             a._dist = None
 
     @property
     def magmoms(self):
         """numpy.ndarray of magnetic moments of shape (natoms,)."""
-        return np.array([ atom.magmom for atom in self.atoms ])
+        return np.array([atom.magmom for atom in self.atoms])
 
     @magmoms.setter
     def magmoms(self, moms):
@@ -1114,7 +1150,7 @@ class Structure(models.Model, object):
     @property
     def cartesian_coords(self):
         """Return atomic positions in cartesian coordinates."""
-        return np.array([ atom.cart_coord for atom in self.atoms ])
+        return np.array([atom.cart_coord for atom in self.atoms])
 
     @cartesian_coords.setter
     def cartesian_coords(self, cc):
@@ -1142,6 +1178,7 @@ class Structure(models.Model, object):
         return self._reciprocal_lattice
 
     _inv = None
+
     @property
     def inv(self):
         """
@@ -1155,26 +1192,30 @@ class Structure(models.Model, object):
     @property
     def relative_rec_lat(self):
         rec_lat = self.reciprocal_lattice
-        rec_mags = map(la.norm, rec_lat)
+        rec_mags = list(map(la.norm, rec_lat))
         r0 = min(rec_mags)
-        return np.array([ np.round(r/r0, 4) for r in rec_mags ])
+        return np.array([np.round(r / r0, 4) for r in rec_mags])
 
     def get_TM_kpoint_mesh(self, configuration=None):
-        poscar = os.path.join('/tmp', 'POSCAR')
+        poscar = os.path.join("/tmp", "POSCAR")
         try:
             qmpy.io.poscar.write(self, poscar)
         except:
-            raise TMKPointsError('Failed to write structure into /tmp/POSCAR')
-        if configuration in ['wavefunction', 'hse06']:
-            TM_script = os.path.join(qmpy.INSTALL_PATH, 'analysis', 'vasp','getKPoints_HSE')
+            raise TMKPointsError("Failed to write structure into /tmp/POSCAR")
+        if configuration in ["wavefunction", "hse06"]:
+            TM_script = os.path.join(
+                qmpy.INSTALL_PATH, "analysis", "vasp", "getKPoints_HSE"
+            )
         else:
-            TM_script = os.path.join(qmpy.INSTALL_PATH, 'analysis', 'vasp', 'getKPoints')
-        with change_directory('/tmp'):
+            TM_script = os.path.join(
+                qmpy.INSTALL_PATH, "analysis", "vasp", "getKPoints"
+            )
+        with change_directory("/tmp"):
             TM_stdout = subprocess.check_output(TM_script)
-        if 'error' in TM_stdout.lower():
-            raise TMKPointsError('Failed to get KPOINTS from the TM server')
-        TM_KPOINTS = os.path.join('/tmp', 'KPOINTS')
-        with open(TM_KPOINTS, 'r') as fr:
+        if "error" in TM_stdout.lower():
+            raise TMKPointsError("Failed to get KPOINTS from the TM server")
+        TM_KPOINTS = os.path.join("/tmp", "KPOINTS")
+        with open(TM_KPOINTS, "r") as fr:
             return fr.read()
 
     def get_kpoint_mesh_with_sympy(self, kppra):
@@ -1190,21 +1231,21 @@ class Structure(models.Model, object):
         sympy installed) get_kpoint_mesh_with_sympy(kppra) instead.
         """
         recs = self.reciprocal_lattice
-        rec_mags = [ norm(recs[0]), norm(recs[1]), norm(recs[2])]
+        rec_mags = [norm(recs[0]), norm(recs[1]), norm(recs[2])]
         r0 = max(rec_mags)
-        refr = np.array([ roundclose(r/r0, 1e-2) for r in rec_mags ])
+        refr = np.array([roundclose(r / r0, 1e-2) for r in rec_mags])
         refr = np.round(refr, 4)
         scale = 1.0
         kpts = np.ones(3)
 
-        while self.natoms*np.product(kpts) < kppra:
+        while self.natoms * np.product(kpts) < kppra:
             prev_kpts = kpts.copy()
-            refk = np.array(np.ones(3)*refr)*scale
-            kpts = np.array(map(np.round, refk))
+            refk = np.array(np.ones(3) * refr) * scale
+            kpts = np.array(list(map(np.round, refk)))
             scale += 1
 
-        upper = kppra - np.product(prev_kpts)*self.natoms
-        lower = np.product(kpts)*self.natoms - kppra
+        upper = kppra - np.product(prev_kpts) * self.natoms
+        lower = np.product(kpts) * self.natoms - kppra
         if upper < lower:
             kpts = prev_kpts.copy()
         return kpts
@@ -1218,7 +1259,7 @@ class Structure(models.Model, object):
         new = Structure()
         new.cell = self.cell
         new.sites = []
-        new.atoms = [ atom.copy() for atom in self.atoms ]
+        new.atoms = [atom.copy() for atom in self.atoms]
         new.entry = self.entry
         new.composition = self.composition
         return new
@@ -1236,19 +1277,21 @@ class Structure(models.Model, object):
 
     @property
     def similar(self):
-        return Structure.objects.filter(natoms=self.natoms,
-                composition=self.composition, 
-                spacegroup=self.spacegroup,
-                label=self.label).exclude(id=self.id)
+        return Structure.objects.filter(
+            natoms=self.natoms,
+            composition=self.composition,
+            spacegroup=self.spacegroup,
+            label=self.label,
+        ).exclude(id=self.id)
 
     def set_natoms(self, n):
         """Set self.atoms to n blank Atoms."""
-        self.atoms = [ Atom() for i in range(n) ]
+        self.atoms = [Atom() for i in range(n)]
         self._sites = None
 
     def set_nsites(self, n):
         """Sets self.sites to n blank Sites."""
-        self.sites = [ Site() for i in range(n) ]
+        self.sites = [Site() for i in range(n)]
         self._atoms = None
 
     def make_conventional(self, in_place=True, tol=1e-3):
@@ -1313,22 +1356,22 @@ class Structure(models.Model, object):
         than tol from one another are considered on the same site.
 
         """
-        if not any([ a.occupancy < 1 for a in self.atoms ]):
-            self._sites = [ a.get_site() for a in self.atoms ]
+        if not any([a.occupancy < 1 for a in self.atoms]):
+            self._sites = [a.get_site() for a in self.atoms]
             return self._sites
 
         _sites = []
         for atom in self.atoms:
             site = atom.get_site()
             site.structure = self
-            if not any([ site is site2 for site2 in _sites ]):
+            if not any([site is site2 for site2 in _sites]):
                 _sites.append(site)
         self._sites = _sites
         return self._sites
 
     def group_atoms_by_symmetry(self):
         """Sort self.atoms according to the site they occupy."""
-        eq = get_symmetry_dataset(self)['equivalent_atoms']
+        eq = get_symmetry_dataset(self)["equivalent_atoms"]
         resort = np.argsort(eq)
         self._atoms = list(np.array(self._atoms)[resort])
 
@@ -1337,13 +1380,13 @@ class Structure(models.Model, object):
         Tests whether or not the structure is a Buerger cell.
         """
         G = self.metrical_matrix
-        if G[0,0] < G[1,1] - tol or G[1,1] < G[2,2] - tol:
+        if G[0, 0] < G[1, 1] - tol or G[1, 1] < G[2, 2] - tol:
             return False
-        if abs(G[0,0] - G[1,1]) < tol:
-            if abs(G[1,2]) > abs(G[0,2]) - tol:
+        if abs(G[0, 0] - G[1, 1]) < tol:
+            if abs(G[1, 2]) > abs(G[0, 2]) - tol:
                 return False
-        if abs(G[1,1] - G[2,2]) < tol:
-            if abs(G[0,2]) > abs(G[0,1]) - tol:
+        if abs(G[1, 1] - G[2, 2]) < tol:
+            if abs(G[0, 2]) > abs(G[0, 1]) - tol:
                 return False
 
     def is_niggli_cell(self, tol=1e-3):
@@ -1353,31 +1396,30 @@ class Structure(models.Model, object):
         if not self.is_grueber_cell():
             return False
         (a, b, c), (d, e, f) = self.niggli_form
-        if abs(d-b) < tol:
-            if f > 2*e - tol:
+        if abs(d - b) < tol:
+            if f > 2 * e - tol:
                 return False
-        if abs(e-a) < tol:
-            if f > 2*d - tol:
+        if abs(e - a) < tol:
+            if f > 2 * d - tol:
                 return False
-        if abs(f-a) < tol:
-            if e > 2*d - tol:
+        if abs(f - a) < tol:
+            if e > 2 * d - tol:
                 return False
-        if abs(d+b) < tol:
+        if abs(d + b) < tol:
             if abs(f) > tol:
                 return False
-        if abs(e+a) < tol:
+        if abs(e + a) < tol:
             if abs(f) > tol:
                 return False
-        if abs(f+a) < tol:
+        if abs(f + a) < tol:
             if abs(f) > tol:
                 return False
-        if abs(d+e+f+a+b) < tol:
-            if 2*a+2*e+f > -tol:
+        if abs(d + e + f + a + b) < tol:
+            if 2 * a + 2 * e + f > -tol:
                 return False
         return True
 
-    def find_nearest_neighbors(self, method='closest', tol=0.05, limit=5.0,
-            **kwargs):
+    def find_nearest_neighbors(self, method="closest", tol=0.05, limit=5.0, **kwargs):
         """
         Determine the nearest neighbors for all Atoms in Structure.
 
@@ -1398,12 +1440,12 @@ class Structure(models.Model, object):
 
         Returns: None
         """
-        self._neighbor_dict = find_nearest_neighbors(self, method=method,
-                                                           tol=tol, 
-                                                           limit=limit,
-                                                           **kwargs)
+        self._neighbor_dict = find_nearest_neighbors(
+            self, method=method, tol=tol, limit=limit, **kwargs
+        )
 
     _neighbor_dict = None
+
     @property
     def nearest_neighbor_dict(self):
         """
@@ -1414,12 +1456,12 @@ class Structure(models.Model, object):
         return self._neighbor_dict
 
     def get_sublattice(self, elements, new=True):
-        if isinstance(elements, basestring):
+        if isinstance(elements, str):
             elements = [elements]
         if new:
             struct = self.copy()
             return struct.get_sublattice(elements, new=False)
-        self.atoms = [ a for a in self if a.element_id in elements ]
+        self.atoms = [a for a in self if a.element_id in elements]
         return self
 
     def get_lattice_network(self, elements=None, supercell=None, **kwargs):
@@ -1465,10 +1507,10 @@ class Structure(models.Model, object):
             n0 = len(pairs)
             lp1 = LatticePoint(s1.coord)
             for s2 in s1.neighbors:
-                #if a1 < a2:
+                # if a1 < a2:
                 #    continue
                 lp2 = LatticePoint(s2.coord)
-                #pairs.append((s1, s2))
+                # pairs.append((s1, s2))
                 pairs.add(frozenset([lp1, lp2]))
         pairs = list(pairs)
 
@@ -1479,7 +1521,7 @@ class Structure(models.Model, object):
     def displace_atom(structure, index, vector):
         vector = np.array(vector)
         if not vector.shape == (3,):
-            raise ValueError('Provide a 3x1 translation array')
+            raise ValueError("Provide a 3x1 translation array")
 
         structure[index].coord += vector
         return structure
@@ -1511,14 +1553,14 @@ class Structure(models.Model, object):
             return new
 
         def disp():
-            dists = np.array([ distance/i for i in self.lp[:3]])
-            rands = [ random.random() for i in range(3) ]
-            return dists*rands
+            dists = np.array([distance / i for i in self.lp[:3]])
+            rands = [random.random() for i in range(3)]
+            return dists * rands
 
         translations = np.zeros(np.shape(self.coords))
         for i, atom in enumerate(self.atoms):
             tvec = disp()
-            translations[i,:] = tvec
+            translations[i, :] = tvec
             atom.coord += tvec
         return translations
 
@@ -1552,7 +1594,7 @@ class Structure(models.Model, object):
             new = self.copy()
             new.recenter(atom, in_place=True)
             return new
-        
+
         if isinstance(atom, int):
             atom = self.atoms[atom]
 
@@ -1592,11 +1634,11 @@ class Structure(models.Model, object):
         if not cv.shape == (3,):
             raise ValueError
 
-        if all([ abs(v) < 1e-4 for v in cv]):
+        if all([abs(v) < 1e-4 for v in cv]):
             return self
 
         if cartesian:
-            cv = np.array(map(float, np.dot(self.inv.T, cv)))
+            cv = np.array(list(map(float, np.dot(self.inv.T, cv))))
 
         coords = self.coords + cv
         self.coords = wrap(coords)
@@ -1611,18 +1653,18 @@ class Structure(models.Model, object):
         origin.
 
         """
-        limits = [ int(np.ceil(distance/self.lp[i])) for i in range(3) ]
-        ranges = [ range(0, l+1) for l in limits ]
-        d2 = distance**2
+        limits = [int(np.ceil(distance / self.lp[i])) for i in range(3)]
+        ranges = [list(range(0, l + 1)) for l in limits]
+        d2 = distance ** 2
         lattice_points = []
         for i, j, k in itertools.product(*ranges):
-            #if (i,j,k) == (0,0,0):
+            # if (i,j,k) == (0,0,0):
             #    continue
-            point = np.dot([i,j,k], self.cell)
-            if any([ abs(p) > distance for p in point ]):
+            point = np.dot([i, j, k], self.cell)
+            if any([abs(p) > distance for p in point]):
                 continue
             if np.dot(point, point) < d2:
-                lattice_points.append([i,j,k])
+                lattice_points.append([i, j, k])
         return np.vstack(lattice_points)
 
     def find_lattice_points_by_transform(self, transform, tol=1e-6):
@@ -1636,7 +1678,7 @@ class Structure(models.Model, object):
 
         for i in range(3):
             is_new = True
-            cur_vec = np.array([0,0,0])
+            cur_vec = np.array([0, 0, 0])
             trans_vecs = [np.array(cur_vec)]
             lattice_points[i] = [cur_vec]
             while is_new:
@@ -1649,7 +1691,7 @@ class Structure(models.Model, object):
                     diff = known - trans_vec
                     diff = wrap(diff)
 
-                    if all([ abs(x) < tol for x in diff ]):
+                    if all([abs(x) < tol for x in diff]):
                         is_new = False
                         break
 
@@ -1671,7 +1713,7 @@ class Structure(models.Model, object):
                 diff = known - trans_vec
                 diff = wrap(diff)
 
-                if all([ abs(x) < tol or abs(abs(x)-1) < tol for x in diff ]):
+                if all([abs(x) < tol or abs(abs(x) - 1) < tol for x in diff]):
                     found = True
                     break
 
@@ -1680,7 +1722,7 @@ class Structure(models.Model, object):
             if len(trans_vecs) == enough:
                 break
 
-        return [ transform.T.dot(vec) for vec in trans_vecs ]
+        return [transform.T.dot(vec) for vec in trans_vecs]
 
     def remove_atom(self, atom):
         ind = self.sites.index(atom.site)
@@ -1713,40 +1755,40 @@ class Structure(models.Model, object):
             return new
 
         transform = np.array(transform)
-        if transform.shape == (3,3):
+        if transform.shape == (3, 3):
             pass
-        elif transform.shape in [ (1,3), (3,) ]:
-            transform = np.eye(3)*transform
+        elif transform.shape in [(1, 3), (3,)]:
+            transform = np.eye(3) * transform
         else:
             raise ValueError
 
         # test for singular matrix
 
-        #if la.det(transform) < 0:
+        # if la.det(transform) < 0:
         #    transform = np.dot([[-1,0,0],[0,-1,0],[0,0,-1]], transform)
         if la.det(transform) == 1:
             # if cell size doesn't change
             new_cell = transform.dot(self.cell)
             inv = la.inv(transform.T)
-            coords = np.array([ inv.dot(c) for c in self.coords ])
+            coords = np.array([inv.dot(c) for c in self.coords])
             self.coords = coords
             self.cell = new_cell
             return self
 
-        # Test for simple IxJxK lattice multiplication        
+        # Test for simple IxJxK lattice multiplication
         diag = True
-        for i, j in itertools.combinations(range(3), r=2):
+        for i, j in itertools.combinations(list(range(3)), r=2):
             if i == j:
                 continue
-            if transform[i,j] != 0:
+            if transform[i, j] != 0:
                 diag = False
                 break
         if diag:
             # do simple expansion
-            i = int(transform[0,0])
-            j = int(transform[1,1])
-            k = int(transform[2,2])
-            points = itertools.product(range(i), range(j), range(k))
+            i = int(transform[0, 0])
+            j = int(transform[1, 1])
+            k = int(transform[2, 2])
+            points = itertools.product(list(range(i)), list(range(j)), list(range(k)))
         else:
             points = self.find_lattice_points_by_transform(transform)
 
@@ -1782,10 +1824,9 @@ class Structure(models.Model, object):
 
     t = transform
 
-    def substitute(self, replace, 
-                         rescale=True, rescale_method="relative",
-                         in_place=False, 
-                         **kwargs):
+    def substitute(
+        self, replace, rescale=True, rescale_method="relative", in_place=False, **kwargs
+    ):
         """Replace atoms, as specified in a dict of pairs. 
 
         Keyword Arguments:
@@ -1818,17 +1859,18 @@ class Structure(models.Model, object):
         volume_sum_atom = self.get_volume_sum_of_elements()
         for atom in self:
             if atom.element_id in replace:
-                final_vol -= atom.element.volume/volume_sum_atom*init_vol
+                final_vol -= atom.element.volume / volume_sum_atom * final_vol
                 volume_sum_atom -= atom.element.volume
                 atom.element = Element.get(replace[atom.element_id])
                 volume_sum_atom += atom.element.volume
-                final_vol += atom.element.volume/volume_sum_atom*init_vol
+                final_vol += atom.element.volume / volume_sum_atom * final_vol
         if rescale and rescale_method == "relative":
             self.set_volume(final_vol)
         elif rescale and rescale_method == "absolute":
             self.set_volume_to_sum_of_elements()
         self.set_composition()
         return self
+
     sub = substitute
     replace = substitute
 
@@ -1862,7 +1904,7 @@ class Structure(models.Model, object):
             for rot, trans in self.operations:
                 test = rot.dot(atom.coord) + trans
                 test = wrap(test)
-                if not any([all(test==c) for c in coords]):
+                if not any([all(test == c) for c in coords]):
                     if self.get_distance(test, atom, limit=1) < tol:
                         coords.append(test)
             central = np.average(coords, 0)
@@ -1904,15 +1946,15 @@ class Structure(models.Model, object):
 
         # reduction parameters
         vectors = self.cell.copy()
-        (a,b,c), (ksi,eta,zeta) = basis_to_niggli(vectors)
+        (a, b, c), (ksi, eta, zeta) = basis_to_niggli(vectors)
         trans = np.eye(3)
 
         # convergence variables
-        _a, _b, _c = a*10, b*10, c*10
+        _a, _b, _c = a * 10, b * 10, c * 10
         mult = 10
 
         # tolerance and tests
-        eps = tol * self.get_volume()**(1./3)
+        eps = tol * self.get_volume() ** (1.0 / 3)
 
         def lt(x, y):
             return x < y - eps
@@ -1932,29 +1974,29 @@ class Structure(models.Model, object):
             step += 1
 
             # N 1
-            if gt(a,b) or (eq(a,b) and gt(abs(ksi),abs(eta))):
-                r = np.array([[0,-1,0],[-1,0,0],[0,0,-1]])
-                ((a,b,c),(ksi,eta,zeta)),trans = update(r, trans)
-                logger.debug('reduction: test 1')
+            if gt(a, b) or (eq(a, b) and gt(abs(ksi), abs(eta))):
+                r = np.array([[0, -1, 0], [-1, 0, 0], [0, 0, -1]])
+                ((a, b, c), (ksi, eta, zeta)), trans = update(r, trans)
+                logger.debug("reduction: test 1")
 
             # N 2
-            if gt(b, c) or ( eq(b,c) and gt(abs(eta),abs(zeta))):
-                r = np.array([[-1,0,0],[0,0,-1],[0,-1,0]])
-                ((a,b,c),(ksi,eta,zeta)),trans = update(r, trans)
-                logger.debug('reduction: test 2')
+            if gt(b, c) or (eq(b, c) and gt(abs(eta), abs(zeta))):
+                r = np.array([[-1, 0, 0], [0, 0, -1], [0, -1, 0]])
+                ((a, b, c), (ksi, eta, zeta)), trans = update(r, trans)
+                logger.debug("reduction: test 2")
                 continue
 
             # N 3
-            if gt(ksi*eta*zeta, 0):
-                i = ( -1 if lt(ksi, 0) else 1 )
-                j = ( -1 if lt(eta, 0) else 1 )
-                k = ( -1 if lt(zeta, 0) else 1 )
-                r = np.eye(3)*np.array([i,j,k])
-                ((a,b,c),(ksi,eta,zeta)),trans = update(r, trans)
-                logger.debug('reduction: test 3 True path')
+            if gt(ksi * eta * zeta, 0):
+                i = -1 if lt(ksi, 0) else 1
+                j = -1 if lt(eta, 0) else 1
+                k = -1 if lt(zeta, 0) else 1
+                r = np.eye(3) * np.array([i, j, k])
+                ((a, b, c), (ksi, eta, zeta)), trans = update(r, trans)
+                logger.debug("reduction: test 3 True path")
             else:
-                vals = [1,1,1]
-                p=0
+                vals = [1, 1, 1]
+                p = 0
                 for i, x in enumerate([ksi, eta, zeta]):
                     if gt(x, 0):
                         vals[i] = -1
@@ -1962,55 +2004,65 @@ class Structure(models.Model, object):
                         p = i
                 if np.product(vals) < 0:
                     vals[p] = -1
-                r = np.eye(3)*vals
-                ((a,b,c),(ksi,eta,zeta)),trans = update(r, trans)
-                logger.debug('reduction: test 3 False path')
+                r = np.eye(3) * vals
+                ((a, b, c), (ksi, eta, zeta)), trans = update(r, trans)
+                logger.debug("reduction: test 3 False path")
 
                 # test minimum reduction
-            if ( mult*a + (a - _a) - (a*mult) == 0 
-                    and 
-                 mult*b + (b - _b) - (b*mult) == 0
-                    and 
-                 mult*c + (c - _c) - (c*mult) == 0 ):
-                logger.debug('reduction: Minimum reduction test passed')
-                #break
+            if (
+                mult * a + (a - _a) - (a * mult) == 0
+                and mult * b + (b - _b) - (b * mult) == 0
+                and mult * c + (c - _c) - (c * mult) == 0
+            ):
+                logger.debug("reduction: Minimum reduction test passed")
+                # break
             _a, _b, _c = a, b, c
 
             # N 5
-            if (gt(abs(ksi), b) or 
-                    (eq(ksi,b) and lt(2*eta,zeta)) or 
-                    (eq(ksi,-b) and lt(zeta,0))):
-                r = np.array([[1,0,0], [0,1,-sign(ksi)], [0,0,1]])
-                ((a,b,c),(ksi,eta,zeta)),trans = update(r, trans)
-                logger.debug('reduction: test 5')
+            if (
+                gt(abs(ksi), b)
+                or (eq(ksi, b) and lt(2 * eta, zeta))
+                or (eq(ksi, -b) and lt(zeta, 0))
+            ):
+                r = np.array([[1, 0, 0], [0, 1, -sign(ksi)], [0, 0, 1]])
+                ((a, b, c), (ksi, eta, zeta)), trans = update(r, trans)
+                logger.debug("reduction: test 5")
                 continue
 
             # N 6
-            if (gt(abs(eta),a) or 
-                    ( eq(eta,a) and lt(2*ksi,zeta)) or 
-                    ( eq(eta,-a) and lt(zeta,0))):
-                r = np.array([[1,0,-sign(eta)], [0,1,0], [0,0,1]])
-                ((a,b,c),(ksi,eta,zeta)),trans = update(r, trans)
-                logger.debug('reduction: test 6')
+            if (
+                gt(abs(eta), a)
+                or (eq(eta, a) and lt(2 * ksi, zeta))
+                or (eq(eta, -a) and lt(zeta, 0))
+            ):
+                r = np.array([[1, 0, -sign(eta)], [0, 1, 0], [0, 0, 1]])
+                ((a, b, c), (ksi, eta, zeta)), trans = update(r, trans)
+                logger.debug("reduction: test 6")
                 continue
-            
+
             # N 7
-            if (gt(abs(zeta),a) or 
-                    ( eq(zeta, a) and lt(2*ksi, eta)) or 
-                    ( eq(zeta, -a) and lt(eta, 0))):
-                r = np.array([[1,-sign(zeta),0], [0,1,0], [0,0,1]])
-                ((a,b,c),(ksi,eta,zeta)),trans = update(r, trans)
-                logger.debug('reduction: test 7')
+            if (
+                gt(abs(zeta), a)
+                or (eq(zeta, a) and lt(2 * ksi, eta))
+                or (eq(zeta, -a) and lt(eta, 0))
+            ):
+                r = np.array([[1, -sign(zeta), 0], [0, 1, 0], [0, 0, 1]])
+                ((a, b, c), (ksi, eta, zeta)), trans = update(r, trans)
+                logger.debug("reduction: test 7")
                 continue
 
             # N 8
-            if (lt(ksi + eta + zeta + a + b, 0) or 
-                    (eq(ksi + eta + zeta + a + b, 0) and gt(2*(a+eta)+zeta, 0))):
-                r = np.array([[1,0,1], [0,1,1], [0,0,1]])
-                ((a,b,c),(ksi,eta,zeta)),trans = update(r, trans)
-                logger.debug('reduction: test 8')
+            if lt(ksi + eta + zeta + a + b, 0) or (
+                eq(ksi + eta + zeta + a + b, 0) and gt(2 * (a + eta) + zeta, 0)
+            ):
+                r = np.array([[1, 0, 1], [0, 1, 1], [0, 0, 1]])
+                ((a, b, c), (ksi, eta, zeta)), trans = update(r, trans)
+                logger.debug("reduction: test 8")
                 continue
             break
+
+        if (trans == np.array([[-1.,  0.,  0.], [ 0., -1.,  0.], [ 0.,  0., -1.]])).all():
+            trans = np.array([[1.,  0.,  0.], [ 0., 1.,  0.], [ 0.,  0., 1.]])
 
         # temporarily stored transformations
         self._original_cell = self.cell.copy()
@@ -2033,6 +2085,7 @@ class Structure(models.Model, object):
         return self.pdf
 
     _cart_rots = None
+
     def get_cartesian_rotations(self):
         if self._cart_rots is None:
             self.symmetrize()
@@ -2041,7 +2094,7 @@ class Structure(models.Model, object):
             cr = []
             for rot in self.rotations:
                 c1 = p.dot(rot).dot(q)
-                if any([ np.allclose(c1, c2) for c2 in cr ]):
+                if any([np.allclose(c1, c2) for c2 in cr]):
                     continue
                 cr.append(c1)
             self._cart_rots = cr
@@ -2049,7 +2102,7 @@ class Structure(models.Model, object):
 
     @property
     def is_perfect(self):
-        if any([s.partial for s in self.sites ]):
+        if any([s.partial for s in self.sites]):
             return False
         return True
 
@@ -2120,10 +2173,10 @@ class Structure(models.Model, object):
             new = self.copy()
             return new.make_perfect(True, tol=tol)
 
-        init_atoms = [ a.copy() for a in self.atoms ]
+        init_atoms = [a.copy() for a in self.atoms]
         init_comp = dict(self.comp)
         n = sum(init_comp.values())
-        atom_tol = tol*n
+        atom_tol = tol * n
         hopeless = False
 
         for s1, s2 in itertools.combinations(self.sites, r=2):
@@ -2135,7 +2188,7 @@ class Structure(models.Model, object):
 
         atoms = []
         for atom in self.atoms:
-            if abs(1-atom.occupancy) < 0.5:
+            if abs(1 - atom.occupancy) < 0.5:
                 # first, fill any nearly full sites
                 new = atom.copy()
                 new.occupancy = 1.0
@@ -2145,7 +2198,7 @@ class Structure(models.Model, object):
                 # then, empty any nearly empty sites
                 continue
             elif atom.occupancy >= 2:
-                raise StructureError('Site occupied by a molecule')
+                raise StructureError("Site occupied by a molecule")
 
         self._sites = []
         self.atoms = atoms
@@ -2156,7 +2209,7 @@ class Structure(models.Model, object):
             if abs(sum(self.comp.values()) - n) > tol:
                 hopeless = True
 
-            for k in init_comp.keys():
+            for k in list(init_comp.keys()):
                 d = init_comp[k] - self.comp.get(k, 0.0)
                 if abs(d) > tol:
                     hopeless = True
@@ -2170,6 +2223,7 @@ class Structure(models.Model, object):
         self.atoms = init_atoms
         self.get_sites()
         return self
+
 
 class Prototype(models.Model):
     """
@@ -2186,13 +2240,16 @@ class Prototype(models.Model):
     """
 
     name = models.CharField(max_length=63, primary_key=True)
-    structure = models.ForeignKey(Structure, related_name='+',
-                                  blank=True, null=True)
-    composition = models.ForeignKey('Composition', blank=True, null=True)
+    structure = models.ForeignKey(
+        Structure, related_name="+", on_delete=models.PROTECT, blank=True, null=True
+    )
+    composition = models.ForeignKey(
+        "Composition", blank=True, null=True, on_delete=models.PROTECT
+    )
 
     class Meta:
-        app_label = 'qmpy'
-        db_table = 'prototypes'
+        app_label = "qmpy"
+        db_table = "prototypes"
 
     @classmethod
     def get(cls, name):
@@ -2213,7 +2270,6 @@ class Prototype(models.Model):
     def __str__(self):
         if not self.structure is None:
             sname = self.structure.name
-            return '%s - %s' % (self.name, self.structure.name)
+            return "%s - %s" % (self.name, self.structure.name)
         else:
             return self.name
-

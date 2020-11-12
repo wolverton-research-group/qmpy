@@ -1,23 +1,27 @@
 language: python
 sudo: false
-python:
-  - '2.7'
+matrix:
+  include:
+  - python: 3.7
+    dist: xenial
 branches:
   only:
     - master
     - production
-virtualenv:
-  system_site_packages: true
 services:
   - mysql
 before_install:
   - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
   - chmod +x miniconda.sh
-  - ./miniconda.sh -b
-  - export PATH=/home/travis/miniconda2/bin:$PATH
-  - conda update --yes conda
-install: 
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy
+  - ./miniconda.sh -b -p $HOME/miniconda
+  - export PATH=$HOME/miniconda/bin:$PATH
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  - conda info -a
+  - conda create -q -n qmpy-test-env python=$TRAVIS_PYTHON_VERSION
+  - source activate qmpy-test-env
+install:
+  - conda install --yes atlas numpy
   - "python setup.py install"
 before_script:
   - export qmdb_v1_1_name="qmdb_dev"
@@ -25,6 +29,7 @@ before_script:
   - export qmdb_v1_1_pswd=""
   - export qmdb_v1_1_host=""
   - export qmdb_v1_1_port=""
+  - export web_port="0000"
   - mysql -e 'create database qmdb_dev;'
 script:
   - cd qmpy/db

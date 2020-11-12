@@ -13,8 +13,10 @@ import qmpy
 
 logger = logging.getLogger(__name__)
 
+
 def get_params(elt1, elt2):
     raise NotImplementedError
+
 
 def v_ij(atom1, atom2, params=None):
     if params is None:
@@ -22,9 +24,10 @@ def v_ij(atom1, atom2, params=None):
     if params is None:
         return None
     R = atom1.structure.get_distance(atom1, atom2)
-    R0 = params['param_r0']
-    B = params['param_B']
-    return np.exp( (R0 - R)/B )
+    R0 = params["param_r0"]
+    B = params["param_B"]
+    return np.exp((R0 - R) / B)
+
 
 def valence_sum(atom):
     valence = 0
@@ -35,6 +38,7 @@ def valence_sum(atom):
             continue
         valence += v
     return valence
+
 
 def total_valence_sum(structure):
     structure.find_nearest_neighbors()

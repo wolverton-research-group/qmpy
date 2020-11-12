@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import division
+
 import sys
 import argparse
 import os.path
 import itertools
 from qmpy import *
-from django.db.models import get_app, get_models
+#from django.db.models import get_app, get_models
+from django.apps import apps
 
 def main():
     '''Handles command line args, parses them to understand what sub-scripts to
@@ -79,19 +80,19 @@ Examples:
 #==============================================================================#
 
     if runner.task[0] == 'describe_database':
-        app = get_app('qmpy')
-        for model in get_models(app):
-            print 'Model: %s' % model.__name__
+        app = apps.get_app_config('qmpy')
+        for model in app.get_models():
+            print('Model: %s' % model.__name__)
             for field in model._meta.fields:
-                print '   -', field.name
-            print 
+                print('   -', field.name)
+            print() 
 
     #======================================================================#
     if runner.task[0] == 'add_structure':
         if not kwargs.get('project', False):
-            runner.kwargs['project'] = raw_input('project: ')
+            runner.kwargs['project'] = input('project: ')
         if not kwargs.get('keywords', False):
-            runner.kwargs['keywords'] = raw_input('keywords: ').split()
+            runner.kwargs['keywords'] = input('keywords: ').split()
         path = os.path.abspath(runner.task[1])
         try:
             entry = Entry.create(path,
@@ -99,15 +100,15 @@ Examples:
                     project=runner.kwargs['project'])
             entry.save()
         except:
-            print 'Failed to add structure file: %s' % path
-            print 'Please verify that it is a valid structure file'
+            print('Failed to add structure file: %s' % path)
+            print('Please verify that it is a valid structure file')
 
     #======================================================================#
     if runner.task[0] == 'add_structures':
         if 'project' not in runner.kwargs:
-            runner.kwargs['project'] = raw_input('project: ')
+            runner.kwargs['project'] = input('project: ')
         if 'keywords' not in runner.kwargs:
-            runner.kwargs['keywords'] = raw_input('keywords: ')
+            runner.kwargs['keywords'] = input('keywords: ')
         path = os.path.abspath(runner.task[1])
         for file in os.listdir(path):
             try:
@@ -116,8 +117,8 @@ Examples:
                     project=runner.kwargs['keywords'])
                 entry.save()
             except:
-                print 'Failed to add structure file: %s' % path
-                print 'Please verify that it is a valid structure file'
+                print('Failed to add structure file: %s' % path)
+                print('Please verify that it is a valid structure file')
 
 #==============================================================================#
 # queue
@@ -144,9 +145,9 @@ Examples:
             h = h[0]
             h.state = 1
             h.save()
-            print 'Starting host: %s' % h
+            print('Starting host: %s' % h)
         else:
-            print 'Host', runner.task[1], 'doesn\'t exist!'
+            print('Host', runner.task[1], 'doesn\'t exist!')
 
     #======================================================================#
     if runner.task[0] == 'stop_host':
@@ -155,9 +156,9 @@ Examples:
             h = h[0]
             h.state = -2
             h.save()
-            print 'Disabling host: %s' % h
+            print('Disabling host: %s' % h)
         else:
-            print 'Host', runner.task[1], 'doesn\'t exist!'
+            print('Host', runner.task[1], 'doesn\'t exist!')
 
     #======================================================================#
     if runner.task[0] == 'running':
@@ -166,22 +167,22 @@ Examples:
         else:
             hosts = runner.task[1:]
 
-        print 'Currently running:'
+        print('Currently running:')
         for h in hosts:
-            print '!'+''.ljust(78, '=')+'!'
-            print h.center(80)
-            print '!'+''.ljust(78, '=')+'!'
-            print 'Entry'.rjust(60), 'NCPUS'.ljust(20)
+            print('!'+''.ljust(78, '=')+'!')
+            print(h.center(80))
+            print('!'+''.ljust(78, '=')+'!')
+            print('Entry'.rjust(60), 'NCPUS'.ljust(20))
             host = Host.objects.get(name=h)
             for j in host.jobs:
-                print str(j.entry).rjust(60),
-                print str(j.ncpus).ljust(20)
+                print(str(j.entry).rjust(60), end=' ')
+                print(str(j.ncpus).ljust(20))
 
     #======================================================================#
     if runner.task[0] == 'utilization':
-        print 'Resource utilization:'
+        print('Resource utilization:')
         for h in Host.objects.all():
-            print '   - %s : %0.1f %%' % (h.name, h.utilization/h.ncpus*100)
+            print('   - %s : %0.1f %%' % (h.name, h.utilization/h.ncpus*100))
 
     #======================================================================#
     if runner.task[0] == 'progress':
@@ -191,22 +192,22 @@ Examples:
             projects = runner.task[1:]
         
         for project in projects:
-            print 'Project: %s' % project
+            print('Project: %s' % project)
             tasks = Task.objects.filter(project_set=project)
             rel = Calculation.objects.filter(converged=True,
                         label='relaxation', entry__task__project_set=project)
             sta = Calculation.objects.filter(converged=True, 
                         label='static', entry__task__project_set=project)
 
-            print '  %s tasks for this project' % tasks.count()
-            print '     - FAILED:   %s' % tasks.filter(state=-1).count()
-            print '     - RUNNING:  %s' % tasks.filter(state=1).count()
-            print '     - COMPLETE: %s' % tasks.filter(state=2).count()
+            print('  %s tasks for this project' % tasks.count())
+            print('     - FAILED:   %s' % tasks.filter(state=-1).count())
+            print('     - RUNNING:  %s' % tasks.filter(state=1).count())
+            print('     - COMPLETE: %s' % tasks.filter(state=2).count())
             num = float(tasks.count())
-            print '  Progress:'
-            print '     - Relaxed: {0:.3f}%'.format(rel.count()/num*100)
-            print '     - Completed: {0:.3f}%'.format(sta.count()/num*100)
-            print 
+            print('  Progress:')
+            print('     - Relaxed: {0:.3f}%'.format(rel.count()/num*100))
+            print('     - Completed: {0:.3f}%'.format(sta.count()/num*100))
+            print() 
 
     #======================================================================#
     if runner.task[0] == 'failed':
@@ -216,15 +217,15 @@ Examples:
             projects = runner.task[1:]
 
         for project in projects:
-            print 'Project: %s' % project
+            print('Project: %s' % project)
             tasks = Task.objects.filter(project_set=project, state=-1)
             for t in tasks:
-                print t.entry.name.rjust(10),
+                print(t.entry.name.rjust(10), end=' ')
                 errs = set()
-                for err in t.entry.errors.values():
+                for err in list(t.entry.errors.values()):
                     errs |= set(err)
-                print t.entry.path.ljust(30),
-                print ', '.join(errs)
+                print(t.entry.path.ljust(30), end=' ')
+                print(', '.join(errs))
 
     #======================================================================#
     if runner.task[0] == 'cancel':
@@ -247,18 +248,18 @@ Examples:
                     type=runner.task[0],
                     path=path+'/'+runner.task[0])
             if calc.converged:
-                print 'Calculation of %s is done' % struct
+                print('Calculation of %s is done' % struct)
             else:
                 if calc.instructions:
                     calc.write()
-                    print 'Wrote calculation of %s' % struct 
+                    print('Wrote calculation of %s' % struct) 
 
     #======================================================================#
     if runner.task[0] == 'kpoints':
         c = Calculation()
         c.input = io.read(runner.task[1])
         c.settings['kppra'] = int(runner.task[2])
-        print c.KPOINTS
+        print(c.KPOINTS)
 
 #=============================================================================
 # thermodynamic analysis
@@ -269,12 +270,12 @@ Examples:
             s = PhaseSpace(formula+'-'+runner.task[1])
             for reaction in s.get_reactions(runner.task[1], 
                     electrons=kwargs.get('electrons', 1.0)):
-                print reaction
+                print(reaction)
 
     #======================================================================#
     if runner.task[0] == 'reaction_plot':
         for formula in runner.formula:
-            print formula, '+', runner.task[1]
+            print(formula, '+', runner.task[1])
             s = PhaseSpace(formula+'-'+runner.task[1])
             s.plot_reactions(runner.task[1], 
                     electrons=kwargs.get('electrons', 1.0))
@@ -294,13 +295,13 @@ Examples:
             formulae = parse_formula_regex(rformula)
             for formula in formulae:
                 formula = unit_comp(formula)
-                print format_comp(formula), ':'
-                bstring = '-'.join(formula.keys())
+                print(format_comp(formula), ':')
+                bstring = '-'.join(list(formula.keys()))
                 space = PhaseSpace(bstring)
                 en, phases = space.gclp(formula)
-                keys = sorted( phases.keys(), key=lambda x: -phases[x])
-                print '   Hull formation energy: %.3f eV/atom' % en
-                print '   Hull phases:', 
+                keys = sorted( list(phases.keys()), key=lambda x: -phases[x])
+                print('   Hull formation energy: %.3f eV/atom' % en)
+                print('   Hull phases:', end=' ') 
                 pstr = ''
                 for k in keys:
                     if phases[k] == 1:
@@ -308,14 +309,14 @@ Examples:
                     else:
                         pstr += '%s %s + ' % (phases[k], k.name)
                 pstr = pstr.rstrip('+ ')
-                print pstr,
+                print(pstr, end=' ')
 
-                print '(',
+                print('(', end=' ')
                 for k in keys:
-                    print k.description,
-                print ')'
+                    print(k.description, end=' ')
+                print(')')
 
-                print '   Hull phases (LaTeX):',
+                print('   Hull phases (LaTeX):', end=' ')
                 pstr = ''
                 for k in keys:
                     if phases[k] == 1:
@@ -323,12 +324,12 @@ Examples:
                     else:
                         pstr += '%s %s + ' % (phases[k], k.latex)
                 pstr = pstr.rstrip('+ ')
-                print pstr,
+                print(pstr, end=' ')
 
-                print '(',
+                print('(', end=' ')
                 for k in keys:
-                    print k.description,
-                print ')'
+                    print(k.description, end=' ')
+                print(')')
 
     #======================================================================#
     if runner.task[0] == 'graph':
@@ -395,9 +396,9 @@ Examples:
     #======================================================================#
     if runner.task[0] == 'reshape':
         s = io.read(runner.task[1])
-        remains = map(float, runner.task[2:])
+        remains = list(map(float, runner.task[2:]))
         s.transform(remains)
-        print io.write(s)
+        print(io.write(s))
 
 #==============================================================================#
 # composition search
@@ -410,10 +411,10 @@ Examples:
                     comps = Composition.get_space(formula)
                     for comp in comps:
                         comp.get_distinct(calculable=False)
-                        print comp.summary
+                        print(comp.summary)
                 else:
                     comp = Composition.get(formula)
-                    print comp.summary
+                    print(comp.summary)
             elif runner.task == ['count']:
                 phases = set()
                 a = PhaseSpace(load=[])
@@ -422,18 +423,18 @@ Examples:
                     formulae = parse_formula_regex(rformula)
                     for formula in formulae:
                         tot = sum(formula.values())
-                        formula = dict( (k, v/tot) for k, v in formula.items() )
-                        bstring = '-'.join(formula.keys())
+                        formula = dict( (k, v/tot) for k, v in list(formula.items()) )
+                        bstring = '-'.join(list(formula.keys()))
                         space = PhaseSpace(bstring, pdata=a._data)
                         phases |= set(space.phases)
-                print '\n'.join([ p.name for p in phases])
+                print('\n'.join([ p.name for p in phases]))
 
             else:
                 result = query(type=runner.task[0], 
                         formula=runner.formula, 
                         search=runner.search,
                         columns=runner.task[1:])
-                print result
+                print(result)
 
 if __name__ == '__main__':
     main()

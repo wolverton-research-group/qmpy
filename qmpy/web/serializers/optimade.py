@@ -2,6 +2,7 @@ from rest_framework import serializers
 from qmpy.materials.formation_energy import FormationEnergy
 from drf_queryfields import QueryFieldsMixin
 
+
 class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer):
     chemical_formula = serializers.SerializerMethodField()
     formula_prototype = serializers.SerializerMethodField()
@@ -22,10 +23,9 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
     _oqmd_delta_e = serializers.SerializerMethodField()
     _oqmd_stability = serializers.SerializerMethodField()
 
-
     def get_chemical_formula(self, formationenergy):
-        return formationenergy.composition.formula.replace(' ','')
-    
+        return formationenergy.composition.formula.replace(" ", "")
+
     def get_formula_prototype(self, formationenergy):
         return formationenergy.composition.generic
 
@@ -33,16 +33,16 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
         return formationenergy.composition.ntypes
 
     def get_elements(self, formationenergy):
-        elst = formationenergy.composition.element_list.split('_')
+        elst = formationenergy.composition.element_list.split("_")
         elst.pop()
-        return ','.join(elst)
+        return ",".join(elst)
 
     def get__oqmd_icsd_id(self, formationenergy):
         entry = formationenergy.entry
-        if 'icsd' in entry.keywords:
+        if "icsd" in entry.keywords:
             try:
-                assert 'icsd' in entry.path
-                return int(entry.path.split('/')[-1])
+                assert "icsd" in entry.path
+                return int(entry.path.split("/")[-1])
             except:
                 pass
 
@@ -51,7 +51,7 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
 
     def get__oqmd_calculation_id(self, formationenergy):
         return formationenergy.calculation.id
-    
+
     def get__oqmd_spacegroup(self, formationenergy):
         try:
             return formationenergy.calculation.output.spacegroup.hm
@@ -68,9 +68,11 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
         try:
             strct = formationenergy.calculation.output
 
-            return [[strct.x1, strct.x2, strct.x3],
-                    [strct.y1, strct.y2, strct.y3],
-                    [strct.z1, strct.z2, strct.z3]]
+            return [
+                [strct.x1, strct.x2, strct.x3],
+                [strct.y1, strct.y2, strct.y3],
+                [strct.z1, strct.z2, strct.z3],
+            ]
         except:
             return
 
@@ -100,10 +102,21 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
 
     class Meta:
         model = FormationEnergy
-        fields = ('id',
-                  'nelements', 'elements', 
-                  'chemical_formula', 'formula_prototype', 
-                  '_oqmd_entry_id', '_oqmd_calculation_id','_oqmd_icsd_id',
-                  '_oqmd_band_gap', '_oqmd_delta_e', '_oqmd_stability',
-                  '_oqmd_prototype', '_oqmd_spacegroup', '_oqmd_natoms',
-                  '_oqmd_unit_cell', '_oqmd_sites')
+        fields = (
+            "id",
+            "nelements",
+            "elements",
+            "chemical_formula",
+            "formula_prototype",
+            "_oqmd_entry_id",
+            "_oqmd_calculation_id",
+            "_oqmd_icsd_id",
+            "_oqmd_band_gap",
+            "_oqmd_delta_e",
+            "_oqmd_stability",
+            "_oqmd_prototype",
+            "_oqmd_spacegroup",
+            "_oqmd_natoms",
+            "_oqmd_unit_cell",
+            "_oqmd_sites",
+        )

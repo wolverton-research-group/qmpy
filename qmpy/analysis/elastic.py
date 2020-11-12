@@ -2,7 +2,9 @@ import numpy as np
 
 import qmpy
 from qmpy.utils import *
-import symmetry.routines as routines
+
+# from . import symmetry.routines as routines
+from .symmetry import routines
 
 import logging
 
@@ -16,12 +18,15 @@ To do: need to convert the symmetry operations of a structure from the lattice
 basis to cartesian.
 """
 
-vectors = [[0.1, 0.0, 0.0],
-           [0.0, 0.1, 0.0],
-           [0.0, 0.0, 0.1],
-           [0.1, 0.1, 0.0],
-           [0.1, 0.0, 0.1],
-           [0.0, 0.1, 0.1]]
+vectors = [
+    [0.1, 0.0, 0.0],
+    [0.0, 0.1, 0.0],
+    [0.0, 0.0, 0.1],
+    [0.1, 0.1, 0.0],
+    [0.1, 0.0, 0.1],
+    [0.0, 0.1, 0.1],
+]
+
 
 def get_unique_transforms(structure):
     uniq_transforms = []
@@ -31,16 +36,16 @@ def get_unique_transforms(structure):
         found = False
         mod = mod + 1
         cell = structure.cell * mod
-        print 'right'
-        print cell
-        print 'tests:'
+        print("right")
+        print(cell)
+        print("tests:")
         for trans, cell2 in uniq_transforms:
             for rotation in structure.rotations:
                 test = rotation.dot(cell2)
                 if np.allclose(cell, test):
                     found = True
-                    print test
-                    print 'FOUND'
+                    print(test)
+                    print("FOUND")
                     break
             if found:
                 break

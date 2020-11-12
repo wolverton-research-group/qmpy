@@ -341,6 +341,11 @@ html {
 	width: 400px;
 }
 
+#sidebar_small {
+        float: right;
+        width: 300px;
+}
+
 #footer {
 	clear: both;
 	padding: 10px;

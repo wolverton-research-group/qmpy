@@ -1,8 +1,8 @@
 #!/bin/sh
 #SBATCH -J {name}
-#SBATCH -p RM
+#SBATCH -p RM-shared
 #SBATCH -N {nodes}
-#SBATCH -t 48:00:00
+#SBATCH -t 12:00:00
 #SBATCH -A mr4s8rp
 #SBATCH --ntasks-per-node={ppn}
 

@@ -2,9 +2,10 @@ import numpy as np
 import logging
 
 import qmpy
-import phase
+from . import phase
 
 logger = logging.getLogger(__name__)
+
 
 class Equilibrium:
     def __init__(self, phases, **kwargs):
@@ -15,19 +16,19 @@ class Equilibrium:
 
     def __contains__(self, other):
         if isinstance(other, phase.Phase):
-            return ( other in self.phases )
+            return other in self.phases
         if isinstance(other, list):
-            return (set(other) <= set(self.phases))
+            return set(other) <= set(self.phases)
         if isinstance(other, Equilibrium):
-            return (other.phases <= self.phases)
+            return other.phases <= self.phases
         if isinstance(other, dict):
-            return (set(other.keys()) <= set(self.phases))
+            return set(other.keys()) <= set(self.phases)
 
     def __str__(self):
-        return '-'.join([p.name for p in self.phases ])
+        return "-".join([p.name for p in self.phases])
 
     def __repr__(self):
-        return '<Equilibrium: %s>' % self
+        return "<Equilibrium: %s>" % self
 
     @property
     def elements(self):
@@ -35,16 +36,16 @@ class Equilibrium:
 
     @property
     def composition_matrix(self):
-        mat = [ [ p.unit_comp.get(k,0) for k in self.elements ]
-                                       for p in self.phases ]
+        mat = [[p.unit_comp.get(k, 0) for k in self.elements] for p in self.phases]
         return np.array(mat)
 
     @property
     def energy_array(self):
-        arr = [ p.energy for p in self.phases ]
+        arr = [p.energy for p in self.phases]
         return np.array(arr)
 
     _chem_pots = None
+
     @property
     def chemical_potentials(self):
         if self._chem_pots:
@@ -52,7 +53,7 @@ class Equilibrium:
         A = self.composition_matrix
         b = self.energy_array
         dmus = np.linalg.lstsq(A, b)
-        self._chem_pots = dict(zip(self.elements, dmus[0]))
+        self._chem_pots = dict(list(zip(self.elements, dmus[0])))
         return self._chem_pots
 
     @property
@@ -65,8 +66,8 @@ class Equilibrium:
 
     @property
     def chem_pot_coord(self):
-        return np.array([ self.chem_pots[k] for k in self.elements ])
+        return np.array([self.chem_pots[k] for k in self.elements])
 
     @property
     def label(self):
-        return '-'.join([ p.name for p in self.phases ])
+        return "-".join([p.name for p in self.phases])
