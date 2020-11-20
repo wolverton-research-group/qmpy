@@ -224,9 +224,9 @@ def relaxation(entry, xc_func="PBE", **kwargs):
         in_struct = entry.input.copy()
 
         projects = entry.project_set.all()
-        if 'fast' in entry.keywords:
+        if "fast" in entry.keywords:
             calc = Calculation.setup(
-                in_struct, entry=entry, configuration=cnfg_name, path=path, settings={'kpar':'4'}, **kwargs
+                in_struct, entry=entry, configuration=cnfg_name, path=path, settings={"kpar":4}, **kwargs
             )
         else:
             calc = Calculation.setup(
@@ -235,8 +235,8 @@ def relaxation(entry, xc_func="PBE", **kwargs):
 
         entry.calculations[cnfg_name] = calc
         calc.Co_lowspin = False
-        if 'Co' in entry.comp:
-            calc.add_Co_spin('Co_highspin')
+        if "Co" in entry.comp:
+            calc.add_Co_spin("Co_highspin")
 
         # If converged, write results to disk and return calculation
         if not calc.converged:
@@ -259,10 +259,10 @@ def relaxation(entry, xc_func="PBE", **kwargs):
             # Get input structure
             in_struct = entry.input.copy()
 
-            if 'fast' in entry.keywords:
+            if "fast" in entry.keywords:
                 calc = Calculation.setup(
                     in_struct, entry=entry, configuration=cnfg_name, path=lowspin_dir,
-                    settings={'kpar':'4'}, **kwargs
+                    settings={"kpar":4}, **kwargs
                 )
             else:
                 calc = Calculation.setup(
@@ -276,7 +276,7 @@ def relaxation(entry, xc_func="PBE", **kwargs):
 
             entry.calculations[low_name] = calc
             calc.Co_lowspin = True
-            calc.add_Co_spin('Co_lowspin')
+            calc.add_Co_spin("Co_lowspin")
             if not calc.converged:
                 calc.write()
                 return calc
@@ -356,14 +356,14 @@ def static(entry, xc_func="PBE", **kwargs):
         calc.add_Co_spin("Co_lowspin")
     else:
         use_lowspin = False
-        if 'Co' in entry.composition:
-            calc.add_Co_spin('Co_highspin')
+        if "Co" in entry.composition:
+            calc.add_Co_spin("Co_highspin")
 
     if not calc.converged:
         return calc
 
     # Special case: also perform the static for the higher energy spin configuration
-    if 'Co' in entry.comp:
+    if "Co" in entry.comp:
                                                                                  
         # If the lower energy relaxation was high spin, perform now the low spin 
         if not use_lowspin:
@@ -375,20 +375,20 @@ def static(entry, xc_func="PBE", **kwargs):
                 lowspin_dir = os.path.join(entry.path, low_name)
             
                 # Get input structure
-                input = entry.calculations[low_relax_name].output
+                input_struct = entry.calculations[low_relax_name].output
             
-                calc = Calculation.setup(input,  entry=entry,
+                calc = Calculation.setup(input_struct,  entry=entry,
                                                  configuration=cnfg_name,
                                                  path=lowspin_dir,
                                                  **kwargs)
             
                 # Return atoms to the low-spin configuration
                 for atom in calc.input:
-                    if atom.element.symbol == 'Co':
+                    if atom.element.symbol == "Co":
                         atom.magmom = 0.01
             
                 entry.calculations[low_name] = calc
-                calc.add_Co_spin('Co_lowspin')
+                calc.add_Co_spin("Co_lowspin")
 
                 if not calc.converged:
                     calc.write()
@@ -402,20 +402,20 @@ def static(entry, xc_func="PBE", **kwargs):
                 highspin_dir = os.path.join(entry.path, high_name)
             
                 # Get input structure
-                input = entry.calculations[highspin_name].output
+                input_struct = entry.calculations[high_relax_name].output
             
-                calc = Calculation.setup(input,  entry=entry,
+                calc = Calculation.setup(input_struct,  entry=entry,
                                                  configuration=cnfg_name,
                                                  path=highspin_dir,
                                                  **kwargs)
             
-                # Return atoms to the low-spin configuration
+                # Return atoms to the high-spin configuration
                 for atom in calc.input:
-                    if atom.element.symbol == 'Co':
+                    if atom.element.symbol == "Co":
                         atom.magmom = 5
             
                 entry.calculations[high_name] = calc
-                calc.add_Co_spin('Co_highspin')
+                calc.add_Co_spin("Co_highspin")
 
                 if not calc.converged:
                     calc.write()
@@ -427,10 +427,10 @@ def static(entry, xc_func="PBE", **kwargs):
     chgcar_path = calc.path
 
     # Set up calculation
-    if 'fast' in entry.keywords:
+    if "fast" in entry.keywords:
         calc = Calculation.setup(
             in_struct, entry=entry, configuration=cnfg_name, path=calc_dir, chgcar=chgcar_path,
-            settings={'kpar':'4'}, **kwargs
+            settings={"kpar":4}, **kwargs
         )
     else:
         calc = Calculation.setup(
