@@ -64,9 +64,10 @@ def vasp_format(key, value):
 class VaspError(Exception):
     """General problem with vasp calculation."""
 
-
 @add_meta_data("error")
 @add_meta_data("warning")
+@add_meta_data("Co_spin")
+
 class Calculation(models.Model):
     """
     Base class for storing a VASP calculation.
