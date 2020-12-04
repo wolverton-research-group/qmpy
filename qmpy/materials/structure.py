@@ -251,12 +251,14 @@ class Structure(models.Model, object):
             for s in self.sites:
                 if not s.id:
                     s.save()
-                self.site_set.add(s)
+                if not s in self.site_set.all():
+                    self.site_set.add(s)
         if not self._atoms is None:
             for a in self.atoms:
                 if not a.id:
                     a.save()
-                self.atom_set.add(a)
+                if not a in self.atom_set.all():
+                    self.atom_set.add(a)
         super(Structure, self).save(*args, **kwargs)
 
         if not self.spacegroup:

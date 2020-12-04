@@ -106,7 +106,7 @@ class Atom(models.Model):
     def __eq__(self, other):
         if self.element_id != other.element_id:
             return False
-        return (self.x, self.y, self.z) == (other.x, other.y, other.z)
+        return norm([self.x-other.x, self.y-other.y, self.z-other.z])<1e-4
 
     def __lt__(self, other):
         comp_arr = [

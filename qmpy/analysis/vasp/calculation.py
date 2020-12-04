@@ -1421,9 +1421,9 @@ class Calculation(models.Model):
         new = copy.deepcopy(self)
         new.id = None
         new.label = None
-        new.input = self.input
-        new.output = self.output
-        new.dos = self.dos
+        new.input = self.input.copy()
+        new.output = self.output.copy()
+        new.dos = copy.deepcopy(self.dos)
         return new
 
     def move(self, path):
