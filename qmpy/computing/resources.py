@@ -552,7 +552,7 @@ class Account(models.Model):
 
         print("Great! Lets test it real quick...")
         out = self.execute("whoami")
-        if out == "%s\n" % self.username:
+        if out.decode('utf-8') == "%s\n" % self.username:
             print("Awesome! It worked!")
         else:
             print("Something appears to be wrong, talk to Scott...")
