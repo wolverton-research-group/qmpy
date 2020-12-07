@@ -218,7 +218,7 @@ class Calculation(models.Model):
     def formation(self):
         fe_set = self.formationenergy_set.filter(fit__name='standard')
         if len(fe_set)==0:
-            return get_formation()
+            return self.get_formation()
         else:
             return fe_set[0]
 
@@ -1761,7 +1761,7 @@ class Calculation(models.Model):
         try:
             fe_set = self.formationenergy_set.filter(fit__name=reference)
             if len(fe_set)==0:
-                return get_formation(reference=reference).delta_e
+                return self.get_formation(reference=reference).delta_e
             else:
                 return fe_set[0].delta_e
         except AttributeError:
