@@ -1778,7 +1778,6 @@ class Calculation(models.Model):
             formation.entry = self.entry
             formation.calculation = self
             formation.stability = None
-            formation.save()
             return formation
         hub_mus = chem_pots[reference]["hubbards"]
         elt_mus = chem_pots[reference]["elements"]
@@ -1792,7 +1791,6 @@ class Calculation(models.Model):
         formation.entry = self.entry
         formation.calculation = self
         formation.stability = None
-        formation.save()
         return formation
 
     @staticmethod
