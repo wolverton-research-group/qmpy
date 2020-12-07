@@ -155,7 +155,7 @@ class FormationEnergy(models.Model):
     )
     entry = models.ForeignKey("Entry", null=True, blank=True, on_delete=models.CASCADE)
     calculation = models.ForeignKey(
-        "Calculation", null=True, blank=True, on_delete=models.SET_NULL
+        "Calculation", null=True, blank=True, on_delete=models.CASCADE
     )
     description = models.CharField(max_length=20, null=True, blank=True)
     fit = models.ForeignKey("Fit", null=True, on_delete=models.PROTECT)
