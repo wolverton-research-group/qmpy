@@ -165,7 +165,6 @@ class Calculation(models.Model):
     outcar = None
     kpoints = None
     occupations = None
-    formation = None
 
     class Meta:
         app_label = "qmpy"
@@ -209,11 +208,19 @@ class Calculation(models.Model):
         self.potential_set.set(self.potentials)
         self.element_set.set([Element.get(e) for e in set(self.elements)])
         self.meta_data.set(self.error_objects)
-        if not self.formation is None:
-            self.formation.save()
+        super(Calculation, self).save(*args, **kwargs)
+
 
     # django caching
     _potentials = None
+
+    @property
+    def formation(self):
+        fe_set = self.formationenergy_set.filter(fit__name='standard')
+        if len(fe_set)==0:
+            return get_formation()
+        else:
+            return fe_set[0]
 
     @property
     def potentials(self):
@@ -1752,7 +1759,11 @@ class Calculation(models.Model):
 
     def formation_energy(self, reference="standard"):
         try:
-            return self.get_formation(reference=reference).delta_e
+            fe_set = self.formationenergy_set.filter(fit__name=reference)
+            if len(fe_set)==0:
+                return get_formation(reference=reference).delta_e
+            else:
+                return fe_set[0].delta_e
         except AttributeError:
             return None
 
@@ -1767,7 +1778,7 @@ class Calculation(models.Model):
             formation.entry = self.entry
             formation.calculation = self
             formation.stability = None
-            self.formation = formation
+            formation.save()
             return formation
         hub_mus = chem_pots[reference]["hubbards"]
         elt_mus = chem_pots[reference]["elements"]
@@ -1781,7 +1792,7 @@ class Calculation(models.Model):
         formation.entry = self.entry
         formation.calculation = self
         formation.stability = None
-        self.formation = formation
+        formation.save()
         return formation
 
     @staticmethod

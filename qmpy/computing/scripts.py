@@ -449,46 +449,11 @@ def static(entry, xc_func="PBE", **kwargs):
 
     # Save calculation [ LW 20Jan16: Only for PBE for now ]
     if calc.converged and xc_func.lower() == "pbe":
+        calc.save()
         f = calc.get_formation()  # LW 16 Jan 2016: Need to rewrite this to have
         # separate hulls for LDA / PBE / ...
-        calc.save()
-        f.calculation = calc
-        f.save()
         
         ps = PhaseSpace(list(calc.input.comp.keys()))
-        '''
-        for p in ps.phases:
-            if p in list(ps.phase_dict.values()):
-                ps.compute_stability(p)
-            else:
-                p2 = ps.phase_dict[p.name]
-                ps.compute_stability(p2)
-                base = max(0, p2.stability)
-                diff = p.energy - p2.energy
-                p.stability = base + diff
-
-            temp_c = Calculation.objects.get(formationenergy__id=p.id)
-            if temp_c.id == calc.id:
-                print("new calc stability")
-                f.stability = p.stability
-                f.save()
-            else:
-                try:
-                    fe = temp_c.get_formation()
-                except MultipleObjectsReturned:
-                    print(
-                        (
-                            "Calculation ",
-                            temp_c.id,
-                            " has more than one formationenergy",
-                        )
-                    )
-                    continue
-                if fe is None:
-                    continue
-                fe.stability = p.stability
-                fe.save()
-            '''
         ps.compute_stabilities(reevaluate=True, save=True)
     else:
         calc.write()
