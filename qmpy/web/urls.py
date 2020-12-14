@@ -106,11 +106,26 @@ urlpatterns += [
         views.FormationEnergyDetail.as_view(),
     ),
     ## optimade
+    url(r"^optimade/info$", views.OptimadeInfoData),
+    url(r"^optimade/versions$", views.OptimadeVersionsData),
     url(r"^optimade/structures$", views.OptimadeStructureList.as_view()),
     url(
         r"^optimade/structures/(?P<pk>[0-9]+)/$",
         views.OptimadeStructureDetail.as_view(),
     ),
+    url(r"^optimade/structures/info$", views.OptimadeStructuresInfoData),
+    url(r"^optimade/links$", views.OptimadeLinksData),
+
+    url(r"^optimade/v1/info$", views.OptimadeInfoData),
+    url(r"^optimade/versions$", views.OptimadeVersionsData),
+    url(r"^optimade/v1/structures$", views.OptimadeStructureList.as_view()),
+    url(
+        r"^optimade/v1/structures/(?P<pk>[0-9]+)/$",
+        views.OptimadeStructureDetail.as_view(),
+    ),
+    url(r"^optimade/v1/structures/info$", views.OptimadeStructuresInfoData),
+    url(r"^optimade/v1/links$", views.OptimadeLinksData),
+
     ## download
     url(r"^download/", views.download_home),
     ## other
