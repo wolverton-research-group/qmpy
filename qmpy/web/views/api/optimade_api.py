@@ -10,9 +10,10 @@ from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer
 
 from qmpy.rester import qmpy_rester
+from django.shortcuts import render_to_response
 
 from collections import OrderedDict
-
+from qmpy.utils import oqmd_optimade as oqop
 import time
 import datetime
 
@@ -26,7 +27,8 @@ class OptimadeStructureDetail(generics.RetrieveAPIView):
 
 class OptimadePagination(LimitOffsetPagination):
     default_limit = 50
-
+    offset_query_param = 'page_offset'
+    limit_query_param = 'page_limit'
     def get_paginated_response(self, page_data):
         data = page_data["data"]
         request = page_data["request"]
@@ -92,7 +94,6 @@ class OptimadePagination(LimitOffsetPagination):
 class OptimadeStructureList(generics.ListAPIView):
     serializer_class = OptimadeStructureSerializer
     pagination_class = OptimadePagination
-
     def get_queryset(self):
         fes = FormationEnergy.objects.filter(fit="standard")
         fes = self.filter(fes)
@@ -130,3 +131,21 @@ class OptimadeStructureList(generics.ListAPIView):
         fes = fes.filter(q)
 
         return fes
+
+def OptimadeInfoData(request):
+    data = oqop.get_optimade_data("info")
+    return render_to_response("api/plain_text.html", {"data":data})
+
+def OptimadeVersionsData(request):
+    data = oqop.get_optimade_data("versions")
+    return render_to_response("api/plain_text.html", {"data":data})
+
+def OptimadeLinksData(request):
+    data = oqop.get_optimade_data("links")
+    return render_to_response("api/plain_text.html", {"data":data})
+
+def OptimadeStructuresInfoData(request):
+    data = oqop.get_optimade_data("structures.info")
+    return render_to_response("api/plain_text.html", {"data":data})
+
+
