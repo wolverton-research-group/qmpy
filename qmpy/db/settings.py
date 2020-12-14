@@ -180,8 +180,6 @@ REST_FRAMEWORK = {
         "rest_framework_xml.renderers.XMLRenderer",
         "rest_framework_yaml.renderers.YAMLRenderer",
     ),
-    'URL_FORMAT_OVERRIDE': 'response_format',
-    'FORMAT_SUFFIX_KWARG': 'response_format',
 }
 
 CRIPSY_TEMPLATE_PACK = "bootstrap"
