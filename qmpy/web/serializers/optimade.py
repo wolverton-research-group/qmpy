@@ -45,14 +45,6 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
                 }
             for field in fields_to_drop:
                 self.fields.pop(field)
-        print("\n All fields: ",set(self.fields))
-        print("\n All fields_type: ",type(set(self.fields)))
-        print("\nRequest: ",request)
-        print("\nQueryParams: ",query_params)
-        print("\nFields:",query_params.getlist('fields')) 
-
-        
-
 
     # Mandatory properties
     def get_type(self,_):

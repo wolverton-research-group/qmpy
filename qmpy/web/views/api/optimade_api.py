@@ -41,10 +41,14 @@ class OptimadePagination(LimitOffsetPagination):
         time_stamp = datetime.datetime.fromtimestamp(time_now).strftime(
             "%Y-%m-%d %H:%M:%S"
         )
+        _oqmd_final_query = page_data['meta']['django_query'] if 'django_query' in page_data['meta'] else None
+        _warnings         = page_data['meta']['warnings']     if 'warnings'     in page_data['meta'] else []
+        if (not _warnings) and (not _oqmd_final_query):
+            _warnings = ["_oqmd_NoFilterWarning: No filters were provided in the query"]
         meta_list = [
                         ("query", {
                                       "representation"   : representation,
-                                      "_oqmd_final_query": page_data['meta']['django_query']
+                                      "_oqmd_final_query": _oqmd_final_query
                                   }
                         ),
                         ("api_version", "1.0.0"),
@@ -72,7 +76,7 @@ class OptimadePagination(LimitOffsetPagination):
                                     ("homepage", "http://oqmd.org"),
                                 ])
                         ),
-                        ("warnings", page_data['meta']['warnings']),
+                        ("warnings", _warnings),
                         ("response_message", "OK")
                     ]
                         
@@ -115,21 +119,11 @@ class OptimadeStructureList(generics.ListAPIView):
     def list(self, request, *args, **kwargs):
         query_set, meta_info = self.get_queryset()
         page = self.paginate_queryset(query_set)
-
-        #if page is not None:
-        #    serializer = self.get_serializer(page, many=True)
-        #    page_data = {"data": serializer.data, "request": self.request,
-        #                 "meta":meta_info}
-        #    return self.get_paginated_response(page_data)
-
-        #serializer = self.get_serializer(query_set, many=True)
-
         serializer = self.get_serializer(page, many=True)
         page_data = {"data"    : serializer.data, 
                      "request" : self.request,
                      "meta"    : meta_info }
         return self.get_paginated_response(page_data)
-        #return Response(serializer.data)
 
     def filter(self, fes):
         request = self.request
@@ -137,7 +131,8 @@ class OptimadeStructureList(generics.ListAPIView):
         filters = request.GET.get("filter", False)
 
         if not filters:
-            return fes
+            meta_data = {"warnings": ["_oqmd_NoFilterWarning: No filters were provided in the query. Returning all structures"],}
+            return fes, meta_data
 
         # shortcut to get all stable phases
         filters = filters.replace("stability=0", "stability<=0")
