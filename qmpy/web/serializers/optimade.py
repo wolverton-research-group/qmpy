@@ -2,7 +2,6 @@ from rest_framework import serializers
 from qmpy.materials.formation_energy import FormationEnergy
 from drf_queryfields import QueryFieldsMixin
 
-
 class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer):
     chemical_formula_reduced = serializers.SerializerMethodField()
     chemical_formula_anonymous = serializers.SerializerMethodField()
@@ -33,7 +32,28 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
     _oqmd_delta_e = serializers.SerializerMethodField()
     _oqmd_stability = serializers.SerializerMethodField()
     _oqmd_volume = serializers.SerializerMethodField()
-    
+
+    def __init__(self, *args, **kwargs):
+        super(OptimadeStructureSerializer, self).__init__(*args, **kwargs)
+        request = self.context['request']
+        query_params = request.query_params
+        _fields = query_params.getlist('fields')
+        if not _fields:
+            fields_to_drop = {
+                'chemical_formula_descriptive','elements_ratios', 'dimension_types', 
+                '_oqmd_direct_site_positions', 'nperiodic_dimensions', 'species'
+                }
+            for field in fields_to_drop:
+                self.fields.pop(field)
+        print("\n All fields: ",set(self.fields))
+        print("\n All fields_type: ",type(set(self.fields)))
+        print("\nRequest: ",request)
+        print("\nQueryParams: ",query_params)
+        print("\nFields:",query_params.getlist('fields')) 
+
+        
+
+
     # Mandatory properties
     def get_type(self,_):
         return "structure"
@@ -77,12 +97,20 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
             sites = [s.label for s in strct.sites]
             return sites
         except:
-            return []        
+            return []
         
+    def get_cartesian_site_positions(self,formationenergy):
+        try:
+            strct = formationenergy.calculation.output
+            sites = [s.atoms[0].cart_coord.round(6).tolist() for s in strct.sites]
+            return sites
+        except:
+            return [] 
+
     def get__oqmd_direct_site_positions(self, formationenergy):
         try:
             strct = formationenergy.calculation.output
-            sites = [s.coord.tolist() for s in strct.sites]
+            sites = [s.coord.round(6).tolist() for s in strct.sites]
             return sites
         except:
             return []
@@ -99,8 +127,6 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
     def get_chemical_formula_descriptive(self,_):
         return ""
     def get_species(self,_):
-        return []
-    def get_cartesian_site_positions(self,_):
         return []
 
 
@@ -136,11 +162,11 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
         return formationenergy.calculation.band_gap
 
     def get__oqmd_delta_e(self, formationenergy):
-        return formationenergy.delta_e
+        return round(formationenergy.delta_e,4)
 
     def get__oqmd_stability(self, formationenergy):
         if formationenergy.stability is not None:
-            return max(formationenergy.stability, 0.0)
+            return max(round(formationenergy.stability,3), 0.0)
         else:
             return
     def get__oqmd_volume(self, formationenergy):

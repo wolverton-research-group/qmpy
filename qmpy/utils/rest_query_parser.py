@@ -95,5 +95,5 @@ def query_to_Q(query_string):
     try:
         parsed_tree = dlconverter.parse_raw_q(query_string)
     except:
-        return None
+        return
     return dlconverter.evaluate(parsed_tree)

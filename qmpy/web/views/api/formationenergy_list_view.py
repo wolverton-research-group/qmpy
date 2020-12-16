@@ -257,7 +257,7 @@ class FormationEnergyList(generics.ListAPIView):
         filters = filters.replace("&", " AND ")
         filters = filters.replace("|", " OR ")
         filters = filters.replace("~", " NOT ")
-        q = query_to_Q(filters)
+        q, meta_info = query_to_Q(filters)
         if not q:
             return []
         fes = fes.filter(q)

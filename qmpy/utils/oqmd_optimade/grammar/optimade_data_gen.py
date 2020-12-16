@@ -27,47 +27,19 @@ def write_info():
     json.dump(data, open("optimade_info.json", "w"))
 
 
-def write_structure_info():
+def write_info_structures():
     formats = ["json", "xml", "yaml"]
-    properties = [
-        "id",
-        "nelements",
-        "lattice_vectors",
-    ]
+    properties = json.load(open("optimade_info_properties.json","r"))
+    output_fields_by_format = {item:[jtem for jtem in properties] for item in formats}
     data = {
         "data": {
             "description": "a structures entry",
-            "properties": {
-
-                "nsites": {
-                    "description": "Number of sites in the unit cell",
-                    "sortable": "false",
-                    "type": "integer",
-                },
-
-                "nelements": {
-                    "description": "Number of elements",
-                    "sortable": "false",
-                    "type": "integer",
-                },
-                "lattice_vectors": {
-                    "description": "Unit cell lattice vectors",
-                    "unit": "Ao",
-                    "sortable": "false",
-                    "type": "list",
-                },
-            },
-            "formats": ["json", "xml", "yaml"],
-            "output_fields_by_format": {
-                "json": [
-                    "nelements",
-                    "lattice_vectors",
-                ],
-                "xml": ["nelements"],
-            },
+            "properties": properties,
+            "formats": formats,
+            "output_fields_by_format": output_fields_by_format,
         }
     }
-    json.dump(data, open("optimade_structures.info.json", "w"))
+    json.dump(data, open("optimade_info_structures.json", "w"))
 
 
 def write_links_info():
@@ -101,5 +73,5 @@ def write_links_info():
 
 
 write_info()
-write_structure_info()
+write_info_structures()
 write_links_info()

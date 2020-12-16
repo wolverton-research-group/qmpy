@@ -98,7 +98,7 @@ class EntryList(generics.ListAPIView):
             comp_in = comp.replace("include_", "")
             # t = Token(comp_in)
             # q = t.evaluate()
-            q = query_to_Q(comp_in)
+            q, meta_info = query_to_Q(comp_in)
             entries = entries.filter(q)
 
         # comp_ex = request.GET.get('composition_exclude', False)

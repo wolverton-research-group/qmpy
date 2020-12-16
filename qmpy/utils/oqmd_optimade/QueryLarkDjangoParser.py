@@ -11,7 +11,8 @@ import json
 
 class ParserError(Exception):
     def __init__(self,message):
-        return('ParserError: {}'.format(message))
+        self.message = message
+        print('ParserError: {}'.format(message))
 
 def get_grammar_data():
     parser_grammer = {}
@@ -104,6 +105,7 @@ class Lark2Django(Transformer):
         
         self.logic_functions = [self.gt, self.ge, self.lt, self.le]
         self.elements = qmpy.elements.keys()
+        self.warnings = []
 
     def parse_raw_q(self, raw_query):
         return self.parser.parse(raw_query)
@@ -134,6 +136,8 @@ class Lark2Django(Transformer):
             ParserError('Unsupported query or query children format found: {}'.format(type(qob)))
      
     def printable_djangoQ(self,qob,pretty=True,indent=4):
+        if not qob:
+            return
         if pretty:
             try:
                 assert (indent>0 and type(indent)==int)
@@ -178,7 +182,14 @@ class Lark2Django(Transformer):
         return operator.or_(q1, q2)
     
     def has(self,a,b):
-        return self.eq(a,b)
+        try:
+            assert a.is_set_operable
+            return self.eq(a,b)
+        except:
+            self.warnings.append("_oqmd_IgnoredProperty: The comparison HAS is not supported for {}".format(
+                                  a.name)
+                                ) 
+            return None
     
     def has_all(self,a,b):
         assert type(b)==list
@@ -209,7 +220,9 @@ class Lark2Django(Transformer):
         if a.length_prop:
             return self.eq(self.property_dict[a.length_prop],b)
         else:
-            raise ParserError("Length does not exist for {}".format(a.name))
+            self.warnings.append("_oqmd_PropertyNotFound: COuld not find length parameter for {}".format(
+                                 a.name))
+            return None
             
     def expression_clause(self,children):
         try:
@@ -252,7 +265,12 @@ class Lark2Django(Transformer):
             a = self._property(children[0])
             operation_fn = children[1][0]
             b = children[1][1]
-            assert (a.is_queryable or a.db_value)
+            try:
+                assert (a.is_queryable or a.db_value)
+            except:
+                self.warnings.append("_oqmd_IgnoredProperty: The property {} is cannot be queried".format(
+                                 children[0].children[0].value))
+                return None
         
             if a.is_chem_form:
                 c_dict_lst = parse_formula_regex(b)
@@ -261,9 +279,16 @@ class Lark2Django(Transformer):
                     b.append(" ".join(["%s%g" % (k, cd[k]) for k in sorted(cd.keys())]))
                 
             if operation_fn in self.logic_functions:
-                assert a.is_logic_operable
+                try:
+                    assert a.is_logic_operable
+                except:
+                    self.warnings.append("_oqmd_IgnoredProperty: The property {} is cannot be queried with the logic operators <,>,<=,>=".format(
+                                 children[0].children[0].value))
+                    return None
             return operation_fn(a,b)
         except:
+            self.warnings.append("_oqmd_IgnoredProperty: Error encountered while parsing the comparison of property {}".format(
+                                 children[0].children[0].value))
             return None
         
     def value_op_rhs(self,children):
@@ -279,6 +304,7 @@ class Lark2Django(Transformer):
                 set_operation_name = '_'.join([item.value for item in children[:2]])
                 return [self.opers[set_operation_name],children[2]]
         except:
+            self.warnings.append("_oqmd_IgnoredProperty: Error encountered while parsing a set-operation")
             return
         
     def length_op_rhs(self,children):
@@ -301,5 +327,13 @@ class Lark2Django(Transformer):
         return children[0]
     
     def evaluate(self, tree):
-        # For backward compatibility
-        return self.transform(tree)
+        try:
+            assert type(tree)==Tree
+        except:
+            return
+        django_q = self.transform(tree)
+        meta_info = {
+                     "warnings":list(set(self.warnings)),
+                     "django_query":self.printable_djangoQ(django_q,pretty=False)
+                    }
+        return (django_q, meta_info)

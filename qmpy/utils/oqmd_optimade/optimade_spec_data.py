@@ -8,9 +8,9 @@ def get_optimade_data(label):
         return json.dumps(data,indent=4)
     elif label=="versions":
         return "version \n 1"
-    elif label=="structures.info":
+    elif label=="info.structures":
         filename = os.path.join(os.path.dirname(__file__), "./grammar", 
-                                  "optimade_structures.info.json")
+                                  "optimade_info_structures.json")
         data  =json.load(open(filename,"r"))
         return json.dumps(data,indent=4)
     elif label=="links":
