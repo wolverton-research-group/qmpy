@@ -24,7 +24,7 @@ def write_info():
         }
     }
 
-    json.dump(data, open("optimade_info.json", "w"))
+    json.dump(data, open("optimade_info.json", "w"),indent=4)
 
 
 def write_info_structures():
@@ -39,7 +39,7 @@ def write_info_structures():
             "output_fields_by_format": output_fields_by_format,
         }
     }
-    json.dump(data, open("optimade_info_structures.json", "w"))
+    json.dump(data, open("optimade_info_structures.json", "w"),indent=4)
 
 
 def write_links_info():
@@ -69,7 +69,7 @@ def write_links_info():
             },
         ]
     }
-    json.dump(data, open("optimade_links.json", "w"))
+    json.dump(data, open("optimade_links.json", "w"),indent=4)
 
 
 write_info()
