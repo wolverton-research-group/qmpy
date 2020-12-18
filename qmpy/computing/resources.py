@@ -137,9 +137,9 @@ class Host(models.Model):
         | name: Primary key.
         | binaries: dict of label:path pairs for vasp binaries.
         | check_queue: Path to showq command
-        | checked_time: datetime object for the last time the queue was 
+        | checked_time: datetime object for the last time the queue was
         |   checked.
-        | hostname: Full host name. 
+        | hostname: Full host name.
         | ip_address: Full ip address.
         | nodes: Total number of nodes.
         | ppn: Number of processors per node.
@@ -372,7 +372,7 @@ class Host(models.Model):
         running = {}
         if not raw_data:
             return
-        elif type(raw_data)==bytes:
+        elif type(raw_data) == bytes:
             raw_data = raw_data.decode()
 
         ## < Mohan
@@ -432,7 +432,7 @@ class Host(models.Model):
 
     def deactivate(self):
         """
-        Prevent new jobs from being started on this system. 
+        Prevent new jobs from being started on this system.
         Remember to save() changes
         """
         self.state = -1
@@ -464,8 +464,8 @@ class Host(models.Model):
 
 
 class Account(models.Model):
-    """ 
-    Base class for a `User` account on a `Host`. 
+    """
+    Base class for a `User` account on a `Host`.
 
     Attributes:
         | host
@@ -552,7 +552,7 @@ class Account(models.Model):
 
         print("Great! Lets test it real quick...")
         out = self.execute("whoami")
-        if out.decode('utf-8') == "%s\n" % self.username:
+        if out.decode("utf-8") == "%s\n" % self.username:
             print("Awesome! It worked!")
         else:
             print("Something appears to be wrong, talk to Scott...")
@@ -582,7 +582,7 @@ class Account(models.Model):
         else:
             # < Mohan
             tmp = stdout.strip().split()[0]
-            if type(tmp)==bytes:
+            if type(tmp) == bytes:
                 tmp = tmp.decode()
             if "Moab" in tmp:
                 jid = int(tmp.split(".")[1])
@@ -790,7 +790,7 @@ class Allocation(models.Model):
 
 class Project(models.Model):
     """
-    Base class for a project within qmpy. 
+    Base class for a project within qmpy.
 
     Attributes:
         | allocations

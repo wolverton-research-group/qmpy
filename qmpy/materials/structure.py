@@ -264,13 +264,13 @@ class Structure(models.Model, object):
         if not self.spacegroup:
             self.symmetrize()
         super(Structure, self).save(*args, **kwargs)
-        
+
     _atoms = None
 
     @property
     def atoms(self):
         """
-        List of ``Atoms`` in the structure. 
+        List of ``Atoms`` in the structure.
         """
         if self._atoms is None:
             if not self.id:
@@ -696,11 +696,11 @@ class Structure(models.Model, object):
 
         5. If needed check that the primitive cell volumes are the same
 
-        6. Convert both primitive cells to reduced form There is one issue here - 
-        the reduce cell could be type I (all angles acute) or type II (all angles 
-        obtuse) and a slight difference in the initial cells could cause two 
-        structures to reduce to different types. So at this step, if the angles 
-        are not correct, the second cell is transformed as 
+        6. Convert both primitive cells to reduced form There is one issue here -
+        the reduce cell could be type I (all angles acute) or type II (all angles
+        obtuse) and a slight difference in the initial cells could cause two
+        structures to reduce to different types. So at this step, if the angles
+        are not correct, the second cell is transformed as
         [[-1, 0, 0], [0, -1, 0], [0, 0, 1]].
 
         7. Check that the cell internal angles are the same in both reduced
@@ -911,20 +911,20 @@ class Structure(models.Model, object):
             demonstrate that for any non-cubic cell, the normal method of
             calculating the distance by wrapping the vector in fractional
             coordinates to the range (-0.5, 0.5) fails for cases near (0.5,0.5)
-            in Type I cells and near (0.5, -0.5) for Type II. 
+            in Type I cells and near (0.5, -0.5) for Type II.
 
             To get the correct distance, the vector must be wrapped into the
-            Wigner-Seitz cell. 
+            Wigner-Seitz cell.
 
         Arguments:
             atom1, atom2: (:mod:`~qmpy.Atom`, :mod:`~qmpy.Site`, int).
 
         Keyword Arguments:
-            limit: 
+            limit:
                 If a limit is provided, returns None if the distance is
                 greater than the limit.
 
-            wrap_self: 
+            wrap_self:
                 If True, the distance from an atom to itself is 0, otherwise it
                 is the distance to the shortest periodic image of itself.
 
@@ -1300,13 +1300,13 @@ class Structure(models.Model, object):
         """Uses spglib to convert to the conventional cell.
 
         Keyword Arguments:
-            in_place: 
+            in_place:
                 If True, changes the current structure. If false returns
                 a new one
 
-            tol: 
+            tol:
                 Symmetry precision for symmetry analysis
-        
+
         Examples::
 
             >>> s = io.read(INSTALL_PATH+'io/files/POSCAR_FCC_prim')
@@ -1328,13 +1328,13 @@ class Structure(models.Model, object):
         """Uses spglib to convert to the primitive cell.
 
         Keyword Arguments:
-            in_place: 
+            in_place:
                 If True, changes the current structure. If false returns
                 a new one
 
-            tol: 
+            tol:
                 Symmetry precision for symmetry analysis
-        
+
         Examples::
 
             >>> s = io.read(INSTALL_PATH+'io/files/POSCAR_FCC')
@@ -1472,8 +1472,8 @@ class Structure(models.Model, object):
 
         Keyword Arguments:
             elements:
-                If `elements` is supplied, get_lattice_network will return the 
-                lattice of those elements only. 
+                If `elements` is supplied, get_lattice_network will return the
+                lattice of those elements only.
 
             supercell:
                 Accepts any valid input to Structure.transform to construct a
@@ -1487,7 +1487,7 @@ class Structure(models.Model, object):
             neighbors.
 
         Examples::
-            
+
             >>> s = io.read(INSTALL_PATH+'/io/files/fe3o4.cif')
             >>> sl = s.get_lattice_network(elements=['Fe'])
             >>> sl.set_fraction(0.33333)
@@ -1573,7 +1573,7 @@ class Structure(models.Model, object):
         identified by index.
 
         Keyword Arguments:
-            in_place: 
+            in_place:
                 If False, return a new Structure with the transformation applied.
                 defaults to True.
 
@@ -1608,7 +1608,7 @@ class Structure(models.Model, object):
 
     def translate(self, cv, cartesian=True, in_place=True):
         """
-        Shifts the contents of the structure by a vector. 
+        Shifts the contents of the structure by a vector.
 
         Optional keyword arguments:
             *cartesian*     : If True, translation vector is taken to be
@@ -1737,7 +1737,7 @@ class Structure(models.Model, object):
         """
         Apply lattice transform to the structure. Accepts transformations of
         shape (3,) and (3,3).
-        
+
         Optional keyword arguments:
             *in_place*      : If False, return a new Structure with the
                                 transformation applied.
@@ -1829,18 +1829,18 @@ class Structure(models.Model, object):
     def substitute(
         self, replace, rescale=True, rescale_method="relative", in_place=False, **kwargs
     ):
-        """Replace atoms, as specified in a dict of pairs. 
+        """Replace atoms, as specified in a dict of pairs.
 
         Keyword Arguments:
-            rescale: 
-                rescale the volume of the final structure based on the per 
+            rescale:
+                rescale the volume of the final structure based on the per
                 atom volume of the new composition.
 
             rescale_method:
-                How to rescale the 
+                How to rescale the
 
-            in_place: 
-                change the species of the current Structure or return a new 
+            in_place:
+                change the species of the current Structure or return a new
                 one.
 
         Examples::
@@ -1881,9 +1881,9 @@ class Structure(models.Model, object):
         Identify atoms that are close to high symmetry sites (within `tol` and
         shift them onto them.
 
-        Note: 
+        Note:
             "symprec" doesn't appear to do anything with spglib, so I am
-            unable to get "loose" symmetry operations. Without which, this 
+            unable to get "loose" symmetry operations. Without which, this
             doesn't work.
 
         Examples::
@@ -1922,16 +1922,16 @@ class Structure(models.Model, object):
         Acta. Cryst. (2003) A60, 1
 
         Optional keyword arguments:
-            *tol* : 
-                eps_rel in Acta. Cryst. 2003 above. Similar to 
+            *tol* :
+                eps_rel in Acta. Cryst. 2003 above. Similar to
                 tolerance for floating point comparisons. Defaults to 1e-5.
-            *limit* : 
-                maximum number of loops through the algorithm. Defaults to 
-                1000. 
-            *in_place* : 
-                Change the Structure or return a new one. If True, the 
+            *limit* :
+                maximum number of loops through the algorithm. Defaults to
+                1000.
+            *in_place* :
+                Change the Structure or return a new one. If True, the
                 transformation matrix is returned. If False, a tuple of
-                (Structure, transformation_matrix) is returned. 
+                (Structure, transformation_matrix) is returned.
 
         Examples::
 
@@ -2063,8 +2063,10 @@ class Structure(models.Model, object):
                 continue
             break
 
-        if (trans == np.array([[-1.,  0.,  0.], [ 0., -1.,  0.], [ 0.,  0., -1.]])).all():
-            trans = np.array([[1.,  0.,  0.], [ 0., 1.,  0.], [ 0.,  0., 1.]])
+        if (
+            trans == np.array([[-1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, -1.0]])
+        ).all():
+            trans = np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
 
         # temporarily stored transformations
         self._original_cell = self.cell.copy()
@@ -2125,7 +2127,7 @@ class Structure(models.Model, object):
             in_place: apply change to current structure, or return a new one.
 
         Examples::
-            
+
             >>> s = io.read(INSTALL_PATH+'/io/files/POSCAR_FCC')
             >>> s.create_vacuum(2, 5)
         """
@@ -2147,7 +2149,7 @@ class Structure(models.Model, object):
         If a site is not fully occupied, but has only one atom type on it, it
         will be filled the rest of the way.
         If a site has two or more atom types on it, the higher fraction element
-        will fill the site. 
+        will fill the site.
 
         Keyword Arguments:
             in_place: If False returns a new :mod:`~qmpy.Structure`, otherwise
@@ -2156,7 +2158,7 @@ class Structure(models.Model, object):
             tol: maximum defect concentration.
 
         Examples::
-            
+
             >>> s = io.read(INSTALL_PATH+'/io/files/partial_vac.cif')
             >>> s
             <Structure: Mn3.356Si4O16>
@@ -2229,7 +2231,7 @@ class Structure(models.Model, object):
 
 class Prototype(models.Model):
     """
-    Base class for a prototype structure. 
+    Base class for a prototype structure.
 
     Relationships:
         | :mod:`~qmpy.Composition` via composition_set

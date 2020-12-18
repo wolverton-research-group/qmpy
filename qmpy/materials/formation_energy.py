@@ -207,14 +207,14 @@ Formation = FormationEnergy
 
 class Fit(models.Model):
     """
-    The core model for a reference energy fitting scheme. 
-    
-    The Fit model links to the experimental data (ExptFormationEnergy objects) 
-    that informed the fit, as well as the DFT calculations (Calculation objects) 
-    that were matched to each experimental formation energy. Once the fit is 
-    completed, it also stores a list of chemical potentials both as a 
-    relationship to ReferenceEnergy and HubbardCorrection objects. 
-    These correction energies can also be accessed by dictionaries at 
+    The core model for a reference energy fitting scheme.
+
+    The Fit model links to the experimental data (ExptFormationEnergy objects)
+    that informed the fit, as well as the DFT calculations (Calculation objects)
+    that were matched to each experimental formation energy. Once the fit is
+    completed, it also stores a list of chemical potentials both as a
+    relationship to ReferenceEnergy and HubbardCorrection objects.
+    These correction energies can also be accessed by dictionaries at
     Fit.mus and Fit.hubbard_mus.
 
     Relationships:
@@ -226,7 +226,7 @@ class Fit(models.Model):
 
     Attributes:
         | name: Name for the fitting
-    
+
     Examples::
 
         >>> f = Fit.get('standard')

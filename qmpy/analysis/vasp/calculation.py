@@ -64,10 +64,10 @@ def vasp_format(key, value):
 class VaspError(Exception):
     """General problem with vasp calculation."""
 
+
 @add_meta_data("error")
 @add_meta_data("warning")
 @add_meta_data("Co_spin")
-
 class Calculation(models.Model):
     """
     Base class for storing a VASP calculation.
@@ -210,14 +210,13 @@ class Calculation(models.Model):
         self.meta_data.set(self.error_objects)
         super(Calculation, self).save(*args, **kwargs)
 
-
     # django caching
     _potentials = None
 
     @property
     def formation(self):
-        fe_set = self.formationenergy_set.filter(fit__name='standard')
-        if len(fe_set)==0:
+        fe_set = self.formationenergy_set.filter(fit__name="standard")
+        if len(fe_set) == 0:
             return self.get_formation()
         else:
             return fe_set[0]
@@ -554,7 +553,7 @@ class Calculation(models.Model):
     def get_outcar(self):
         """
         Sets the calculations outcar attribute to a list of lines from the
-        outcar. 
+        outcar.
 
         Examples::
 
@@ -564,7 +563,7 @@ class Calculation(models.Model):
             >>> calc.get_outcar()
             >>> len(calc.outcar)
             12345L
-        
+
         """
         if not self.outcar is None:
             return self.outcar
@@ -572,9 +571,11 @@ class Calculation(models.Model):
             return
         elif exists(self.path + "/OUTCAR"):
             try:
-                self.outcar = open(self.path + "/OUTCAR","r").readlines()
+                self.outcar = open(self.path + "/OUTCAR", "r").readlines()
             except UnicodeDecodeError:
-                self.outcar = open(self.path + "/OUTCAR","r",encoding='ISO-8859-1').readlines()
+                self.outcar = open(
+                    self.path + "/OUTCAR", "r", encoding="ISO-8859-1"
+                ).readlines()
         elif exists(self.path + "/OUTCAR.gz"):
             outcar = gzip.open(self.path + "/OUTCAR.gz", "rb").read().decode()
             self.outcar = outcar.splitlines()
@@ -613,7 +614,7 @@ class Calculation(models.Model):
             >>> calc = Calculation.read('calculation_path')
             >>> calc.read_energies()
             array([-12.415236, -12.416596, -12.416927])
-        
+
         """
         self.get_outcar()
         energies = []
@@ -643,7 +644,7 @@ class Calculation(models.Model):
     def read_elements(self):
         """
         Reads the elements of the atoms in the structure. Returned as a list of
-        atoms of shape (natoms,). 
+        atoms of shape (natoms,).
 
         Examples::
 
@@ -673,7 +674,7 @@ class Calculation(models.Model):
 
     def read_lattice_vectors(self):
         """
-        Reads and returns a numpy ndarray of lattice vectors for every ionic 
+        Reads and returns a numpy ndarray of lattice vectors for every ionic
         step of the calculation.
 
         Examples::
@@ -703,7 +704,7 @@ class Calculation(models.Model):
         """
         Reads and returns VASP-calculated projected charge for each atom. Returns the
         RAW charge, not NET charge.
-        
+
         Examples::
 
             >>> calc = Calculation.read('path_to_calculation')
@@ -788,8 +789,8 @@ class Calculation(models.Model):
 
     def read_stresses(self):
         """
-            Using vasprun.xml.gz to collect stresses.
-            In future, this function will be moved to read_output_from_vasprun()
+        Using vasprun.xml.gz to collect stresses.
+        In future, this function will be moved to read_output_from_vasprun()
         """
         try:
             stresses = []
@@ -1679,12 +1680,12 @@ class Calculation(models.Model):
 
         Arguments:
             source: can be another :mod:`~qmpy.Calculation` instance or a
-            string containing a path to a WAVECAR. If it is a path, it should 
-            be a absolute, i.e. begin with "/", and can either end with the 
+            string containing a path to a WAVECAR. If it is a path, it should
+            be a absolute, i.e. begin with "/", and can either end with the
             WAVECAR or simply point to the path that contains it. For
-            example, if you want to take the WAVECAR from a previous 
+            example, if you want to take the WAVECAR from a previous
             calculation you can do any of::
-            
+
             >>> c1 # old calculation
             >>> c2 # new calculation
             >>> c2.set_wavecar(c1)
@@ -1714,12 +1715,12 @@ class Calculation(models.Model):
 
         Arguments:
             source: can be another :mod:`~qmpy.Calculation` instance or a
-            string containing a path to a CHGCAR. If it is a path, it should 
-            be a absolute, i.e. begin with "/", and can either end with the 
+            string containing a path to a CHGCAR. If it is a path, it should
+            be a absolute, i.e. begin with "/", and can either end with the
             CHGCAR or simply point to the path that contains it. For
-            example, if you want to take the CHGCAR from a previous 
+            example, if you want to take the CHGCAR from a previous
             calculation you can do any of::
-            
+
             >>> c1 # old calculation
             >>> c2 # new calculation
             >>> c2.set_chgcar(c1)
@@ -1760,7 +1761,7 @@ class Calculation(models.Model):
     def formation_energy(self, reference="standard"):
         try:
             fe_set = self.formationenergy_set.filter(fit__name=reference)
-            if len(fe_set)==0:
+            if len(fe_set) == 0:
                 return self.get_formation(reference=reference).delta_e
             else:
                 return fe_set[0].delta_e
@@ -1814,7 +1815,7 @@ class Calculation(models.Model):
             input structure file.
 
         Keyword Arguments:
-            configuration: 
+            configuration:
                 String indicating the type of calculation to
                 perform. Options can be found with qmpy.VASP_SETTINGS.keys().
                 Create your own configuration options by adding a new file to
@@ -1824,9 +1825,9 @@ class Calculation(models.Model):
             settings:
                 Dictionary of VASP settings to be applied to the calculation.
                 Is applied after the settings which are provided by the
-                `configuration` choice. 
+                `configuration` choice.
 
-            path: 
+            path:
                 Location at which to perform the calculation. If the
                 calculation takes repeated iterations to finish successfully,
                 all steps will be nested in the `path` directory.
@@ -1836,13 +1837,13 @@ class Calculation(models.Model):
                 an entry to associate with the calculation.
 
             hubbard:
-                String indicating the hubbard correctionconvention. Options 
+                String indicating the hubbard correctionconvention. Options
                 found with qmpy.HUBBARDS.keys(), and can be added to or
                 altered by editing configuration/vasp_settings/hubbards.yml.
                 Default="wang".
 
             potentials:
-                String indicating the vasp potentials to use. Options can be 
+                String indicating the vasp potentials to use. Options can be
                 found with qmpy.POTENTIALS.keys(), and can be added to or
                 altered by editing configuration/vasp_settings/potentials/yml.
                 Default="vasp_rec".
@@ -1906,7 +1907,7 @@ class Calculation(models.Model):
 
         calc.set_potentials(vasp_settings.get("potentials", "vasp_rec"))
         calc.set_hubbards(vasp_settings.get("hubbards", hubbard))
-        #calc.set_magmoms(vasp_settings.get("magnetism", "ferro"))
+        # calc.set_magmoms(vasp_settings.get("magnetism", "ferro"))
 
         if "scale_encut" in vasp_settings:
             enmax = max(pot.enmax for pot in calc.potentials)
@@ -1927,7 +1928,7 @@ class Calculation(models.Model):
 
         # Read all outputs
         calc.read_stdout()
-        if not 'edddav' in calc.errors:
+        if not "edddav" in calc.errors:
             calc.read_outcar()
             calc.read_doscar()
 
