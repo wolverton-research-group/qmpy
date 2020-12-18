@@ -50,13 +50,18 @@ class DataFilterForm(forms.Form):
     element_set = forms.CharField(
         required=False,
         label="Element Set",
-        widget=forms.TextInput(attrs={"placeholder": "e.g. S, (Mn-Fe),O"},),
+        widget=forms.TextInput(
+            attrs={"placeholder": "e.g. S, (Mn-Fe),O"},
+        ),
         help_text="<html>Use <code>,</code> as <b>AND</b> and\
                                   <code>-</code> as <b>OR</b> <br>\
                                   Use <code>(</code> and <code>)</code> to change priority</html>",
     )
     prototype = forms.CharField(
-        required=False, widget=forms.TextInput(attrs={"placeholder": "e.g. Cu, CsCl"},)
+        required=False,
+        widget=forms.TextInput(
+            attrs={"placeholder": "e.g. Cu, CsCl"},
+        ),
     )
     spacegroup = forms.CharField(
         required=False,
@@ -90,7 +95,8 @@ class DataFilterForm(forms.Form):
         widget=forms.TextInput(attrs={"placeholder": "e.g. <=-0.5"}),
     )
     stability = forms.CharField(
-        required=False, widget=forms.TextInput(attrs={"placeholder": "e.g. 0, <=0.05"}),
+        required=False,
+        widget=forms.TextInput(attrs={"placeholder": "e.g. 0, <=0.05"}),
     )
     natoms = forms.CharField(
         required=False,
@@ -122,7 +128,10 @@ class DataFilterForm(forms.Form):
     sort_offset = forms.IntegerField(required=False, label="Offset", initial=0)
 
     sort_by = forms.TypedChoiceField(
-        required=False, choices=filter_choices, label="Sort By", widget=forms.Select,
+        required=False,
+        choices=filter_choices,
+        label="Sort By",
+        widget=forms.Select,
     )
     desc = forms.TypedChoiceField(
         required=False,

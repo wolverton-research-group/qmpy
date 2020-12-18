@@ -27,8 +27,9 @@ class OptimadeStructureDetail(generics.RetrieveAPIView):
 
 class OptimadePagination(LimitOffsetPagination):
     default_limit = 50
-    offset_query_param = 'page_offset'
-    limit_query_param = 'page_limit'
+    offset_query_param = "page_offset"
+    limit_query_param = "page_limit"
+
     def get_paginated_response(self, page_data):
         data = page_data["data"]
         request = page_data["request"]
@@ -40,45 +41,52 @@ class OptimadePagination(LimitOffsetPagination):
         time_stamp = datetime.datetime.fromtimestamp(time_now).strftime(
             "%Y-%m-%d %H:%M:%S"
         )
-        _oqmd_final_query = page_data['meta']['django_query'] if 'django_query' in page_data['meta'] else None
-        _warnings         = page_data['meta']['warnings']     if 'warnings'     in page_data['meta'] else []
+        _oqmd_final_query = (
+            page_data["meta"]["django_query"]
+            if "django_query" in page_data["meta"]
+            else None
+        )
+        _warnings = (
+            page_data["meta"]["warnings"] if "warnings" in page_data["meta"] else []
+        )
         if (not _warnings) and (not _oqmd_final_query):
             _warnings = ["_oqmd_NoFilterWarning: No filters were provided in the query"]
         meta_list = [
-                        ("query", {
-                                      "representation"   : representation,
-                                      "_oqmd_final_query": _oqmd_final_query
-                                  }
-                        ),
-                        ("api_version", "1.0.0"),
-                        ("time_stamp", time_stamp),
-                        (
-                            "data_returned",
-                            min(
-                                self.get_limit(request),
-                                self.count - self.get_offset(request),
-                               ),
-                        ),
-                        ("data_available", self.count),
-                        (
-                            "more_data_available",
-                            (self.get_next_link() != None)
-                            or (self.get_previous_link() != None),
-                        ),
-                        (
-                            "provider", 
-                            OrderedDict(
-                                [
-                                    ("name","OQMD"),
-                                    ("description","The Open Quantum Materials Database"),
-                                    ("prefix", "oqmd"),
-                                    ("homepage", "http://oqmd.org"),
-                                ])
-                        ),
-                        ("warnings", _warnings),
-                        ("response_message", "OK")
+            (
+                "query",
+                {
+                    "representation": representation,
+                    "_oqmd_final_query": _oqmd_final_query,
+                },
+            ),
+            ("api_version", "1.0.0"),
+            ("time_stamp", time_stamp),
+            (
+                "data_returned",
+                min(
+                    self.get_limit(request),
+                    self.count - self.get_offset(request),
+                ),
+            ),
+            ("data_available", self.count),
+            (
+                "more_data_available",
+                (self.get_next_link() != None) or (self.get_previous_link() != None),
+            ),
+            (
+                "provider",
+                OrderedDict(
+                    [
+                        ("name", "OQMD"),
+                        ("description", "The Open Quantum Materials Database"),
+                        ("prefix", "oqmd"),
+                        ("homepage", "http://oqmd.org"),
                     ]
-                        
+                ),
+            ),
+            ("warnings", _warnings),
+            ("response_message", "OK"),
+        ]
 
         return Response(
             OrderedDict(
@@ -110,6 +118,7 @@ class OptimadePagination(LimitOffsetPagination):
 class OptimadeStructureList(generics.ListAPIView):
     serializer_class = OptimadeStructureSerializer
     pagination_class = OptimadePagination
+
     def get_queryset(self):
         fes = FormationEnergy.objects.filter(fit="standard")
         fes, meta_info = self.filter(fes)
@@ -119,9 +128,11 @@ class OptimadeStructureList(generics.ListAPIView):
         query_set, meta_info = self.get_queryset()
         page = self.paginate_queryset(query_set)
         serializer = self.get_serializer(page, many=True)
-        page_data = {"data"    : serializer.data, 
-                     "request" : self.request,
-                     "meta"    : meta_info }
+        page_data = {
+            "data": serializer.data,
+            "request": self.request,
+            "meta": meta_info,
+        }
         return self.get_paginated_response(page_data)
 
     def filter(self, fes):
@@ -130,7 +141,11 @@ class OptimadeStructureList(generics.ListAPIView):
         filters = request.GET.get("filter", False)
 
         if not filters:
-            meta_data = {"warnings": ["_oqmd_NoFilterWarning: No filters were provided in the query. Returning all structures"],}
+            meta_data = {
+                "warnings": [
+                    "_oqmd_NoFilterWarning: No filters were provided in the query. Returning all structures"
+                ],
+            }
             return fes, meta_data
 
         # shortcut to get all stable phases
@@ -142,25 +157,27 @@ class OptimadeStructureList(generics.ListAPIView):
 
         q, meta_info = query_to_Q(filters)
         if not q:
-            return ([],meta_info)
+            return ([], meta_info)
         fes = fes.filter(q)
 
-        return (fes,meta_info)
+        return (fes, meta_info)
+
 
 def OptimadeInfoData(request):
     data = oqop.get_optimade_data("info")
-    return render_to_response("api/plain_text.html", {"data":data})
+    return render_to_response("api/plain_text.html", {"data": data})
+
 
 def OptimadeVersionsData(request):
     data = oqop.get_optimade_data("versions")
-    return render_to_response("api/plain_text.html", {"data":data})
+    return render_to_response("api/plain_text.html", {"data": data})
+
 
 def OptimadeLinksData(request):
     data = oqop.get_optimade_data("links")
-    return render_to_response("api/plain_text.html", {"data":data})
+    return render_to_response("api/plain_text.html", {"data": data})
+
 
 def OptimadeStructuresInfoData(request):
     data = oqop.get_optimade_data("info.structures")
-    return render_to_response("api/plain_text.html", {"data":data})
-
-
+    return render_to_response("api/plain_text.html", {"data": data})

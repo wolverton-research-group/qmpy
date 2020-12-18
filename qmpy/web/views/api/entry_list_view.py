@@ -68,7 +68,7 @@ class EntryList(generics.ListAPIView):
             3. ?composition={Fe,Ni}O
             4. ?composition={3d}2O3
             5. ?composition=include_(Fe,Mn)-O : (Fe OR Mn) AND O
-            6. ?composition=include_Cl,O-H : Cl OR O AND H 
+            6. ?composition=include_Cl,O-H : Cl OR O AND H
             6. ?composition=include_H-{3d} : 3d elements AND H
         """
         request = self.request

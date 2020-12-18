@@ -2,6 +2,7 @@ from rest_framework import serializers
 from qmpy.materials.formation_energy import FormationEnergy
 from drf_queryfields import QueryFieldsMixin
 
+
 class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer):
     chemical_formula_reduced = serializers.SerializerMethodField()
     chemical_formula_anonymous = serializers.SerializerMethodField()
@@ -17,7 +18,7 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
     elements_ratios = serializers.SerializerMethodField()
     structure_features = serializers.SerializerMethodField()
     chemical_formula_descriptive = serializers.SerializerMethodField()
-    species= serializers.SerializerMethodField()
+    species = serializers.SerializerMethodField()
 
     _oqmd_icsd_id = serializers.SerializerMethodField()
     _oqmd_entry_id = serializers.SerializerMethodField()
@@ -35,25 +36,29 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
 
     def __init__(self, *args, **kwargs):
         super(OptimadeStructureSerializer, self).__init__(*args, **kwargs)
-        request = self.context['request']
+        request = self.context["request"]
         query_params = request.query_params
-        _fields = query_params.getlist('fields')
+        _fields = query_params.getlist("fields")
         if not _fields:
             fields_to_drop = {
-                'chemical_formula_descriptive','elements_ratios', 'dimension_types', 
-                '_oqmd_direct_site_positions', 'nperiodic_dimensions', 'species'
-                }
+                "chemical_formula_descriptive",
+                "elements_ratios",
+                "dimension_types",
+                "_oqmd_direct_site_positions",
+                "nperiodic_dimensions",
+                "species",
+            }
             for field in fields_to_drop:
                 self.fields.pop(field)
 
     # Mandatory properties
-    def get_type(self,_):
+    def get_type(self, _):
         return "structure"
 
-    def get_last_modified(self,_):
+    def get_last_modified(self, _):
         return ""
 
-    # Optimade recommended structure-related properties 
+    # Optimade recommended structure-related properties
     def get_chemical_formula_reduced(self, formationenergy):
         return formationenergy.composition.formula.replace(" ", "")
 
@@ -83,21 +88,21 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
     def get_nsites(self, formationenergy):
         return formationenergy.entry.natoms
 
-    def get_species_at_sites(self,formationenergy):
+    def get_species_at_sites(self, formationenergy):
         try:
             strct = formationenergy.calculation.output
             sites = [s.label for s in strct.sites]
             return sites
         except:
             return []
-        
-    def get_cartesian_site_positions(self,formationenergy):
+
+    def get_cartesian_site_positions(self, formationenergy):
         try:
             strct = formationenergy.calculation.output
             sites = [s.atoms[0].cart_coord.round(6).tolist() for s in strct.sites]
             return sites
         except:
-            return [] 
+            return []
 
     def get__oqmd_direct_site_positions(self, formationenergy):
         try:
@@ -108,19 +113,23 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
             return []
 
     # Constant value or unsupported properties, but response required by optimade
-    def get_dimension_types(self,_):
-        return [1,1,1]
-    def get_nperiodic_dimensions(self,_):
+    def get_dimension_types(self, _):
+        return [1, 1, 1]
+
+    def get_nperiodic_dimensions(self, _):
         return 3
-    def get_elements_ratios(self,_):
-        return []
-    def get_structure_features(self,_):
-        return []
-    def get_chemical_formula_descriptive(self,_):
-        return ""
-    def get_species(self,_):
+
+    def get_elements_ratios(self, _):
         return []
 
+    def get_structure_features(self, _):
+        return []
+
+    def get_chemical_formula_descriptive(self, _):
+        return ""
+
+    def get_species(self, _):
+        return []
 
     # OQMD specific data
     def get__oqmd_icsd_id(self, formationenergy):
@@ -154,13 +163,14 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
         return formationenergy.calculation.band_gap
 
     def get__oqmd_delta_e(self, formationenergy):
-        return round(formationenergy.delta_e,4)
+        return round(formationenergy.delta_e, 4)
 
     def get__oqmd_stability(self, formationenergy):
         if formationenergy.stability is not None:
-            return max(round(formationenergy.stability,3), 0.0)
+            return max(round(formationenergy.stability, 3), 0.0)
         else:
             return
+
     def get__oqmd_volume(self, formationenergy):
         return formationenergy.calculation.output.volume
 
@@ -178,7 +188,6 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
             "lattice_vectors",
             "_oqmd_direct_site_positions",
             "species_at_sites",
-
             "dimension_types",
             "nperiodic_dimensions",
             "elements_ratios",
@@ -186,7 +195,6 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
             "chemical_formula_descriptive",
             "species",
             "cartesian_site_positions",
-
             "_oqmd_entry_id",
             "_oqmd_calculation_id",
             "_oqmd_icsd_id",
