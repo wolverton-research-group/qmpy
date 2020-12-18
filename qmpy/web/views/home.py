@@ -9,7 +9,9 @@ from .tools import get_globals
 def home_page(request):
     data = get_globals()
     data.update(
-        {"done": "{:,}".format(Formation.objects.filter(fit="standard").count()),}
+        {
+            "done": "{:,}".format(Formation.objects.filter(fit="standard").count()),
+        }
     )
     request.session.set_test_cookie()
     return render(request, "index.html", data)

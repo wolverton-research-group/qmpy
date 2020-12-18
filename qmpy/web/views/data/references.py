@@ -31,10 +31,10 @@ def journal_view(request, journal_id):
     plt.xlabel("Year")
     plt.ylabel("# of publications with new materials")
     img = BytesIO()
-    plt.savefig(img, dpi=75, bbox_inches="tight", format='png')
+    plt.savefig(img, dpi=75, bbox_inches="tight", format="png")
     img.seek(0)
     data_uri = base64.b64encode(img.read())
-    data_uri = 'data:image/png;base64,' + urllib.parse.quote(data_uri)
+    data_uri = "data:image/png;base64," + urllib.parse.quote(data_uri)
     plt.close()
 
     some_entries = Entry.objects.filter(reference__journal=journal)[:20]

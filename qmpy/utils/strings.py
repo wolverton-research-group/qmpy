@@ -282,11 +282,11 @@ def reduce_comp(values, method="auto"):
 
         b) If that fails (i.e. the GCD < 1e-10, and there is no accurate
         rational value ), try multiplying the coefficients by the first 20
-        prime numbers. For example: if your coefficients are 
+        prime numbers. For example: if your coefficients are
         [0.3333333, 0.6666667], this will fail to identify a rational GCD, but
         if you multiply by 3, you get [1, 2]. NOTE: This only works because we
         only keep compositions to 1 decimal place. As a result, 0.6666667
-        cannot be properly identified, but 0.6666667*3, can. 
+        cannot be properly identified, but 0.6666667*3, can.
 
         c) If None of these work, simply return the literal composition given,
         rounded to 3 decimal places.
@@ -358,9 +358,9 @@ def parse_formula_regex(formula):
     >>> parse_formula_regex('{Fe,Ni}2O3')
     [{'Fe':2, 'O':3}, {'Ni':2, 'O':3}]
     >>> parse_formula_regex('{3d}2O3')
-    [{'Co': 2.0, 'O': 3.0}, {'Cr': 2.0, 'O': 3.0}, {'Cu': 2.0, 'O':3.0}, 
+    [{'Co': 2.0, 'O': 3.0}, {'Cr': 2.0, 'O': 3.0}, {'Cu': 2.0, 'O':3.0},
     {'Fe': 2.0, 'O': 3.0}, {'Mn': 2.0, 'O': 3.0}, {'Ni': 2.0, 'O': 3.0},
-    {'Sc': 2.0, 'O': 3.0}, {'O': 3.0, 'Ti': 2.0}, {'O': 3.0, 'V': 2.0}, 
+    {'Sc': 2.0, 'O': 3.0}, {'O': 3.0, 'Ti': 2.0}, {'O': 3.0, 'V': 2.0},
     {'Zn':2.0, 'O': 3.0}]
 
     """
@@ -403,7 +403,7 @@ def read_fortran_array(string, expected_cols=None):
     Returns:
         A list of floats.
 
-    Raises: 
+    Raises:
         ValueError: If the string cannot be parsed into the desired number of
         columns of numbers, a ValueError is raised.
 

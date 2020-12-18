@@ -220,7 +220,7 @@ class FormationEnergyList(generics.ListAPIView):
             delta_e, band_gap
 
         Requirments:
-            1. Space padding is required between expression. 
+            1. Space padding is required between expression.
             2. For each epression, space is not allowed.
             3. Operators include: 'AND', 'OR'
             4. '(' and ')' can be used to change precedence
@@ -257,7 +257,7 @@ class FormationEnergyList(generics.ListAPIView):
         filters = filters.replace("&", " AND ")
         filters = filters.replace("|", " OR ")
         filters = filters.replace("~", " NOT ")
-        q = query_to_Q(filters)
+        q, meta_info = query_to_Q(filters)
         if not q:
             return []
         fes = fes.filter(q)

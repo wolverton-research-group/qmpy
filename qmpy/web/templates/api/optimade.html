@@ -1,0 +1,50 @@
+{% extends "base_site.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block content %}
+<script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Dataset",
+      "name": "OQMD RESTful API based data querying",
+      "url": "http://www.oqmd.org/api/",
+      "description":"OQMD supports RESTful API data transfer to ease the access of materials property data",
+      "keywords":"MATERIALS DATA, COMPUTATIONAL MATERIALS, DFT, DENSITY FUNCTIONAL THEORY, THERMODYNAMIC PROPERTIES, CRYSTAL STRUCTURAL DATA, MATERIAL CRYSTAL STRUCTURE, MATERIALS DISCOVERY, INORGANIC MATERIALS",
+      "license" : "https://creativecommons.org/licenses/by/4.0/"
+     
+    }
+</script>
+
+<h1> OQMD and OPTiMaDe </h1>
+<p>
+OQMD supports RESTful queries made over HTTP requests with a format detailed by 
+<a href="http://www.optimade.org/">OPTiMaDe</a> specification.
+More details are vailable on OPTiMade website and on OQMD's documentation page: <a href="{% static "docs/restful.html" %}"> RESTful Documentation page</a>.
+
+The data is availed without requiring any user credentials. So usage of a specific 
+Python query package is optional, but nevertheless a standalone <a href="https://pypi.org/project/qmpy-rester/">Querying System</a> is provided for convenience of the frequent users.
+</p>
+
+<h2> OPTiMaDe Endpoints  </h2>
+<p>
+The following links are the endpoints specifed by OPTiMaDe v1.0.0.  
+<ul>
+        <li><a href="/optimade/">Base Endpoint (This page)</a></li>
+	<li><a href="/optimade/info">General-Info Endpoint</a></li>
+        <li><a href="/optimade/info/structures">Structures-Info Endpoint</a></li>
+        <li><a href="/optimade/links">Links Endpoint</a></li>
+        <li><a href="/optimade/versions">Versions Endpoint</a></li>
+	<li><a href="/optimade/structures">Structure Data Endpoint</a></li>
+</ul>
+</p>
+<h2> Useful Info  </h2>
+<ul>
+    <li> <a href="{% static "docs/restful.html" %}">OQMD RESTful API Documentation</a></li>
+    <li> <a href="http://www.optimade.org/">OPTiMaDe Specification Homepage</a></li>
+    <li> <a href="https://github.com/Materials-Consortia/OPTIMADE/tree/v1.0.0">OPTiMaDe Github Repo</a></li>
+
+</ul>
+
+
+{% endblock %}

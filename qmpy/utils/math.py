@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 def _gcd(a, b):
     """
     Returns greatest common denominator of two numbers.
-    
+
     Example:
     >>> _gcd(4, 6)
     2
@@ -110,9 +110,9 @@ def angle(x, y, radians=False):
 
 def basis_to_latparams(basis, radians=False):
     """Returns the lattice parameters [a, b, c, alpha, beta, gamma].
-    
+
     Example:
-        
+
     >>> basis_to_latparams([[3,0,0],[0,3,0],[0,0,5]])
     [3, 3, 5, 90, 90, 90]
     """
@@ -224,7 +224,7 @@ def coord_to_point(coord):
 def coord_to_bin(coord):
     """Convert a binary composition to an x-coordinate value:
     returns ( A )
-    
+
     """
     return coord[0]
 
@@ -232,7 +232,7 @@ def coord_to_bin(coord):
 def coord_to_gtri(coord):
     """Convert a ternary composition to an x,y-coordinate pair:
     ( A+B/2, B*3^(1/2)/2 )
-    
+
     """
     return (coord[0] + coord[1] / 2.0, coord[1] * np.sqrt(3) / 2)
 
@@ -240,7 +240,7 @@ def coord_to_gtri(coord):
 def coord_to_gtet(coord):
     """Convert a quaternary composition to an x,y,z triplet:
     ( A/2+B+C/2, A*3^(1/2)/2 + C*3^(1/2)/6, C*(2/3)^(1/2) )
-    
+
     """
     return (
         coord[0] / 2 + coord[1] + coord[2] / 2,
