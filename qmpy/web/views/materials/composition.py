@@ -65,12 +65,13 @@ def composition_view(request, search=None):
             composition=comp, fit="standard"
         ).order_by("delta_e")
         
+        
         data['running'] = Entry.objects.filter(
             composition=comp,formationenergy=None
         ).filter(id=F("duplicate_of__id"))
         
         data["space"] = "-".join(list(comp.comp.keys()))
-
+        
         if comp.ntypes == 1:
             energy, gs = ps.gclp(comp.name)
             data["gs"] = Phase.from_phases(gs)
@@ -147,7 +148,6 @@ def composition_view(request, search=None):
         return render_to_response(
             "materials/phasespace.html", data, RequestContext(request)
         )
-
 
 def generic_composition_view(request, search=None):
     data = {"search": search}
