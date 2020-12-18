@@ -1,5 +1,4 @@
 from rest_framework import generics
-from rest_framework.exceptions import ValidationError, ParseError
 import django_filters.rest_framework
 from qmpy.web.serializers.optimade import OptimadeStructureSerializer
 from qmpy.materials.formation_energy import FormationEnergy
@@ -140,10 +139,8 @@ class OptimadeStructureList(generics.ListAPIView):
         filters = filters.replace("&", " AND ")
         filters = filters.replace("|", " OR ")
         filters = filters.replace("~", " NOT ")
-        try:
-            q, meta_info = query_to_Q(filters)
-        except:
-            raise ParseError
+
+        q, meta_info = query_to_Q(filters)
         if not q:
             return ([],meta_info)
         fes = fes.filter(q)

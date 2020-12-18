@@ -87,13 +87,12 @@ def query_to_Q(query_string):
                         '( element=Fe & element=O)'
         Output:
             :Q : django Q model
+            :meta-data : Extra information from parsing (warnings, etc.)
     """
     if "element_set" in query_string:
         query_string = element_set_conversion(query_string)
     query_string = optimade_filter_conversion(query_string)
     dlconverter = Lark2Django()
-    try:
-        parsed_tree = dlconverter.parse_raw_q(query_string)
-    except:
-        return
+
+    parsed_tree = dlconverter.parse_raw_q(query_string)
     return dlconverter.evaluate(parsed_tree)
