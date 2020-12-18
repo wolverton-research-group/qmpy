@@ -12,7 +12,7 @@ from lark.exceptions import VisitError
 from copy import deepcopy
 
 
-class ParserError(Exception):
+class LarkParserError(Exception):
     pass
 
 
@@ -28,7 +28,7 @@ def get_grammar_data():
     return parser_grammer
 
 
-class LarkParser:
+class LarkParser(object):
     """
     Parser to convert a given filter string to a Tree-Token system according to
     the grammar rules provided
@@ -51,7 +51,7 @@ class LarkParser:
             self.lark = parser_grammer[version]
             self.version = version
         else:
-            raise ParserError("Unknown parser grammar version : " + str(version))
+            raise LarkParserError("Unknown parser grammar version : " + str(version))
         self.tree = None
         self.filter = None
 
@@ -208,7 +208,7 @@ class Lark2Django(Transformer):
         elif isinstance(qob, tuple):
             return (" " * indent * (ic - 1)) + ("=".join([str(item) for item in qob]))
         else:
-            ParserError(
+            LarkParserError(
                 "Unsupported query or query children format found: {}".format(type(qob))
             )
 
@@ -229,7 +229,7 @@ class Lark2Django(Transformer):
         elif isinstance(qob, tuple):
             return " " + ("=".join([str(item) for item in qob])) + " "
         else:
-            ParserError(
+            LarkParserError(
                 "Unsupported query or query children format found: {}".format(type(qob))
             )
 
@@ -244,7 +244,7 @@ class Lark2Django(Transformer):
             try:
                 assert indent > 0 and isinstance(indent, int)
             except:
-                raise ParserError(
+                raise LarkParserError(
                     "Indent value should be an integer >0 for pretty print"
                 )
             return self.pretty_Q(qob, indent, ic=0)

@@ -105,7 +105,7 @@ def online_view(request):
                 os.mkdir(folder)
             with open(os.path.join(folder, "POSCAR"), "w") as f:
                 for c in fl.chunks():
-                    if type(c) == bytes:
+                    if isinstance(c,bytes):
                         c = c.decode()
                     f.write(c)
             _data = {"uploaded_url": os.path.join(folder, "POSCAR")}
