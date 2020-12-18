@@ -22,7 +22,7 @@ def get_grammar_data():
         with open(name) as f:
             ver = tuple(
                 int(n)
-                for n in re.findall(r"\d+", str(os.path.basename(name).split(".g")[0]))
+                for n in re.findall(r"\d+", os.path.splitext(os.path.basename(name))[0])
             )
             parser_grammer[ver] = Lark(f.read())
     return parser_grammer
