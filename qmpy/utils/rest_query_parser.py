@@ -22,10 +22,8 @@ def element_set_conversion(filter_expr):
 
     for els in re.findall("element_set=[\S]*", filter_expr):
         els_out = els.replace("element_set=", "")
-
         for el in re.findall("[A-Z][a-z]*", els):
-            els_out = els_out.replace(el, " element=" + el + " ")
-
+            els_out = els_out.replace(el, ' element="' + el + '" ')
         els_out = els_out.replace(",", " AND ")
         els_out = els_out.replace("-", " OR ")
 
@@ -36,7 +34,8 @@ def element_set_conversion(filter_expr):
 
 def optimade_filter_conversion(filter_expr):
     """
-    Convert optimade filters to oqmdap formationenergy filters
+    Combining optimade and oqmd-formation-energy filters together
+    to pass onto the default query parser based on optimade spec grammar
     Input:
         :str : original filter expression
     Output:
@@ -45,10 +44,17 @@ def optimade_filter_conversion(filter_expr):
     filter_expr_out = filter_expr
 
     # General conversion
-    filter_expr_out = filter_expr_out.replace("_oqmd_", "")
+    # filter_expr_out = filter_expr_out.replace("_oqmd_", "")
     filter_expr_out = filter_expr_out.replace("&", "AND")
     filter_expr_out = filter_expr_out.replace("|", "OR")
     # Convert 'elements=' into mutiple 'element=' filters
+
+    for prop in ["prototype", "generic"]:
+        for els in re.findall(prop + "=[\S]*", filter_expr):
+            els_out = els.replace(prop + "=", "")
+            els_out = prop + '="' + els_out + '"'
+            filter_expr_out = filter_expr_out.replace(els, els_out)
+
     for els in re.findall("elements=[^-0-9\/]+", filter_expr):
         els_out = els.replace("elements=", "")
 
@@ -64,28 +70,29 @@ def optimade_filter_conversion(filter_expr):
 def query_to_Q(query_string):
 
     """
-        Function to convert expression into Q model
-        Input: 
-            :str expr: format should be 'attribute=value' e.g. 'element=Fe'
-                list of valid attributes:
-                    element, generic, prototype, spacegroup,
-                    volume, natoms, ntypes, stability,
-                    delta_e, band_gap, chemical_formula
-                Space padding is required between expression. For each epression,
-                space is not allowed.
-                    Valid examples:
-                        'element=Mn & band_gap>1'
-                        '( element=O | element=S ) & natoms<3'
-                    Invalid examples:
-                        'element = Fe'
-                        '( element=Fe & element=O)'
-        Output:
-            :Q : django Q model
+    Function to convert expression into Q model
+    Input:
+        :str expr: format should be 'attribute=value' e.g. 'element=Fe'
+            list of valid attributes:
+                element, generic, prototype, spacegroup,
+                volume, natoms, ntypes, stability,
+                delta_e, band_gap, chemical_formula
+            Space padding is required between expression. For each epression,
+            space is not allowed.
+                Valid examples:
+                    'element=Mn & band_gap>1'
+                    '( element=O | element=S ) & natoms<3'
+                Invalid examples:
+                    'element = Fe'
+                    '( element=Fe & element=O)'
+    Output:
+        :Q : django Q model
+        :meta-data : Extra information from parsing (warnings, etc.)
     """
-
     if "element_set" in query_string:
         query_string = element_set_conversion(query_string)
     query_string = optimade_filter_conversion(query_string)
     dlconverter = Lark2Django()
+
     parsed_tree = dlconverter.parse_raw_q(query_string)
     return dlconverter.evaluate(parsed_tree)

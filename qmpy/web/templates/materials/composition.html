@@ -46,7 +46,8 @@ OQMD | Search Phases
             background: { opacity: 0},
             formatter: labelFormatter}
           }
-        }
+        },
+      height: '100%',  
       });
     });
 </script>
@@ -108,9 +109,41 @@ function openWindow() {
     {
       "@context": "https://schema.org",
       "@type": "Dataset",
-      "name": "OQMD Material Phase Data",
+      "name": "Computational stability data of {{ composition.html |safe }}  from Density Functional Theory calculations",
+      "isPartOf": {
+        "@type": "Dataset",
+        "name": "The Open Quantum Materials Database",
+        "description":"Open Quantum Materials Database (OQMD) is a database of DFT calculated thermodynamic and structural properties materials, created in Chris Wolverton's group at Northwestern University",
+        "alternateName":"OQMD",
+        "url": "http://oqmd.org/",
+        "license" : "https://creativecommons.org/licenses/by/4.0/",
+        "creator":{
+          "@type":"Organization",
+          "url": "http://oqmd.org/",
+          "name":"The Open Quantum Materials Database",
+          "alternateName":"OQMD",
+          "contactPoint":{
+             "@type":"ContactPoint",
+             "contactType": "general queries",
+             "email":"oqmd.questions@gmail.com"
+          }
+        },
+        "keywords": "MATERIALS DATA, COMPUTATIONAL MATERIALS, DFT, DENSITY FUNCTIONAL THEORY, THERMODYNAMIC PROPERTIES, INORGANIC MATERIALS, CONVEX HULL, MATERIAL STABILITY, FORMATION ENERGY, PHASE DIAGRAM"
+      },
+      "creator":{
+         "@type":"Organization",
+         "url": "http://oqmd.org/",
+         "name":"The Open Quantum Materials Database",
+         "alternateName":"OQMD",
+         "contactPoint":{
+            "@type":"ContactPoint",
+            "contactType": "general queries",
+            "email":"oqmd.questions@gmail.com"
+         }
+      },
+      "measurementTechnique": "Computational, Density Functional Theory",
       "url": "http://www.oqmd.org/materials/composition/{{ composition.html |safe }}",
-      "description":"Computational stability data of {{ composition.html |safe }}  from Density Functional Theory calculations",
+      "description":"This composition appears in the {{ space }} region of phase space. It's relative stability is shown in the {{ space }} phase diagram (left). The relative stability of all other phases at this composition (and the combination of other stable phases, if no compound at this composition is stable) is shown in the relative stability plot (right)",
       "keywords": "{{ composition.html |safe }}, CONVEX HULL, STABILITY",
       "license" : "https://creativecommons.org/licenses/by/4.0/",
       "variableMeasured": [
@@ -122,13 +155,16 @@ function openWindow() {
                              {
                                "@type": "PropertyValue",
                                "name": "Stability",
-                               "value": "0 ev/atom",
+                               "value": "0",
+                               "unitText": "ev/atom",
                                "measurementTechnique": "Computational, DFT"
                              },
                              {
                                "@type": "PropertyValue",
                                "name": "Decomposition Energy",
-                               "value": "{{ decomp_en | floatformat:-3}} eV/atom"
+                               "value": "{{ decomp_en | floatformat:-3}}",
+                               "unitText": "eV/atom",
+                               "measurementTechnique": "Computational, DFT"
                              }
                            ]
      
@@ -152,9 +188,41 @@ function openWindow() {
     {
       "@context": "https://schema.org",
       "@type": "Dataset",
-      "name": "OQMD Material Phase Data",
+      "name": "Computational stability data of {{ composition.html |safe }}  from Density Functional Theory calculations",
+      "isPartOf": {
+        "@type": "Dataset",
+        "name": "The Open Quantum Materials Database",
+        "description":"Open Quantum Materials Database (OQMD) is a database of DFT calculated thermodynamic and structural properties materials, created in Chris Wolverton's group at Northwestern University",
+        "alternateName":"OQMD",
+        "url": "http://oqmd.org/",
+        "license" : "https://creativecommons.org/licenses/by/4.0/",
+        "creator":{
+          "@type":"Organization",
+          "url": "http://oqmd.org/",
+          "name":"The Open Quantum Materials Database",
+          "alternateName":"OQMD",
+          "contactPoint":{
+             "@type":"ContactPoint",
+             "contactType": "general queries",
+             "email":"oqmd.questions@gmail.com"
+          }
+        },
+        "keywords": "MATERIALS DATA, COMPUTATIONAL MATERIALS, DFT, DENSITY FUNCTIONAL THEORY, THERMODYNAMIC PROPERTIES, INORGANIC MATERIALS, CONVEX HULL, MATERIAL STABILITY, FORMATION ENERGY, PHASE DIAGRAM"
+      },
+      "creator":{
+         "@type":"Organization",
+         "url": "http://oqmd.org/",
+         "name":"The Open Quantum Materials Database",
+         "alternateName":"OQMD",
+         "contactPoint":{
+            "@type":"ContactPoint",
+            "contactType": "general queries",
+            "email":"oqmd.questions@gmail.com"
+         }
+      },
+      "measurementTechnique": "Computational, Density Functional Theory",
       "url": "http://www.oqmd.org/materials/composition/{{ composition.html |safe }}",
-      "description":"Computational stability data of {{ composition.html |safe }}  from Density Functional Theory calculations",
+      "description":"This composition appears in the {{ space }} region of phase space. It's relative stability is shown in the {{ space }} phase diagram (left). The relative stability of all other phases at this composition (and the combination of other stable phases, if no compound at this composition is stable) is shown in the relative stability plot (right)",
       "keywords": " {{ composition.html |safe }}, CONVEX HULL, STABILITY",
       "license" : "https://creativecommons.org/licenses/by/4.0/",
       "variableMeasured": [
@@ -166,7 +234,8 @@ function openWindow() {
                              {
                                "@type": "PropertyValue",
                                "name": "Stability",
-                               "value": "{{ hull_dis | floatformat:-3}} eV/atom",
+                               "value": "{{ hull_dis | floatformat:-3}}",
+                               "unitText": "eV/atom",
                                "measurementTechnique": "Computational, DFT"
                              }
                            ]
@@ -299,18 +368,6 @@ function openWindow() {
 {% endblock %}
 
 {% block sidebar %}
-<script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Dataset",
-      "name": "OQMD Materials Composition Search Engine",
-      "url": "http://www.oqmd.org/materials/composition",
-      "description":"Search and view OQMD materials composition data along with its corresponding convex hull, and computational stability",
-      "keywords": "MATERIALS DATA, COMPUTATIONAL MATERIALS, DFT, DENSITY FUNCTIONAL THEORY, THERMODYNAMIC PROPERTIES, INORGANIC MATERIALS, CONVEX HULL, MATERIAL STABILITY, FORMATION ENERGY, PHASE DIAGRAM",
-      "license" : "https://creativecommons.org/licenses/by/4.0/"
-     
-    }
-</script>
 
 <div id="sidebar" class="box">
   <h2 class="subhead"> Search for a composition or region </h2>

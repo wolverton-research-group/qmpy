@@ -1,0 +1,353 @@
+{
+  "chemical_formula_reduced": {
+    "name": "chemical_formula_reduced",
+    "db_value": "composition__formula__in",
+    "is_queryable": true,
+    "length_prop": null,
+    "is_chem_form": true,
+    "is_set_operable": false,
+    "is_logic_operable": false
+  },
+  "chemical_formula": {
+    "name": "chemical_formula",
+    "db_value": "composition__formula__in",
+    "is_queryable": true,
+    "length_prop": null,
+    "is_chem_form": true,
+    "is_set_operable": false,
+    "is_logic_operable": false
+  },
+  "chemical_formula_anonymous": {
+    "name": "chemical_formula_anonymous",
+    "db_value": "composition__generic",
+    "is_queryable": true,
+    "length_prop": null,
+    "is_chem_form": false,
+    "is_set_operable": false,
+    "is_logic_operable": false
+  },
+  "formula_prototype": {
+    "name": "formula_prototype",
+    "db_value": "composition__generic",
+    "is_queryable": true,
+    "length_prop": null,
+    "is_chem_form": false,
+    "is_set_operable": false,
+    "is_logic_operable": false
+  },
+  "generic": {
+    "name": "generic",
+    "db_value": "composition__generic",
+    "is_queryable": true,
+    "length_prop": null,
+    "is_chem_form": false,
+    "is_set_operable": false,
+    "is_logic_operable": false
+  },
+  "nelements": {
+    "name": "nelements",
+    "db_value": "entry__composition__ntypes",
+    "is_queryable": true,
+    "length_prop": null,
+    "is_chem_form": false,
+    "is_set_operable": false,
+    "is_logic_operable": true
+  },
+  "ntypes": {
+    "name": "ntypes",
+    "db_value": "entry__composition__ntypes",
+    "is_queryable": true,
+    "length_prop": null,
+    "is_chem_form": false,
+    "is_set_operable": false,
+    "is_logic_operable": true
+  },
+  "elements": {
+    "name": "elements",
+    "db_value": "composition__element_list__contains",
+    "is_queryable": true,
+    "length_prop": "nelements",
+    "is_chem_form": false,
+    "is_set_operable": true,
+    "is_logic_operable": false
+  },
+  "nsites": {
+    "name": "nsites",
+    "db_value": "entry__natoms",
+    "is_queryable": true,
+    "length_prop": null,
+    "is_chem_form": false,
+    "is_set_operable": false,
+    "is_logic_operable": true
+  },
+  "natoms": {
+    "name": "natoms",
+    "db_value": "entry__natoms",
+    "is_queryable": true,
+    "length_prop": null,
+    "is_chem_form": false,
+    "is_set_operable": false,
+    "is_logic_operable": true
+  },
+  "element": {
+    "name": "element",
+    "db_value": "composition__element_list__contains",
+    "is_queryable": true,
+    "length_prop": null,
+    "is_chem_form": false,
+    "is_set_operable": false,
+    "is_logic_operable": false
+  },
+  "_oqmd_volume": {
+    "name": "_oqmd_volume",
+    "db_value": "calculation__output__volume",
+    "is_queryable": true,
+    "length_prop": null,
+    "is_chem_form": false,
+    "is_set_operable": false,
+    "is_logic_operable": true
+  },
+  "volume": {
+    "name": "volume",
+    "db_value": "calculation__output__volume",
+    "is_queryable": true,
+    "length_prop": null,
+    "is_chem_form": false,
+    "is_set_operable": false,
+    "is_logic_operable": true
+  },
+  "_oqmd_band_gap": {
+    "name": "_oqmd_band_gap",
+    "db_value": "calculation__band_gap",
+    "is_queryable": true,
+    "length_prop": null,
+    "is_chem_form": false,
+    "is_set_operable": false,
+    "is_logic_operable": true
+  },
+  "band_gap": {
+    "name": "band_gap",
+    "db_value": "calculation__band_gap",
+    "is_queryable": true,
+    "length_prop": null,
+    "is_chem_form": false,
+    "is_set_operable": false,
+    "is_logic_operable": true
+  },
+  "_oqmd_delta_e": {
+    "name": "_oqmd_delta_e",
+    "db_value": "delta_e",
+    "is_queryable": true,
+    "length_prop": null,
+    "is_chem_form": false,
+    "is_set_operable": false,
+    "is_logic_operable": true
+  },
+  "delta_e": {
+    "name": "delta_e",
+    "db_value": "delta_e",
+    "is_queryable": true,
+    "length_prop": null,
+    "is_chem_form": false,
+    "is_set_operable": false,
+    "is_logic_operable": true
+  },
+  "_oqmd_stability": {
+    "name": "_oqmd_stability",
+    "db_value": "stability",
+    "is_queryable": true,
+    "length_prop": null,
+    "is_chem_form": false,
+    "is_set_operable": false,
+    "is_logic_operable": true
+  },
+  "stability": {
+    "name": "stability",
+    "db_value": "stability",
+    "is_queryable": true,
+    "length_prop": null,
+    "is_chem_form": false,
+    "is_set_operable": false,
+    "is_logic_operable": true
+  },
+  "_oqmd_prototype": {
+    "name": "_oqmd_prototype",
+    "db_value": "entry__prototype",
+    "is_queryable": true,
+    "length_prop": null,
+    "is_chem_form": false,
+    "is_set_operable": false,
+    "is_logic_operable": false
+  },
+  "prototype": {
+    "name": "prototype",
+    "db_value": "entry__prototype",
+    "is_queryable": true,
+    "length_prop": null,
+    "is_chem_form": false,
+    "is_set_operable": false,
+    "is_logic_operable": false
+  },
+  "_oqmd_spacegroup": {
+    "name": "_oqmd_spacegroup",
+    "db_value": "calculation__output__spacegroup__hm",
+    "is_queryable": true,
+    "length_prop": null,
+    "is_chem_form": false,
+    "is_set_operable": false,
+    "is_logic_operable": false
+  },
+  "spacegroup": {
+    "name": "spacegroup",
+    "db_value": "calculation__output__spacegroup__hm",
+    "is_queryable": true,
+    "length_prop": null,
+    "is_chem_form": false,
+    "is_set_operable": false,
+    "is_logic_operable": false
+  },
+  "_oqmd_entry_id": {
+    "name": "_oqmd_entry_id",
+    "db_value": "entry__id",
+    "length_prop": null,
+    "is_queryable": false,
+    "is_chem_form": false,
+    "is_set_operable": false,
+    "is_logic_operable": false
+  },
+  "_oqmd_calculation_id": {
+    "name": "_oqmd_calculation_id",
+    "db_value": null,
+    "length_prop": null,
+    "is_queryable": false,
+    "is_chem_form": false,
+    "is_set_operable": false,
+    "is_logic_operable": false
+  },
+  "_oqmd_icsd_id": {
+    "name": "_oqmd_icsd_id",
+    "db_value": null,
+    "length_prop": null,
+    "is_queryable": false,
+    "is_chem_form": false,
+    "is_set_operable": false,
+    "is_logic_operable": false
+  },
+  "id": {
+    "name": "id",
+    "db_value": "id",
+    "length_prop": null,
+    "is_queryable": true,
+    "is_chem_form": false,
+    "is_set_operable": false,
+    "is_logic_operable": false
+  },
+  "type": {
+    "name": "type",
+    "db_value": null,
+    "length_prop": null,
+    "is_queryable": false,
+    "is_chem_form": false,
+    "is_set_operable": false,
+    "is_logic_operable": false
+  },
+  "last_modified": {
+    "name": "last_modified",
+    "db_value": null,
+    "length_prop": null,
+    "is_queryable": false,
+    "is_chem_form": false,
+    "is_set_operable": false,
+    "is_logic_operable": false
+  },
+  "lattice_vectors": {
+    "name": "lattice_vectors",
+    "db_value": null,
+    "length_prop": null,
+    "is_queryable": false,
+    "is_chem_form": false,
+    "is_set_operable": false,
+    "is_logic_operable": false
+  },
+  "_oqmd_direct_site_positions": {
+    "name": "_oqmd_direct_site_positions",
+    "db_value": null,
+    "length_prop": null,
+    "is_queryable": false,
+    "is_chem_form": false,
+    "is_set_operable": false,
+    "is_logic_operable": false
+  },
+  "species_at_sites": {
+    "name": "species_at_sites",
+    "db_value": null,
+    "length_prop": null,
+    "is_queryable": false,
+    "is_chem_form": false,
+    "is_set_operable": false,
+    "is_logic_operable": false
+  },
+  "dimension_types": {
+    "name": "dimension_types",
+    "db_value": null,
+    "length_prop": null,
+    "is_queryable": false,
+    "is_chem_form": false,
+    "is_set_operable": false,
+    "is_logic_operable": false
+  },
+  "nperiodic_dimensions": {
+    "name": "nperiodic_dimensions",
+    "db_value": null,
+    "length_prop": null,
+    "is_queryable": false,
+    "is_chem_form": false,
+    "is_set_operable": false,
+    "is_logic_operable": false
+  },
+  "elements_ratios": {
+    "name": "elements_ratios",
+    "db_value": null,
+    "length_prop": null,
+    "is_queryable": false,
+    "is_chem_form": false,
+    "is_set_operable": false,
+    "is_logic_operable": false
+  },
+  "structure_features": {
+    "name": "structure_features",
+    "db_value": null,
+    "length_prop": null,
+    "is_queryable": false,
+    "is_chem_form": false,
+    "is_set_operable": false,
+    "is_logic_operable": false
+  },
+  "chemical_formula_descriptive": {
+    "name": "chemical_formula_descriptive",
+    "db_value": null,
+    "length_prop": null,
+    "is_queryable": false,
+    "is_chem_form": false,
+    "is_set_operable": false,
+    "is_logic_operable": false
+  },
+  "species": {
+    "name": "species",
+    "db_value": null,
+    "length_prop": null,
+    "is_queryable": false,
+    "is_chem_form": false,
+    "is_set_operable": false,
+    "is_logic_operable": false
+  },
+  "cartesian_site_positions": {
+    "name": "cartesian_site_positions",
+    "db_value": null,
+    "length_prop": null,
+    "is_queryable": false,
+    "is_chem_form": false,
+    "is_set_operable": false,
+    "is_logic_operable": false
+  }
+}
