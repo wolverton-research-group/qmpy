@@ -50,6 +50,10 @@
 
 
 {% block content %}
+{% if error %}
+ <h1>Error: </h1>
+   {{error}}
+ {% else %}
 <h1> Summary </h1>
 <ul>
   <li># of hypothetical decorations of this prototype that have been calculated: </li>
@@ -85,5 +89,6 @@
 		{% endfor %}
 	</tbody>
 </table>
+{% endif %}
 
 {% endblock %}

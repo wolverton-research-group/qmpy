@@ -73,7 +73,11 @@ def export_structure(request, structure_id, convention="primitive", format="posc
 
 
 def prototype_view(request, name):
-    proto = Prototype.objects.get(pk=name)
+    try:
+        proto = Prototype.objects.get(pk=name)
+    except:
+        data={"error":"A prototype with this composition does not exist"}
+        return render(request, "materials/prototype.html", context=data)
     n_stable = 0
     for entry in proto.entry_set.all():
         if entry.stable:
