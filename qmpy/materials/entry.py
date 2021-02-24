@@ -514,7 +514,7 @@ class Entry(models.Model):
     def mass(self):
         """Return the mass of the entry, normalized to per atom."""
         return sum(
-            Element.objects.get(symbol=elt).mass * amt for elt, amt in self.unit_comp
+            Element.objects.get(symbol=elt).mass * self.unit_comp[elt] for elt in self.unit_comp
         )
 
     @property
