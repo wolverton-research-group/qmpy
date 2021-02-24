@@ -87,6 +87,12 @@ def composition_view(request, search=None):
         data["running"] = zip(run_entry, run_pro, create_time)
         data["space"] = "-".join(list(comp.comp.keys()))
 
+        if comp.entry_set.filter(path__contains="icsd"):
+            _comp_id = "".join(comp.pk.split())
+            data["handle"] = "http://hdl.handle.net/20.500.12856/oqmd.v1.cmp.{}".format(_comp_id)
+        else:
+            data["handle"] = ""
+
         if comp.ntypes == 1:
             energy, gs = ps.gclp(comp.name)
             data["gs"] = Phase.from_phases(gs)
