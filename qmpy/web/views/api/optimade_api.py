@@ -29,7 +29,14 @@ class OptimadeStructureDetail(generics.RetrieveAPIView):
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
-        data = serializer.data
+        _data = serializer.data
+        data = []
+        for _item in _data:
+            item = OrderedDict([("id",_item["id"]),("type",_item["type"])])
+            del _item["id"]
+            del _item["type"]
+            item["attributes"] = _item
+            data.append(item)
         full_url = request.build_absolute_uri()
         representation = full_url.replace(BASE_URL, "")
 
@@ -97,7 +104,14 @@ class OptimadePagination(LimitOffsetPagination):
     limit_query_param = "page_limit"
 
     def get_paginated_response(self, page_data):
-        data = page_data["data"]
+        _data = page_data["data"]
+        data = []
+        for _item in _data:
+            item = OrderedDict([("id",_item["id"]),("type",_item["type"])])
+            del _item["id"]
+            del _item["type"]
+            item["attributes"] = _item
+            data.append(item)
         request = page_data["request"]
 
         full_url = request.build_absolute_uri()
