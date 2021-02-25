@@ -89,7 +89,9 @@ def composition_view(request, search=None):
 
         if comp.entry_set.filter(path__contains="icsd"):
             _comp_id = "".join(comp.pk.split())
-            data["handle"] = "http://hdl.handle.net/20.500.12856/oqmd.v1.cmp.{}".format(_comp_id)
+            data["handle"] = "http://hdl.handle.net/20.500.12856/oqmd.v1.cmp.{}".format(
+                _comp_id
+            )
         else:
             data["handle"] = ""
 

@@ -1,5 +1,6 @@
 from rest_framework.negotiation import DefaultContentNegotiation
 
+
 class IgnoreClientContentNegotiation(DefaultContentNegotiation):
     def select_renderer(self, request, renderers, format_suffix):
         """
@@ -11,5 +12,6 @@ class IgnoreClientContentNegotiation(DefaultContentNegotiation):
         if format is None:
             return (renderers[0], renderers[0].media_type)
         else:
-            return DefaultContentNegotiation.select_renderer(self, request, renderers, format_suffix)
-
+            return DefaultContentNegotiation.select_renderer(
+                self, request, renderers, format_suffix
+            )

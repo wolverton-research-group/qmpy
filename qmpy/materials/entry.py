@@ -150,8 +150,10 @@ class Entry(models.Model):
 
         """
         source_file = os.path.abspath(source)
-        if 'libraries_v2_0/libraries_v1_overflow' in source_file:
-            source_file = source_file.replace("libraries_v2_0/libraries_v1_overflow", "libraries")
+        if "libraries_v2_0/libraries_v1_overflow" in source_file:
+            source_file = source_file.replace(
+                "libraries_v2_0/libraries_v1_overflow", "libraries"
+            )
         path = os.path.dirname(source_file)
 
         # Step 1
@@ -514,7 +516,8 @@ class Entry(models.Model):
     def mass(self):
         """Return the mass of the entry, normalized to per atom."""
         return sum(
-            Element.objects.get(symbol=elt).mass * self.unit_comp[elt] for elt in self.unit_comp
+            Element.objects.get(symbol=elt).mass * self.unit_comp[elt]
+            for elt in self.unit_comp
         )
 
     @property
@@ -522,7 +525,7 @@ class Entry(models.Model):
         """
         If the entry has gone through relaxation, returns the relaxed
         volume. Otherwise, returns the input volume.
-        
+
         """
         if not self.relaxed is None:
             return self.relaxed.volume / self.natoms
@@ -553,7 +556,7 @@ class Entry(models.Model):
         Looks for a computing script matching the first argument, and attempts
         to run it with itself as the first argument. Sends args and kwargs
         to the script. Should return a Calculation object, or list of
-        Calculation objects. 
+        Calculation objects.
 
         Examples::
 

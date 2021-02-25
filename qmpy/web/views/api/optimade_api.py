@@ -26,13 +26,14 @@ BASE_URL = qmpy_rester.REST_OPTIMADE
 class OptimadeStructureDetail(generics.RetrieveAPIView):
     queryset = FormationEnergy.objects.filter(fit="standard")
     serializer_class = OptimadeStructureSerializer
+
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         _data = serializer.data
         data = []
         for _item in _data:
-            item = OrderedDict([("id",_item["id"]),("type",_item["type"])])
+            item = OrderedDict([("id", _item["id"]), ("type", _item["type"])])
             del _item["id"]
             del _item["type"]
             item["attributes"] = _item
@@ -55,7 +56,7 @@ class OptimadeStructureDetail(generics.RetrieveAPIView):
             ("time_stamp", time_stamp),
             ("data_returned", 1),
             ("data_available", Formation.objects.filter(fit="standard").count()),
-            ("more_data_available",False),
+            ("more_data_available", False),
             (
                 "provider",
                 OrderedDict(
@@ -97,7 +98,6 @@ class OptimadeStructureDetail(generics.RetrieveAPIView):
         )
 
 
-
 class OptimadePagination(LimitOffsetPagination):
     default_limit = 50
     offset_query_param = "page_offset"
@@ -107,7 +107,7 @@ class OptimadePagination(LimitOffsetPagination):
         _data = page_data["data"]
         data = []
         for _item in _data:
-            item = OrderedDict([("id",_item["id"]),("type",_item["type"])])
+            item = OrderedDict([("id", _item["id"]), ("type", _item["type"])])
             del _item["id"]
             del _item["type"]
             item["attributes"] = _item
@@ -199,7 +199,7 @@ class OptimadePagination(LimitOffsetPagination):
 class OptimadeStructureList(generics.ListAPIView):
     serializer_class = OptimadeStructureSerializer
     pagination_class = OptimadePagination
-    renderer_classes = [JSONRenderer,XMLRenderer,YAMLRenderer,BrowsableAPIRenderer]
+    renderer_classes = [JSONRenderer, XMLRenderer, YAMLRenderer, BrowsableAPIRenderer]
 
     def get_queryset(self):
         fes = FormationEnergy.objects.filter(fit="standard")
@@ -247,19 +247,19 @@ class OptimadeStructureList(generics.ListAPIView):
 
 def OptimadeInfoData(request):
     data = oqop.get_optimade_data("info")
-    return HttpResponse(data, content_type='application/json')
+    return HttpResponse(data, content_type="application/json")
 
 
 def OptimadeVersionsData(request):
     data = oqop.get_optimade_data("versions")
-    return HttpResponse(data, content_type='application/json')
+    return HttpResponse(data, content_type="application/json")
 
 
 def OptimadeLinksData(request):
     data = oqop.get_optimade_data("links")
-    return HttpResponse(data, content_type='application/json')
+    return HttpResponse(data, content_type="application/json")
 
 
 def OptimadeStructuresInfoData(request):
     data = oqop.get_optimade_data("info.structures")
-    return HttpResponse(data, content_type='application/json')
+    return HttpResponse(data, content_type="application/json")

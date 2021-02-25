@@ -24,24 +24,36 @@ def entry_view(request, entry_id):
     else:
         data["entry_structure"] = entry.input
 
-    fe_std = entry.formationenergy_set.filter(fit='standard')
-    data['structured_data'] = {}
+    fe_std = entry.formationenergy_set.filter(fit="standard")
+    data["structured_data"] = {}
     if fe_std:
-        data['structured_data']['available'] = True
-        data['structured_data']["name"]       = "{} {}".format(entry.spacegroup.lattice_system, entry.name)
-        data['structured_data']["is_stable"]  = True if fe_std[0].stability <= 0.0 else False
-        data['structured_data']["stability"]  = max(fe_std[0].stability,0.0)
-        data['structured_data']["spacegroup"] = "{} ({})".format(entry.spacegroup.hm, entry.spacegroup.number)
-        data['structured_data']["volume"]     = fe_std[0].calculation.output.volume
-        data['structured_data']["bandgap"]    = fe_std[0].calculation.band_gap
-        data['structured_data']["natoms"]     = fe_std[0].entry.natoms
-        data['structured_data']["delta_e"]    = fe_std[0].delta_e
-        data['structured_data']["handle"]     = "http://hdl.handle.net/20.500.12856/oqmd.v1.ent.{}".format(entry.id)
+        data["structured_data"]["available"] = True
+        data["structured_data"]["name"] = "{} {}".format(
+            entry.spacegroup.lattice_system, entry.name
+        )
+        data["structured_data"]["is_stable"] = (
+            True if fe_std[0].stability <= 0.0 else False
+        )
+        data["structured_data"]["stability"] = max(fe_std[0].stability, 0.0)
+        data["structured_data"]["spacegroup"] = "{} ({})".format(
+            entry.spacegroup.hm, entry.spacegroup.number
+        )
+        data["structured_data"]["volume"] = fe_std[0].calculation.output.volume
+        data["structured_data"]["bandgap"] = fe_std[0].calculation.band_gap
+        data["structured_data"]["natoms"] = fe_std[0].entry.natoms
+        data["structured_data"]["delta_e"] = fe_std[0].delta_e
+        data["structured_data"][
+            "handle"
+        ] = "http://hdl.handle.net/20.500.12856/oqmd.v1.ent.{}".format(entry.id)
         if "icsd" in entry.path:
-            data['structured_data']["icsd"]   = "This structure was obtained from ICSD (Collection code = {})".format(entry.path.split('/')[-1])
+            data["structured_data"][
+                "icsd"
+            ] = "This structure was obtained from ICSD (Collection code = {})".format(
+                entry.path.split("/")[-1]
+            )
         else:
-            data['structured_data']["icsd"]   = ""
-        
+            data["structured_data"]["icsd"] = ""
+
     data = get_globals(data)
     if request.method == "POST":
         p = request.POST
