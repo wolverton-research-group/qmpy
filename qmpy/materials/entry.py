@@ -3,6 +3,7 @@
 from datetime import datetime
 import time
 import os
+import re
 
 from django.db import models
 from django.db import transaction
@@ -155,6 +156,8 @@ class Entry(models.Model):
                 "libraries_v2_0/libraries_v1_overflow", "libraries"
             )
         path = os.path.dirname(source_file)
+        if not (re.compile('[@!#$%^&*()<>?\|}{~:]').search(path) is None):
+            raise ValueError("Entry path name cannot contain special characters")
 
         # Step 1
         if Entry.objects.filter(path=path).exists():
