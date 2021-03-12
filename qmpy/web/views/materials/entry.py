@@ -44,7 +44,7 @@ def entry_view(request, entry_id):
         data["structured_data"]["delta_e"] = fe_std[0].delta_e
         data["structured_data"][
             "handle"
-        ] = "http://hdl.handle.net/20.500.12856/oqmd.v1.ent.{}".format(entry.id)
+        ] = "20.500.12856/oqmd.v1-en.{}.v1".format(entry.id)
         if "icsd" in entry.path:
             data["structured_data"][
                 "icsd"
