@@ -3,14 +3,17 @@ import django_filters.rest_framework
 from qmpy.web.serializers.optimade import OptimadeStructureSerializer
 from qmpy.materials.formation_energy import FormationEnergy
 from qmpy.materials.entry import Composition
+from qmpy.models import Formation
 from qmpy.utils import query_to_Q, parse_formula_regex
 
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer
+from rest_framework_xml.renderers import XMLRenderer
+from rest_framework_yaml.renderers import YAMLRenderer
 
 from qmpy.rester import qmpy_rester
-from django.shortcuts import render_to_response
+from django.http import HttpResponse
 
 from collections import OrderedDict
 from qmpy.utils import oqmd_optimade as oqop
@@ -24,6 +27,76 @@ class OptimadeStructureDetail(generics.RetrieveAPIView):
     queryset = FormationEnergy.objects.filter(fit="standard")
     serializer_class = OptimadeStructureSerializer
 
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        _data = serializer.data
+        data = []
+        for _item in _data:
+            item = OrderedDict([("id", _item["id"]), ("type", _item["type"])])
+            del _item["id"]
+            del _item["type"]
+            item["attributes"] = _item
+            data.append(item)
+        full_url = request.build_absolute_uri()
+        representation = full_url.replace(BASE_URL, "")
+
+        time_now = time.time()
+        time_stamp = datetime.datetime.fromtimestamp(time_now).strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
+        meta_list = [
+            (
+                "query",
+                {
+                    "representation": representation,
+                },
+            ),
+            ("api_version", "1.0.0"),
+            ("time_stamp", time_stamp),
+            ("data_returned", 1),
+            ("data_available", Formation.objects.filter(fit="standard").count()),
+            ("more_data_available", False),
+            (
+                "provider",
+                OrderedDict(
+                    [
+                        ("name", "OQMD"),
+                        ("description", "The Open Quantum Materials Database"),
+                        ("prefix", "oqmd"),
+                        ("homepage", "http://oqmd.org"),
+                    ]
+                ),
+            ),
+            ("warnings", []),
+            ("response_message", "OK"),
+        ]
+        return Response(
+            OrderedDict(
+                [
+                    (
+                        "links",
+                        OrderedDict(
+                            [
+                                ("next", None),
+                                ("previous", None),
+                                (
+                                    "base_url",
+                                    {
+                                        "href": BASE_URL,
+                                        "meta": {"_oqmd_version": "1.0"},
+                                    },
+                                ),
+                            ]
+                        ),
+                    ),
+                    ("resource", {}),
+                    ("data", data),
+                    ("meta", OrderedDict(meta_list)),
+                ]
+            )
+        )
+
 
 class OptimadePagination(LimitOffsetPagination):
     default_limit = 50
@@ -31,7 +104,14 @@ class OptimadePagination(LimitOffsetPagination):
     limit_query_param = "page_limit"
 
     def get_paginated_response(self, page_data):
-        data = page_data["data"]
+        _data = page_data["data"]
+        data = []
+        for _item in _data:
+            item = OrderedDict([("id", _item["id"]), ("type", _item["type"])])
+            del _item["id"]
+            del _item["type"]
+            item["attributes"] = _item
+            data.append(item)
         request = page_data["request"]
 
         full_url = request.build_absolute_uri()
@@ -62,13 +142,14 @@ class OptimadePagination(LimitOffsetPagination):
             ("api_version", "1.0.0"),
             ("time_stamp", time_stamp),
             (
-                "data_returned",
+                "_oqmd_data_in_response",
                 min(
                     self.get_limit(request),
                     self.count - self.get_offset(request),
                 ),
             ),
-            ("data_available", self.count),
+            ("data_returned", self.count),
+            ("data_available", Formation.objects.filter(fit="standard").count()),
             (
                 "more_data_available",
                 (self.get_next_link() != None) or (self.get_previous_link() != None),
@@ -118,6 +199,7 @@ class OptimadePagination(LimitOffsetPagination):
 class OptimadeStructureList(generics.ListAPIView):
     serializer_class = OptimadeStructureSerializer
     pagination_class = OptimadePagination
+    renderer_classes = [JSONRenderer, XMLRenderer, YAMLRenderer, BrowsableAPIRenderer]
 
     def get_queryset(self):
         fes = FormationEnergy.objects.filter(fit="standard")
@@ -165,19 +247,19 @@ class OptimadeStructureList(generics.ListAPIView):
 
 def OptimadeInfoData(request):
     data = oqop.get_optimade_data("info")
-    return render_to_response("api/plain_text.html", {"data": data})
+    return HttpResponse(data, content_type="application/json")
 
 
 def OptimadeVersionsData(request):
     data = oqop.get_optimade_data("versions")
-    return render_to_response("api/plain_text.html", {"data": data})
+    return HttpResponse(data, content_type="application/json")
 
 
 def OptimadeLinksData(request):
     data = oqop.get_optimade_data("links")
-    return render_to_response("api/plain_text.html", {"data": data})
+    return HttpResponse(data, content_type="application/json")
 
 
 def OptimadeStructuresInfoData(request):
     data = oqop.get_optimade_data("info.structures")
-    return render_to_response("api/plain_text.html", {"data": data})
+    return HttpResponse(data, content_type="application/json")

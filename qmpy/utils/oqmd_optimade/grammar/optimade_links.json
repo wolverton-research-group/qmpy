@@ -1,4 +1,12 @@
 {
+ "meta": {
+     "api_version": "1.0.0",
+     "query": {
+       "representation": "/info"
+     },
+     "more_data_available": false,
+     "schema": "https://schemas.optimade.org/openapi/v1.0/optimade_index.json"
+   },
   "data": [
     {
       "type": "links",

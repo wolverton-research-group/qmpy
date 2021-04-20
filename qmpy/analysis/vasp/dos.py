@@ -80,11 +80,12 @@ class DOS(models.Model):
         """Set the Fermi level."""
         ef = efermi - self._efermi
         self._efermi = efermi
-        try:
-            self.data[0, :] = self.data[0, :] + ef
-            self._site_dos[:, 0, :] = self._site_dos[:, 0, :] + ef
-        except IndexError:
-            pass
+        if isinstance(self.data,np.ndarray):
+            try:
+                self.data[0, :] = self.data[0, :] + ef
+                self._site_dos[:, 0, :] = self._site_dos[:, 0, :] + ef
+            except IndexError:
+                pass
 
     @property
     def energy(self):
@@ -456,7 +457,7 @@ class DOS(models.Model):
         [f.readline() for nn in range(4)]  # Skip next 4 lines.
         # First we have a block with total and total integrated DOS
         ndos, efermi = f.readline().split()[2:4]
-        #self.efermi = float(efermi)
+        self.efermi = float(efermi)
         ndos = int(ndos)
         dos = []
         for nd in range(ndos):
@@ -479,5 +480,4 @@ class DOS(models.Model):
                 cdos[nd] = np.array([float(x) for x in line])
             dos.append(cdos.T)
         self._site_dos = np.array(dos)
-        self.efermi = float(efermi)
         f.close()

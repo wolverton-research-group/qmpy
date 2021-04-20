@@ -89,8 +89,6 @@ Spacegroup: <a href="/analysis/spacegroup/{{structure.spacegroup_id}}">
   </form>
 
   <h1> Pair distribution function</h1>
-  <script language="javascript" type="text/javascript" src={% static "js/jquery.flot.min.js" %}></script>
-  <script src={% static "js/jquery.flot.axislabels.js" %}></script>
   <script language="javascript" type="text/javascript">
   $(function() {
       {{ pdf | safe }}

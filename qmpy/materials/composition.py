@@ -29,7 +29,7 @@ class Composition(models.Model):
         | generic: Genericized composition string. e.g. A2B3, ABC2.
         | mass: Mass per atom in AMUs
         | meidema: Meidema model energy for the composition
-        | ntypes: Number of elements. 
+        | ntypes: Number of elements.
 
     """
 
@@ -104,7 +104,7 @@ class Composition(models.Model):
     def get_list(cls, bounds, calculated=False, uncalculated=False):
         """
         Classmethod for finding all compositions within the space bounded by a
-        sequence of compositions. 
+        sequence of compositions.
 
         Examples::
 

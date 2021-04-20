@@ -53,7 +53,7 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
 
     # Mandatory properties
     def get_type(self, _):
-        return "structure"
+        return "structures"
 
     def get_last_modified(self, _):
         return ""

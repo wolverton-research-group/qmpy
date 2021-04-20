@@ -23,6 +23,103 @@
 {% endif %}
 
 {% block content %}
+{% if structured_data.available %}
+<script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Dataset",
+      "name": "Computational data of {{ structured_data.name }} from Density Functional Theory calculations",
+      "isPartOf": {
+        "@type": "Dataset",
+        "name": "The Open Quantum Materials Database",
+        "description":"Open Quantum Materials Database (OQMD) is a database of DFT calculated thermodynamic and structural properties materials, created in Chris Wolverton's group at Northwestern University",
+        "alternateName":"OQMD",
+        "url": "http://oqmd.org/",
+        "license" : "https://creativecommons.org/licenses/by/4.0/",
+        "creator":{
+          "@type":"Organization",
+          "url": "http://oqmd.org/",
+          "name":"The Open Quantum Materials Database",
+          "alternateName":"OQMD",
+          "contactPoint":{
+             "@type":"ContactPoint",
+             "contactType": "general queries",
+             "email":"oqmd.questions@gmail.com"
+          }
+        },
+        "keywords": "MATERIALS DATA, COMPUTATIONAL MATERIALS, DFT, DENSITY FUNCTIONAL THEORY, THERMODYNAMIC PROPERTIES, INORGANIC MATERIALS, Band GAP, MATERIAL STABILITY, FORMATION ENERGY"
+      },
+      "creator":{
+         "@type":"Organization",
+         "url": "http://oqmd.org/",
+         "name":"The Open Quantum Materials Database",
+         "alternateName":"OQMD",
+         "contactPoint":{
+            "@type":"ContactPoint",
+            "contactType": "general queries",
+            "email":"oqmd.questions@gmail.com"
+         }
+      },
+      "measurementTechnique": "Computational, Density Functional Theory",
+      "url": "http://www.oqmd.org/materials/entry/{{ entry.id }}",
+      "description":"Data obtained from computational DFT calculations on {{ structured_data.name }} is provided. Available data include crystal structure, bandgap energy, stability, density of states, and calculation input/output files. {{ structured_data.icsd }}",
+      "keywords": "{{ entry.composition.name }}, {{ structured_data.name }}, STABILITY, BAND GAP",
+      "identifier": ["{{ structured_data.handle }}"],
+      "license" : "https://creativecommons.org/licenses/by/4.0/",
+      "variableMeasured": [
+                             {
+                               "@type": "PropertyValue",
+                                "name": "Name",
+                                "value": "{{ entry.composition.name }}"
+                             },
+                             {
+                               "@type": "PropertyValue",
+                               "name": "Stability",
+                               "value": "{{ structured_data.stability | floatformat:-3}}",
+                               "unitText": "ev/atom",
+                               "measurementTechnique": "Computational, DFT"
+                             },
+                             {
+                               "@type": "PropertyValue",
+                               "name": "Formation energy",
+                               "value": "{{ structured_data.delta_e | floatformat:-3}}",
+                               "unitText": "eV/atom",
+                               "measurementTechnique": "Computational, DFT"
+                             },
+                             {
+                               "@type": "PropertyValue",
+                               "name": "Crystal volume",
+                               "value": "{{ structured_data.volume | floatformat:-3 }}",
+                               "unitText": "Angstrom**3",
+                               "measurementTechnique": "Computational, DFT"
+                             },
+                             {
+                               "@type": "PropertyValue",
+                               "name": "Bandgap",
+                               "value": "{{ structured_data.bandgap | floatformat:-3 }}",
+                               "unitText": "eV",
+                               "measurementTechnique": "Computational, DFT"
+                             },
+                             {
+                               "@type": "PropertyValue",
+                               "name": "Number of atoms in unit cell",
+                               "value": "{{ structured_data.natoms }}",
+                               "measurementTechnique": "Computational"
+                             },
+                             {
+                               "@type": "PropertyValue",
+                               "name": "Symmetry spacegroup",
+                               "value": "{{ structured_data.spacegroup }}",
+                               "measurementTechnique": "Computational"
+                             }
+
+                           ]
+     
+    }
+</script>
+{% endif %}
+<h3> Identifier:
+<a href="http://hdl.handle.net/{{structured_data.handle}}">{{structured_data.handle}}</a> </h3>
 
 <h2> Database Information </h2>
 <ul>
