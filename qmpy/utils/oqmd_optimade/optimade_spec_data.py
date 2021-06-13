@@ -20,7 +20,7 @@ def get_optimade_data(label):
         data = json.load(open(filename, "r"))
         return json.dumps(data, indent=2)
     elif label == "versions":
-        return "version \n 1"
+        return "version\n1"
     elif label == "info.structures":
         filename = os.path.join(
             os.path.dirname(__file__), "grammar", "optimade_info_structures.json"
