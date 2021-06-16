@@ -1,7 +1,4 @@
 from django.shortcuts import render_to_response
-from django.template import RequestContext
-
-from qmpy.models import Calculation
 
 
 def docs_view(request):

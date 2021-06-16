@@ -1,0 +1,34 @@
+{
+ "meta": {
+     "api_version": "1.0.0",
+     "query": {
+       "representation": "/info"
+     },
+     "more_data_available": false,
+     "schema": "https://schemas.optimade.org/openapi/v1.0/optimade_index.json"
+   },
+  "data": [
+    {
+      "type": "links",
+      "id": "oqmd",
+      "attributes": {
+        "name": "OQMD.org",
+        "description": "Open Quantum Materials Database",
+        "base_url": "http://oqmd.org/optimade/",
+        "homepage": "http://oqmd.org",
+        "link_type": "root"
+      }
+    },
+    {
+      "type": "links",
+      "id": "optimade",
+      "attributes": {
+        "name": "Materials Consortia",
+        "description": "List of OPTIMADE providers maintained by the Materials Consortia organisation",
+        "base_url": "https://providers.optimade.org",
+        "homepage": "https://optimade.org",
+        "link_type": "providers"
+      }
+    }
+  ]
+}

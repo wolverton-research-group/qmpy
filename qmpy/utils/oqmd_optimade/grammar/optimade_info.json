@@ -1,0 +1,46 @@
+{
+  "meta": {
+    "api_version": "1.0.0",
+    "query": {
+      "representation": "/info"
+    },
+    "more_data_available": false,
+    "schema": "https://schemas.optimade.org/openapi/v1.0/optimade_index.json"
+  },
+  "data": {
+    "type": "info",
+    "id": "/",
+    "attributes": {
+      "api_version": "1.0.0",
+      "available_api_versions": [
+        {
+          "url": "http://oqmd.org/optimade/v1/",
+          "version": "1.0.0"
+        }
+      ],
+      "formats": [
+        "json",
+        "xml",
+        "yaml"
+      ],
+      "entry_types_by_format": {
+        "json": [
+          "structures"
+        ],
+        "xml": [
+          "structures"
+        ],
+        "yaml": [
+          "structures"
+        ]
+      },
+      "available_endpoints": [
+        "structures",
+        "info",
+        "links",
+        "versions"
+      ],
+      "is_index": false
+    }
+  }
+}

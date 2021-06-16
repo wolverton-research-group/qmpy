@@ -12,3 +12,7 @@ from .optimade_api import *
 
 def api_view(request):
     return render_to_response("api/index.html", {})
+
+
+def optimade_view(request):
+    return render_to_response("api/optimade.html", {})

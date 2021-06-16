@@ -41,7 +41,7 @@ class Atom(models.Model):
     Relationships:
         | :mod:`~qmpy.Structure` via structure
         | :mod:`~qmpy.Element` via element
-        | :mod:`~qmpy.Site` via site 
+        | :mod:`~qmpy.Site` via site
         | :mod:`~qmpy.WyckoffSite` via wyckoff
 
     Attributes:
@@ -106,7 +106,7 @@ class Atom(models.Model):
     def __eq__(self, other):
         if self.element_id != other.element_id:
             return False
-        return (self.x, self.y, self.z) == (other.x, other.y, other.z)
+        return norm([self.x - other.x, self.y - other.y, self.z - other.z]) < 1e-4
 
     def __lt__(self, other):
         comp_arr = [
@@ -181,7 +181,7 @@ class Atom(models.Model):
     @property
     def index(self):
         """
-        None if not in a :mod:`~qmpy.Structure`, otherwise the index of the atom 
+        None if not in a :mod:`~qmpy.Structure`, otherwise the index of the atom
         in the structure.
         """
         if not self.structure:
@@ -191,26 +191,26 @@ class Atom(models.Model):
     @classmethod
     def create(cls, element, coord, **kwargs):
         """
-        Creates a new Atom object. 
+        Creates a new Atom object.
 
         Arguments:
             element (str or Element): Specifies the element of the Atom.
             coord (iterable of floats): Specifies the coordinate of the Atom.
 
         Keyword Arguments:
-            forces: 
+            forces:
                 Specifies the forces on the atom.
-            magmom: 
+            magmom:
                 The magnitude of the magnetic moment on the atom.
-            charge: 
+            charge:
                 The charge on the Atom.
-            volume: 
+            volume:
                 The atomic volume of the atom (Angstroms^3).
 
         Examples::
 
             >>> Atom.create('Fe', [0,0,0])
-            >>> Atom.create('Ni', [0.5, 0.5, 0.5], ox=2, magmom=5, 
+            >>> Atom.create('Ni', [0.5, 0.5, 0.5], ox=2, magmom=5,
             >>>                                 forces=[0.2, 0.2, 0.2],
             >>>                                 volume=101, charge=1.8,
             >>>                                 occupancy=1)
@@ -249,7 +249,7 @@ class Atom(models.Model):
             <Atom: Fe - 0.000, 0.000, 0.000>
             >>> a.id
             None
-        
+
         """
         atom = Atom()
         keys = [
@@ -318,9 +318,9 @@ class Atom(models.Model):
 
 class Site(models.Model):
     """
-    A lattice site. 
+    A lattice site.
 
-    A site can be occupied by one Atom, many Atoms or no Atoms. 
+    A site can be occupied by one Atom, many Atoms or no Atoms.
 
     Relationships:
         | :mod:`~qmpy.Structure` via structure
@@ -352,7 +352,7 @@ class Site(models.Model):
         db_table = "sites"
 
     def __hash__(self):
-         return hash(self._get_pk_val())
+        return hash(self._get_pk_val())
 
     def __eq__(self, other):
         return (self.x, self.y, self.z) == (other.x, other.y, other.z)
@@ -495,7 +495,7 @@ class Site(models.Model):
           atoms (iterable of `Atom`): List of Atoms to occupy the Site.
 
         Keyword Arguments:
-          tol (float): Atoms must be within `tol` of each other to be assigned 
+          tol (float): Atoms must be within `tol` of each other to be assigned
           to the same Site. Defaults to 1e-4.
 
         Examples::
@@ -525,7 +525,7 @@ class Site(models.Model):
           The Site is created without any Atoms occupying it.
 
         Arguments:
-          coord (length 3 iterable): Assigns the x, y, and z coordinates of 
+          coord (length 3 iterable): Assigns the x, y, and z coordinates of
             the Site.
 
         Keyword Arguments:
@@ -572,8 +572,8 @@ class Site(models.Model):
         Composition dictionary of the Site.
 
         Returns:
-          dict: of (element, occupancy) pairs. 
-        
+          dict: of (element, occupancy) pairs.
+
         Examples::
 
             >>> a1 = Atom('Fe', [0,0,0], occupancy=0.2)
@@ -602,8 +602,8 @@ class Site(models.Model):
         Composition dictionary of the Site.
 
         Returns:
-          dict: of (species, occupancy) pairs. 
-        
+          dict: of (species, occupancy) pairs.
+
         Examples::
 
             >>> a1 = Atom('Fe', [0,0,0], occupancy=0.2)
@@ -620,7 +620,7 @@ class Site(models.Model):
 
     def add_atom(self, atom, tol=None):
         """
-        Adds Atom to `Site.atoms`. 
+        Adds Atom to `Site.atoms`.
 
         Notes:
           If the Site being assigned to doens't have a coordinate, it is assigned
@@ -630,12 +630,12 @@ class Site(models.Model):
           atom (Atom): Atom to add to the structure.
 
         Keyword Arguments:
-          tol (float): Distance between `atom` and the Site for the Atom to be 
-            assigned to the Site. Raises a SiteError if the distance is 
-            greater than `tol`. 
+          tol (float): Distance between `atom` and the Site for the Atom to be
+            assigned to the Site. Raises a SiteError if the distance is
+            greater than `tol`.
 
         Raises:
-          SiteError: If `atom` is more than `tol` from the Site. 
+          SiteError: If `atom` is more than `tol` from the Site.
 
         Examples::
 
@@ -660,7 +660,7 @@ class Site(models.Model):
     @property
     def magmom(self):
         """
-        Calculates the composition weighted average magnetic moment of the atoms 
+        Calculates the composition weighted average magnetic moment of the atoms
         on the Site.
 
         Returns:
@@ -678,7 +678,7 @@ class Site(models.Model):
     @property
     def ox(self):
         """
-        Calculates the composition weighted average oxidation state of the atoms 
+        Calculates the composition weighted average oxidation state of the atoms
         on the Site.
 
         Returns:

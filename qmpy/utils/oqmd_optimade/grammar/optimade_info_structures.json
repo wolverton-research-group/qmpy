@@ -1,0 +1,379 @@
+{
+ "meta": {
+     "api_version": "1.0.0",
+     "query": {
+       "representation": "/info/structures"
+     },
+     "more_data_available": false,
+     "schema": "https://schemas.optimade.org/openapi/v1.0/optimade_index.json"
+  },
+  "data": {
+    "description": "a structures entry",
+    "properties": {
+      "id": {
+        "description": "ID of OQMD FormationEnergy Object corresponding to this structure",
+        "sortable": false,
+        "type": "integer",
+        "unit": null,
+        "_oqmd_django_query": null,
+        "_oqmd_set_operable": false,
+        "_oqmd_has_length": false,
+        "_oqmd_queryable": false
+      },
+      "type": {
+        "description": "Type of data. Only Structure data are currently available",
+        "sortable": false,
+        "type": "string",
+        "unit": null,
+        "_oqmd_django_query": null,
+        "_oqmd_set_operable": false,
+        "_oqmd_has_length": false,
+        "_oqmd_queryable": false
+      },
+      "last_modified": {
+        "description": "Time of last modification. It is updated only when new DB is made public at oqmd.org",
+        "sortable": false,
+        "type": "timestamp",
+        "unit": null,
+        "_oqmd_django_query": null,
+        "_oqmd_set_operable": false,
+        "_oqmd_has_length": false,
+        "_oqmd_queryable": false
+      },
+      "chemical_formula_reduced": {
+        "description": "Reduced chemical formula",
+        "sortable": false,
+        "type": "string",
+        "unit": null,
+        "_oqmd_django_query": "composition__formula__in",
+        "_oqmd_set_operable": false,
+        "_oqmd_has_length": false,
+        "_oqmd_queryable": true
+      },
+      "chemical_formula_anonymous": {
+        "description": "Generic chemical formula",
+        "sortable": false,
+        "type": "string",
+        "unit": null,
+        "_oqmd_django_query": "composition__generic",
+        "_oqmd_set_operable": false,
+        "_oqmd_has_length": false,
+        "_oqmd_queryable": true
+      },
+      "nelements": {
+        "description": "Number of different elements in the structure",
+        "sortable": false,
+        "type": "integer",
+        "unit": null,
+        "_oqmd_django_query": "entry__composition__ntypes",
+        "_oqmd_set_operable": false,
+        "_oqmd_has_length": false,
+        "_oqmd_queryable": true
+      },
+      "elements": {
+        "description": "List of unique elements in the structure",
+        "sortable": false,
+        "type": "list",
+        "unit": null,
+        "_oqmd_django_query": "composition__element_list__contains",
+        "_oqmd_set_operable": true,
+        "_oqmd_has_length": true,
+        "_oqmd_queryable": true
+      },
+      "nsites": {
+        "description": "Number of atomic sites in the structure",
+        "sortable": false,
+        "type": "integer",
+        "unit": null,
+        "_oqmd_django_query": "entry__natoms",
+        "_oqmd_set_operable": false,
+        "_oqmd_has_length": false,
+        "_oqmd_queryable": true
+      },
+      "lattice_vectors": {
+        "description": "Lattice vectors",
+        "sortable": false,
+        "type": "list",
+        "unit": "Ao",
+        "_oqmd_django_query": null,
+        "_oqmd_set_operable": false,
+        "_oqmd_has_length": false,
+        "_oqmd_queryable": false
+      },
+      "_oqmd_direct_site_positions": {
+        "description": "Ordered list of site-positions relative to the unti cell, occupied by atoms given in the property species_at_sites",
+        "sortable": false,
+        "type": "list",
+        "unit": null,
+        "_oqmd_django_query": null,
+        "_oqmd_set_operable": false,
+        "_oqmd_has_length": false,
+        "_oqmd_queryable": false
+      },
+      "species_at_sites": {
+        "description": "Ordered list of atomic species that occupies each site in the structure",
+        "sortable": false,
+        "type": "list",
+        "unit": null,
+        "_oqmd_django_query": null,
+        "_oqmd_set_operable": false,
+        "_oqmd_has_length": false,
+        "_oqmd_queryable": false
+      },
+      "dimension_types": {
+        "description": "To specify whether each of the three dimensions are periodic(1) or not (0)",
+        "sortable": false,
+        "type": "list",
+        "unit": null,
+        "_oqmd_django_query": null,
+        "_oqmd_set_operable": false,
+        "_oqmd_has_length": false,
+        "_oqmd_queryable": false
+      },
+      "nperiodic_dimensions": {
+        "description": "Number of periodic dimensions. It is always 3 for all structures in OQMD as of Dec, 2020",
+        "sortable": false,
+        "type": "integer",
+        "unit": null,
+        "_oqmd_django_query": null,
+        "_oqmd_set_operable": false,
+        "_oqmd_has_length": false,
+        "_oqmd_queryable": false
+      },
+      "elements_ratios": {
+        "description": "Ratios of elements in the structure. Currently not supported in OQMD",
+        "sortable": false,
+        "type": "list",
+        "unit": null,
+        "_oqmd_django_query": null,
+        "_oqmd_set_operable": false,
+        "_oqmd_has_length": false,
+        "_oqmd_queryable": false
+      },
+      "structure_features": {
+        "description": "set of special features accociated with the structure. Currently not used in OQMD DB",
+        "sortable": false,
+        "type": "list",
+        "unit": null,
+        "_oqmd_django_query": null,
+        "_oqmd_set_operable": false,
+        "_oqmd_has_length": false,
+        "_oqmd_queryable": false
+      },
+      "chemical_formula_descriptive": {
+        "description": "Descriptive checmical formula. Currently not used in OQMD DB",
+        "sortable": false,
+        "type": "string",
+        "unit": null,
+        "_oqmd_django_query": null,
+        "_oqmd_set_operable": false,
+        "_oqmd_has_length": false,
+        "_oqmd_queryable": false
+      },
+      "species": {
+        "description": "Details of species occupying sites. Currently OQMD DB does not have partial occupancy. All relevant infomation is provided via the property species_at_sites",
+        "sortable": false,
+        "type": "list",
+        "unit": null,
+        "_oqmd_django_query": null,
+        "_oqmd_set_operable": false,
+        "_oqmd_has_length": false,
+        "_oqmd_queryable": false
+      },
+      "cartesian_site_positions": {
+        "description": "Ordered list of site-positions in cartesian coordinates, occupied by atoms given in the property species_at_sites",
+        "sortable": false,
+        "type": "list",
+        "unit": "Ao",
+        "_oqmd_django_query": null,
+        "_oqmd_set_operable": false,
+        "_oqmd_has_length": false,
+        "_oqmd_queryable": false
+      },
+      "_oqmd_entry_id": {
+        "description": "ID of the OQMD Entry object. Can be used to see further details at oqmd.org/materials/entry/OQMDEntryID (Replace OQMDEntryID with the ID value)",
+        "sortable": false,
+        "type": "integer",
+        "unit": null,
+        "_oqmd_django_query": null,
+        "_oqmd_set_operable": false,
+        "_oqmd_has_length": false,
+        "_oqmd_queryable": false
+      },
+      "_oqmd_calculation_id": {
+        "description": "ID of the OQMD Calculation object. Can be used to see further details at oqmd.org/analysis/calculation/OQMDCalcID (Replace OQMDCalcID with the ID value)",
+        "sortable": false,
+        "type": "integer",
+        "unit": null,
+        "_oqmd_django_query": null,
+        "_oqmd_set_operable": false,
+        "_oqmd_has_length": false,
+        "_oqmd_queryable": false
+      },
+      "_oqmd_icsd_id": {
+        "description": "ICSD ID of the structure - if it a structure obtained from the Inorganic Crystal Structure Database (ICSD)",
+        "sortable": false,
+        "type": "integer",
+        "unit": null,
+        "_oqmd_django_query": null,
+        "_oqmd_set_operable": false,
+        "_oqmd_has_length": false,
+        "_oqmd_queryable": false
+      },
+      "_oqmd_band_gap": {
+        "description": "Electronic bandgap value of the structure",
+        "sortable": false,
+        "type": "float",
+        "unit": "eV",
+        "_oqmd_django_query": "calculation__band_gap",
+        "_oqmd_set_operable": false,
+        "_oqmd_has_length": false,
+        "_oqmd_queryable": true
+      },
+      "_oqmd_delta_e": {
+        "description": "Formation energy of the structure",
+        "sortable": true,
+        "type": "float",
+        "unit": "eV/atom",
+        "_oqmd_django_query": "delta_e",
+        "_oqmd_set_operable": false,
+        "_oqmd_has_length": false,
+        "_oqmd_queryable": true
+      },
+      "_oqmd_volume": {
+        "description": "Volume of the structure",
+        "sortable": false,
+        "type": "float",
+        "unit": "Ao^3",
+        "_oqmd_django_query": "calculation__output__volume",
+        "_oqmd_set_operable": false,
+        "_oqmd_has_length": false,
+        "_oqmd_queryable": true
+      },
+      "_oqmd_stability": {
+        "description": "Stability data from formation energy value. The structure is predicted to be computationally stable if the value is zero.",
+        "sortable": true,
+        "type": "float",
+        "unit": "eV/atom",
+        "_oqmd_django_query": "stability",
+        "_oqmd_set_operable": false,
+        "_oqmd_has_length": false,
+        "_oqmd_queryable": true
+      },
+      "_oqmd_prototype": {
+        "description": "Structural prototype used in the OQMD to generate this structure",
+        "sortable": false,
+        "type": "string",
+        "unit": null,
+        "_oqmd_django_query": "entry__prototype",
+        "_oqmd_set_operable": false,
+        "_oqmd_has_length": false,
+        "_oqmd_queryable": true
+      },
+      "_oqmd_spacegroup": {
+        "description": "Spacegroup of the structure",
+        "sortable": false,
+        "type": "string",
+        "unit": null,
+        "_oqmd_django_query": "calculation__output__spacegroup__hm",
+        "_oqmd_set_operable": false,
+        "_oqmd_has_length": false,
+        "_oqmd_queryable": true
+      }
+    },
+    "formats": [
+      "json",
+      "xml",
+      "yaml"
+    ],
+    "output_fields_by_format": {
+      "json": [
+        "id",
+        "type",
+        "last_modified",
+        "chemical_formula_reduced",
+        "chemical_formula_anonymous",
+        "nelements",
+        "elements",
+        "nsites",
+        "lattice_vectors",
+        "_oqmd_direct_site_positions",
+        "species_at_sites",
+        "dimension_types",
+        "nperiodic_dimensions",
+        "elements_ratios",
+        "structure_features",
+        "chemical_formula_descriptive",
+        "species",
+        "cartesian_site_positions",
+        "_oqmd_entry_id",
+        "_oqmd_calculation_id",
+        "_oqmd_icsd_id",
+        "_oqmd_band_gap",
+        "_oqmd_delta_e",
+        "_oqmd_volume",
+        "_oqmd_stability",
+        "_oqmd_prototype",
+        "_oqmd_spacegroup"
+      ],
+      "xml": [
+        "id",
+        "type",
+        "last_modified",
+        "chemical_formula_reduced",
+        "chemical_formula_anonymous",
+        "nelements",
+        "elements",
+        "nsites",
+        "lattice_vectors",
+        "_oqmd_direct_site_positions",
+        "species_at_sites",
+        "dimension_types",
+        "nperiodic_dimensions",
+        "elements_ratios",
+        "structure_features",
+        "chemical_formula_descriptive",
+        "species",
+        "cartesian_site_positions",
+        "_oqmd_entry_id",
+        "_oqmd_calculation_id",
+        "_oqmd_icsd_id",
+        "_oqmd_band_gap",
+        "_oqmd_delta_e",
+        "_oqmd_volume",
+        "_oqmd_stability",
+        "_oqmd_prototype",
+        "_oqmd_spacegroup"
+      ],
+      "yaml": [
+        "id",
+        "type",
+        "last_modified",
+        "chemical_formula_reduced",
+        "chemical_formula_anonymous",
+        "nelements",
+        "elements",
+        "nsites",
+        "lattice_vectors",
+        "_oqmd_direct_site_positions",
+        "species_at_sites",
+        "dimension_types",
+        "nperiodic_dimensions",
+        "elements_ratios",
+        "structure_features",
+        "chemical_formula_descriptive",
+        "species",
+        "cartesian_site_positions",
+        "_oqmd_entry_id",
+        "_oqmd_calculation_id",
+        "_oqmd_icsd_id",
+        "_oqmd_band_gap",
+        "_oqmd_delta_e",
+        "_oqmd_volume",
+        "_oqmd_stability",
+        "_oqmd_prototype",
+        "_oqmd_spacegroup"
+      ]
+    }
+  }
+}
