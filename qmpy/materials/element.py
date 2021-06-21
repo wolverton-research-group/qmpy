@@ -33,7 +33,7 @@ class Element(models.Model):
       | symbol: atomic symbol
       | group: group in the periodic table
       | period: period in the periodic table
-      | 
+      |
       | **Physical properties**
       | mass: Atomic mass, in AMU (float)
       | density: Density at STP, in g/cm^3 (float)
@@ -42,12 +42,12 @@ class Element(models.Model):
       | van_der_waals radii: in A (float)
       | covalent_radii: in A (float)
       | scattering_factors: A dictionary of scattering factor coeffs.
-      | 
+      |
       | **Thermodynamic properties**
       | melt: melting point in K
       | boil: boiling point in K
       | specific_heat: C_p in J/K
-      | 
+      |
       | **Electronic properties**
       | electronegativity: Pauling electronegativity
       | ion_energy: First ionization energy. (eV)
@@ -119,7 +119,7 @@ class Element(models.Model):
         """
         Return an element object. Accepts symbols and atomic numbers, or a list
         of symbols/atomic numbers.
-        
+
         Examples::
 
             >>> Element.get('Fe')
@@ -180,7 +180,7 @@ class Species(models.Model):
         Gets or creates the specified species.
 
         Arguments:
-            value: 
+            value:
                 Accepts multiple input types. Can be a string, e.g. Fe3+
                 or a tuple of (symbol, oxidation state) pairs, e.g. (Fe, 3).
 

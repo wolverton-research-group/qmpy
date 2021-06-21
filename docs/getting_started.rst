@@ -61,7 +61,7 @@ Recommended Packages
 --------------------
 
 * matplotlib (http://matplotlib.org/) (required for creating figures)
-* networx (http://networkx.github.io/) (required for creating spin lattices,
+* networkx (http://networkx.github.io/) (required for creating spin lattices,
   and some high-dimensional phase diagram analysis)
 
 .. warning::
@@ -73,7 +73,11 @@ Recommended Packages
 Setting up the database
 =======================
 
-The database can be downloaded from
+The most recent and all the older versions of the database can be downloaded from
+http://oqmd.org/download/
+
+For a better user convenience, the latest version of the database is also available 
+for direct download at
 http://oqmd.org/static/downloads/qmdb.sql.gz
 
 Once you have the database file, you need to unzip it and load it into a
@@ -119,7 +123,7 @@ permissions, run::
     +----------+
     | count(*) |
     +----------+
-    |   173653 |
+    |   815654 |
     +----------+
 
 The number may not match what is shown above, but as long as you don't recieve

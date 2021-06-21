@@ -65,7 +65,7 @@ MEDIA_URL = "/media/"
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = "/var/www/html/oqmd.org/static/"
+STATIC_ROOT = "/home/oqmd/oqmd2.org/static/"
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
@@ -93,7 +93,9 @@ SECRET_KEY = "h23o7ac@^_upzx*zzs%1t1bn6#*(7@b3$kp*v9)6hbf%rkr!%z"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(INSTALL_PATH, "qmpy", "web", "templates"),],
+        "DIRS": [
+            os.path.join(INSTALL_PATH, "qmpy", "web", "templates"),
+        ],
         "OPTIONS": {
             "context_processors": [
                 "django.contrib.auth.context_processors.auth",
@@ -109,6 +111,9 @@ TEMPLATES = [
                 "django.template.loaders.filesystem.Loader",
                 "django.template.loaders.app_directories.Loader",
             ],
+            "libraries": {
+                "staticfiles": "django.templatetags.static",
+            },
         },
     },
 ]
@@ -169,8 +174,10 @@ LOGGING = {
 REST_FRAMEWORK = {
     "DEFAULT_FILTER_BACKEND": ("django_filters.rest_framework.DjangoFilterBackend",),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
+    "DEFAULT_CONTENT_NEGOTIATION_CLASS": "qmpy.utils.oqmd_optimade.IgnoreClientContentNegotiation",
     "PAGE_SIZE": 100,
     "DEFAULT_PARSER_CLASSES": (
+        "rest_framework.renderers.JSONRenderer",
         "rest_framework_xml.parsers.XMLParser",
         "rest_framework_yaml.parsers.YAMLParser",
     ),
