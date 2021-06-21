@@ -222,6 +222,7 @@
 
 {% block sidebar %}
 <div id="sidebar" class="box">
+  <!--
   {% if not entry.tasks %}
   <h1> Control Panel</h1>
   <form action="" method="post">{% csrf_token %}
@@ -229,18 +230,18 @@
   </form>
   {% endif %}
   {% if entry.holds %}
-  <!-- 
+ 
   <form action="" method="post">{% csrf_token %}
     <input type="submit" name="clear_holds" value="Clear holds">
   </form>
-  -->
   {% endif %}
 
   <form action="" method="post">{% csrf_token %}
     Add keyword: <input type="text" name="add_keyword"><br>
-    <!-- Add hold: <input type="text" name="add_hold"><br> -->
+    Add hold: <input type="text" name="add_hold"><br>
     <input type="submit">
   </form>
+  -->
 
   <h1> Visualization </h1>
   {% if entry.natoms > 200 %}

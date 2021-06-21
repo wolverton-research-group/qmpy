@@ -5,8 +5,7 @@ INSTALL_PATH = os.path.dirname(os.path.abspath(__file__))
 INSTALL_PATH = os.path.split(INSTALL_PATH)[0]
 INSTALL_PATH = os.path.split(INSTALL_PATH)[0]
 
-# DEBUG = False
-DEBUG = True
+DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -27,7 +26,8 @@ DATABASES = {
     }
 }
 
-ALLOWED_HOSTS = ["larue.northwestern.edu", "www.larue.northwestern.edu"]
+ALLOWED_HOSTS = ["www.oqmd.org", "oqmd.org", "http://oqmd.org", "http://www.oqmd.org"]
+##ALLOWED_HOSTS = ['josquin.northwestern.edu', 'josquin.northwestern.edu/oqmd.org']
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
