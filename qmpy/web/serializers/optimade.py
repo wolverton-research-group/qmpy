@@ -56,7 +56,7 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
         return "structures"
 
     def get_last_modified(self, _):
-        return ""
+        return None
 
     # Optimade recommended structure-related properties
     def get_chemical_formula_reduced(self, formationenergy):
@@ -89,7 +89,7 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
                 [strct.z1, strct.z2, strct.z3],
             ]
         except:
-            return []
+            return None
 
     def get_nsites(self, formationenergy):
         return formationenergy.entry.natoms
@@ -100,7 +100,7 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
             sites = [s.label for s in strct.sites]
             return sites
         except:
-            return []
+            return None
 
     def get_cartesian_site_positions(self, formationenergy):
         try:
@@ -108,7 +108,7 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
             sites = [s.atoms[0].cart_coord.round(6).tolist() for s in strct.sites]
             return sites
         except:
-            return []
+            return None
 
     def get__oqmd_direct_site_positions(self, formationenergy):
         try:
@@ -126,7 +126,7 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
         return 3
 
     def get_elements_ratios(self, _):
-        return []
+        return None
 
     def get_structure_features(self, _):
         return []
