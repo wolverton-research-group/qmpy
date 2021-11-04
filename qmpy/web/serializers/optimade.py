@@ -135,7 +135,8 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
         return ""
 
     def get_species(self, _):
-        return []
+        species_set = set(s.label for s in formationenergy.calculation.output.sites)
+        return {s: {"name": s, "chemical_symbols": [s], "concentration": 1} for s in species_set}
 
     # OQMD specific data
     def get__oqmd_icsd_id(self, formationenergy):
