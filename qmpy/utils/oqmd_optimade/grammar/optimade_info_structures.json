@@ -5,7 +5,11 @@
        "representation": "/info/structures"
      },
      "more_data_available": false,
-     "schema": "https://schemas.optimade.org/openapi/v1.0/optimade_index.json"
+     "schema": "https://schemas.optimade.org/openapi/v1.0/optimade_index.json",
+     "provider": {
+         "name": "Open Quantum Materials Database",
+         "prefix": "oqmd"
+     }
   },
   "data": {
     "description": "a structures entry",
