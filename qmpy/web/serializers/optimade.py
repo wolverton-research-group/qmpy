@@ -77,7 +77,7 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
     def get_elements(self, formationenergy):
         elst = formationenergy.composition.element_list.split("_")
         elst.pop()
-        return ",".join(elst)
+        return elst
 
     def get_lattice_vectors(self, formationenergy):
         try:
