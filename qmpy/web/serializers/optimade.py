@@ -60,7 +60,13 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
 
     # Optimade recommended structure-related properties
     def get_chemical_formula_reduced(self, formationenergy):
-        return formationenergy.composition.formula.replace(" ", "")
+        # Remove spaces and remove "1" from composition, e.g. O2 Si1 -> O2Si
+        formula = formationenergy.composition.formula.split()
+        for ind, species in enumerate(formula):
+            if species[-1] == "1" and species[-2].isalpha():
+                formula[ind] = species[:-1]
+
+        return "".join(formula)
 
     def get_chemical_formula_anonymous(self, formationenergy):
         return formationenergy.composition.generic
