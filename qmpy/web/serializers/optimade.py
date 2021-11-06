@@ -56,11 +56,17 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
         return "structures"
 
     def get_last_modified(self, _):
-        return ""
+        return None
 
     # Optimade recommended structure-related properties
     def get_chemical_formula_reduced(self, formationenergy):
-        return formationenergy.composition.formula.replace(" ", "")
+        # Remove spaces and remove "1" from composition, e.g. O2 Si1 -> O2Si
+        formula = formationenergy.composition.formula.split()
+        for ind, species in enumerate(formula):
+            if species[-1] == "1" and species[-2].isalpha():
+                formula[ind] = species[:-1]
+
+        return "".join(formula)
 
     def get_chemical_formula_anonymous(self, formationenergy):
         return formationenergy.composition.generic
@@ -71,7 +77,7 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
     def get_elements(self, formationenergy):
         elst = formationenergy.composition.element_list.split("_")
         elst.pop()
-        return ",".join(elst)
+        return elst
 
     def get_lattice_vectors(self, formationenergy):
         try:
@@ -83,7 +89,7 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
                 [strct.z1, strct.z2, strct.z3],
             ]
         except:
-            return []
+            return None
 
     def get_nsites(self, formationenergy):
         return formationenergy.entry.natoms
@@ -94,7 +100,7 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
             sites = [s.label for s in strct.sites]
             return sites
         except:
-            return []
+            return None
 
     def get_cartesian_site_positions(self, formationenergy):
         try:
@@ -102,7 +108,7 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
             sites = [s.atoms[0].cart_coord.round(6).tolist() for s in strct.sites]
             return sites
         except:
-            return []
+            return None
 
     def get__oqmd_direct_site_positions(self, formationenergy):
         try:
@@ -120,7 +126,7 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
         return 3
 
     def get_elements_ratios(self, _):
-        return []
+        return None
 
     def get_structure_features(self, _):
         return []
@@ -129,7 +135,8 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
         return ""
 
     def get_species(self, _):
-        return []
+        species_set = set(s.label for s in formationenergy.calculation.output.sites)
+        return {s: {"name": s, "chemical_symbols": [s], "concentration": 1} for s in species_set}
 
     # OQMD specific data
     def get__oqmd_icsd_id(self, formationenergy):
