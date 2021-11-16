@@ -38,18 +38,22 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
         super(OptimadeStructureSerializer, self).__init__(*args, **kwargs)
         request = self.context["request"]
         query_params = request.query_params
-        _fields = query_params.getlist("fields")
-        if not _fields:
-            fields_to_drop = {
+        _fields = query_params.getlist("response_fields")
+        fields_to_drop=[]
+        if _fields:
+            _fields = _fields[0].split(",") + ["id","type"]
+            fields_to_drop = [item for item in self.fields if not item in _fields]
+        else:
+            fields_to_drop = [
                 "chemical_formula_descriptive",
                 "elements_ratios",
                 "dimension_types",
                 "_oqmd_direct_site_positions",
                 "nperiodic_dimensions",
                 "species",
-            }
-            for field in fields_to_drop:
-                self.fields.pop(field)
+                ]
+        for field in fields_to_drop:
+            self.fields.pop(field)
 
     # Mandatory properties
     def get_type(self, _):
@@ -77,6 +81,7 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
     def get_elements(self, formationenergy):
         elst = formationenergy.composition.element_list.split("_")
         elst.pop()
+        elst.sort()
         return elst
 
     def get_lattice_vectors(self, formationenergy):
@@ -134,9 +139,9 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
     def get_chemical_formula_descriptive(self, _):
         return ""
 
-    def get_species(self, _):
+    def get_species(self, formationenergy):
         species_set = set(s.label for s in formationenergy.calculation.output.sites)
-        return {s: {"name": s, "chemical_symbols": [s], "concentration": 1} for s in species_set}
+        return [{"name": s, "chemical_symbols": [s], "concentration": [1]} for s in species_set]
 
     # OQMD specific data
     def get__oqmd_icsd_id(self, formationenergy):

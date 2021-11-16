@@ -7,8 +7,10 @@
     "more_data_available": false,
     "schema": "https://schemas.optimade.org/openapi/v1.0/optimade_index.json",
     "provider": {
-        "name": "Open Quantum Materials Database",
-        "prefix": "oqmd"
+        "name": "OQMD",
+	"description":"Open Quantum Materials Database",
+        "prefix": "oqmd",
+	"homepage":"http://oqmd.org/"
     }
   },
   "data": {

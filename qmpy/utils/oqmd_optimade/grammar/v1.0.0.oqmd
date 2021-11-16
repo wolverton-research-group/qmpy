@@ -240,7 +240,7 @@
     "is_queryable": true,
     "is_chem_form": false,
     "is_set_operable": false,
-    "is_logic_operable": false
+    "is_logic_operable": true
   },
   "type": {
     "name": "type",
@@ -325,10 +325,10 @@
   },
   "chemical_formula_descriptive": {
     "name": "chemical_formula_descriptive",
-    "db_value": null,
+    "db_value": "composition__formula__in",
     "length_prop": null,
-    "is_queryable": false,
-    "is_chem_form": false,
+    "is_queryable": true,
+    "is_chem_form": true,
     "is_set_operable": false,
     "is_logic_operable": false
   },
