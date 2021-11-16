@@ -39,19 +39,17 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
         request = self.context["request"]
         query_params = request.query_params
         _fields = query_params.getlist("response_fields")
-        fields_to_drop=[]
+        fields_to_drop = []
         if _fields:
-            _fields = _fields[0].split(",") + ["id","type"]
+            _fields = _fields[0].split(",") + ["id", "type"]
             fields_to_drop = [item for item in self.fields if not item in _fields]
         else:
             fields_to_drop = [
-                "chemical_formula_descriptive",
                 "elements_ratios",
                 "dimension_types",
                 "_oqmd_direct_site_positions",
-                "nperiodic_dimensions",
                 "species",
-                ]
+            ]
         for field in fields_to_drop:
             self.fields.pop(field)
 
@@ -136,12 +134,15 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
     def get_structure_features(self, _):
         return []
 
-    def get_chemical_formula_descriptive(self, _):
-        return ""
+    def get_chemical_formula_descriptive(self, formationenergy):
+        return self.get_chemical_formula_reduced(formationenergy)
 
     def get_species(self, formationenergy):
         species_set = set(s.label for s in formationenergy.calculation.output.sites)
-        return [{"name": s, "chemical_symbols": [s], "concentration": [1]} for s in species_set]
+        return [
+            {"name": s, "chemical_symbols": [s], "concentration": [1]}
+            for s in species_set
+        ]
 
     # OQMD specific data
     def get__oqmd_icsd_id(self, formationenergy):

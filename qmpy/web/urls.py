@@ -125,6 +125,7 @@ urlpatterns += [
     ),
     url(r"^optimade/v1/info/structures$", views.OptimadeStructuresInfoData),
     url(r"^optimade/v1/links$", views.OptimadeLinksData),
+    url(r"^optimade/v\d+$", views.OptimadeVersionPage),
     ## download
     url(r"^download/", views.download_home),
     ## other

@@ -10,6 +10,7 @@ import json
 from rest_framework.exceptions import ParseError, APIException
 from lark.exceptions import VisitError
 from copy import deepcopy
+from functools import reduce
 
 
 class LarkParserError(Exception):
@@ -141,13 +142,9 @@ class Lark2Django(Transformer):
             "LENGTH": self.length_eq,
             "STARTS": self.starts,
             "ENDS": self.ends,
-            "CONTAINS": self.contains
+            "CONTAINS": self.contains,
         }
-        self.fuzzy_functions_list = {
-                self.starts,
-                self.ends,
-                self.contains
-                }
+        self.fuzzy_functions_list = {self.starts, self.ends, self.contains}
         self.parser = LarkParser(version=(1, 0, 0))
         prop_data = json.load(
             open(
@@ -382,30 +379,38 @@ class Lark2Django(Transformer):
         else:
             self.handle_error("T3", "Not supported for {}".format(a.name), "HAS ONLY")
 
-    def starts(self,a,b):
+    def starts(self, a, b):
         if a.is_chem_form:
             _db_value = a.db_value.strip("__in")
             _db_value = _db_value + "__startswith"
-            return Q(**{_db_value: b})
+            if len(b) > 1:
+                return reduce(self.and_, (Q(**{_db_value: ib}) for ib in b))
+            else:
+                return Q(**{_db_value: b[0]})
         else:
             self.handle_error("T3", "Not supported for {}".format(a.name), "STARTS")
-            
-    def ends(self,a,b):
+
+    def ends(self, a, b):
         if a.is_chem_form:
             _db_value = a.db_value.strip("__in")
             _db_value = _db_value + "__endswith"
-            return Q(**{_db_value: b})
+            if len(b) > 1:
+                return reduce(self.and_, (Q(**{_db_value: ib}) for ib in b))
+            else:
+                return Q(**{_db_value: b[0]})
         else:
             self.handle_error("T3", "Not supported for {}".format(a.name), "ENDS")
-            
-    def contains(self,a,b):
+
+    def contains(self, a, b):
         if a.is_chem_form:
             _db_value = a.db_value.strip("__in")
             _db_value = _db_value + "__contains"
-            return Q(**{_db_value: b})
+            if len(b) > 1:
+                return reduce(self.and_, (Q(**{_db_value: ib}) for ib in b))
+            else:
+                return Q(**{_db_value: b[0]})
         else:
             self.handle_error("T3", "Not supported for {}".format(a.name), "CONTAINS")
-
 
     def length_eq(self, a, b):
         """
@@ -488,25 +493,31 @@ class Lark2Django(Transformer):
         b = children[1][1]
 
         if not (a.is_queryable and a.db_value):
-            if (a.name == "nperiodic_dimensions"):
-                if (operation_fn == self.eq and int(b)==3) or (operation_fn == self.ne and int(b)!=3):
-                    return self.gt(self.property_dict['volume'],0)
+            if a.name == "nperiodic_dimensions":
+                if (
+                    (operation_fn == self.eq and int(b) == 3)
+                    or (operation_fn == self.ne and int(b) != 3)
+                    or (operation_fn == self.ge and int(b) <= 3)
+                    or (operation_fn == self.le and int(b) >= 3)
+                ):
+                    return self.gt(self.property_dict["volume"], 0)
                 else:
-                    error_message = "All structures  in OQMD have nperiodic_dimensions=3"
-                    self.handle_error("T4",error_message, a.name, raise_error=False)
-                    return self.eq(self.property_dict['volume'],0)
-            elif (a.name == "structure_features"):
+                    error_message = "All structures in OQMD have nperiodic_dimensions=3"
+                    self.handle_error("T4", error_message, a.name, raise_error=False)
+                    return self.eq(self.property_dict["volume"], 0)
+            elif a.name == "structure_features":
                 error_message = "No structure_features are included in OQMD"
-                error_message = error_message + "A dummy query (id=-1) to return none is executed"
-                self.handle_error("T4",error_message, a.name, raise_error=False)
-                return self.eq(self.property_dict['id'],-1)
+                error_message = (
+                    error_message + "A dummy query (id=-1) to return none is executed"
+                )
+                self.handle_error("T4", error_message, a.name, raise_error=False)
+                return self.eq(self.property_dict["id"], -1)
             self.handle_error("T1", "Cannot be queried in filter", a.name)
             return
 
         if a.is_chem_form:
-            b=b.strip('"')
-            if not (len(b)==0 or operation_fn in self.fuzzy_functions_list):
-                b=b.strip('"')
+            b = b.strip('"')
+            if (len(b) > 0) and (a.name != "chemical_formula_anonymous"):
                 c_dict_lst = parse_formula_regex(b)
                 if len(c_dict_lst) == 1 and len(c_dict_lst[0].keys()) == 0:
                     self.handle_error(
@@ -517,13 +528,21 @@ class Lark2Django(Transformer):
                     " ".join(["%s%g" % (k, cd[k]) for k in sorted(cd.keys())])
                     for cd in c_dict_lst
                 ]
-
-        if operation_fn in self.logic_functions:
-            if not a.is_logic_operable:
-                self.handle_error(
-                    "T1", "Cannot be queried with operators <,>,<=,>=", a.name
+            if operation_fn in self.logic_functions:
+                error_message = (
+                    "It does not make sense to use logic operators in chemical formulae"
                 )
-                return
+                error_message = (
+                    error_message + "A dummy query (id=-1) to return none is executed"
+                )
+                self.handle_error("T4", error_message, a.name, raise_error=False)
+                return self.eq(self.property_dict["id"], -1)
+
+        if (operation_fn in self.logic_functions) and (not a.is_logic_operable):
+            self.handle_error(
+                "T1", "Cannot be queried with operators <,>,<=,>=", a.name
+            )
+            return
         try:
             return operation_fn(a, b)
         except ParseError as err:
@@ -534,14 +553,32 @@ class Lark2Django(Transformer):
             )
 
     def constant_first_comparison(self, children):
-        self.handle_error("T3", "Not supported yet", "CONSTANT FIRST COMPARISON")
+        try:
+            reverse_functions = {
+                "=": "=",
+                "!=": "!=",
+                ">": "<",
+                "<": ">",
+                ">=": "<=",
+                "<=": ">=",
+            }
+            a = children[2].children[0]
+            b = children[0].children[0].children[0].value
+            operation_fn = self.opers[reverse_functions[children[1].value]]
+            return self.property_first_comparison([a, [operation_fn, b]])
+        except:
+            self.handle_error(
+                "T3",
+                "CONSTANT FIRST COMPARISON is not supported in this format",
+                children[2].children[0],
+            )
 
     def known_op_rhs(self, children):
         self.handle_error("T3", "Not supported yet", "KNOWN OPERATION")
 
     def fuzzy_string_op_rhs(self, children):
         if children[0] in self.opers:
-            return [self.opers[children[0].value],children[-1]]
+            return [self.opers[children[0].value], children[-1]]
         self.handle_error("T3", "Not supported yet", "FUZZY STRING OPERATIONS")
 
     def value_op_rhs(self, children):
@@ -613,9 +650,10 @@ class Lark2Django(Transformer):
         except:
             raise APIException(error_message_500, code=500)
 
-        self.warnings = [ 
-                { "type":"warning", "detail":warn_message} for warn_message in list(set(self.warnings))
-                ]
+        self.warnings = [
+            {"type": "warning", "detail": warn_message}
+            for warn_message in list(set(self.warnings))
+        ]
         meta_info = {
             "warnings": self.warnings,
             "django_query": self.printable_djangoQ(django_q, pretty=False),
