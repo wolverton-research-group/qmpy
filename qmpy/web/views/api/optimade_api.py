@@ -26,11 +26,14 @@ BASE_URL = qmpy_rester.REST_OPTIMADE
 class OptimadeStructureDetail(generics.RetrieveAPIView):
     queryset = FormationEnergy.objects.filter(fit="standard")
     serializer_class = OptimadeStructureSerializer
+    renderer_classes = [JSONRenderer, XMLRenderer, YAMLRenderer, BrowsableAPIRenderer]
 
     def retrieve(self, request, *args, **kwargs):
+        structure_id = request.path.strip("/").split("/")[-1]
+        self.queryset = self.queryset.filter(id=structure_id)
         instance = self.get_object()
         serializer = self.get_serializer(instance)
-        _data = serializer.data
+        _data = [serializer.data]
         data = []
         for _item in _data:
             item = OrderedDict([("id", _item["id"]), ("type", _item["type"])])
@@ -38,6 +41,12 @@ class OptimadeStructureDetail(generics.RetrieveAPIView):
             del _item["type"]
             item["attributes"] = _item
             data.append(item)
+        _data = serializer.data
+        data = OrderedDict([("id", _data["id"]), ("type", _data["type"])])
+        del _data["id"]
+        del _data["type"]
+        data["attributes"] = _data
+
         full_url = request.build_absolute_uri()
         representation = full_url.replace(BASE_URL, "")
 
@@ -130,7 +139,12 @@ class OptimadePagination(LimitOffsetPagination):
             page_data["meta"]["warnings"] if "warnings" in page_data["meta"] else []
         )
         if (not _warnings) and (not _oqmd_final_query):
-            _warnings = ["_oqmd_NoFilterWarning: No filters were provided in the query"]
+            _warnings = [
+                    {
+                        "type":"warning",
+                        "detail":"_oqmd_NoFilterWarning: No filters were provided in the query"
+                        }
+                    ]
         meta_list = [
             (
                 "query",
@@ -224,9 +238,13 @@ class OptimadeStructureList(generics.ListAPIView):
 
         if not filters:
             meta_data = {
-                "warnings": [
-                    "_oqmd_NoFilterWarning: No filters were provided in the query. Returning all structures"
-                ],
+                "warnings": 
+                [
+                    {
+                        "type":"warning",
+                        "detail":"_oqmd_NoFilterWarning: No filters were provided in the query. Returning all structures"
+                        }
+                    ],
             }
             return fes, meta_data
 
