@@ -13,7 +13,7 @@ from rest_framework_xml.renderers import XMLRenderer
 from rest_framework_yaml.renderers import YAMLRenderer
 
 from qmpy.rester import qmpy_rester
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 
 from collections import OrderedDict
 from qmpy.utils import oqmd_optimade as oqop
@@ -140,11 +140,11 @@ class OptimadePagination(LimitOffsetPagination):
         )
         if (not _warnings) and (not _oqmd_final_query):
             _warnings = [
-                    {
-                        "type":"warning",
-                        "detail":"_oqmd_NoFilterWarning: No filters were provided in the query"
-                        }
-                    ]
+                {
+                    "type": "warning",
+                    "detail": "_oqmd_NoFilterWarning: No filters were provided in the query",
+                }
+            ]
         meta_list = [
             (
                 "query",
@@ -238,13 +238,12 @@ class OptimadeStructureList(generics.ListAPIView):
 
         if not filters:
             meta_data = {
-                "warnings": 
-                [
+                "warnings": [
                     {
-                        "type":"warning",
-                        "detail":"_oqmd_NoFilterWarning: No filters were provided in the query. Returning all structures"
-                        }
-                    ],
+                        "type": "warning",
+                        "detail": "_oqmd_NoFilterWarning: No filters were provided in the query. Returning all structures",
+                    }
+                ],
             }
             return fes, meta_data
 
@@ -270,7 +269,19 @@ def OptimadeInfoData(request):
 
 def OptimadeVersionsData(request):
     data = oqop.get_optimade_data("versions")
-    return HttpResponse(data, content_type="application/json")
+    return HttpResponse(data, content_type="text/plain")
+
+
+def OptimadeVersionPage(request):
+    versions = oqop.get_optimade_data("versions").strip().split("\n")[1:]
+    versions = ["v{}".format(item) for item in versions]
+    request_version = request.path.strip("/").split("/")[-1]
+    data = {"query": request.path}
+    if request_version in versions:
+        return JsonResponse(data)
+    else:
+        data["error"] = "Version not supported"
+        return JsonResponse({"status": "false", "message": data}, status=553)
 
 
 def OptimadeLinksData(request):

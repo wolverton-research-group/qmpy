@@ -22,7 +22,7 @@
     "db_value": "composition__generic",
     "is_queryable": true,
     "length_prop": null,
-    "is_chem_form": false,
+    "is_chem_form": true,
     "is_set_operable": false,
     "is_logic_operable": false
   },
