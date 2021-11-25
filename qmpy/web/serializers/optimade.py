@@ -1,3 +1,4 @@
+import re
 from rest_framework import serializers
 from qmpy.materials.formation_energy import FormationEnergy
 from drf_queryfields import QueryFieldsMixin
@@ -71,7 +72,20 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
         return "".join(formula)
 
     def get_chemical_formula_anonymous(self, formationenergy):
-        return formationenergy.composition.generic
+        # The generic composition appears in the opposite order expected by OPTIMADE,
+        # e.g., ABCD4 vs A4BCD, so it needs to be reversed
+        formula = formationenergy.composition.generic
+
+        # Extract and sort the proportions from the generic formula,
+        # replacing "" with 1 for the sort, and then removing it again
+        numbers = [i if i != 1 else "" for i in sorted((int(i) if i else 1 for i in re.split(r"[A-Z][a-z]*", formula)[1:]), reverse=True)]
+
+        # Extract the anonymized element symbols (could also directly regenerate them here)
+        elements = tuple(re.findall(r"[A-Z][a-z]*", formula))
+
+        # Reconstruct the reversed formula
+        return "".join(f"{elem}{number}" for elem, number in zip(elements, numbers))
+
 
     def get_nelements(self, formationenergy):
         return formationenergy.composition.ntypes
