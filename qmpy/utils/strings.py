@@ -420,3 +420,13 @@ def read_fortran_array(string, expected_cols=None):
         if len(arr) != expected_cols:
             raise ValueError
     return arr
+
+
+def reverse_generic_order(formula):
+    # Split the formula to elements and amounts, reverse the amounts, recreate the formula
+    gen_comp = re_formula.findall(formula)
+    elts = [item[0] for item in gen_comp]
+    amts = [item[1] for item in gen_comp]
+    amts.reverse()
+    gen_comp = list(zip(elts, amts))
+    return "".join("{elt}{amt}".format(elt=elt, amt=amt) for elt, amt in gen_comp)
