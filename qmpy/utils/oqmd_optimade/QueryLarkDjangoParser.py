@@ -4,17 +4,25 @@ import re
 from glob import glob
 from lark import Lark, Tree, Token, Transformer
 from django.db.models import Q
-from qmpy.utils import parse_formula_regex
+from qmpy.utils import parse_formula_regex, reverse_generic_order
 import qmpy
 import json
-from rest_framework.exceptions import ParseError, APIException
+from rest_framework.exceptions import APIException
 from lark.exceptions import VisitError
 from copy import deepcopy
 from functools import reduce
 
 
-class LarkParserError(Exception):
-    pass
+class LarkParserError(APIException):
+    status_code = 400
+    default_detail = "Bad request"
+    default_code = "parse_error"
+
+
+class NotImplementedErr(APIException):
+    status_code = 501
+    default_detail = "Parts of the query is not implemented"
+    default_code = "not_implemented_error"
 
 
 def get_grammar_data():
@@ -63,7 +71,7 @@ class LarkParser(object):
             >>> if LarkParser().parse("nsites>1"): print("Success")
                 Success
             >>> tree = LarkParser().parse('chemical_formula_reduced=Al2O3').pretty()
-                ParseError: Error while parsing the filter with optimade grammar version :(1, 0, 0)
+                LarkParserError: Error while parsing the filter with optimade grammar version :(1, 0, 0)
         """
 
         try:
@@ -78,7 +86,7 @@ class LarkParser(object):
                 ".".join([str(item) for item in self.version])
             )
             error_message += "Check for grammatical errors in the query"
-            raise ParseError(error_message)
+            raise LarkParserError(error_message)
 
     def __repr__(self):
         if isinstance(self.tree, Tree):
@@ -182,13 +190,11 @@ class Lark2Django(Transformer):
             warn_message = "UnknownError"
         warn_message = "_oqmd_" + warn_message
         warn_message = " :: ".join([warn_message, str(object_label), message])
-        if str(object_label).startswith("_"):
-            raise_error = False
 
         if not raise_error:
             self.warnings.append(warn_message)
         else:
-            raise ParseError(warn_message)
+            raise NotImplementedErr(warn_message)
 
     def parse_raw_q(self, raw_query):
         """
@@ -265,7 +271,9 @@ class Lark2Django(Transformer):
             if a.db_value == self.property_dict["element"].db_value:
                 if not b.endswith("_"):
                     if not b in self.elements:
-                        raise ParseError("Unknown element name queried: {}".format(b))
+                        self.handle_error(
+                            "T2", "Unknown element name queried: ".format(b)
+                        )
                     b = b + "_"
         return Q(**{a.db_value: b})
 
@@ -312,7 +320,7 @@ class Lark2Django(Transformer):
 
     def has_all(self, a, b):
         """
-        Similar to HAS, but oeprable on multiple values with AND connector
+        Similar to HAS, but operable on multiple values with AND connector
 
         Example:
             elements HAS ALL "Al","Fe","O" : will add a filter to only those structures
@@ -381,17 +389,25 @@ class Lark2Django(Transformer):
 
     def starts(self, a, b):
         if a.is_chem_form:
+            if a.name == "chemical_formula_anonymous":
+                self.handle_error("T3", "Not supported for {}".format(a.name), "STARTS")
             _db_value = a.db_value.strip("__in")
             _db_value = _db_value + "__startswith"
-            if len(b) > 1:
+            if isinstance(b, str):
+                return Q(**{_db_value: b})
+            elif isinstance(b, list):
                 return reduce(self.and_, (Q(**{_db_value: ib}) for ib in b))
             else:
-                return Q(**{_db_value: b[0]})
+                self.handle_error(
+                    "T3", "Query not supported with the value {}".format(b), "STARTS"
+                )
         else:
             self.handle_error("T3", "Not supported for {}".format(a.name), "STARTS")
 
     def ends(self, a, b):
         if a.is_chem_form:
+            if a.name == "chemical_formula_anonymous":
+                self.handle_error("T3", "Not supported for {}".format(a.name), "STARTS")
             _db_value = a.db_value.strip("__in")
             _db_value = _db_value + "__endswith"
             if len(b) > 1:
@@ -506,10 +522,8 @@ class Lark2Django(Transformer):
                     self.handle_error("T4", error_message, a.name, raise_error=False)
                     return self.eq(self.property_dict["volume"], 0)
             elif a.name == "structure_features":
-                error_message = "No structure_features are included in OQMD"
-                error_message = (
-                    error_message + "A dummy query (id=-1) to return none is executed"
-                )
+                error_message = "No structure_features are included in OQMD. "
+                error_message += "A dummy query (id=-1) to return none is executed"
                 self.handle_error("T4", error_message, a.name, raise_error=False)
                 return self.eq(self.property_dict["id"], -1)
             self.handle_error("T1", "Cannot be queried in filter", a.name)
@@ -517,24 +531,29 @@ class Lark2Django(Transformer):
 
         if a.is_chem_form:
             b = b.strip('"')
-            if (len(b) > 0) and (a.name != "chemical_formula_anonymous"):
-                c_dict_lst = parse_formula_regex(b)
-                if len(c_dict_lst) == 1 and len(c_dict_lst[0].keys()) == 0:
-                    self.handle_error(
-                        "T1", "Chemical formula {} cannot be parsed".format(b), a.name
-                    )
-                    return
-                b = [
-                    " ".join(["%s%g" % (k, cd[k]) for k in sorted(cd.keys())])
-                    for cd in c_dict_lst
-                ]
+            if len(b) > 0:
+                if a.name == "chemical_formula_anonymous":
+                    # The amounts of generic elements are in opposite order between OPTIMADE and OQMD
+                    b = reverse_generic_order(b)
+                    error_message = "OQMD and OPTIMADE have different conventions for generic/anonymous formula."
+                    error_message += "Notice the difference in _oqmd_final_query and original filter query"
+                    self.handle_error("T4", error_message, a.name, raise_error=False)
+                else:
+                    c_dict_lst = parse_formula_regex(b)
+                    if len(c_dict_lst) == 1 and len(c_dict_lst[0].keys()) == 0:
+                        self.handle_error(
+                            "T1",
+                            "Chemical formula {} cannot be parsed".format(b),
+                            a.name,
+                        )
+                        return
+                    b = [
+                        " ".join(["%s%g" % (k, cd[k]) for k in sorted(cd.keys())])
+                        for cd in c_dict_lst
+                    ]
             if operation_fn in self.logic_functions:
-                error_message = (
-                    "It does not make sense to use logic operators in chemical formulae"
-                )
-                error_message = (
-                    error_message + "A dummy query (id=-1) to return none is executed"
-                )
+                error_message = "It does not make sense to use logic operators in chemical formulae. "
+                error_message += "A dummy query (id=-1) to return none is executed"
                 self.handle_error("T4", error_message, a.name, raise_error=False)
                 return self.eq(self.property_dict["id"], -1)
 
@@ -543,14 +562,7 @@ class Lark2Django(Transformer):
                 "T1", "Cannot be queried with operators <,>,<=,>=", a.name
             )
             return
-        try:
-            return operation_fn(a, b)
-        except ParseError as err:
-            raise err
-        except:
-            self.handle_error(
-                "T1", "Unknown error while converting to Django Q", a.name
-            )
+        return operation_fn(a, b)
 
     def constant_first_comparison(self, children):
         try:
@@ -635,16 +647,17 @@ class Lark2Django(Transformer):
                      may be added in later when the API specifications change
         """
         error_message_500 = (
-            "Your query could not be transformed to a Django query filter ."
+            "Your query could not be transformed to a Django query filter. "
         )
         error_message_500 += "Let us know if your query filter is in accoradnce with OQMD's current optimade version"
         try:
             django_q = self.transform(tree)
-        except ParseError as err:
-            raise err
         except VisitError as err:
-            if isinstance(err.orig_exc, ParseError):
-                raise ParseError(err.orig_exc)
+            # VisitError is the default exception for Lark parsers.
+            # The attributes err.rule and err.obj provide more info.
+            # err.orig_exc attribute retreives the original exception
+            if isinstance(err.orig_exc, NotImplementedErr):
+                raise err.orig_exc
             else:
                 raise APIException(error_message_500, code=500)
         except:

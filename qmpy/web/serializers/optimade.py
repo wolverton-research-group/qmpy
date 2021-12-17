@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from qmpy.materials.formation_energy import FormationEnergy
 from drf_queryfields import QueryFieldsMixin
+from qmpy.utils import reverse_generic_order
 
 
 class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer):
@@ -71,7 +72,10 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
         return "".join(formula)
 
     def get_chemical_formula_anonymous(self, formationenergy):
-        return formationenergy.composition.generic
+        # The generic composition appears in the opposite order between OPTIMADE and OQMD
+        # e.g., ABCD4 vs A4BCD, so it needs to be reversed
+        formula = formationenergy.composition.generic
+        return reverse_generic_order(formula)
 
     def get_nelements(self, formationenergy):
         return formationenergy.composition.ntypes

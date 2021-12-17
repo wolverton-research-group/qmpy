@@ -5,6 +5,7 @@ import os
 def get_optimade_data(label):
     """
     Function providing data for all optimade endpoints, except the data-endpoint
+
     Currently served end-points are:
         1. Info endpoint : Provides general information about the API implementation
         2. Info/Structures endpoint : Provides information specific to the structures-data
