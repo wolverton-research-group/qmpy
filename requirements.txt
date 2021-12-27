@@ -1,15 +1,15 @@
 ase
 bokeh == 0.12.15
 Django == 2.2.24
-django-crispy-forms == 1.8.1
+django-crispy-forms
 django-extensions > 2.2.5
-django-filter
+django-filter == 21.1
 djangorestframework > 3.10
-djangorestframework-filters
 djangorestframework-queryfields
 djangorestframework-xml
 djangorestframework-yaml
 lark-parser
+lxml
 matplotlib
 mysqlclient
 networkx
@@ -20,6 +20,7 @@ PyCifRW >= 4.3
 pygraphviz
 pyparsing
 pytest
+python-dotenv
 python-memcached
 PyYAML 
 requests

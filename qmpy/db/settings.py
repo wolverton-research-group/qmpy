@@ -1,17 +1,20 @@
 # Django settings for oqmd project.
 import os
+from dotenv import load_dotenv, find_dotenv
+
+# Loading environment variables from .env file
+load_dotenv(find_dotenv())
 
 INSTALL_PATH = os.path.dirname(os.path.abspath(__file__))
 INSTALL_PATH = os.path.split(INSTALL_PATH)[0]
 INSTALL_PATH = os.path.split(INSTALL_PATH)[0]
 
-# DEBUG = False
-DEBUG = True
+DEBUG = True if os.environ.get("OQMD_WEB_debug").lower() == 'true' else False
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
     ("Scott Kirklin", "scott.kirklin@gmail.com"),
-    ("Vinay Hegde", "hegdevinayi@gmail.com"),
+    ("OQMD Dev Team", "oqmd.questions@gmail.com"),
 )
 
 MANAGERS = ADMINS
@@ -19,15 +22,15 @@ MANAGERS = ADMINS
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": os.environ.get("qmdb_v1_1_name"),
-        "USER": os.environ.get("qmdb_v1_1_user"),
-        "PASSWORD": os.environ.get("qmdb_v1_1_pswd"),
-        "HOST": os.environ.get("qmdb_v1_1_host"),
-        "PORT": os.environ.get("qmdb_v1_1_port"),
+        "NAME": os.environ.get("OQMD_DB_name"),
+        "USER": os.environ.get("OQMD_DB_user"),
+        "PASSWORD": os.environ.get("OQMD_DB_pswd"),
+        "HOST": os.environ.get("OQMD_DB_host"),
+        "PORT": os.environ.get("OQMD_DB_port"),
     }
 }
 
-ALLOWED_HOSTS = ["larue.northwestern.edu", "www.larue.northwestern.edu"]
+ALLOWED_HOSTS = os.environ.get("OQMD_WEB_hosts").split(",")
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -65,11 +68,11 @@ MEDIA_URL = "/media/"
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = "/home/oqmd/oqmd2.org/static/"
+STATIC_ROOT = os.environ.get("OQMD_STATIC_root")
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
-STATIC_URL = "/static/"
+STATIC_URL = os.environ.get("OQMD_STATIC_url")
 
 # Additional locations of static files
 STATICFILES_DIRS = (
@@ -88,7 +91,7 @@ STATICFILES_FINDERS = (
 )
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = "h23o7ac@^_upzx*zzs%1t1bn6#*(7@b3$kp*v9)6hbf%rkr!%z"
+SECRET_KEY = os.environ.get("OQMD_DJANGO_secretkey")
 
 TEMPLATES = [
     {

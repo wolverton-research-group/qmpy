@@ -1,10 +1,12 @@
 import json
 import os
 
-WEBPORT = os.environ.get("web_port")
+REST_WEBHOST = os.environ.get("OQMD_REST_host")
+REST_WEBPORT = os.environ.get("OQMD_REST_port")
 
-REST_OPTIMADE = "http://larue.northwestern.edu:" + WEBPORT + "/optimade"
-REST_OQMDAPI = "http://larue.northwestern.edu:" + WEBPORT + "/oqmdapi"
+REST_OPTIMADE = "http://{}:{}/optimade".format(REST_WEBHOST,REST_WEBPORT)
+REST_OQMDAPI  = "http://{}:{}/oqmdapi".format(REST_WEBHOST,REST_WEBPORT)
+
 REST_END_POINT = REST_OQMDAPI
 
 
