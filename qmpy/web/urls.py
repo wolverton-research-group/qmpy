@@ -81,8 +81,8 @@ urlpatterns += [
     url(r"^analysis/gclp/$", views.gclp_view),
     url(r"^analysis/phase_diagram/$", views.phase_diagram_view),
     url(r"^analysis/chemical_potentials/$", views.chem_pot_view),
-    url(r"^analysis/spacegroup/(?P<spacegroup>.*)", views.sg_view),
-    url(r"^analysis/operation/(?P<operation>.*)", views.op_view),
+    url(r"^analysis/spacegroup/(?P<spacegroup>.*)$", views.sg_view),
+    url(r"^analysis/operation/(?P<operation>.*)$", views.op_view),
     url(r"^analysis/visualize$", views.vis_data),
     url(r"^analysis/visualize/custom$", views.jsmol),
     ## documentation

@@ -1,8 +1,8 @@
 {% extends "base_site.html" %}
 {% load static %}
 
-{% block extrastyle %}
-<script type="text/javascript" src={% static "js/jsmol/JSmol.min.js" %}></script>
+{% block extrascript %}
+<script type="text/javascript" src={% static "js/jsmol/JSmol.min.nojq.js" %}></script>
 {% endblock %}
 
 {% block title %}Operation: {{ operation.id }}{% endblock %}
@@ -20,7 +20,7 @@
 	</thead>
 	<tbody>
 		{% for spg in operation.spacegroup_set.all %}
-		<tr class=clickableRow href="/analysis/spacegroup/{{spg.id}}">
+		<tr class=clickableRow href="/analysis/spacegroup/{{spg.pk}}">
 			<td>{{spg.symbol}}</td>
 			<td>{{spg.number}}</td>
 		</tr>
