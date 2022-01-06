@@ -301,14 +301,10 @@ c$.setOabc = Clazz.defineMethod (c$, "setOabc",
 function (abcabg, params, ucnew) {
 if (abcabg != null) {
 if (params == null) params =  Clazz.newFloatArray (6, 0);
-if (abcabg.indexOf ("=") >= 0) {
-var tokens = JU.PT.split (abcabg.$replace (",", " "), "=");
-if (tokens.length == 7) {
-for (var i = 0; i < 6; i++) if (Float.isNaN (params[i] = JU.PT.parseFloat (tokens[i + 1]))) return null;
+var tokens = JU.PT.split (abcabg.$replace (',', '='), "=");
+if (tokens.length >= 12) for (var i = 0; i < 6; i++) params[i] = JU.PT.parseFloat (tokens[i * 2 + 1]);
 
-} else {
-return null;
-}}}if (ucnew == null) return null;
+}if (ucnew == null) return null;
 var f = JU.SimpleUnitCell.newA (params).getUnitCellAsArray (true);
 ucnew[1].set (f[0], f[1], f[2]);
 ucnew[2].set (f[3], f[4], f[5]);
@@ -336,6 +332,10 @@ minXYZ.z = 0;
 maxXYZ.z = 1;
 }
 }, "~N,JU.P3i,JU.P3i,~N");
+Clazz.overrideMethod (c$, "toString", 
+function () {
+return "[" + this.a + " " + this.b + " " + this.c + " " + this.alpha + " " + this.beta + " " + this.gamma + "]";
+});
 Clazz.defineStatics (c$,
 "toRadians", 0.017453292,
 "INFO_DIMENSIONS", 6,

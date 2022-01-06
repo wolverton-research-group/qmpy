@@ -31,6 +31,7 @@ elementSymbol = JU.PT.trim (elementSymbol, "-");
 atom.formalCharge = -1;
 }atom.elementSymbol = elementSymbol;
 }
+this.asc.setModelInfoForSet ("dimension", "2D", this.asc.iSet);
 }, "~N");
 Clazz.defineMethod (c$, "readBonds", 
  function (bondCount) {

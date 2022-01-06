@@ -252,7 +252,7 @@ this.pt0.x *= this.vwr.tm.width / 100;
 this.pt0.y *= this.vwr.tm.height / 100;
 this.diameter = Clazz.floatToInt (this.diameter * this.vwr.getScreenDim () / 100);
 }this.diameter *= f;
-this.pt1i.set (Clazz.floatToInt (this.pt0.x * f), Clazz.floatToInt (this.vwr.tm.height - this.pt0.y * f), Clazz.floatToInt (this.vwr.tm.cameraDistance));
+this.pt1i.set (Clazz.floatToInt (this.pt0.x), Clazz.floatToInt (this.vwr.tm.height - this.pt0.y), Clazz.floatToInt (this.vwr.tm.cameraDistance));
 this.g3d.fillSphereI (this.diameter, this.pt1i);
 });
 Clazz.defineMethod (c$, "renderXyArrow", 
@@ -346,7 +346,7 @@ Clazz.defineMethod (c$, "renderInfo",
  function () {
 if (this.isExport || this.mesh.title == null || this.vwr.getDrawHover () || !this.g3d.setC (this.vwr.cm.colixBackgroundContrast)) return;
 for (var i = this.dmesh.pc; --i >= 0; ) if (this.isPolygonDisplayable (i)) {
-var size = this.vwr.getFloat (570425356);
+var size = this.vwr.getFloat (570425355);
 if (size <= 0) size = 14;
 this.vwr.gdata.setFontFid (this.vwr.gdata.getFontFid (size * this.imageFontScaling));
 var s = this.mesh.title[i < this.mesh.title.length ? i : this.mesh.title.length - 1];

@@ -1,5 +1,5 @@
 Clazz.declarePackage ("JM");
-Clazz.load (["JM.AtomCollection"], "JM.BondCollection", ["JU.AU", "$.BS", "JM.Bond", "$.BondIteratorSelected", "$.BondSet", "$.HBond", "JU.BSUtil", "$.C", "$.Edge", "$.Logger"], function () {
+Clazz.load (["JM.AtomCollection"], "JM.BondCollection", ["JU.AU", "$.BS", "JM.Bond", "$.BondIteratorSelected", "$.BondSet", "$.HBond", "JU.BSUtil", "$.C", "$.Edge"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.bo = null;
 this.bondCount = 0;
@@ -12,6 +12,7 @@ this.bsAromaticSingle = null;
 this.bsAromaticDouble = null;
 this.bsAromatic = null;
 this.haveHiddenBonds = false;
+this.haveAtropicBonds = false;
 Clazz.instantialize (this, arguments);
 }, JM, "BondCollection", JM.AtomCollection);
 Clazz.defineMethod (c$, "setupBC", 
@@ -176,7 +177,7 @@ if (matchNull || newOrder == (bond.order & -257 | 131072) || (order & bond.order
 bsDelete.set (i);
 nDeleted++;
 }}
-if (nDeleted > 0) this.dBm (bsDelete, false);
+if (nDeleted > 0) (this).deleteBonds (bsDelete, false);
 return  Clazz.newIntArray (-1, [0, nDeleted]);
 }, "~N,~N,~N,JU.BS,JU.BS,~B,~B");
 Clazz.defineMethod (c$, "fixD", 
@@ -192,10 +193,6 @@ var dABcalc = atom1.getBondingRadius () + atom2.getBondingRadius ();
 return ((minFrac ? dAB >= dABcalc * minD : d2 >= minD) && (maxfrac ? dAB <= dABcalc * maxD : d2 <= maxD));
 }return (d2 >= minD && d2 <= maxD);
 }, "JM.Atom,JM.Atom,~N,~N,~B,~B,~B");
-Clazz.defineMethod (c$, "dBm", 
-function (bsBonds, isFullModel) {
-(this).deleteBonds (bsBonds, isFullModel);
-}, "JU.BS,~B");
 Clazz.defineMethod (c$, "dBb", 
 function (bsBond, isFullModel) {
 var iDst = bsBond.nextSetBit (0);
@@ -435,50 +432,6 @@ bs.set (this.bo[i].atom2.i);
 return bs;
 }
 }, "~N,~O");
-Clazz.defineMethod (c$, "assignBond", 
-function (bondIndex, type) {
-var bondOrder = type.charCodeAt (0) - 48;
-var bond = this.bo[bondIndex];
-(this).clearDB (bond.atom1.i);
-switch (type) {
-case '0':
-case '1':
-case '2':
-case '3':
-break;
-case 'p':
-case 'm':
-bondOrder = JU.Edge.getBondOrderNumberFromOrder (bond.getCovalentOrder ()).charCodeAt (0) - 48 + (type == 'p' ? 1 : -1);
-if (bondOrder > 3) bondOrder = 1;
- else if (bondOrder < 0) bondOrder = 3;
-break;
-default:
-return null;
-}
-var bsAtoms =  new JU.BS ();
-try {
-if (bondOrder == 0) {
-var bs =  new JU.BS ();
-bs.set (bond.index);
-bsAtoms.set (bond.atom1.i);
-bsAtoms.set (bond.atom2.i);
-this.dBm (bs, false);
-return bsAtoms;
-}bond.setOrder (bondOrder | 131072);
-if (bond.atom1.getElementNumber () != 1 && bond.atom2.getElementNumber () != 1) {
-this.removeUnnecessaryBonds (bond.atom1, false);
-this.removeUnnecessaryBonds (bond.atom2, false);
-}bsAtoms.set (bond.atom1.i);
-bsAtoms.set (bond.atom2.i);
-} catch (e) {
-if (Clazz.exceptionOf (e, Exception)) {
-JU.Logger.error ("Exception in seBondOrder: " + e.toString ());
-} else {
-throw e;
-}
-}
-return bsAtoms;
-}, "~N,~S");
 Clazz.defineMethod (c$, "removeUnnecessaryBonds", 
 function (atom, deleteAtom) {
 var bs =  new JU.BS ();
@@ -491,7 +444,7 @@ if (atom2.getElementNumber () == 1) bs.set (bonds[i].getOtherAtom (atom).i);
 } else {
 bsBonds.set (bonds[i].index);
 }
-if (bsBonds.nextSetBit (0) >= 0) this.dBm (bsBonds, false);
+if (bsBonds.nextSetBit (0) >= 0) (this).deleteBonds (bsBonds, false);
 if (deleteAtom) bs.set (atom.i);
 if (bs.nextSetBit (0) >= 0) this.vwr.deleteAtoms (bs, false);
 }, "JM.Atom,~B");

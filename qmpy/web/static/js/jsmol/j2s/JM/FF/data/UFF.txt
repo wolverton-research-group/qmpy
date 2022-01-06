@@ -26,7 +26,7 @@ atom [#4]     Be3+2       Generic Be
 atom [#5]     B_2         Trigonal planar boron
 atom [#5D4]   B_3         Tetrahedral boron
 atom [#6]     C_3         Generic sp3 C
-atom [C^2]    C_2         sp2 non-aromatic C=
+atom [C^2]    C_2         sp2 non-aromatic C= // BH ^ is handled in ForceFieldUFF.getSearch as connected(double)
 atom [C+1]    C_2+        trivalent C (cation)  // bh added Jmol 12.0.RC9
 atom [C-1]    C_3         trivalent C (anion)  // bh added Jmol 12.0.RC9
 atom [CA1]    C_2         allylic C (anion or cation) // bh added Jmol 12.0.RC9

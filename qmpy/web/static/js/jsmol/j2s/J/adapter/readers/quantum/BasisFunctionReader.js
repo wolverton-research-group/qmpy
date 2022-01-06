@@ -2,6 +2,8 @@ Clazz.declarePackage ("J.adapter.readers.quantum");
 Clazz.load (["J.adapter.smarter.AtomSetCollectionReader", "java.util.Hashtable", "JU.Lst", "J.quantum.QS"], "J.adapter.readers.quantum.BasisFunctionReader", ["java.util.Arrays", "JU.PT", "JU.Logger"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.shells = null;
+this.slaters = null;
+this.slaterArray = null;
 this.moData = null;
 this.orbitals = null;
 this.nOrbitals = 0;
@@ -120,6 +122,8 @@ function () {
 this.orbitals =  new JU.Lst ();
 this.moData =  new java.util.Hashtable ();
 this.alphaBeta = "";
+this.slaterArray = null;
+this.slaters = null;
 });
 c$.$BasisFunctionReader$MOEnergySorter$ = function () {
 Clazz.pu$h(self.c$);

@@ -18,6 +18,30 @@ throw e;
 }
 this.isTainted = false;
 }, "J.api.SC,~N,~N");
+Clazz.overrideMethod (c$, "menuHidePopup", 
+function (popup) {
+try {
+(popup).setVisible (false);
+} catch (e) {
+if (Clazz.exceptionOf (e, Exception)) {
+} else {
+throw e;
+}
+}
+}, "J.api.SC");
+Clazz.defineMethod (c$, "exitBondRotation", 
+function () {
+try {
+if (this.bondRotationCheckBox != null) (this.bondRotationCheckBox).setSelected (false);
+if (this.prevBondCheckBox != null) (this.prevBondCheckBox).setSelected (true);
+} catch (e) {
+if (Clazz.exceptionOf (e, Exception)) {
+} else {
+throw e;
+}
+}
+Clazz.superCall (this, J.awtjs2d.JSModelKitPopup, "exitBondRotation", []);
+});
 Clazz.overrideMethod (c$, "getImageIcon", 
 function (fileName) {
 return "J/modelkit/images/" + fileName;

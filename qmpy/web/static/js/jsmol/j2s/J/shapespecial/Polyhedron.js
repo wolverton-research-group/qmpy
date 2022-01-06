@@ -278,9 +278,9 @@ this.info = null;
 var sm = vwr.getSmilesMatcher ();
 try {
 var details = (this.distanceRef <= 0 ? null : "r=" + this.distanceRef);
-this.smarts = sm.polyhedronToSmiles (this.centralAtom, this.faces, this.nVertices, null, 8192, null);
+this.polySmiles = sm.polyhedronToSmiles (this.centralAtom, this.faces, this.nVertices, this.vertices, 1 | 65536 | (JU.Logger.debugging ? 131072 : 0), details);
+this.smarts = sm.polyhedronToSmiles (this.centralAtom, this.faces, this.nVertices, null, 16384, null);
 this.smiles = sm.polyhedronToSmiles (this.centralAtom, this.faces, this.nVertices, this.vertices, 1, null);
-this.polySmiles = sm.polyhedronToSmiles (this.centralAtom, this.faces, this.nVertices, this.vertices, 196609, details);
 } catch (e) {
 if (Clazz.exceptionOf (e, Exception)) {
 } else {

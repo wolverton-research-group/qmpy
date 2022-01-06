@@ -167,48 +167,56 @@ case 136314895:
 case 2097184:
 var type = (tokType == 136314895 ? J.c.STR.HELIX : J.c.STR.SHEET);
 for (i = ac; --i >= 0; ) {
+if (at[i] == null) continue;
 if ((g = at[i].group).isWithinStructure (type)) g.setAtomBits (bs);
 i = g.firstAtomIndex;
 }
 break;
 case 2097188:
 for (i = ac; --i >= 0; ) {
+if (at[i] == null) continue;
 if ((g = at[i].group).isCarbohydrate ()) g.setAtomBits (bs);
 i = g.firstAtomIndex;
 }
 break;
 case 2097156:
 for (i = ac; --i >= 0; ) {
+if (at[i] == null) continue;
 if ((g = at[i].group).isDna ()) g.setAtomBits (bs);
 i = g.firstAtomIndex;
 }
 break;
 case 2097166:
 for (i = ac; --i >= 0; ) {
+if (at[i] == null) continue;
 if ((g = at[i].group).isNucleic ()) g.setAtomBits (bs);
 i = g.firstAtomIndex;
 }
 break;
 case 2097168:
 for (i = ac; --i >= 0; ) {
+if (at[i] == null) continue;
 if ((g = at[i].group).isProtein ()) g.setAtomBits (bs);
 i = g.firstAtomIndex;
 }
 break;
 case 2097170:
 for (i = ac; --i >= 0; ) {
+if (at[i] == null) continue;
 if ((g = at[i].group).isPurine ()) g.setAtomBits (bs);
 i = g.firstAtomIndex;
 }
 break;
 case 2097172:
 for (i = ac; --i >= 0; ) {
+if (at[i] == null) continue;
 if ((g = at[i].group).isPyrimidine ()) g.setAtomBits (bs);
 i = g.firstAtomIndex;
 }
 break;
 case 2097174:
 for (i = ac; --i >= 0; ) {
+if (at[i] == null) continue;
 if ((g = at[i].group).isRna ()) g.setAtomBits (bs);
 i = g.firstAtomIndex;
 }
@@ -275,7 +283,7 @@ var at0 = (bsAtoms == null ? 0 : bsAtoms.nextSetBit (0));
 if (at0 < 0) return "";
 if (bsAtoms != null && mode == 4138) {
 bsAtoms = JU.BSUtil.copy (bsAtoms);
-for (var i = this.ms.ac; --i >= 0; ) if (Float.isNaN (atoms[i].group.getGroupParameter (1111490569)) || Float.isNaN (atoms[i].group.getGroupParameter (1111490570))) bsAtoms.clear (i);
+for (var i = this.ms.ac; --i >= 0; ) if (atoms[i] == null || Float.isNaN (atoms[i].group.getGroupParameter (1111490569)) || Float.isNaN (atoms[i].group.getGroupParameter (1111490570))) bsAtoms.clear (i);
 
 }var at1 = (bsAtoms == null ? this.ms.ac : bsAtoms.length ()) - 1;
 var im0 = atoms[at0].mi;
@@ -400,6 +408,7 @@ iLast = i = g.lastAtomIndex;
 }
 var lastStrucNo =  Clazz.newIntArray (this.ms.mc, 0);
 for (var i = 0; i < this.ms.ac; i++) {
+if (at[i] == null) continue;
 var modelIndex = at[i].mi;
 if (!bsModels.get (modelIndex)) {
 i = am[modelIndex].firstAtomIndex + am[modelIndex].act - 1;
@@ -411,6 +420,7 @@ if (iLast < 1000 && iLast > lastStrucNo[modelIndex]) lastStrucNo[modelIndex] = i
 i = g.lastAtomIndex;
 }}
 for (var i = 0; i < this.ms.ac; i++) {
+if (at[i] == null) continue;
 var modelIndex = at[i].mi;
 if (!bsModels.get (modelIndex)) {
 i = am[modelIndex].firstAtomIndex + am[modelIndex].act - 1;
@@ -635,6 +645,7 @@ var bsModels = JU.BS.newN (this.ms.mc);
 var isAll = (bsAtoms == null);
 var i0 = (isAll ? this.ms.ac - 1 : bsAtoms.nextSetBit (0));
 for (var i = i0; i >= 0; i = (isAll ? i - 1 : bsAtoms.nextSetBit (i + 1))) {
+if (this.ms.at[i] == null) continue;
 var modelIndex = this.ms.am[this.ms.at[i].mi].trajectoryBaseIndex;
 if (this.ms.isJmolDataFrameForModel (modelIndex)) continue;
 bsModels.set (modelIndex);

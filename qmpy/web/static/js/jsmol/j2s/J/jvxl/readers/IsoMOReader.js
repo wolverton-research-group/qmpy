@@ -132,8 +132,8 @@ if (line.indexOf ("%S") >= 0) line = JU.PT.formatStringS (line, "S", mo != null 
 if (line.indexOf ("%O") >= 0) {
 var obj = (mo == null ? null : mo.get ("occupancy"));
 var o = (obj == null ? 0 : obj.floatValue ());
-line = JU.PT.formatStringS (line, "O", obj != null && ++rep != 0 ? (o == Clazz.floatToInt (o) ? "" + Clazz.floatToInt (o) : JU.PT.formatF (o, 0, 4, false, false)) : "");
-}if (line.indexOf ("%T") >= 0) line = JU.PT.formatStringS (line, "T", mo != null && mo.containsKey ("type") && ++rep != 0 ? "" + mo.get ("type") : "");
+line = JU.PT.formatStringS (line, "O", obj != null && this.params.qm_moLinearCombination == null && ++rep != 0 ? (o == Clazz.floatToInt (o) ? "" + Clazz.floatToInt (o) : JU.PT.formatF (o, 0, 4, false, false)) : "");
+}if (line.indexOf ("%T") >= 0) line = JU.PT.formatStringS (line, "T", mo != null && mo.containsKey ("type") ? (this.params.qm_moLinearCombination == null && ++rep != 0 ? "" + mo.get ("type") : "") + ((this.params.isSquared || this.params.isSquaredLinear) && ++rep != 0 ? " ^2" : "") : "");
 if (line.equals ("string")) {
 this.params.title[iLine] = "";
 return;

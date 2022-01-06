@@ -207,7 +207,7 @@ this.addMo (sym, moPt, occ, energy);
 var iAtom0 = this.asc.getLastAtomSetAtomIndex ();
 for (var i = 0; i < nBF; i++) this.slaterArray[i].atomNo += iAtom0 + 1;
 
-this.setSlaters (true, true);
+this.setSlaters (true);
 this.sortOrbitals ();
 this.setMOs ("eV");
 }, "~S");

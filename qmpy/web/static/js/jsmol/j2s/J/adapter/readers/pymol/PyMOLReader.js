@@ -204,7 +204,7 @@ this.desiredModelNumber = pymolState;
 }var n = names.size ();
 for (var j = 0; j < this.stateCount; j++) {
 if (!this.doGetModel (++this.nModels, null)) continue;
-this.model (this.nModels);
+this.model (this.nModels, null);
 this.pymolScene.currentAtomSetIndex = this.asc.iSet;
 if (this.isTrajectory) {
 this.trajectoryStep =  new Array (this.totalAtomCount);

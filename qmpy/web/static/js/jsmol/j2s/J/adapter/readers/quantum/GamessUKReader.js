@@ -47,7 +47,7 @@ var tokens = this.getTokens ();
 var atomicNumber = Clazz.floatToInt (this.parseFloatStr (tokens[2]));
 var atom = this.setAtomCoordScaled (null, tokens, 3, 0.5291772);
 atom.elementSymbol = J.adapter.smarter.AtomSetCollectionReader.getElementSymbol (atomicNumber);
-this.atomNames.addLast (atom.atomName = tokens[1]);
+this.setAtom (atom, atomicNumber, tokens[1], null);
 }
 });
 Clazz.overrideMethod (c$, "fixShellTag", 

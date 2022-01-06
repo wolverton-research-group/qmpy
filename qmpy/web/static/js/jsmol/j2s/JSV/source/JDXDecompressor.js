@@ -1,32 +1,27 @@
 Clazz.declarePackage ("JSV.source");
-Clazz.load (null, "JSV.source.JDXDecompressor", ["java.lang.Double", "JSV.common.Coordinate", "JU.Logger"], function () {
+Clazz.load (["java.util.Iterator"], "JSV.source.JDXDecompressor", ["java.lang.Double", "JSV.common.Coordinate", "JU.Logger"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.xFactor = 0;
 this.yFactor = 0;
-this.deltaX = 0;
 this.nPoints = 0;
 this.ich = 0;
-this.lineNumber = 0;
 this.t = null;
 this.firstX = 0;
-this.dx = 0;
+this.lastX = 0;
 this.maxY = 4.9E-324;
 this.minY = 1.7976931348623157E308;
 this.debugging = false;
 this.xyCoords = null;
-this.ipt = 0;
 this.line = null;
-this.lastLine = null;
 this.lineLen = 0;
 this.errorLog = null;
-this.difVal = -2147483648;
 this.lastDif = -2147483648;
 this.dupCount = 0;
-this.xval = 0;
-this.yval = 0;
-this.firstLastX = null;
+this.nptsFound = 0;
+this.lastY = 0;
+this.isDIF = true;
 Clazz.instantialize (this, arguments);
-}, JSV.source, "JDXDecompressor");
+}, JSV.source, "JDXDecompressor", null, java.util.Iterator);
 Clazz.defineMethod (c$, "getMinY", 
 function () {
 return this.minY;
@@ -36,250 +31,157 @@ function () {
 return this.maxY;
 });
 Clazz.makeConstructor (c$, 
-function (t, firstX, xFactor, yFactor, deltaX, nPoints) {
+function (t, firstX, lastX, xFactor, yFactor, nPoints) {
 this.t = t;
 this.firstX = firstX;
+this.lastX = lastX;
 this.xFactor = xFactor;
 this.yFactor = yFactor;
-this.deltaX = deltaX;
 this.nPoints = nPoints;
-this.lineNumber = t.labelLineNo;
 this.debugging = JU.Logger.isActiveLevel (6);
 }, "JSV.source.JDXSourceStreamTokenizer,~N,~N,~N,~N,~N");
-Clazz.defineMethod (c$, "addPoint", 
- function (pt) {
-if (this.ipt == this.xyCoords.length) {
-var t =  new Array (this.ipt * 2);
-System.arraycopy (this.xyCoords, 0, t, 0, this.ipt);
-this.xyCoords = t;
-}var d = pt.getYVal ();
-if (d > this.maxY) this.maxY = d;
- else if (d < this.minY) this.minY = d;
-if (this.debugging) this.logError ("Coord: " + this.ipt + pt);
-this.xyCoords[this.ipt++] = pt;
-this.firstLastX[1] = pt.getXVal ();
-}, "JSV.common.Coordinate");
+Clazz.makeConstructor (c$, 
+function (line, lastY) {
+this.line = line.trim ();
+this.lineLen = line.length;
+this.lastY = lastY;
+}, "~S,~N");
 Clazz.defineMethod (c$, "decompressData", 
-function (errorLog, firstLastX) {
+function (errorLog) {
 this.errorLog = errorLog;
-this.firstLastX = firstLastX;
-if (this.debugging) this.logError ("firstX=" + this.firstX + " xFactor=" + this.xFactor + " yFactor=" + this.yFactor + " deltaX=" + this.deltaX + " nPoints=" + this.nPoints);
-this.testAlgorithm ();
+var deltaXcalc = JSV.common.Coordinate.deltaX (this.lastX, this.firstX, this.nPoints);
+if (this.debugging) this.logError ("firstX=" + this.firstX + " lastX=" + this.lastX + " xFactor=" + this.xFactor + " yFactor=" + this.yFactor + " deltaX=" + deltaXcalc + " nPoints=" + this.nPoints);
 this.xyCoords =  new Array (this.nPoints);
-var difMax = Math.abs (0.35 * this.deltaX);
-var dif14 = Math.abs (1.4 * this.deltaX);
-var dif06 = Math.abs (0.6 * this.deltaX);
+var difFracMax = 0.5;
+var prevXcheck = 0;
+var prevIpt = 0;
+var lastXExpected = this.lastX;
+var x = this.lastX = this.firstX;
+var lastLine = null;
+var ipt = 0;
+var yval = 0;
+var haveWarned = false;
+var lineNumber = this.t.labelLineNo;
 try {
 while ((this.line = this.t.readLineTrimmed ()) != null && this.line.indexOf ("##") < 0) {
-this.lineNumber++;
-if (this.debugging) this.logError (this.lineNumber + "\t" + this.line);
+lineNumber++;
 if ((this.lineLen = this.line.length) == 0) continue;
 this.ich = 0;
-var isCheckPoint = (this.lastDif != -2147483648);
-this.xval = this.getValueDelim () * this.xFactor;
-if (this.ipt == 0) {
-firstLastX[0] = this.xval;
-this.dx = this.firstX - this.xval;
-}this.xval += this.dx;
-var point =  new JSV.common.Coordinate ().set (this.xval, (this.yval = this.getYValue ()) * this.yFactor);
-if (this.ipt == 0) {
-this.addPoint (point);
+var isCheckPoint = this.isDIF;
+var xcheck = this.readSignedFloat () * this.xFactor;
+yval = this.nextValue (yval);
+if (!isCheckPoint && ipt > 0) x += deltaXcalc;
+if (this.debugging) this.logError ("Line: " + lineNumber + " isCP=" + isCheckPoint + "\t>>" + this.line + "<<\n x, xcheck " + x + " " + x / this.xFactor + " " + xcheck / this.xFactor + " " + deltaXcalc / this.xFactor);
+var y = yval * this.yFactor;
+var point =  new JSV.common.Coordinate ().set (x, y);
+if (ipt == 0 || !isCheckPoint) {
+this.addPoint (point, ipt++);
+} else if (ipt < this.nPoints) {
+var lastY = this.xyCoords[ipt - 1].getYVal ();
+if (y != lastY) {
+this.xyCoords[ipt - 1] = point;
+this.logError (lastLine + "\n" + this.line + "\nY-value Checkpoint Error! Line " + lineNumber + " for y=" + y + " yLast=" + lastY);
+}if (xcheck == prevXcheck || (xcheck < prevXcheck) != (deltaXcalc < 0)) {
+this.logError (lastLine + "\n" + this.line + "\nX-sequence Checkpoint Error! Line " + lineNumber + " order for xCheck=" + xcheck + " after prevXCheck=" + prevXcheck);
+}var xcheckDif = Math.abs (xcheck - prevXcheck);
+var xiptDif = Math.abs ((ipt - prevIpt) * deltaXcalc);
+var fracDif = Math.abs ((xcheckDif - xiptDif)) / xcheckDif;
+if (this.debugging) System.err.println ("JDXD fracDif = " + xcheck + "\t" + prevXcheck + "\txcheckDif=" + xcheckDif + "\txiptDif=" + xiptDif + "\tf=" + fracDif);
+if (fracDif > difFracMax) {
+this.logError (lastLine + "\n" + this.line + "\nX-value Checkpoint Error! Line " + lineNumber + " expected " + xiptDif + " but X-Sequence Check difference reads " + xcheckDif);
+}}prevIpt = (ipt == 1 ? 0 : ipt);
+prevXcheck = xcheck;
+var nX = 0;
+while (this.hasNext ()) {
+var ich0 = this.ich;
+if (this.debugging) this.logError ("line " + lineNumber + " char " + ich0 + ":" + this.line.substring (0, ich0) + ">>>>" + this.line.substring (this.ich));
+if (Double.isNaN (yval = this.nextValue (yval))) {
+this.logError ("There was an error reading line " + lineNumber + " char " + ich0 + ":" + this.line.substring (0, ich0) + ">>>>" + this.line.substring (ich0));
 } else {
-var lastPoint = this.xyCoords[this.ipt - 1];
-var xdif = Math.abs (lastPoint.getXVal () - point.getXVal ());
-if (isCheckPoint && xdif < difMax) {
-this.xyCoords[this.ipt - 1] = point;
-var y = lastPoint.getYVal ();
-var y1 = point.getYVal ();
-if (y1 != y) this.logError (this.lastLine + "\n" + this.line + "\nY-value Checkpoint Error! Line " + this.lineNumber + " for y1=" + y1 + " y0=" + y);
-} else {
-this.addPoint (point);
-if (xdif < dif06 || xdif > dif14) this.logError (this.lastLine + "\n" + this.line + "\nX-sequence Checkpoint Error! Line " + this.lineNumber + " |x1-x0|=" + xdif + " instead of " + Math.abs (this.deltaX) + " for x1=" + point.getXVal () + " x0=" + lastPoint.getXVal ());
-}}while (this.ich < this.lineLen || this.difVal != -2147483648 || this.dupCount > 0) {
-this.xval += this.deltaX;
-if (!Double.isNaN (this.yval = this.getYValue ())) this.addPoint ( new JSV.common.Coordinate ().set (this.xval, this.yval * this.yFactor));
-}
-this.lastLine = this.line;
+x += deltaXcalc;
+if (yval == 1.7976931348623157E308) {
+yval = 0;
+this.logError ("Point marked invalid '?' for line " + lineNumber + " char " + ich0 + ":" + this.line.substring (0, ich0) + ">>>>" + this.line.substring (ich0));
+}this.addPoint ( new JSV.common.Coordinate ().set (x, yval * this.yFactor), ipt++);
+if (this.debugging) this.logError ("nx=" + ++nX + " " + x + " " + x / this.xFactor + " yval=" + yval);
+}}
+this.lastX = x;
+if (!haveWarned && ipt > this.nPoints) {
+this.logError ("! points overflow nPoints!");
+haveWarned = true;
+}lastLine = this.line;
 }
 } catch (ioe) {
 if (Clazz.exceptionOf (ioe, java.io.IOException)) {
+ioe.printStackTrace ();
 } else {
 throw ioe;
 }
 }
-if (this.nPoints != this.ipt) {
-this.logError ("Decompressor did not find " + this.nPoints + " points -- instead " + this.ipt);
-var temp =  new Array (this.ipt);
-System.arraycopy (this.xyCoords, 0, temp, 0, this.ipt);
-this.xyCoords = temp;
-}return (this.deltaX > 0 ? this.xyCoords : JSV.common.Coordinate.reverse (this.xyCoords));
-}, "JU.SB,~A");
+this.checkZeroFill (ipt, lastXExpected);
+return this.xyCoords;
+}, "JU.SB");
+Clazz.defineMethod (c$, "checkZeroFill", 
+ function (ipt, lastXExpected) {
+this.nptsFound = ipt;
+if (this.nPoints == this.nptsFound) {
+if (Math.abs (lastXExpected - this.lastX) > 0.00001) this.logError ("Something went wrong! The last X value was " + this.lastX + " but expected " + lastXExpected);
+} else {
+this.logError ("Decompressor did not find " + this.nPoints + " points -- instead " + this.nptsFound + " xyCoords.length set to " + this.nPoints);
+for (var i = this.nptsFound; i < this.nPoints; i++) this.addPoint ( new JSV.common.Coordinate ().set (0, NaN), i);
+
+}}, "~N,~N");
+Clazz.defineMethod (c$, "addPoint", 
+ function (pt, ipt) {
+if (ipt >= this.nPoints) return;
+this.xyCoords[ipt] = pt;
+var y = pt.getYVal ();
+if (y > this.maxY) this.maxY = y;
+ else if (y < this.minY) this.minY = y;
+if (this.debugging) this.logError ("Coord: " + ipt + pt);
+}, "JSV.common.Coordinate,~N");
 Clazz.defineMethod (c$, "logError", 
  function (s) {
 if (this.debugging) JU.Logger.debug (s);
+System.err.println (s);
 this.errorLog.append (s).appendC ('\n');
 }, "~S");
-Clazz.defineMethod (c$, "getYValue", 
- function () {
-if (this.dupCount > 0) {
---this.dupCount;
-this.yval = (this.lastDif == -2147483648 ? this.yval : this.yval + this.lastDif);
-return this.yval;
-}if (this.difVal != -2147483648) {
-this.yval += this.difVal;
-this.lastDif = this.difVal;
-this.difVal = -2147483648;
-return this.yval;
-}if (this.ich == this.lineLen) return NaN;
-var ch = this.line.charAt (this.ich);
-if (this.debugging) JU.Logger.info ("" + ch);
-switch (ch) {
-case '%':
-this.difVal = 0;
+Clazz.defineMethod (c$, "nextValue", 
+ function (yval) {
+if (this.dupCount > 0) return this.getDuplicate (yval);
+var ch = this.skipUnknown ();
+switch (JSV.source.JDXDecompressor.actions[ch.charCodeAt (0)]) {
+case 1:
+this.isDIF = true;
+return yval + (this.lastDif = this.readNextInteger (ch == '%' ? 0 : ch <= 'R' ? ch.charCodeAt (0) - 73 : 105 - ch.charCodeAt (0)));
+case 2:
+this.dupCount = this.readNextInteger ((ch == 's' ? 9 : ch.charCodeAt (0) - 82)) - 1;
+return this.getDuplicate (yval);
+case 3:
+yval = this.readNextSqueezedNumber (ch);
 break;
-case 'J':
-case 'K':
-case 'L':
-case 'M':
-case 'N':
-case 'O':
-case 'P':
-case 'Q':
-case 'R':
-this.difVal = ch.charCodeAt (0) - 73;
+case 4:
+this.ich--;
+yval = this.readSignedFloat ();
 break;
-case 'j':
-case 'k':
-case 'l':
-case 'm':
-case 'n':
-case 'o':
-case 'p':
-case 'q':
-case 'r':
-this.difVal = 105 - ch.charCodeAt (0);
+case -1:
+yval = 1.7976931348623157E308;
 break;
-case 'S':
-case 'T':
-case 'U':
-case 'V':
-case 'W':
-case 'X':
-case 'Y':
-case 'Z':
-this.dupCount = ch.charCodeAt (0) - 82;
-break;
-case 's':
-this.dupCount = 9;
-break;
-case '+':
-case '-':
-case '.':
-case '0':
-case '1':
-case '2':
-case '3':
-case '4':
-case '5':
-case '6':
-case '7':
-case '8':
-case '9':
-case '@':
-case 'A':
-case 'B':
-case 'C':
-case 'D':
-case 'E':
-case 'F':
-case 'G':
-case 'H':
-case 'I':
-case 'a':
-case 'b':
-case 'c':
-case 'd':
-case 'e':
-case 'f':
-case 'g':
-case 'h':
-case 'i':
-this.lastDif = -2147483648;
-return this.getValue ();
-case '?':
-this.lastDif = -2147483648;
-return NaN;
 default:
-this.ich++;
-this.lastDif = -2147483648;
-return this.getYValue ();
+yval = NaN;
+break;
 }
-this.ich++;
-if (this.difVal != -2147483648) this.difVal = this.getDifDup (this.difVal);
- else this.dupCount = this.getDifDup (this.dupCount) - 1;
-return this.getYValue ();
-});
-Clazz.defineMethod (c$, "getDifDup", 
- function (i) {
-var ich0 = this.ich;
-this.next ();
-var s = i + this.line.substring (ich0, this.ich);
-return (ich0 == this.ich ? i : Integer.$valueOf (s).intValue ());
+this.isDIF = false;
+return yval;
 }, "~N");
-Clazz.defineMethod (c$, "getValue", 
+Clazz.defineMethod (c$, "skipUnknown", 
  function () {
-var ich0 = this.ich;
-if (this.ich == this.lineLen) return NaN;
-var ch = this.line.charAt (this.ich);
-var leader = 0;
-switch (ch) {
-case '+':
-case '-':
-case '.':
-case '0':
-case '1':
-case '2':
-case '3':
-case '4':
-case '5':
-case '6':
-case '7':
-case '8':
-case '9':
-return this.getValueDelim ();
-case '@':
-case 'A':
-case 'B':
-case 'C':
-case 'D':
-case 'E':
-case 'F':
-case 'G':
-case 'H':
-case 'I':
-leader = ch.charCodeAt (0) - 64;
-ich0 = ++this.ich;
-break;
-case 'a':
-case 'b':
-case 'c':
-case 'd':
-case 'e':
-case 'f':
-case 'g':
-case 'h':
-case 'i':
-leader = 96 - ch.charCodeAt (0);
-ich0 = ++this.ich;
-break;
-default:
-this.ich++;
-return this.getValue ();
+var ch = '\u0000';
+while (this.ich < this.lineLen && JSV.source.JDXDecompressor.actions[(ch = this.line.charAt (this.ich++)).charCodeAt (0)] == 0) {
 }
-this.next ();
-return Double.$valueOf (leader + this.line.substring (ich0, this.ich)).doubleValue ();
+return ch;
 });
-Clazz.defineMethod (c$, "getValueDelim", 
+Clazz.defineMethod (c$, "readSignedFloat", 
  function () {
 var ich0 = this.ich;
 var ch = '\u0000';
@@ -293,26 +195,143 @@ case '+':
 ich0 = ++this.ich;
 break;
 }
-ch = this.next ();
-if (ch == 'E' && this.ich + 3 < this.lineLen) switch (this.line.charAt (this.ich + 1)) {
+if (this.scanToNonnumeric () == 'E' && this.ich + 3 < this.lineLen) {
+switch (this.line.charAt (this.ich + 1)) {
 case '-':
 case '+':
 this.ich += 4;
 if (this.ich < this.lineLen && (ch = this.line.charAt (this.ich)) >= '0' && ch <= '9') this.ich++;
 break;
 }
-return factor * ((Double.$valueOf (this.line.substring (ich0, this.ich))).doubleValue ());
+}return factor * Double.parseDouble (this.line.substring (ich0, this.ich));
 });
-Clazz.defineMethod (c$, "next", 
+Clazz.defineMethod (c$, "getDuplicate", 
+ function (yval) {
+this.dupCount--;
+return (this.isDIF ? yval + this.lastDif : yval);
+}, "~N");
+Clazz.defineMethod (c$, "readNextInteger", 
+ function (n) {
+var c = String.fromCharCode (0);
+while (this.ich < this.lineLen && (c = this.line.charAt (this.ich)) >= '0' && c <= '9') {
+n = n * 10 + (n < 0 ? 48 - c.charCodeAt (0) : c.charCodeAt (0) - 48);
+this.ich++;
+}
+return n;
+}, "~N");
+Clazz.defineMethod (c$, "readNextSqueezedNumber", 
+ function (ch) {
+var ich0 = this.ich;
+this.scanToNonnumeric ();
+return Double.parseDouble ((ch.charCodeAt (0) > 0x60 ? 0x60 - ch.charCodeAt (0) : ch.charCodeAt (0) - 0x40) + this.line.substring (ich0, this.ich));
+}, "~S");
+Clazz.defineMethod (c$, "scanToNonnumeric", 
  function () {
-while (this.ich < this.lineLen && "+-%@ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrs? ,\t\n".indexOf (this.line.charAt (this.ich)) < 0) this.ich++;
+var ch = String.fromCharCode (0);
+while (this.ich < this.lineLen && ((ch = this.line.charAt (this.ich)) == '.' || ch >= '0' && ch <= '9')) this.ich++;
 
-return (this.ich == this.lineLen ? '\0' : this.line.charAt (this.ich));
+return (this.ich < this.lineLen ? ch : '\0');
 });
-Clazz.defineMethod (c$, "testAlgorithm", 
- function () {
+Clazz.defineMethod (c$, "getNPointsFound", 
+function () {
+return this.nptsFound;
+});
+Clazz.overrideMethod (c$, "hasNext", 
+function () {
+return (this.ich < this.lineLen || this.dupCount > 0);
+});
+Clazz.overrideMethod (c$, "next", 
+function () {
+return (this.hasNext () ? Double.$valueOf (this.lastY = this.nextValue (this.lastY)) : null);
+});
+Clazz.overrideMethod (c$, "remove", 
+function () {
 });
 Clazz.defineStatics (c$,
-"allDelim", "+-%@ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrs? ,\t\n",
-"WHITE_SPACE", " ,\t\n");
-});
+"delimiters", " ,\t\n",
+"actions",  Clazz.newIntArray (255, 0),
+"ACTION_INVALID", -1,
+"ACTION_UNKNOWN", 0,
+"ACTION_DIF", 1,
+"ACTION_DUP", 2,
+"ACTION_SQZ", 3,
+"ACTION_NUMERIC", 4,
+"INVALID_Y", 1.7976931348623157E308);
+{
+for (var i = 0x25; i <= 0x73; i++) {
+var c = String.fromCharCode (i);
+switch (c) {
+case '%':
+case 'J':
+case 'K':
+case 'L':
+case 'M':
+case 'N':
+case 'O':
+case 'P':
+case 'Q':
+case 'R':
+case 'j':
+case 'k':
+case 'l':
+case 'm':
+case 'n':
+case 'o':
+case 'p':
+case 'q':
+case 'r':
+JSV.source.JDXDecompressor.actions[i] = 1;
+break;
+case '+':
+case '-':
+case '.':
+case '0':
+case '1':
+case '2':
+case '3':
+case '4':
+case '5':
+case '6':
+case '7':
+case '8':
+case '9':
+JSV.source.JDXDecompressor.actions[i] = 4;
+break;
+case '?':
+JSV.source.JDXDecompressor.actions[i] = -1;
+break;
+case '@':
+case 'A':
+case 'B':
+case 'C':
+case 'D':
+case 'E':
+case 'F':
+case 'G':
+case 'H':
+case 'I':
+case 'a':
+case 'b':
+case 'c':
+case 'd':
+case 'e':
+case 'f':
+case 'g':
+case 'h':
+case 'i':
+JSV.source.JDXDecompressor.actions[i] = 3;
+break;
+case 'S':
+case 'T':
+case 'U':
+case 'V':
+case 'W':
+case 'X':
+case 'Y':
+case 'Z':
+case 's':
+JSV.source.JDXDecompressor.actions[i] = 2;
+break;
+}
+}
+}});

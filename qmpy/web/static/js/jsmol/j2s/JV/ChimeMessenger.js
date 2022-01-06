@@ -70,14 +70,16 @@ var id;
 var lastid = -1;
 nH = 0;
 for (var i = ac; --i >= 0; ) {
-var isHetero = atoms[i].isHetero ();
+var a = atoms[i];
+if (a == null) continue;
+var isHetero = a.isHetero ();
 if (isHetero) nHetero++;
-var g = atoms[i].group;
+var g = a.group;
 if (!map.containsKey (g)) {
 map.put (g, Boolean.TRUE);
 if (isHetero) ngHetero++;
  else ng++;
-}if (atoms[i].mi == 0) {
+}if (a.mi == 0) {
 if ((id = g.getStrucNo ()) != lastid && id != 0) {
 lastid = id;
 switch (g.getProteinStructureType ()) {

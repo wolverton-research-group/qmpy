@@ -46,7 +46,7 @@ this.jvxlData.mappedDataMax = minmax[1];
 Clazz.overrideMethod (c$, "setProperty", 
 function (propertyName, value, bs) {
 if ("set" === propertyName) {
-this.setContacts (value, !this.vwr.getBoolean (603979965));
+this.setContacts (value, true);
 return;
 }if ("init" === propertyName) {
 this.translucentLevel = 0;

@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.io");
-Clazz.load (null, "J.io.FileReader", ["java.io.BufferedInputStream", "$.BufferedReader", "$.Reader", "javajs.api.GenericBinaryDocument", "$.ZInputStream", "JU.AU", "$.PT", "$.Rdr", "J.api.Interface", "JU.Logger"], function () {
+Clazz.load (null, "J.io.FileReader", ["java.io.BufferedInputStream", "$.BufferedReader", "$.Reader", "java.util.zip.ZipInputStream", "javajs.api.GenericBinaryDocument", "JU.AU", "$.PT", "$.Rdr", "J.api.Interface", "JU.Logger"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.vwr = null;
 this.fileNameIn = null;
@@ -45,7 +45,7 @@ this.atomSetCollection = errorMessage;
 return;
 }if (Clazz.instanceOf (t, java.io.BufferedReader)) {
 this.readerOrDocument = t;
-} else if (Clazz.instanceOf (t, javajs.api.ZInputStream)) {
+} else if (Clazz.instanceOf (t, java.util.zip.ZipInputStream)) {
 var name = this.fullPathNameIn;
 var subFileList = null;
 name = name.$replace ('\\', '/');

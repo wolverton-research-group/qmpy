@@ -17,6 +17,29 @@ this.bytes = null;
 this.bigEndian = true;
 Clazz.instantialize (this, arguments);
 }, JU, "OC", java.io.OutputStream, javajs.api.GenericOutputChannel);
+Clazz.makeConstructor (c$, 
+function () {
+Clazz.superConstructor (this, JU.OC, []);
+});
+Clazz.makeConstructor (c$, 
+function (fileName) {
+Clazz.superConstructor (this, JU.OC, []);
+this.setParams (null, fileName, false, null);
+}, "~S");
+Clazz.defineMethod (c$, "setParams", 
+function (bytePoster, fileName, asWriter, os) {
+this.bytePoster = bytePoster;
+this.$isBase64 = ";base64,".equals (fileName);
+if (this.$isBase64) {
+fileName = null;
+this.os0 = os;
+os = null;
+}this.fileName = fileName;
+this.os = os;
+this.isLocalFile = (fileName != null && !JU.OC.isRemote (fileName));
+if (asWriter && !this.$isBase64 && os != null) this.bw =  new java.io.BufferedWriter ( new java.io.OutputStreamWriter (os));
+return this;
+}, "javajs.api.BytePoster,~S,~B,java.io.OutputStream");
 Clazz.overrideMethod (c$, "isBigEndian", 
 function () {
 return this.bigEndian;
@@ -25,20 +48,6 @@ Clazz.defineMethod (c$, "setBigEndian",
 function (TF) {
 this.bigEndian = TF;
 }, "~B");
-Clazz.defineMethod (c$, "setParams", 
-function (bytePoster, fileName, asWriter, os) {
-this.bytePoster = bytePoster;
-this.fileName = fileName;
-this.$isBase64 = ";base64,".equals (fileName);
-if (this.$isBase64) {
-fileName = null;
-this.os0 = os;
-os = null;
-}this.os = os;
-this.isLocalFile = (fileName != null && !JU.OC.isRemote (fileName));
-if (asWriter && !this.$isBase64 && os != null) this.bw =  new java.io.BufferedWriter ( new java.io.OutputStreamWriter (os));
-return this;
-}, "javajs.api.BytePoster,~S,~B,java.io.OutputStream");
 Clazz.defineMethod (c$, "setBytes", 
 function (b) {
 this.bytes = b;
@@ -205,8 +214,8 @@ return ret;
 }var jmol = null;
 var _function = null;
 {
-jmol = self.J2S || Jmol; _function = (typeof this.fileName == "function" ?
-this.fileName : null);
+jmol = self.J2S || Jmol; _function = (typeof this.fileName ==
+"function" ? this.fileName : null);
 }if (jmol != null) {
 var data = (this.sb == null ? this.toByteArray () : this.sb.toString ());
 if (_function == null) jmol.doAjax (this.fileName, null, data, this.sb == null);
@@ -251,13 +260,11 @@ c$.isRemote = Clazz.defineMethod (c$, "isRemote",
 function (fileName) {
 if (fileName == null) return false;
 var itype = JU.OC.urlTypeIndex (fileName);
-return (itype >= 0 && itype != 5);
+return (itype >= 0 && itype < 4);
 }, "~S");
 c$.isLocal = Clazz.defineMethod (c$, "isLocal", 
 function (fileName) {
-if (fileName == null) return false;
-var itype = JU.OC.urlTypeIndex (fileName);
-return (itype < 0 || itype == 5);
+return (fileName != null && !JU.OC.isRemote (fileName));
 }, "~S");
 c$.urlTypeIndex = Clazz.defineMethod (c$, "urlTypeIndex", 
 function (name) {
@@ -286,6 +293,7 @@ function (x) {
 this.writeInt (x == 0 ? 0 : Float.floatToIntBits (x));
 }, "~N");
 Clazz.defineStatics (c$,
-"urlPrefixes",  Clazz.newArray (-1, ["http:", "https:", "sftp:", "ftp:", "cache://", "file:"]),
-"URL_LOCAL", 5);
+"urlPrefixes",  Clazz.newArray (-1, ["http:", "https:", "sftp:", "ftp:", "file:", "cache:"]),
+"URL_LOCAL", 4,
+"URL_CACHE", 5);
 });

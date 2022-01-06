@@ -15,12 +15,12 @@ frank.getFont (imageFontScaling);
 var dx = Clazz.floatToInt (frank.frankWidth + 4 * imageFontScaling);
 var dy = frank.frankDescent;
 this.g3d.drawStringNoSlab (frank.frankString, frank.font3d, this.vwr.gdata.width - dx, this.vwr.gdata.height - dy, 0, 0);
-if (modelKitMode) {
+var kit = (modelKitMode ? this.vwr.getModelkit (false) : null);
+if (modelKitMode && !kit.isHidden ()) {
 this.g3d.setC (12);
 var w = 10;
 var h = 26;
 this.g3d.fillTextRect (0, 0, 1, 0, w, h * 4);
-var kit = this.vwr.getModelkit (false);
 var active = kit.getActiveMenu ();
 if (active != null) {
 if ("atomMenu".equals (active)) {

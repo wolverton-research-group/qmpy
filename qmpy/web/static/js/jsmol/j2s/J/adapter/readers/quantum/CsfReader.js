@@ -397,7 +397,7 @@ if (zetas[ipt][i] == 0) break;
 this.createSphericalSlaterByType (iAtom, this.atomicNumbers[iAtom], types[ipt], zetas[ipt][i] * (i == 0 ? 1 : -1), contractionCoefs == null ? 1 : contractionCoefs[ipt][i]);
 }
 }
-this.setSlaters (true, false);
+this.setSlaters (false);
 }}, "~S");
 Clazz.defineStatics (c$,
 "objCls1", 1,

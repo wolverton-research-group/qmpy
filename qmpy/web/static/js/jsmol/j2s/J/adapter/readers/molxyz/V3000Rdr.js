@@ -18,6 +18,7 @@ Clazz.defineMethod (c$, "readAtomsAndBonds",
 function (tokens) {
 var ac = this.mr.parseIntStr (tokens[3]);
 this.readAtoms (ac);
+this.mr.asc.setModelInfoForSet ("dimension", (this.mr.is2D ? "2D" : "3D"), this.mr.asc.iSet);
 this.readBonds (this.mr.parseIntStr (tokens[4]));
 this.readUserData (ac);
 }, "~A");
@@ -36,6 +37,7 @@ var y = this.mr.parseFloatStr (tokens[5]);
 var z = this.mr.parseFloatStr (tokens[6]);
 var charge = 0;
 var isotope = 0;
+if (this.mr.is2D && z != 0) this.mr.is2D = this.mr.optimize2D = false;
 for (var j = 7; j < tokens.length; j++) {
 var s = tokens[j].toUpperCase ();
 if (s.startsWith ("CHG=")) charge = this.mr.parseIntAt (tokens[j], 4);

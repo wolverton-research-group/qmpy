@@ -21,6 +21,10 @@ p.y = y;
 p.z = z;
 return p;
 }, "~N,~N,~N");
+c$.newA = Clazz.defineMethod (c$, "newA", 
+function (a) {
+return JU.P3.new3 (a[0], a[1], a[2]);
+}, "~A");
 Clazz.defineStatics (c$,
 "unlikely", null);
 });

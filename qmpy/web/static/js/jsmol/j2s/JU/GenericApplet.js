@@ -251,7 +251,6 @@ if (this.outputBuffer != null && s != null) this.outputBuffer.append (s).appendC
 }, "~S");
 Clazz.overrideMethod (c$, "setCallbackFunction", 
 function (callbackName, callbackFunction) {
-if (callbackName.equalsIgnoreCase ("modelkit")) return;
 if (callbackName.equalsIgnoreCase ("language")) {
 this.consoleMessage ("");
 this.consoleMessage (null);

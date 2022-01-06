@@ -81,16 +81,16 @@ case 4:
 isOK = true;
 break;
 case 5:
-isOK = (tokens[0].equals ("DOrbitals") && this.getDFMap ("DS", data, 3, J.adapter.readers.quantum.WebMOReader.DS_LIST, 99));
+isOK = (tokens[0].equals ("DOrbitals") && this.getDFMap ("DS", data, 3, J.adapter.readers.quantum.WebMOReader.$DS_LIST, 99));
 break;
 case 6:
-isOK = (tokens[0].equals ("DOrbitals") && this.getDFMap ("DC", data, 4, J.adapter.readers.quantum.WebMOReader.DC_LIST, 2));
+isOK = (tokens[0].equals ("DOrbitals") && this.getDFMap ("DC", data, 4, J.adapter.readers.quantum.WebMOReader.$DC_LIST, 2));
 break;
 case 7:
-isOK = (tokens[0].equals ("FOrbitals") && this.getDFMap ("FS", data, 5, J.adapter.readers.quantum.WebMOReader.FS_LIST, 99));
+isOK = (tokens[0].equals ("FOrbitals") && this.getDFMap ("FS", data, 5, J.adapter.readers.quantum.WebMOReader.$FS_LIST, 99));
 break;
 case 10:
-isOK = (tokens[0].equals ("FOrbitals") && this.getDFMap ("FC", data, 6, J.adapter.readers.quantum.WebMOReader.FC_LIST, 3));
+isOK = (tokens[0].equals ("FOrbitals") && this.getDFMap ("FC", data, 6, J.adapter.readers.quantum.WebMOReader.$FC_LIST, 3));
 break;
 }
 if (!isOK) {
@@ -150,7 +150,8 @@ var tokens = this.getTokens ();
 if (tokens.length < 7) continue;
 this.addSlater (this.parseIntStr (tokens[0]), this.parseIntStr (tokens[1]), this.parseIntStr (tokens[2]), this.parseIntStr (tokens[3]), this.parseIntStr (tokens[4]), this.parseFloatStr (tokens[5]), this.parseFloatStr (tokens[6]));
 }
-this.setSlaters (false, false);
+this.scaleSlaters = false;
+this.setSlaters (false);
 });
 Clazz.defineMethod (c$, "readMolecularOrbital", 
 function () {
@@ -181,8 +182,8 @@ this.nOrbitals++;
 if (occupancy > 0) this.moData.put ("HOMO", Integer.$valueOf (this.nOrbitals));
 });
 Clazz.defineStatics (c$,
-"DS_LIST", "NOT IMPLEMENTED IN THIS READER",
-"DC_LIST", "xx    yy    zz    xy    xz    yz",
-"FS_LIST", "NOT IMPLEMENTED IN THIS READER",
-"FC_LIST", "xxx   yyy   zzz   yyx   xxy   xxz   zzx   zzy   yyz   xyz");
+"$DS_LIST", "NOT IMPLEMENTED IN THIS READER",
+"$DC_LIST", "xx    yy    zz    xy    xz    yz",
+"$FS_LIST", "NOT IMPLEMENTED IN THIS READER",
+"$FC_LIST", "xxx   yyy   zzz   yyx   xxy   xxz   zzx   zzy   yyz   xyz");
 });

@@ -2,6 +2,7 @@ Clazz.declarePackage ("JS");
 Clazz.load (null, "JS.ScriptTokenParser", ["java.lang.Boolean", "$.Float", "JU.Lst", "$.P3", "$.PT", "J.i18n.GT", "JS.ScriptParam", "$.T", "JU.Logger", "$.SimpleUnitCell"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.vwr = null;
+this.htUserFunctions = null;
 this.script = null;
 this.isStateScript = false;
 this.lineCurrent = 0;
@@ -31,7 +32,6 @@ this.ltokenPostfix = null;
 this.isEmbeddedExpression = false;
 this.isCommaAsOrAllowed = false;
 this.theValue = null;
-this.htUserFunctions = null;
 this.haveString = false;
 this.residueSpecCodeGenerated = false;
 this.errorMessage = null;
@@ -476,6 +476,12 @@ break;
 if (isWithin && distance == 3.4028235E38) switch (tok0) {
 case 12290:
 break;
+case 1094713350:
+case 1094713349:
+this.addTokenToPostfix (4, this.theValue);
+this.clauseCell (8);
+key = "";
+break;
 case 1111490587:
 case 1073742128:
 case 134218756:
@@ -714,12 +720,13 @@ Clazz.defineMethod (c$, "clauseCell",
  function (tok) {
 var cell =  new JU.P3 ();
 this.tokenNext ();
+if (tok != 8) {
 if (!this.tokenNextTok (268435860)) return this.errorStr (15, "=");
-if (this.getToken () == null) return this.error (3);
+}if (this.getToken () == null) return this.error (3);
 if (this.theToken.tok == 2) {
 JU.SimpleUnitCell.ijkToPoint3f (this.theToken.intValue, cell, 1, 0);
-return this.addTokenToPostfix (tok, cell);
-}if (this.theToken.tok != 1073742332 || !this.getNumericalToken ()) return this.error (3);
+} else {
+if (this.theToken.tok != 1073742332 || !this.getNumericalToken ()) return this.error (3);
 cell.x = this.floatValue ();
 if (this.tokPeekIs (268435504)) this.tokenNext ();
 if (!this.getNumericalToken ()) return this.error (3);
@@ -727,7 +734,7 @@ cell.y = this.floatValue ();
 if (this.tokPeekIs (268435504)) this.tokenNext ();
 if (!this.getNumericalToken () || !this.tokenNextTok (1073742338)) return this.error (3);
 cell.z = this.floatValue ();
-return this.addTokenToPostfix (tok, cell);
+}return this.addTokenToPostfix (tok, cell);
 }, "~N");
 Clazz.defineMethod (c$, "clauseDefine", 
  function (haveToken, forceString) {

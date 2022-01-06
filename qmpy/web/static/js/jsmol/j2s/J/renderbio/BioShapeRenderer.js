@@ -77,7 +77,7 @@ this.wireframeOnly = TF;
 TF = (this.isExport || !this.wireframeOnly && this.vwr.getBoolean (603979864));
 if (TF != this.isHighRes) this.invalidateMesh = true;
 this.isHighRes = TF;
-TF = !this.wireframeOnly && (this.vwr.getBoolean (603979817) || this.isExport);
+TF = !this.wireframeOnly && (this.vwr.getBoolean (603979816) || this.isExport);
 if (this.cartoonsFancy != TF) {
 this.invalidateMesh = true;
 this.cartoonsFancy = TF;
@@ -247,7 +247,7 @@ if (!thisTypeOnly || this.structureTypes[i] === this.structureTypes[this.iNext])
 this.diameterMid = Clazz.floatToInt (this.vwr.tm.scaleToScreen (this.monomers[i].getLeadAtom ().sZ, this.madMid));
 this.diameterEnd = Clazz.floatToInt (this.vwr.tm.scaleToScreen (Clazz.floatToInt (this.controlPointScreens[this.iNext].z), this.madEnd));
 var doCap0 = (i == this.iPrev || !this.bsVisible.get (this.iPrev) || thisTypeOnly && this.structureTypes[i] !== this.structureTypes[this.iPrev]);
-var doCap1 = (this.iNext == this.iNext2 || !this.bsVisible.get (this.iNext) || thisTypeOnly && this.structureTypes[i] !== this.structureTypes[this.iNext]);
+var doCap1 = (this.iNext == this.iNext2 || this.iNext2 == this.iNext3 || !this.bsVisible.get (this.iNext) || thisTypeOnly && this.structureTypes[i] !== this.structureTypes[this.iNext]);
 return (this.aspectRatio > 0 && this.meshRenderer != null && this.meshRenderer.check (doCap0, doCap1));
 }, "~N,~B");
 Clazz.defineMethod (c$, "renderHermiteCylinder", 

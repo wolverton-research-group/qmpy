@@ -40,26 +40,15 @@ atom.elementSymbol = J.adapter.smarter.AtomSetCollectionReader.getElementSymbol 
 Clazz.defineMethod (c$, "readSlaterBasis", 
  function () {
 this.nCoefficients = 0;
+this.getSlaters ();
 var values =  Clazz.newFloatArray (3, 0);
 for (var iAtom = 0; iAtom < this.ac; iAtom++) {
 J.adapter.smarter.AtomSetCollectionReader.getTokensFloat (this.rd (), values, 3);
 var atomicNumber = this.atomicNumbers[iAtom];
-var zeta;
-if ((zeta = values[0]) != 0) {
-this.createSphericalSlaterByType (iAtom, atomicNumber, "S", zeta, 1);
-}if ((zeta = values[1]) != 0) {
-this.createSphericalSlaterByType (iAtom, atomicNumber, "Px", zeta, 1);
-this.createSphericalSlaterByType (iAtom, atomicNumber, "Py", zeta, 1);
-this.createSphericalSlaterByType (iAtom, atomicNumber, "Pz", zeta, 1);
-}if ((zeta = values[2]) != 0) {
-this.createSphericalSlaterByType (iAtom, atomicNumber, "Dx2-y2", zeta, 1);
-this.createSphericalSlaterByType (iAtom, atomicNumber, "Dxz", zeta, 1);
-this.createSphericalSlaterByType (iAtom, atomicNumber, "Dz2", zeta, 1);
-this.createSphericalSlaterByType (iAtom, atomicNumber, "Dyz", zeta, 1);
-this.createSphericalSlaterByType (iAtom, atomicNumber, "Dxy", zeta, 1);
-}}
+this.createMopacSlaters (iAtom, atomicNumber, values, true);
+}
 this.nCoefficients = this.slaters.size ();
-this.setSlaters (true, false);
+this.setSlaters (false);
 });
 Clazz.defineMethod (c$, "readMolecularOrbitals", 
  function (isBeta) {

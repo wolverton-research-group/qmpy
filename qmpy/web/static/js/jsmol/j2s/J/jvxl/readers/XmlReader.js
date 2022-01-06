@@ -29,6 +29,10 @@ this.skipTo ("</" + name + ">");
 }, "~S");
 Clazz.defineMethod (c$, "getXmlData", 
 function (name, data, withTag, allowSelfCloseOption) {
+return this.getXmlDataLF (name, data, withTag, allowSelfCloseOption, false);
+}, "~S,~S,~B,~B");
+Clazz.defineMethod (c$, "getXmlDataLF", 
+function (name, data, withTag, allowSelfCloseOption, addLF) {
 var closer = "</" + name + ">";
 var tag = "<" + name;
 if (data == null) {
@@ -46,15 +50,18 @@ throw e;
 }
 }
 sb.append (this.line);
+if (addLF) sb.append ("\n");
 var selfClosed = false;
 var pt = this.line.indexOf ("/>");
 var pt1 = this.line.indexOf (">");
 if (pt1 < 0 || pt == pt1 - 1) selfClosed = allowSelfCloseOption;
-while (this.line.indexOf (closer) < 0 && (!selfClosed || this.line.indexOf ("/>") < 0)) sb.append (this.line = this.br.readLine ());
-
+while (this.line.indexOf (closer) < 0 && (!selfClosed || this.line.indexOf ("/>") < 0)) {
+sb.append (this.line = this.br.readLine ());
+if (addLF) sb.append ("\n");
+}
 data = sb.toString ();
 }return J.jvxl.readers.XmlReader.extractTag (data, tag, closer, withTag);
-}, "~S,~S,~B,~B");
+}, "~S,~S,~B,~B,~B");
 c$.extractTagOnly = Clazz.defineMethod (c$, "extractTagOnly", 
 function (data, tag) {
 return J.jvxl.readers.XmlReader.extractTag (data, "<" + tag + ">", "</" + tag + ">", false);

@@ -63,6 +63,10 @@ Clazz.overrideMethod (c$, "getRadius",
 function () {
 return this.atom.radius;
 });
+Clazz.overrideMethod (c$, "getBondRadius", 
+function () {
+return this.atom.bondRadius;
+});
 Clazz.overrideMethod (c$, "getVib", 
 function () {
 return (this.atom.vib == null || Float.isNaN (this.atom.vib.z) ? null : this.atom.vib);

@@ -7,6 +7,7 @@ this.order = 0;
 this.radius = -1;
 this.colix = -1;
 this.uniqueID = -1;
+this.distance = 0;
 Clazz.instantialize (this, arguments);
 }, J.adapter.smarter, "Bond", J.adapter.smarter.AtomSetObject);
 Clazz.makeConstructor (c$, 
@@ -16,4 +17,12 @@ this.atomIndex1 = atomIndex1;
 this.atomIndex2 = atomIndex2;
 this.order = order;
 }, "~N,~N,~N");
+Clazz.makeConstructor (c$, 
+function () {
+Clazz.superConstructor (this, J.adapter.smarter.Bond, []);
+});
+Clazz.overrideMethod (c$, "toString", 
+function () {
+return "[Bond " + this.atomIndex1 + " " + this.atomIndex2 + " " + this.order + "]";
+});
 });

@@ -259,10 +259,14 @@ if (ms.tainted != null) {
 if (ms.tainted[2] != null) ms.tainted[2].andNot (bs);
 if (ms.tainted[3] != null) ms.tainted[3].andNot (bs);
 }m.loadScript =  new JU.SB ();
-this.getInlineData (commands, this.vwr.getModelExtract (bs, false, true, "MOL"), i > 0, null);
+this.getInlineData (commands, this.vwr.getModelExtract (bs, false, true, "MOL"), i > 0, null, null);
 } else {
 commands.appendSB (m.loadScript);
-}}
+var auxFiles = m.auxiliaryInfo.get ("auxFiles");
+if (auxFiles != null) {
+for (var j = 0; j < auxFiles.size (); j++) commands.append (";#FILE1=" + JU.PT.esc (auxFiles.get (j)) + ";");
+
+}}}
 var s = commands.toString ();
 if (s.indexOf ("data \"append ") < 0) {
 var i = s.indexOf ("load /*data*/");
@@ -273,10 +277,10 @@ if (i >= 0) s = s.substring (0, i) + "zap;" + s.substring (i);
 }cmds.append (s);
 }, "JU.SB");
 Clazz.overrideMethod (c$, "getInlineData", 
-function (loadScript, strModel, isAppend, loadFilter) {
-var tag = (isAppend ? "append" : "model") + " inline";
+function (loadScript, strModel, isAppend, appendToModelIndex, loadFilter) {
+var tag = (isAppend ? "append" + (appendToModelIndex != null && appendToModelIndex.intValue () != this.vwr.ms.mc - 1 ? " modelindex=" + appendToModelIndex : "") : "model") + " inline";
 loadScript.append ("load /*data*/ data \"").append (tag).append ("\"\n").append (strModel).append ("end \"").append (tag).append (loadFilter == null || loadFilter.length == 0 ? "" : " filter" + JU.PT.esc (loadFilter)).append ("\";");
-}, "JU.SB,~S,~B,~S");
+}, "JU.SB,~S,~B,Integer,~S");
 Clazz.defineMethod (c$, "getColorState", 
  function (cm, sfunc) {
 var s =  new JU.SB ();
@@ -658,7 +662,7 @@ break;
 case 33:
 if (!this.vwr.ms.haveUnitCells) return "";
 var st = s = this.getFontLineShapeState (shape);
-var iAtom = this.vwr.am.cai;
+var iAtom = this.vwr.am.getUnitCellAtomIndex ();
 if (iAtom >= 0) s += "  unitcell ({" + iAtom + "});\n";
 var uc = this.vwr.getCurrentUnitCell ();
 if (uc != null) {
@@ -747,7 +751,7 @@ var colixes = balls.colixes;
 var pids = balls.paletteIDs;
 var r = 0;
 for (var i = 0; i < ac; i++) {
-if (shape.bsSizeSet != null && shape.bsSizeSet.get (i)) {
+if (atoms[i] != null && shape.bsSizeSet != null && shape.bsSizeSet.get (i)) {
 if ((r = atoms[i].madAtom) < 0) JU.BSUtil.setMapBitSet (this.temp, i, i, "Spacefill on");
  else JU.BSUtil.setMapBitSet (this.temp, i, i, "Spacefill " + JU.PT.escF (r / 2000));
 }if (shape.bsColixSet != null && shape.bsColixSet.get (i)) {
@@ -948,7 +952,7 @@ var isDefault = (type == 2);
 var atoms = this.vwr.ms.at;
 var tainted = this.vwr.ms.tainted;
 if (bs != null) for (var i = bs.nextSetBit (0); i >= 0; i = bs.nextSetBit (i + 1)) {
-if (atoms[i].isDeleted ()) continue;
+if (atoms[i] == null || atoms[i].isDeleted ()) continue;
 s.appendI (i + 1).append (" ").append (atoms[i].getElementSymbol ()).append (" ").append (atoms[i].getInfo ().$replace (' ', '_')).append (" ");
 switch (type) {
 case 17:
@@ -1090,7 +1094,7 @@ sb.append (this.getAtomicPropertyState (-1, null));
 bs = this.vwr.getModelUndeletedAtomsBitSet (modelIndex);
 sb.append ("zap ");
 sb.append (JU.Escape.eBS (bs)).append (";");
-this.getInlineData (sb, this.vwr.getModelExtract (bs, false, true, "MOL"), true, null);
+this.getInlineData (sb, this.vwr.getModelExtract (bs, false, true, "MOL"), true, null, null);
 sb.append ("set refreshing false;").append (this.vwr.acm.getPickingState ()).append (this.vwr.tm.getMoveToText (0, false)).append ("set refreshing true;");
 }if (clearRedo) {
 this.vwr.actionStates.add (0, sb.toString ());

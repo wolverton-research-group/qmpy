@@ -52,7 +52,7 @@ if (this.calc.loggingEnabled) this.calc.appendLogData (this.calc.getAtomList ("S
 this.dE = 0;
 this.calc.setPreliminary (stepMax > 0);
 this.e0 = this.energyFull (false, false);
-s = JU.PT.sprintf (" Initial " + this.name + " E = %10.3f " + this.minimizer.units + " criterion = %8.6f max steps = " + stepMax, "ff",  Clazz.newArray (-1, [Float.$valueOf (this.toUserUnits (this.e0)), Float.$valueOf (this.toUserUnits (criterion))]));
+s = JU.PT.sprintf (" Initial " + this.name + " E = %10.3f " + this.minimizer.units + "/mol criterion = %8.6f max steps = " + stepMax, "ff",  Clazz.newArray (-1, [Float.$valueOf (this.toUserUnits (this.e0)), Float.$valueOf (this.toUserUnits (criterion))]));
 this.minimizer.report (s, false);
 this.calc.appendLogData (s);
 }, "~N,~N");
@@ -77,14 +77,14 @@ var e1 = this.energyFull (false, false);
 this.dE = e1 - this.e0;
 var done = JM.Util.isNear3 (e1, this.e0, this.criterion);
 if (done || this.currentStep % 10 == 0 || this.stepMax <= this.currentStep) {
-var s = JU.PT.sprintf (this.name + " Step %-4d E = %10.6f    dE = %8.6f ", "Fi",  Clazz.newArray (-1, [ Clazz.newFloatArray (-1, [e1, (this.dE), this.criterion]), Integer.$valueOf (this.currentStep)]));
+var s = JU.PT.sprintf (this.name + " Step %-4d E = %10.6f    dE = %8.6f ", "Fi",  Clazz.newArray (-1, [ Clazz.newFloatArray (-1, [this.toUserUnits (e1), this.toUserUnits (this.dE)]), Integer.$valueOf (this.currentStep)]));
 this.minimizer.report (s, false);
 this.calc.appendLogData (s);
 }this.e0 = e1;
 if (done || this.stepMax <= this.currentStep) {
 if (this.calc.loggingEnabled) this.calc.appendLogData (this.calc.getAtomList ("F I N A L  G E O M E T R Y"));
 if (done) {
-var s = JU.PT.formatStringF ("\n    " + this.name + " STEEPEST DESCENT HAS CONVERGED: E = %8.5f " + this.minimizer.units + " after " + this.currentStep + " steps", "f", this.toUserUnits (e1));
+var s = JU.PT.formatStringF ("\n    " + this.name + " STEEPEST DESCENT HAS CONVERGED: E = %8.5f " + this.minimizer.units + "/mol after " + this.currentStep + " steps", "f", this.toUserUnits (e1));
 this.calc.appendLogData (s);
 this.minimizer.report (s, true);
 JU.Logger.info (s);

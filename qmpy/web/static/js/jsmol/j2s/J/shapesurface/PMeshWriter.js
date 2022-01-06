@@ -101,7 +101,7 @@ Clazz.defineMethod (c$, "checkPoints",
 var slabPoints = ((this.imesh.pc == 0) && this.selectedPolyOnly);
 var incr = this.imesh.vertexIncrement;
 for (var i = (!this.imesh.hasGridPoints || this.imesh.firstRealVertex < 0 ? 0 : this.imesh.firstRealVertex); i < this.vertexCount; i += incr) {
-if (this.vertexValues != null && Float.isNaN (this.vertexValues[i]) || this.imesh.jvxlData.thisSet >= 0 && this.imesh.vertexSets[i] != this.imesh.jvxlData.thisSet || !this.imesh.isColorSolid || this.haveBsDisplay && !this.imesh.bsDisplay.get (i) || slabPoints && !this.bsPolygons.get (i)) continue;
+if (this.vertexValues != null && Float.isNaN (this.vertexValues[i]) || this.imesh.jvxlData.thisSet != null && !this.imesh.jvxlData.thisSet.get (this.imesh.vertexSets[i]) || !this.imesh.isColorSolid || this.haveBsDisplay && !this.imesh.bsDisplay.get (i) || slabPoints && !this.bsPolygons.get (i)) continue;
 bsVert.set (i);
 }
 }, "JU.BS");
@@ -112,7 +112,7 @@ for (var i = this.imesh.pc; --i >= 0; ) {
 var polygon = this.polygonIndexes[i];
 if (polygon == null || this.selectedPolyOnly && !this.bsPolygons.get (i)) continue;
 var iA = polygon[0];
-if (this.imesh.jvxlData.thisSet >= 0 && this.imesh.vertexSets != null && this.imesh.vertexSets[iA] != this.imesh.jvxlData.thisSet) continue;
+if (this.imesh.jvxlData.thisSet != null && this.imesh.vertexSets != null && !this.imesh.jvxlData.thisSet.get (this.imesh.vertexSets[iA])) continue;
 var iB = polygon[1];
 var iC = polygon[2];
 if (this.haveBsDisplay && (!this.imesh.bsDisplay.get (iA) || !this.imesh.bsDisplay.get (iB) || !this.imesh.bsDisplay.get (iC))) continue;

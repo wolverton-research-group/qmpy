@@ -1069,6 +1069,7 @@ if (this.pd.getBoolean (JSV.common.ScriptToken.YSCALEON)) this.drawYScale (gMain
 if (subIndex >= 0) this.draw2DUnits (gMain);
 }this.drawWidgets (gFront, g2, subIndex, needNewPins, doDraw1DObjects, true, false);
 this.drawWidgets (gFront, g2, subIndex, needNewPins, doDraw1DObjects, true, true);
+this.widgetsAreSet = true;
 }if (this.annotations != null) this.drawAnnotations (gFront, this.annotations, null);
 }, "~O,~O,~O,~N,~B,~B,~B");
 Clazz.defineMethod (c$, "drawSpectrumSource", 

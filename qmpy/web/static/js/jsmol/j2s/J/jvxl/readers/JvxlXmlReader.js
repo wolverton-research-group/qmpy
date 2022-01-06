@@ -90,7 +90,7 @@ return true;
 }, "~B");
 Clazz.overrideMethod (c$, "readParameters", 
 function () {
-var s = this.xr.getXmlData ("jvxlFileTitle", null, false, false);
+var s = this.xr.getXmlDataLF ("jvxlFileTitle", null, false, false, true);
 this.jvxlFileHeaderBuffer = JU.SB.newS (s == null ? "" : s);
 this.xr.toTag ("jvxlVolumeData");
 var data = this.tempDataXml = this.xr.getXmlData ("jvxlVolumeData", null, true, false);
@@ -225,10 +225,20 @@ s = J.jvxl.readers.XmlReader.getXmlAttrib (data, "rendering");
 if (s.length > 0) this.jvxlData.rendering = s;
 this.jvxlData.colorScheme = J.jvxl.readers.XmlReader.getXmlAttrib (data, "colorScheme");
 if (this.jvxlData.colorScheme.length == 0) this.jvxlData.colorScheme = (this.jvxlDataIsColorMapped ? "roygb" : null);
-if (this.jvxlData.thisSet < 0) {
+if (this.jvxlData.thisSet == null) {
 var n = this.parseIntStr (J.jvxl.readers.XmlReader.getXmlAttrib (data, "set"));
-if (n > 0) this.jvxlData.thisSet = n - 1;
-}this.jvxlData.slabValue = this.parseIntStr (J.jvxl.readers.XmlReader.getXmlAttrib (data, "slabValue"));
+if (n > 0) {
+this.jvxlData.thisSet =  new JU.BS ();
+this.jvxlData.thisSet.set (n - 1);
+}var a = J.jvxl.readers.XmlReader.getXmlAttrib (data, "subset");
+if (a != null && a.length > 2) {
+var sets = a.$replace ('[', ' ').$replace (']', ' ').trim ().$plit (" ");
+if (sets.length > 0) {
+this.jvxlData.thisSet =  new JU.BS ();
+for (var i = sets.length; --i >= 0; ) {
+this.jvxlData.thisSet.set (JU.PT.parseInt (sets[i]) - 1);
+}
+}}}this.jvxlData.slabValue = this.parseIntStr (J.jvxl.readers.XmlReader.getXmlAttrib (data, "slabValue"));
 this.jvxlData.isSlabbable = (J.jvxl.readers.XmlReader.getXmlAttrib (data, "slabbable").equalsIgnoreCase ("true"));
 this.jvxlData.diameter = this.parseIntStr (J.jvxl.readers.XmlReader.getXmlAttrib (data, "diameter"));
 if (this.jvxlData.diameter == -2147483648) this.jvxlData.diameter = 0;

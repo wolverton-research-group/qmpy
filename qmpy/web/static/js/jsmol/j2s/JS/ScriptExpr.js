@@ -2,6 +2,7 @@ Clazz.declarePackage ("JS");
 Clazz.load (["JS.ScriptParam"], "JS.ScriptExpr", ["java.lang.Boolean", "$.Float", "java.util.Hashtable", "$.Map", "JU.BArray", "$.BS", "$.CU", "$.Lst", "$.M34", "$.M4", "$.Measure", "$.P3", "$.P4", "$.PT", "$.SB", "J.api.Interface", "JM.BondSet", "$.Group", "$.ModelSet", "JS.SV", "$.ScriptContext", "$.ScriptMathProcessor", "$.T", "JU.BSUtil", "$.Elements", "$.Escape"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.debugHigh = false;
+this.privateFuncs = null;
 this.cmdExt = null;
 this.isoExt = null;
 this.mathExt = null;
@@ -381,11 +382,11 @@ if (!haveParens) if (this.chk) {
 v = name;
 } else if (localVars == null || (v = JU.PT.getMapValueNoCase (localVars, name)) == null && allContext) {
 if (name.startsWith ("_")) {
-v = (name.equals ("_") ? this.vwr.ms.getAuxiliaryInfo (null) : name.equals ("_m") ? this.vwr.getCurrentModelAuxInfo () : null);
+v = (name.equals ("_") ? this.vwr.getModelSetAuxiliaryInfo () : name.equals ("_m") ? this.vwr.getCurrentModelAuxInfo () : null);
 }if (v == null) v = this.getContextVariableAsVariable (name, false);
  else if (ptEq == 0) this.invArg ();
 }if (v == null) {
-if (JS.T.tokAttr (this.theTok, 1073741824) && this.vwr.isFunction (name)) {
+if (JS.T.tokAttr (this.theTok, 1073741824) && this.isFunction (name)) {
 if (!rpn.addOp (JS.SV.newV (134320141, this.theToken.value))) this.invArg ();
 if (!haveParens) {
 rpn.addOp (JS.T.tokenLeftParen);
@@ -511,7 +512,7 @@ rpn.addXBs (this.vwr.ms.getAtoms (1086324744, (instruction).asString ()));
 break;
 case 134219265:
 rpn.addX (JS.SV.newT (instruction));
-rpn.addX (JS.SV.newV (9, this.hklParameter (pc + 2)));
+rpn.addX (JS.SV.newV (9, this.hklParameter (pc + 2, false)));
 pc = this.iToken;
 break;
 case 134217750:
@@ -536,7 +537,7 @@ rpn.addXBs (this.vwr.ms.getAtoms (1086324744, s));
 break;
 }rpn.addX (JS.SV.newT (instruction));
 if (s.equals ("hkl")) {
-rpn.addX (JS.SV.newV (9, this.hklParameter (pc + 2)));
+rpn.addX (JS.SV.newV (9, this.hklParameter (pc + 2, false)));
 pc = this.iToken;
 }break;
 case 134217759:
@@ -646,7 +647,7 @@ break;
 case 1094713350:
 case 1094713349:
 var pt = value;
-rpn.addXBs (this.getAtomBits (instruction.tok,  Clazz.newIntArray (-1, [Clazz.doubleToInt (Math.floor (pt.x * 1000)), Clazz.doubleToInt (Math.floor (pt.y * 1000)), Clazz.doubleToInt (Math.floor (pt.z * 1000))])));
+rpn.addXBs (this.getAtomBits (instruction.tok, value));
 break;
 case 2097182:
 rpn.addXBs (this.vwr.am.cmi < 0 ? this.vwr.getFrameAtoms () : this.vwr.getModelUndeletedAtomsBitSet (this.vwr.am.cmi));
@@ -865,6 +866,7 @@ if (!isProp && this.ptTemp == null) this.ptTemp =  new JU.P3 ();
 for (var i = ac; --i >= 0; ) {
 var match = false;
 var atom = atoms[i];
+if (atom == null) continue;
 if (isProp) {
 if (data == null || data.length <= i) continue;
 propertyFloat = data[i];
@@ -975,6 +977,7 @@ bs = JU.BS.newN (ac);
 for (var i = 0; i < ac; ++i) {
 var match = false;
 var atom = atoms[i];
+if (atom == null) continue;
 switch (tokWhat) {
 default:
 ia = atom.atomPropertyInt (tokWhat);
@@ -1079,7 +1082,7 @@ default:
 if (JS.T.tokAttrOr (tok, 1077936128, 1140850688) || xTok == 6) break;
 if (tok != 805306401 && !JS.T.tokAttr (tok, 1073741824)) break;
 var name = this.paramAsStr (i);
-if (this.vwr.isFunction (name.toLowerCase ())) {
+if (this.isFunction (name.toLowerCase ())) {
 tok = 134320141;
 break;
 }}
@@ -1088,7 +1091,7 @@ return JS.SV.newSV (268435665, tok, this.paramAsStr (i));
 Clazz.defineMethod (c$, "getBitsetProperty", 
 function (bs, pts, tok, ptRef, planeRef, tokenValue, opValue, useAtomMap, index, asVectorIfAll) {
 var haveIndex = (index != 2147483647);
-var isAtoms = haveIndex || !(Clazz.instanceOf (tokenValue, JM.BondSet));
+var isAtoms = haveIndex || !(Clazz.instanceOf (tokenValue, JM.BondSet)) && !(Clazz.instanceOf (bs, JM.BondSet));
 var minmaxtype = tok & 480;
 var selectedFloat = (minmaxtype == 224);
 var ac = this.vwr.ms.ac;
@@ -1877,4 +1880,21 @@ for (i = j; i < this.st.length; i++) this.st[i] = null;
 this.slen = j;
 return true;
 }, "~A,~N");
+Clazz.defineMethod (c$, "isFunction", 
+function (sf) {
+return (this.getFunction (sf) != null);
+}, "~S");
+Clazz.defineMethod (c$, "addFunction", 
+function (f) {
+if (f == null || f.isPrivate) {
+if (this.privateFuncs == null) this.privateFuncs =  new java.util.Hashtable ();
+if (f != null) this.privateFuncs.put (f.name, f);
+} else {
+this.vwr.addFunction (f);
+}}, "JS.ScriptFunction");
+Clazz.defineMethod (c$, "getFunction", 
+function (sf) {
+var f = (this.privateFuncs == null ? null : this.privateFuncs.get (sf));
+return (f == null ? this.vwr.getFunction (sf) : f);
+}, "~S");
 });

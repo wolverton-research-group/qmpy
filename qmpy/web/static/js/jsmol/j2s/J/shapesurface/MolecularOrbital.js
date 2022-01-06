@@ -290,6 +290,7 @@ Clazz.defineMethod (c$, "getSettings",
  function (strID) {
 this.thisModel = this.htModels.get (strID);
 if (this.thisModel == null || this.thisModel.get ("moNumber") == null) return false;
+this.nboType = this.thisModel.get ("nboType");
 this.moTranslucency = this.thisModel.get ("moTranslucency");
 this.moTranslucentLevel = this.thisModel.get ("moTranslucentLevel");
 this.moPlane = this.thisModel.get ("moPlane");
@@ -300,7 +301,6 @@ this.moCutoff = Float.$valueOf (0.05);
 }this.thisModel.put ("moCutoff", Float.$valueOf (this.moCutoff.floatValue ()));
 this.moResolution = this.thisModel.get ("moResolution");
 this.moScale = this.thisModel.get ("moScale");
-this.nboType = this.thisModel.get ("moType");
 this.moColorPos = this.thisModel.get ("moColorPos");
 this.moColorNeg = this.thisModel.get ("moColorNeg");
 this.moSquareData = this.thisModel.get ("moSquareData");

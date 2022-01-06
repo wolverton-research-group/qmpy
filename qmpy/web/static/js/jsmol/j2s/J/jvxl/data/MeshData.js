@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.jvxl.data");
-Clazz.load (["JU.MeshSurface"], "J.jvxl.data.MeshData", ["java.lang.Float", "java.util.Arrays", "JU.AU", "$.BS", "$.V3"], function () {
+Clazz.load (["JU.MeshSurface"], "J.jvxl.data.MeshData", ["java.lang.Float", "java.util.Arrays", "JU.AU", "$.BS", "$.V3", "JU.BSUtil"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.setsSuccessful = false;
 this.vertexIncrement = 1;
@@ -132,7 +132,7 @@ return (val1 >= 0 && val2 >= 0 && val3 >= 0 || val1 <= 0 && val2 <= 0 && val3 <=
 c$.calculateVolumeOrArea = Clazz.defineMethod (c$, "calculateVolumeOrArea", 
 function (m, thisSet, isArea, getSets) {
 if (getSets || m.nSets <= 0) m.getSurfaceSet ();
-var justOne = (thisSet >= -1);
+var justOne = (thisSet != null && thisSet.cardinality () == 1);
 var n = (justOne || m.nSets <= 0 ? 1 : m.nSets);
 var v =  Clazz.newDoubleArray (n, 0);
 var vAB =  new JU.V3 ();
@@ -141,7 +141,7 @@ var vTemp =  new JU.V3 ();
 for (var i = m.pc; --i >= 0; ) {
 if (m.setABC (i) == null) continue;
 var iSet = (m.nSets <= 0 ? 0 : m.vertexSets[m.iA]);
-if (thisSet >= 0 && iSet != thisSet) continue;
+if (thisSet != null && !thisSet.get (iSet)) continue;
 if (isArea) {
 vAB.sub2 (m.vs[m.iB], m.vs[m.iA]);
 vAC.sub2 (m.vs[m.iC], m.vs[m.iA]);
@@ -158,8 +158,15 @@ var factor = (isArea ? 2 : 6);
 for (var i = 0; i < n; i++) v[i] /= factor;
 
 if (justOne) return Float.$valueOf (v[0]);
-return v;
-}, "J.jvxl.data.MeshData,~N,~B,~B");
+if (thisSet != null) {
+thisSet.and (JU.BSUtil.newBitSet2 (0, v.length));
+var v1 =  Clazz.newDoubleArray (thisSet.cardinality (), 0);
+for (var pt = 0, i = thisSet.nextSetBit (0); i >= 0; i = thisSet.nextSetBit (i + 1)) {
+v1[pt++] = v[i];
+}
+v = v1;
+}return v;
+}, "J.jvxl.data.MeshData,JU.BS,~B,~B");
 Clazz.defineMethod (c$, "updateInvalidatedVertices", 
 function (bs) {
 bs.clearAll ();

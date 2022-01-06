@@ -7,6 +7,7 @@ this.value = null;
 this.labelLineNo = 0;
 this.line = null;
 this.lineNo = 0;
+this.rawLine = null;
 Clazz.instantialize (this, arguments);
 }, JSV.source, "JDXSourceStreamTokenizer");
 Clazz.makeConstructor (c$, 
@@ -43,6 +44,7 @@ throw e;
 if (this.line.startsWith ("##")) break;
 this.line = null;
 }
+this.rawLine = this.line;
 var pt = this.line.indexOf ("=");
 if (pt < 0) {
 if (isGet) JU.Logger.info ("BAD JDX LINE -- no '=' (line " + this.lineNo + "): " + this.line);

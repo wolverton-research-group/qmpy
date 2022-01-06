@@ -88,7 +88,9 @@ this.getAtoms (this.params.bsSelected, this.doAddHydrogens, true, false, false, 
 if (this.isCavity || this.isPocket) this.dots = this.meshDataServer.calculateGeodesicSurface (this.bsMySelected, this.envelopeRadius);
 this.setHeader ("solvent/molecular surface", this.params.calculationType);
 if (this.havePlane || !isMapData) {
-var minPtsPerAng = 0;
+var r = Math.max (this.params.solventExtendedAtomRadius, this.params.solventRadius);
+var minPtsPerAng = (r >= 1 ? 1.5 / r : 0);
+if (minPtsPerAng > 0) System.out.println ("IsoSolventReader.minPtsPerAng=" + minPtsPerAng);
 this.setRanges (this.params.solvent_ptsPerAngstrom, this.params.solvent_gridMax, minPtsPerAng);
 this.volumeData.getYzCount ();
 this.margin = this.volumeData.maxGrid * 2.0;
@@ -184,7 +186,7 @@ if (this.doCalculateTroughs && this.bsSurfacePoints != null) {
 var bsAll =  new JU.BS ();
 var bsSurfaces = this.meshData.getSurfaceSet ();
 var bsSources = null;
-var volumes = (this.isPocket ? null : J.jvxl.data.MeshData.calculateVolumeOrArea (this.meshData, -2147483648, false, false));
+var volumes = (this.isPocket ? null : J.jvxl.data.MeshData.calculateVolumeOrArea (this.meshData, null, false, false));
 var minVolume = (this.isCavity ? (1.5 * 3.141592653589793 * Math.pow (this.sr, 3)) : 0);
 var maxVolume = 0;
 var maxIsNegative = false;

@@ -13,6 +13,7 @@ this.haveNboOrbitals = false;
 this.orbitalsRead = false;
 this.lastMoData = null;
 this.allowNoOrbitals = false;
+this.forceMOPAC = false;
 this.HEADER_GAMESS_UK_MO = 3;
 this.HEADER_GAMESS_OCCUPANCIES = 2;
 this.HEADER_GAMESS_ORIGINAL = 1;
@@ -28,14 +29,8 @@ this.getNBOs = (this.filter != null && this.filterMO ());
 this.line = "\nNBOCHARGES";
 this.getNBOCharges = (this.filter != null && this.filterMO ());
 this.checkAndRemoveFilterKey ("NBOCHARGES");
+this.forceMOPAC = this.checkAndRemoveFilterKey ("MOPAC");
 });
-Clazz.defineMethod (c$, "checkAndRemoveFilterKey", 
-function (key) {
-if (!this.checkFilterKey (key)) return false;
-this.filter = JU.PT.rep (this.filter, key, "");
-if (this.filter.length < 3) this.filter = null;
-return true;
-}, "~S");
 Clazz.defineMethod (c$, "checkNboLine", 
 function () {
 if (this.getNBOs) {
@@ -96,7 +91,8 @@ function (headerType) {
 if (this.ignoreMOs) {
 this.rd ();
 return;
-}this.dfCoefMaps = null;
+}this.addSlaterBasis ();
+this.dfCoefMaps = null;
 if (this.haveNboOrbitals) {
 this.orbitals =  new JU.Lst ();
 this.alphaBeta = "";
@@ -213,6 +209,9 @@ this.setMOData (!this.alphaBeta.equals ("alpha"));
 this.haveCoeffMap = false;
 this.dfCoefMaps = null;
 }, "~N");
+Clazz.defineMethod (c$, "addSlaterBasis", 
+function () {
+});
 Clazz.defineMethod (c$, "addCoef", 
 function (mo, coefs, type, energy, occ, moCount) {
 mo.put ("coefficients", coefs);
@@ -271,7 +270,8 @@ this.setMO (mos[i]);
 }, "~N,~A,~A");
 Clazz.defineMethod (c$, "setMOData", 
 function (clearOrbitals) {
-if (this.shells != null && this.gaussians != null && (this.allowNoOrbitals || this.orbitals.size () != 0)) {
+if (!this.allowNoOrbitals && this.orbitals.size () == 0) return;
+if (this.shells != null && this.gaussians != null) {
 this.moData.put ("calculationType", this.calculationType);
 this.moData.put ("energyUnits", this.energyUnits);
 this.moData.put ("shells", this.shells);

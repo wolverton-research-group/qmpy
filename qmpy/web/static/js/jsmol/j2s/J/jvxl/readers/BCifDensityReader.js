@@ -1,6 +1,7 @@
 Clazz.declarePackage ("J.jvxl.readers");
 Clazz.load (["J.jvxl.readers.MapFileReader"], "J.jvxl.readers.BCifDensityReader", ["java.io.BufferedInputStream", "$.ByteArrayInputStream", "java.lang.Float", "JU.AU", "$.BC", "$.MessagePackReader", "$.P3", "$.SB", "JU.Logger"], function () {
 c$ = Clazz.decorateAsClass (function () {
+this.header = null;
 this.pt = 0;
 this.checkSum = 0;
 this.values = null;
@@ -47,7 +48,8 @@ throw e;
 var dataBlocks = this.cifData.get ("dataBlocks");
 for (var i = dataBlocks.length; --i >= 0; ) {
 var map = dataBlocks[i];
-if (type.equalsIgnoreCase (map.get ("header").toString ())) {
+this.header = map.get ("header").toString ();
+if ("EM".equals (this.header) || type.equalsIgnoreCase (this.header)) {
 var categories = map.get ("categories");
 for (var j = categories.length; --j >= 0; ) {
 var cat = categories[j];
@@ -86,7 +88,7 @@ case 33:
 f = JU.BC.bytesToDoubleToFloat (data, 0, false);
 break;
 default:
-System.out.println ("BCDensityReader: Number encoding not recognized: " + encoding);
+System.out.println ("BCifDensityReader: Number encoding not recognized: " + encoding);
 break;
 }
 } catch (e) {
@@ -175,8 +177,7 @@ var rmsDeviation = this.getCifFloat ("_volume_data_3d_info_sigma_sampled");
 this.params.cutoff = rmsDeviation * sigma + this.dmean;
 JU.Logger.info ("Cutoff set to (mean + rmsDeviation*" + sigma + " = " + this.params.cutoff + ")\n");
 }this.jvxlFileHeaderBuffer =  new JU.SB ();
-this.jvxlFileHeaderBuffer.append ("CifDensity reader\n");
-this.jvxlFileHeaderBuffer.append ("see http://www.ebi.ac.uk/pdbe/densities/x-ray/1cbs/dbox/\n");
+this.jvxlFileHeaderBuffer.append ("BCifDensity reader type=" + this.header + "\n");
 });
 Clazz.defineMethod (c$, "getXYZ", 
  function (a, x) {

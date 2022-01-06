@@ -18,6 +18,7 @@ this.contourColixes = null;
 this.colorEncoder = null;
 this.bsVdw = null;
 this.colorPhased = false;
+this.probeValues = null;
 Clazz.instantialize (this, arguments);
 }, J.shapesurface, "IsosurfaceMesh", J.shape.Mesh);
 Clazz.overrideMethod (c$, "getResolution", 
@@ -26,6 +27,7 @@ return 1 / this.jvxlData.pointsPerAngstrom;
 });
 Clazz.makeConstructor (c$, 
 function (vwr, thisID, colix, index) {
+Clazz.superConstructor (this, J.shapesurface.IsosurfaceMesh, []);
 this.mesh1 (vwr, thisID, colix, index);
 this.jvxlData =  new J.jvxl.data.JvxlData ();
 this.checkByteCount = 2;
@@ -620,7 +622,7 @@ if (d2 < 5) return 1e-10;
 Clazz.overrideMethod (c$, "getVisibleVertexBitSet", 
 function () {
 var bs = this.getVisibleVBS ();
-if (this.jvxlData.thisSet >= 0) for (var i = 0; i < this.vc; i++) if (this.vertexSets[i] != this.jvxlData.thisSet) bs.clear (i);
+if (this.jvxlData.thisSet != null) for (var i = 0; i < this.vc; i++) if (!this.jvxlData.thisSet.get (this.vertexSets[i])) bs.clear (i);
 
 return bs;
 });
@@ -654,4 +656,54 @@ Clazz.defineMethod (c$, "getDataRange",
 function () {
 return (this.jvxlData.jvxlPlane != null && this.colorEncoder == null ? null :  Clazz.newFloatArray (-1, [this.jvxlData.mappedDataMin, this.jvxlData.mappedDataMax, (this.jvxlData.isColorReversed ? this.jvxlData.valueMappedToBlue : this.jvxlData.valueMappedToRed), (this.jvxlData.isColorReversed ? this.jvxlData.valueMappedToRed : this.jvxlData.valueMappedToBlue)]));
 });
+Clazz.defineMethod (c$, "getInfo", 
+function (isAll) {
+var info = Clazz.superCall (this, J.shapesurface.IsosurfaceMesh, "getInfo", [isAll]);
+if (isAll) {
+var bs =  new JU.BS ();
+var valid = this.getValidVertices (bs);
+if (valid != null) {
+info.put ("allVertices", info.get ("vertices"));
+info.put ("vertices", valid);
+var values = info.get ("vertexValues");
+if (values != null) {
+var v = this.getValidValues (bs);
+info.put ("allValues", values);
+info.put ("vertexValues", v);
+}}}return info;
+}, "~B");
+Clazz.defineMethod (c$, "getValidValues", 
+function (bs) {
+if (bs == null) this.getInvalidBS (bs =  new JU.BS ());
+var n = this.vc - bs.cardinality ();
+var v =  Clazz.newFloatArray (n, 0);
+for (var pt = 0, i = bs.nextClearBit (0); i >= 0 && i < this.vc; i = bs.nextClearBit (i + 1)) v[pt++] = this.vvs[i];
+
+return v;
+}, "JU.BS");
+Clazz.defineMethod (c$, "getValidVertices", 
+function (bs) {
+var allowNull = (bs != null);
+if (bs == null) bs =  new JU.BS ();
+this.getInvalidBS (bs);
+var n = this.vc - bs.cardinality ();
+if (n == this.vc && allowNull) {
+return null;
+}var pa =  new Array (n);
+for (var pt = 0, i = bs.nextClearBit (0); i >= 0 && pt < n; i = bs.nextClearBit (i + 1)) {
+pa[pt++] = this.vs[i];
+}
+return pa;
+}, "JU.BS");
+Clazz.defineMethod (c$, "getInvalidBS", 
+ function (bs) {
+var excluded = this.jvxlData.jvxlExcluded;
+var invalid = excluded[1];
+var thisSet = this.jvxlData.thisSet;
+if (invalid != null) bs.or (invalid);
+if (thisSet != null) {
+for (var i = this.vc; --i >= 0; ) {
+if (!thisSet.get (this.vertexSets[i])) bs.set (i);
+}
+}}, "JU.BS");
 });

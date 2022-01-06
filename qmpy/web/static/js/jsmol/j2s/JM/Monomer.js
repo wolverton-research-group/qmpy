@@ -64,7 +64,7 @@ var m = groups[ipt];
 if (offset == 1 && !m.isConnectedPrevious ()) return -1;
 if ("\0".equals (name)) return m.leadAtomIndex;
 var atoms = this.chain.model.ms.at;
-for (var i = m.firstAtomIndex; i <= m.lastAtomIndex; i++) if (name == null || name.equalsIgnoreCase (atoms[i].getAtomName ())) return i;
+for (var i = m.firstAtomIndex; i <= m.lastAtomIndex; i++) if (atoms[i] != null && (name == null || name.equalsIgnoreCase (atoms[i].getAtomName ()))) return i;
 
 }}return -1;
 }, "~S,~N");

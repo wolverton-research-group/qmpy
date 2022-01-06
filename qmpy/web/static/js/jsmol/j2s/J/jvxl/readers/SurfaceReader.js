@@ -153,10 +153,13 @@ if (!this.readVolumeData (false)) return false;
 this.generateSurfaceData ();
 }if (this.jvxlFileHeaderBuffer == null) {
 this.jvxlData.jvxlFileTitle = "";
+this.jvxlData.jvxlFileSource = null;
+this.jvxlData.jvxlFileMessage = null;
 } else {
 var s = this.jvxlFileHeaderBuffer.toString ();
 var i = s.indexOf ('\n', s.indexOf ('\n', s.indexOf ('\n') + 1) + 1) + 1;
 this.jvxlData.jvxlFileTitle = s.substring (0, i);
+this.jvxlData.jvxlFileSource = this.params.fileName;
 }if (this.params.contactPair == null) this.setBBoxAll ();
 this.jvxlData.isValid = (this.xyzMin.x != 3.4028235E38);
 if (!this.params.isSilent) {

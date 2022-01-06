@@ -103,6 +103,7 @@ out = viewer.getOutputChannel (file.getFullPath (), false);
 var msg = this.exportSpectrumOrImage (viewer, eType, index, out);
 var isOK = msg.startsWith ("OK");
 if (isOK) viewer.si.siUpdateRecentMenus (file.getFullPath ());
+out.closeChannel ();
 return msg;
 }
 case 2:

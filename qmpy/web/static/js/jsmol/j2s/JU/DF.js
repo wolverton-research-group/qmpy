@@ -13,6 +13,8 @@ return JU.DF.formatDecimal (value, decimalDigits);
 c$.formatDecimal = Clazz.defineMethod (c$, "formatDecimal", 
 function (value, decimalDigits) {
 if (decimalDigits == 2147483647 || value == -Infinity || value == Infinity || Float.isNaN (value)) return "" + value;
+var isNeg = (value < 0);
+if (isNeg) value = -value;
 var n;
 if (decimalDigits < 0) {
 decimalDigits = -decimalDigits;
@@ -21,33 +23,29 @@ if (value == 0) return JU.DF.formattingStrings[decimalDigits - 1] + "E+0";
 n = 0;
 var d;
 if (Math.abs (value) < 1) {
-n = 10;
-d = value * 1e-10;
+n = 100;
+d = value * 1e-100;
 } else {
-n = -10;
-d = value * 1e10;
+n = -100;
+d = value * 1e100;
 }var s = ("" + d).toUpperCase ();
-var i = s.indexOf ("E");
-n = JU.PT.parseInt (s.substring (i + 1)) + n;
+var i1 = s.indexOf ("E");
 var sf;
-if (i < 0) {
+if (i1 < 0) {
 sf = "" + value;
 } else {
-var f = JU.PT.parseFloat (s.substring (0, i));
-if (f == 10 || f == -10) {
-f /= 10;
-n += (n < 0 ? 1 : -1);
-}sf = JU.DF.formatDecimal (f, decimalDigits - 1);
-}return sf + "E" + (n >= 0 ? "+" : "") + n;
+n = JU.PT.parseInt (s.substring (i1 + (s.indexOf ("E+") == i1 ? 2 : 1))) + n;
+var f = JU.PT.parseFloat (s.substring (0, i1));
+sf = JU.DF.formatDecimal (f, decimalDigits - 1);
+if (sf.startsWith ("10.")) {
+sf = JU.DF.formatDecimal (1, decimalDigits - 1);
+n++;
+}}return (isNeg ? "-" : "") + sf + "E" + (n >= 0 ? "+" : "") + n;
 }if (decimalDigits >= JU.DF.formattingStrings.length) decimalDigits = JU.DF.formattingStrings.length - 1;
 var s1 = ("" + value).toUpperCase ();
 var pt = s1.indexOf (".");
 if (pt < 0) return s1 + JU.DF.formattingStrings[decimalDigits].substring (1);
-var isNeg = s1.startsWith ("-");
-if (isNeg) {
-s1 = s1.substring (1);
-pt--;
-}var pt1 = s1.indexOf ("E-");
+var pt1 = s1.indexOf ("E-");
 if (pt1 > 0) {
 n = JU.PT.parseInt (s1.substring (pt1 + 1));
 s1 = "0." + "0000000000000000000000000000000000000000".substring (0, -n - 1) + s1.substring (0, 1) + s1.substring (2, pt1);
@@ -61,7 +59,7 @@ pt = s1.indexOf (".");
 }var len = s1.length;
 var pt2 = decimalDigits + pt + 1;
 if (pt2 < len && s1.charAt (pt2) >= '5') {
-return JU.DF.formatDecimal (value + (isNeg ? -1 : 1) * JU.DF.formatAdds[decimalDigits], decimalDigits);
+return JU.DF.formatDecimal ((isNeg ? -1 : 1) * (value + JU.DF.formatAdds[decimalDigits]), decimalDigits);
 }var s0 = s1.substring (0, (decimalDigits == 0 ? pt : ++pt));
 var sb = JU.SB.newS (s0);
 if (isNeg && s0.equals ("0.") && decimalDigits + 2 <= len && s1.substring (2, 2 + decimalDigits).equals ("0000000000000000000000000000000000000000".substring (0, decimalDigits))) isNeg = false;
@@ -78,6 +76,15 @@ var str = JU.DF.formatDecimalDbl (x, precision);
 var m = str.length - 1;
 var zero = '0';
 while (m >= 0 && str.charAt (m) == zero) m--;
+
+return str.substring (0, m + 1);
+}, "~N,~N");
+c$.formatDecimalTrimmed0 = Clazz.defineMethod (c$, "formatDecimalTrimmed0", 
+function (x, precision) {
+var str = JU.DF.formatDecimalDbl (x, precision);
+var m = str.length - 1;
+var pt = str.indexOf (".") + 1;
+while (m > pt && str.charAt (m) == '0') m--;
 
 return str.substring (0, m + 1);
 }, "~N,~N");

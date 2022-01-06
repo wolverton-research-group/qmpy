@@ -71,6 +71,7 @@ this.primitives = bond.primitives;
 this.nPrimitives = bond.nPrimitives;
 this.bondsOr = bond.bondsOr;
 this.nBondsOr = bond.nBondsOr;
+this.atropType = bond.atropType;
 }, "JS.SmilesBond");
 Clazz.defineMethod (c$, "setAtropType", 
 function (nn) {
@@ -160,10 +161,6 @@ default:
 return 1;
 }
 }, "~S,~B,~B");
-Clazz.defineMethod (c$, "getBondType", 
-function () {
-return this.order;
-});
 Clazz.defineMethod (c$, "getValence", 
 function () {
 return (this.order & 7);
@@ -231,6 +228,10 @@ Clazz.defineMethod (c$, "getMatchingBond",
 function () {
 return this.matchingBond == null ? this : this.matchingBond;
 });
+Clazz.overrideMethod (c$, "getAtom", 
+function (i) {
+return (i == 1 ? this.atom2 : this.atom1);
+}, "~N");
 Clazz.defineStatics (c$,
 "TYPE_UNKNOWN", -1,
 "TYPE_NONE", 0,

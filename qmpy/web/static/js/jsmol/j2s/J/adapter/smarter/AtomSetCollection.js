@@ -29,6 +29,7 @@ this.trajectoryNames = null;
 this.doFixPeriodic = false;
 this.allowMultiple = false;
 this.readerList = null;
+this.atomMapAnyCase = false;
 this.bsStructuredModels = null;
 this.haveAnisou = false;
 this.baseSymmetryAtomCount = 0;
@@ -78,6 +79,8 @@ var p =  new java.util.Properties ();
 p.put ("PATH_KEY", ".PATH");
 p.put ("PATH_SEPARATOR", J.adapter.smarter.SmarterJmolAdapter.PATH_SEPARATOR);
 this.setInfo ("properties", p);
+var modelIndex = (reader == null ? null : reader.htParams.get ("appendToModelIndex"));
+if (modelIndex != null) this.setInfo ("appendToModelIndex", modelIndex);
 if (array != null) {
 var n = 0;
 this.readerList =  new JU.Lst ();
@@ -105,7 +108,7 @@ function () {
 if (!this.isTrajectory) this.trajectorySteps =  new JU.Lst ();
 this.isTrajectory = true;
 var n = (this.bsAtoms == null ? this.ac : this.bsAtoms.cardinality ());
-if (n == 0) return;
+if (n <= 1) return;
 var trajectoryStep =  new Array (n);
 var haveVibrations = (n > 0 && this.atoms[0].vib != null && !Float.isNaN (this.atoms[0].vib.z));
 var vibrationStep = (haveVibrations ?  new Array (n) : null);
@@ -146,16 +149,8 @@ if (atomInfo != null) atomInfo[0] += existingAtomsCount;
 this.setCurrentModelInfo ("title", collection.collectionName);
 this.setAtomSetName (collection.getAtomSetName (atomSetNum));
 for (var atomNum = 0; atomNum < collection.atomSetAtomCounts[atomSetNum]; atomNum++) {
-try {
 if (this.bsAtoms != null) this.bsAtoms.set (this.ac);
 this.newCloneAtom (collection.atoms[clonedAtoms]);
-} catch (e) {
-if (Clazz.exceptionOf (e, Exception)) {
-this.errorMessage = "appendAtomCollection error: " + e;
-} else {
-throw e;
-}
-}
 clonedAtoms++;
 }
 this.atomSetNumbers[this.iSet] = (collectionIndex < 0 ? this.iSet + 1 : ((collectionIndex + 1) * 1000000) + collection.atomSetNumbers[atomSetNum]);
@@ -311,6 +306,7 @@ for (var i = this.ac; --i >= 0; ) this.atoms[i] = null;
 
 this.ac = 0;
 this.atomSymbolicMap.clear ();
+this.atomMapAnyCase = false;
 this.atomSetCount = 0;
 this.iSet = -1;
 for (var i = this.atomSetAuxiliaryInfo.length; --i >= 0; ) {
@@ -415,14 +411,31 @@ Clazz.defineMethod (c$, "getAtomFromName",
 function (atomName) {
 return this.atomSymbolicMap.get (atomName);
 }, "~S");
+Clazz.defineMethod (c$, "setAtomMapAnyCase", 
+function () {
+this.atomMapAnyCase = true;
+var newMap =  new java.util.Hashtable ();
+newMap.putAll (this.atomSymbolicMap);
+for (var e, $e = this.atomSymbolicMap.entrySet ().iterator (); $e.hasNext () && ((e = $e.next ()) || true);) {
+var name = e.getKey ();
+var uc = name.toUpperCase ();
+if (!uc.equals (name)) newMap.put (uc, e.getValue ());
+}
+this.atomSymbolicMap = newMap;
+});
 Clazz.defineMethod (c$, "getAtomIndex", 
 function (name) {
 var a = this.atomSymbolicMap.get (name);
+if (a == null && this.atomMapAnyCase) a = this.atomSymbolicMap.get (name.toUpperCase ());
 return (a == null ? -1 : a.index);
 }, "~S");
 Clazz.defineMethod (c$, "addNewBondWithOrder", 
 function (atomIndex1, atomIndex2, order) {
-if (atomIndex1 >= 0 && atomIndex1 < this.ac && atomIndex2 >= 0 && atomIndex2 < this.ac && atomIndex1 != atomIndex2) this.addBond ( new J.adapter.smarter.Bond (atomIndex1, atomIndex2, order));
+var b = null;
+if (atomIndex1 >= 0 && atomIndex1 < this.ac && atomIndex2 >= 0 && atomIndex2 < this.ac && atomIndex1 != atomIndex2) {
+b =  new J.adapter.smarter.Bond (atomIndex1, atomIndex2, order);
+this.addBond (b);
+}return b;
 }, "~N,~N,~N");
 Clazz.defineMethod (c$, "addNewBondFromNames", 
 function (atomName1, atomName2, order) {
@@ -582,6 +595,7 @@ ii++;
 }
 this.setInfo ("trajectorySteps", this.trajectorySteps);
 if (this.vibrationSteps != null) this.setInfo ("vibrationSteps", this.vibrationSteps);
+if (this.ac == 0) this.ac = trajectory.length;
 });
 Clazz.defineMethod (c$, "newAtomSet", 
 function () {
@@ -605,8 +619,10 @@ this.atomSetNumbers = JU.AU.doubleLengthI (this.atomSetNumbers);
 this.atomSetNumbers[this.iSet + this.trajectoryStepCount] = this.atomSetCount + this.trajectoryStepCount;
 } else {
 this.atomSetNumbers[this.iSet] = this.atomSetCount;
-}if (doClearMap) this.atomSymbolicMap.clear ();
-this.setCurrentModelInfo ("title", this.collectionName);
+}if (doClearMap) {
+this.atomSymbolicMap.clear ();
+this.atomMapAnyCase = false;
+}this.setCurrentModelInfo ("title", this.collectionName);
 }, "~B");
 Clazz.defineMethod (c$, "getAtomSetAtomIndex", 
 function (i) {

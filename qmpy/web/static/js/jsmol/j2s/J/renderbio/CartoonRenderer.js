@@ -12,7 +12,7 @@ if (this.nucleicRenderer == null) this.nucleicRenderer = J.api.Interface.getInte
 this.calcScreenControlPoints ();
 this.nucleicRenderer.renderNucleic (this);
 return;
-}var val = this.vwr.getBoolean (603979820);
+}var val = this.vwr.getBoolean (603979819);
 if (this.helixRockets != val) {
 bioShape.falsifyMesh ();
 this.helixRockets = val;

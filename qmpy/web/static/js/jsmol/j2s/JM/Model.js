@@ -1,5 +1,5 @@
 Clazz.declarePackage ("JM");
-Clazz.load (["JU.BS", "$.SB"], "JM.Model", ["java.util.Hashtable", "JU.AU", "JU.BSUtil"], function () {
+Clazz.load (["JU.BS", "$.SB"], "JM.Model", ["java.util.Hashtable", "JU.AU", "JU.BSUtil", "JV.FileManager"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.ms = null;
 this.mat4 = null;
@@ -46,6 +46,7 @@ this.jmolFrameType = null;
 this.pdbID = null;
 this.bsCheck = null;
 this.hasChirality = false;
+this.isOrderly = true;
 Clazz.instantialize (this, arguments);
 }, JM, "Model");
 Clazz.prepareFields (c$, function () {
@@ -66,10 +67,13 @@ this.trajectoryBaseIndex = (this.isTrajectory ? trajectoryBaseIndex : modelIndex
 if (auxiliaryInfo == null) {
 auxiliaryInfo =  new java.util.Hashtable ();
 }this.auxiliaryInfo = auxiliaryInfo;
-if (auxiliaryInfo.containsKey ("biosymmetryCount")) {
-this.biosymmetryCount = (auxiliaryInfo.get ("biosymmetryCount")).intValue ();
+var bc = (auxiliaryInfo.get ("biosymmetryCount"));
+if (bc != null) {
+this.biosymmetryCount = bc.intValue ();
 this.biosymmetry = auxiliaryInfo.get ("biosymmetry");
-}this.properties = properties;
+}var fname = auxiliaryInfo.get ("fileName");
+if (fname != null) auxiliaryInfo.put ("fileName", JV.FileManager.stripTypePrefix (fname));
+this.properties = properties;
 if (jmolData == null) {
 this.jmolFrameType = "modelSet";
 } else {
@@ -82,15 +86,16 @@ this.jmolFrameType = (jmolData.indexOf ("ramachandran") >= 0 ? "ramachandran" : 
 }, "JM.ModelSet,~N,~N,~S,java.util.Properties,java.util.Map");
 Clazz.defineMethod (c$, "getTrueAtomCount", 
 function () {
-return this.bsAtoms.cardinality () - this.bsAtomsDeleted.cardinality ();
+return JU.BSUtil.andNot (this.bsAtoms, this.bsAtomsDeleted).cardinality ();
 });
 Clazz.defineMethod (c$, "isContainedIn", 
 function (bs) {
 if (this.bsCheck == null) this.bsCheck =  new JU.BS ();
+this.bsCheck.clearAll ();
 this.bsCheck.or (bs);
-this.bsCheck.and (this.bsAtoms);
-this.bsCheck.andNot (this.bsAtomsDeleted);
-return (this.bsCheck.cardinality () == this.getTrueAtomCount ());
+var bsa = JU.BSUtil.andNot (this.bsAtoms, this.bsAtomsDeleted);
+this.bsCheck.and (bsa);
+return this.bsCheck.equals (bsa);
 }, "JU.BS");
 Clazz.defineMethod (c$, "resetBoundCount", 
 function () {

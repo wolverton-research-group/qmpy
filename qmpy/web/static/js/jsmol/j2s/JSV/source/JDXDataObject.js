@@ -1,46 +1,45 @@
 Clazz.declarePackage ("JSV.source");
-Clazz.load (["JSV.source.JDXHeader"], "JSV.source.JDXDataObject", ["java.lang.Character", "$.Double", "JU.DF", "$.PT", "JSV.common.Annotation", "$.Coordinate", "$.Integral", "JSV.exception.JSVException", "JU.Logger"], function () {
+Clazz.load (["JSV.source.JDXHeader", "java.util.Hashtable"], "JSV.source.JDXDataObject", ["java.lang.Character", "$.Double", "JU.DF", "$.PT", "JSV.common.Annotation", "$.Coordinate", "$.Integral", "JSV.exception.JSVException", "JU.Logger"], function () {
 c$ = Clazz.decorateAsClass (function () {
+this.sourceID = "";
+this.isSimulation = false;
+this.blockID = 0;
 this.filePath = null;
 this.filePathForwardSlash = null;
-this.isSimulation = false;
 this.inlineData = null;
-this.sourceID = "";
-this.blockID = 0;
-this.fileFirstX = 1.7976931348623157E308;
-this.fileLastX = 1.7976931348623157E308;
-this.nPointsFile = -1;
-this.xFactor = 1.7976931348623157E308;
-this.yFactor = 1.7976931348623157E308;
-this.varName = "";
-this.xUnits = "";
-this.yUnits = "";
-this.xLabel = null;
-this.yLabel = null;
-this.nH = 0;
-this.observedNucl = "";
-this.observedFreq = 1.7976931348623157E308;
-this.parent = null;
-this.offset = 1.7976931348623157E308;
-this.shiftRefType = -1;
-this.dataPointNum = -1;
-this.numDim = 1;
-this.nucleusX = null;
-this.nucleusY = "?";
-this.freq2dX = NaN;
-this.freq2dY = NaN;
-this.y2D = NaN;
-this.y2DUnits = "";
-this.$isHZtoPPM = false;
-this.xIncreases = true;
-this.continuous = false;
-this.xyCoords = null;
+this.fileShiftRef = 1.7976931348623157E308;
+this.fileShiftRefType = -1;
+this.fileShiftRefDataPt = -1;
 this.minX = NaN;
 this.minY = NaN;
 this.maxX = NaN;
 this.maxY = NaN;
 this.deltaX = NaN;
-this.normalizationFactor = 1;
+this.xyCoords = null;
+this.continuous = false;
+this.$isHZtoPPM = false;
+this.xIncreases = true;
+this.fileFirstX = 1.7976931348623157E308;
+this.fileLastX = 1.7976931348623157E308;
+this.fileNPoints = -1;
+this.xFactor = 1.7976931348623157E308;
+this.yFactor = 1.7976931348623157E308;
+this.nucleusX = null;
+this.nucleusY = "?";
+this.freq2dX = NaN;
+this.freq2dY = NaN;
+this.y2DUnits = "";
+this.parent = null;
+this.xUnits = "";
+this.yUnits = "";
+this.xLabel = null;
+this.yLabel = null;
+this.varName = "";
+this.observedNucl = "";
+this.observedFreq = 1.7976931348623157E308;
+this.numDim = 1;
+this.nH = 0;
+this.y2D = NaN;
 Clazz.instantialize (this, arguments);
 }, JSV.source, "JDXDataObject", JSV.source.JDXHeader);
 Clazz.defineMethod (c$, "setInlineData", 
@@ -67,9 +66,10 @@ Clazz.defineMethod (c$, "setBlockID",
 function (id) {
 this.blockID = id;
 }, "~N");
-Clazz.defineMethod (c$, "isImaginary", 
+Clazz.defineMethod (c$, "checkJDXRequiredTokens", 
 function () {
-return this.varName.contains ("IMAG");
+var missingTag = (this.fileFirstX == 1.7976931348623157E308 ? "##FIRSTX" : this.fileLastX == 1.7976931348623157E308 ? "##LASTX" : this.fileNPoints == -1 ? "##NPOINTS" : this.xFactor == 1.7976931348623157E308 ? "##XFACTOR" : this.yFactor == 1.7976931348623157E308 ? "##YFACTOR" : null);
+if (missingTag != null) throw  new JSV.exception.JSVException ("Error Reading Data Set: " + missingTag + " not found");
 });
 Clazz.defineMethod (c$, "setXFactor", 
 function (xFactor) {
@@ -87,10 +87,13 @@ Clazz.defineMethod (c$, "getYFactor",
 function () {
 return this.yFactor;
 });
-Clazz.defineMethod (c$, "checkRequiredTokens", 
+Clazz.defineMethod (c$, "setVarName", 
+function (name) {
+this.varName = name;
+}, "~S");
+Clazz.defineMethod (c$, "isImaginary", 
 function () {
-var err = (this.fileFirstX == 1.7976931348623157E308 ? "##FIRSTX" : this.fileLastX == 1.7976931348623157E308 ? "##LASTX" : this.nPointsFile == -1 ? "##NPOINTS" : this.xFactor == 1.7976931348623157E308 ? "##XFACTOR" : this.yFactor == 1.7976931348623157E308 ? "##YFACTOR" : null);
-if (err != null) throw  new JSV.exception.JSVException ("Error Reading Data Set: " + err + " not found");
+return this.varName.contains ("IMAG");
 });
 Clazz.defineMethod (c$, "setXUnits", 
 function (xUnits) {
@@ -120,8 +123,12 @@ this.yLabel = value;
 Clazz.defineMethod (c$, "setObservedNucleus", 
 function (value) {
 this.observedNucl = value;
-if (this.numDim == 1) this.parent.nucleusX = this.nucleusX = this.fixNucleus (value);
+if (this.is1D ()) this.parent.nucleusX = this.nucleusX = this.fixNucleus (value);
 }, "~S");
+Clazz.defineMethod (c$, "getObservedNucleus", 
+function () {
+return this.observedNucl;
+});
 Clazz.defineMethod (c$, "setObservedFreq", 
 function (observedFreq) {
 this.observedFreq = observedFreq;
@@ -130,10 +137,26 @@ Clazz.defineMethod (c$, "getObservedFreq",
 function () {
 return this.observedFreq;
 });
+Clazz.defineMethod (c$, "setHydrogenCount", 
+function (nH) {
+this.nH = nH;
+}, "~N");
+Clazz.defineMethod (c$, "getHydrogenCount", 
+function () {
+return this.nH;
+});
 Clazz.defineMethod (c$, "is1D", 
 function () {
 return this.numDim == 1;
 });
+Clazz.defineMethod (c$, "getNumDim", 
+function () {
+return this.numDim;
+});
+Clazz.defineMethod (c$, "setNumDim", 
+function (n) {
+this.numDim = n;
+}, "~N");
 Clazz.defineMethod (c$, "setY2D", 
 function (d) {
 this.y2D = d;
@@ -161,8 +184,8 @@ var freq;
 if (this.observedNucl.indexOf (nuc) >= 0) {
 freq = this.observedFreq;
 } else {
-var g1 = JSV.source.JDXDataObject.getGyroMagneticRatio (this.observedNucl);
-var g2 = JSV.source.JDXDataObject.getGyroMagneticRatio (nuc);
+var g1 = JSV.source.JDXDataObject.getGyromagneticRatio (this.fixNucleus (this.observedNucl));
+var g2 = JSV.source.JDXDataObject.getGyromagneticRatio (nuc);
 freq = this.observedFreq * g2 / g1;
 }if (isX) this.freq2dX = freq;
  else this.freq2dY = freq;
@@ -172,16 +195,30 @@ Clazz.defineMethod (c$, "fixNucleus",
  function (nuc) {
 return JU.PT.rep (JU.PT.trim (nuc, "[]^<>"), "NUC_", "");
 }, "~S");
-c$.getGyroMagneticRatio = Clazz.defineMethod (c$, "getGyroMagneticRatio", 
- function (nuc) {
+c$.getNominalSpecFreq = Clazz.defineMethod (c$, "getNominalSpecFreq", 
+function (nuc, freq) {
+var d = freq * JSV.source.JDXDataObject.getGyromagneticRatio ("1H") / JSV.source.JDXDataObject.getGyromagneticRatio (nuc);
+var century = Math.round (d / 100) * 100;
+return (Double.isNaN (d) ? -1 : Math.abs (d - century) < 2 ? century : Math.round (d));
+}, "~S,~N");
+c$.getGyromagneticRatio = Clazz.defineMethod (c$, "getGyromagneticRatio", 
+function (nuc) {
+var v = null;
+try {
+v = JSV.source.JDXDataObject.gyroMap.get (nuc);
+if (v != null) return v.doubleValue ();
 var pt = 0;
-while (pt < nuc.length && !Character.isDigit (nuc.charAt (pt))) pt++;
+while (pt < nuc.length && Character.isDigit (nuc.charAt (pt))) pt++;
 
-pt = JU.PT.parseInt (nuc.substring (pt));
-var i = 0;
-for (; i < JSV.source.JDXDataObject.gyroData.length; i += 2) if (JSV.source.JDXDataObject.gyroData[i] >= pt) break;
-
-return (JSV.source.JDXDataObject.gyroData[i] == pt ? JSV.source.JDXDataObject.gyroData[i + 1] : NaN);
+v = JSV.source.JDXDataObject.gyroMap.get (nuc.substring (0, pt));
+if (v != null) JSV.source.JDXDataObject.gyroMap.put (nuc, v);
+} catch (e) {
+if (Clazz.exceptionOf (e, Exception)) {
+} else {
+throw e;
+}
+}
+return (v == null ? NaN : v.doubleValue ());
 }, "~S");
 Clazz.defineMethod (c$, "isTransmittance", 
 function () {
@@ -257,7 +294,7 @@ Clazz.defineMethod (c$, "shouldDisplayXAxisIncreasing",
 function () {
 var dt = this.dataType.toUpperCase ();
 var xu = this.xUnits.toUpperCase ();
-if (dt.contains ("NMR") && !(dt.contains ("FID"))) {
+if (dt.contains ("NMR") && !dt.contains ("FID")) {
 return false;
 } else if (dt.contains ("LINK") && xu.contains ("CM")) {
 return false;
@@ -309,7 +346,7 @@ if (Double.isNaN (dx)) return "";
 var precision = 1;
 var units = "";
 if (this.isNMR ()) {
-if (this.numDim == 1) {
+if (this.is1D ()) {
 var isIntegral = (Clazz.instanceOf (m, JSV.common.Integral));
 if (this.isHNMR () || isIntegral) {
 if (!isIntegral) {
@@ -376,13 +413,13 @@ Clazz.defineMethod (c$, "getMaxY",
 function () {
 return (Double.isNaN (this.maxY) ? (this.maxY = JSV.common.Coordinate.getMaxY (this.xyCoords, 0, this.xyCoords.length - 1)) : this.maxY);
 });
-Clazz.defineMethod (c$, "doNormalize", 
+Clazz.defineMethod (c$, "normalizeSimulation", 
 function (max) {
 if (!this.isNMR () || !this.is1D ()) return;
-this.normalizationFactor = max / this.getMaxY ();
+var f = max / this.getMaxY ();
 this.maxY = NaN;
-JSV.common.Coordinate.applyScale (this.xyCoords, 1, this.normalizationFactor);
-JU.Logger.info ("Y values have been scaled by a factor of " + this.normalizationFactor);
+JSV.common.Coordinate.applyScale (this.xyCoords, 1, f);
+JU.Logger.info ("Y values have been scaled by a factor of " + f);
 }, "~N");
 Clazz.defineMethod (c$, "getDeltaX", 
 function () {
@@ -408,9 +445,9 @@ newObj.setContinuous (this.continuous);
 newObj.setIncreasing (this.xIncreases);
 newObj.observedFreq = this.observedFreq;
 newObj.observedNucl = this.observedNucl;
-newObj.offset = this.offset;
-newObj.dataPointNum = this.dataPointNum;
-newObj.shiftRefType = this.shiftRefType;
+newObj.fileShiftRef = this.fileShiftRef;
+newObj.fileShiftRefDataPt = this.fileShiftRefDataPt;
+newObj.fileShiftRefType = this.fileShiftRefType;
 newObj.$isHZtoPPM = this.$isHZtoPPM;
 newObj.numDim = this.numDim;
 newObj.nucleusX = this.nucleusX;
@@ -463,11 +500,58 @@ if (this.isNMR ()) {
 return  Clazz.newDoubleArray (-1, [x, y, x * this.observedFreq, (dx * this.observedFreq > 20 ? 0 : dx * this.observedFreq), (ddx * this.observedFreq > 20 ? 0 : ddx * this.observedFreq), (dddx * this.observedFreq > 20 ? 0 : dddx * this.observedFreq)]);
 }return  Clazz.newDoubleArray (-1, [x, y]);
 }, "JSV.common.Measurement,~A,~N");
+Clazz.defineMethod (c$, "finalizeCoordinates", 
+function () {
+var freq = (Double.isNaN (this.freq2dX) ? this.observedFreq : this.freq2dX);
+var isHz = (freq != 1.7976931348623157E308 && this.getXUnits ().toUpperCase ().equals ("HZ"));
+if (this.fileShiftRef != 1.7976931348623157E308 && freq != 1.7976931348623157E308 && this.dataType.toUpperCase ().contains ("SPECTRUM") && this.jcampdx.indexOf ("JEOL") < 0) {
+this.applyShiftReference (isHz ? freq : 1, this.fileShiftRef);
+}if (this.fileFirstX > this.fileLastX) JSV.common.Coordinate.reverse (this.xyCoords);
+if (isHz) {
+JSV.common.Coordinate.applyScale (this.xyCoords, (1.0 / freq), 1);
+this.setXUnits ("PPM");
+this.setHZtoPPM (true);
+}});
+Clazz.defineMethod (c$, "setShiftReference", 
+function (shift, pt, type) {
+this.fileShiftRef = shift;
+this.fileShiftRefDataPt = (pt > 0 ? pt : 1);
+this.fileShiftRefType = type;
+}, "~N,~N,~N");
+Clazz.defineMethod (c$, "isShiftTypeSpecified", 
+function () {
+return (this.fileShiftRefType != -1);
+});
+Clazz.defineMethod (c$, "applyShiftReference", 
+ function (referenceFreq, shift) {
+if (this.fileShiftRefDataPt > this.xyCoords.length || this.fileShiftRefDataPt < 0) return;
+var coord;
+switch (this.fileShiftRefType) {
+case 0:
+shift = this.xyCoords[this.fileShiftRefDataPt - 1].getXVal () - shift * referenceFreq;
+break;
+case 1:
+shift = this.fileFirstX - shift * referenceFreq;
+break;
+case 2:
+shift = this.fileLastX + shift;
+break;
+}
+for (var index = 0; index < this.xyCoords.length; index++) {
+coord = this.xyCoords[index];
+coord.setXVal (coord.getXVal () - shift);
+this.xyCoords[index] = coord;
+}
+}, "~N,~N");
 Clazz.defineStatics (c$,
 "ERROR", 1.7976931348623157E308,
-"SCALE_NONE", 0,
-"SCALE_TOP", 1,
-"SCALE_BOTTOM", 2,
-"SCALE_TOP_BOTTOM", 3,
+"REF_TYPE_UNSPECIFIED", -1,
+"REF_TYPE_STANDARD", 0,
+"REF_TYPE_BRUKER", 1,
+"REF_TYPE_VARIAN", 2,
 "gyroData",  Clazz.newDoubleArray (-1, [1, 42.5774806, 2, 6.53590131, 3, 45.4148, 3, 32.436, 6, 6.2661, 7, 16.5483, 9, 5.9842, 10, 4.5752, 11, 13.663, 13, 10.70839657, 14, 3.07770646, 15, 4.31726570, 17, 5.7742, 19, 40.07757016, 21, 3.3631, 23, 11.26952167, 25, 2.6083, 27, 11.1031, 29, 8.4655, 31, 17.25144090, 33, 3.2717, 35, 4.1765, 37, 3.4765, 37, 5.819, 39, 3.46, 39, 1.9893, 40, 2.4737, 41, 1.0919, 43, 2.8688, 45, 10.3591, 47, 2.4041, 49, 2.4048, 50, 4.2505, 51, 11.2133, 53, 2.4115, 55, 10.5763, 57, 1.3816, 59, 10.077, 61, 3.8114, 63, 11.2982, 65, 12.103, 67, 2.6694, 69, 10.2478, 71, 13.0208, 73, 1.4897, 75, 7.315, 77, 8.1571, 79, 10.7042, 81, 11.5384, 83, 1.6442, 85, 4.1254, 87, 13.9811, 87, 1.8525, 89, 2.0949, 91, 3.9748, 93, 10.4523, 95, 2.7874, 97, 2.8463, 99, 9.6294, 99, 1.9553, 101, 2.1916, 103, 1.3477, 105, 1.957, 107, 1.7331, 109, 1.9924, 111, 9.0692, 113, 9.4871, 113, 9.3655, 115, 9.3856, 115, 14.0077, 117, 15.261, 119, 15.966, 121, 10.2551, 123, 5.5532, 123, 11.2349, 125, 13.5454, 127, 8.5778, 129, 11.8604, 131, 3.5159, 133, 5.6234, 135, 4.2582, 137, 4.7634, 138, 5.6615, 139, 6.0612, 137, 4.88, 139, 5.39, 141, 2.37, 141, 13.0359, 143, 2.319, 145, 1.429, 143, 11.59, 147, 5.62, 147, 1.7748, 149, 14631, 151, 10.5856, 153, 4.6745, 155, 1.312, 157, 1.72, 159, 10.23, 161, 1.4654, 163, 2.0508, 165, 9.0883, 167, 1.2281, 169, 3.531, 171, 7.5261, 173, 2.073, 175, 4.8626, 176, 3.451, 177, 1.7282, 179, 1.0856, 180, 4.087, 181, 5.1627, 183, 1.7957, 185, 9.7176, 187, 9.817, 187, 0.9856, 189, 3.3536, 191, 0.7658, 191, 0.8319, 195, 9.2922, 197, 0.7406, 199, 7.7123, 201, 2.8469, 203, 24.7316, 205, 24.9749, 207, 9.034, 209, 6.963, 209, 11.7, 211, 9.16, 223, 5.95, 223, 1.3746, 225, 11.187, 227, 5.6, 229, 1.4, 231, 10.2, 235, 0.83, 237, 9.57, 239, 3.09, 243, 4.6, 1E100]));
-});
+c$.gyroMap = c$.prototype.gyroMap =  new java.util.Hashtable ();
+{
+for (var i = 0, n = JSV.source.JDXDataObject.gyroData.length - 1; i < n; i += 2) JSV.source.JDXDataObject.gyroMap.put ("" + Clazz.doubleToInt (JSV.source.JDXDataObject.gyroData[i]), Double.$valueOf (JSV.source.JDXDataObject.gyroData[i + 1]));
+
+}});

@@ -91,6 +91,9 @@ return false;
 } else if (lcline.endsWith ("proparc") || lcline.endsWith ("propertyarchive")) {
 this.readProperties ();
 return false;
+} else if (lcline.endsWith ("molstate")) {
+this.readTransform ();
+return false;
 } else if (lcline.endsWith ("archive")) {
 this.asc.setAtomSetName (this.readArchive ());
 return false;
@@ -132,7 +135,7 @@ Clazz.defineMethod (c$, "readOutput",
 this.titles =  new java.util.Hashtable ();
 var header =  new JU.SB ();
 var pt;
-while (this.rd () != null && !this.line.startsWith ("END ")) {
+while (this.rd () != null && !this.line.startsWith ("END ") && !this.line.startsWith ("ENDOUTPUT")) {
 header.append (this.line).append ("\n");
 if ((pt = this.line.indexOf (")")) > 0) this.titles.put ("Title" + this.parseIntRange (this.line, 0, pt), (this.line.substring (pt + 1).trim ()));
 }

@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.adapter.readers.cif");
-Clazz.load (["J.adapter.smarter.MSInterface"], "J.adapter.readers.cif.MSRdr", ["java.lang.Boolean", "$.Exception", "$.Float", "java.util.Hashtable", "JU.Lst", "$.M3", "$.Matrix", "$.P3", "$.PT", "J.adapter.readers.cif.Subsystem", "J.adapter.smarter.AtomSetCollectionReader", "JU.BSUtil", "$.BoxInfo", "$.Escape", "$.Logger", "$.Modulation", "$.ModulationSet", "$.Vibration"], function () {
+Clazz.load (["J.adapter.smarter.MSInterface"], "J.adapter.readers.cif.MSRdr", ["java.lang.Boolean", "$.Float", "java.util.Hashtable", "JU.Lst", "$.M3", "$.Matrix", "$.P3", "$.PT", "J.adapter.readers.cif.Subsystem", "J.adapter.smarter.AtomSetCollectionReader", "JU.BSUtil", "$.BoxInfo", "$.Escape", "$.Logger", "$.Modulation", "$.ModulationSet", "$.Vibration"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.cr = null;
 this.modDim = 0;
@@ -197,7 +197,7 @@ if (pt[2] == 1 && key.charAt (2) != 'S' && key.charAt (2) != 'T' && key.charAt (
 var ipt = key.indexOf ("?");
 if (ipt >= 0) {
 var s = key.substring (ipt + 1);
-pt = this.getMod (key.substring (0, 2) + s + "#*;*");
+pt = this.getMod (key.substring (0, 2) + "_" + s + "#*;*");
 if (pt != null) this.addModulation (map, key = key.substring (0, ipt), pt, iModel);
 } else {
 var a = pt[0];
@@ -258,8 +258,10 @@ var p =  Clazz.newDoubleArray (params.length, 0);
 for (var i = p.length; --i >= 0; ) p[i] = params[i];
 
 var qcoefs = this.getQCoefs (key);
-if (qcoefs == null) throw  new Exception ("Missing cell wave vector for atom wave vector for " + key + " " + JU.Escape.e (params));
-this.addAtomModulation (atomName, axis, type, p, utens, qcoefs);
+if (qcoefs == null) {
+System.err.println ("Missing cell wave vector for atom wave vector for " + key + " " + JU.Escape.e (params));
+break;
+}this.addAtomModulation (atomName, axis, type, p, utens, qcoefs);
 this.haveAtomMods = true;
 break;
 }
@@ -293,7 +295,9 @@ if (this.qlist100 == null) {
 this.qlist100 =  Clazz.newDoubleArray (this.modDim, 0);
 this.qlist100[0] = 1;
 }return this.qlist100;
-}return this.getMod ("F_coefs_" + fn);
+}var p = this.getMod ("F_coefs_" + fn);
+if (p == null) p = this.getMod ("F_" + fn + "_coefs_");
+return p;
 }, "~S");
 Clazz.overrideMethod (c$, "getModType", 
 function (key) {
@@ -321,7 +325,7 @@ var jmin = (this.modDim < 2 ? 0 : -3);
 var jmax = (this.modDim < 2 ? 0 : 3);
 var kmin = (this.modDim < 3 ? 0 : -3);
 var kmax = (this.modDim < 3 ? 0 : 3);
-for (var i = -3; i <= 3; i++) for (var j = jmin; j <= jmax; j++) for (var k = kmin; k <= kmax; k++) {
+for (var i = -4; i <= 4; i++) for (var j = jmin; j <= jmax; j++) for (var k = kmin; k <= kmax; k++) {
 pt.setT (this.qs[0]);
 pt.scale (i);
 if (this.modDim > 1 && this.qs[1] != null) pt.scaleAdd2 (j, this.qs[1], pt);

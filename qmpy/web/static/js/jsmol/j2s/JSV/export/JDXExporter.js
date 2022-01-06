@@ -110,9 +110,10 @@ var nl = (dataSet.startsWith ("<") && dataSet.contains ("</") ? JSV["export"].JD
 this.out.append (label).append ("= ").append (nl).append (dataSet).append (JSV["export"].JDXExporter.newLine);
 }
 var observedFreq = this.spectrum.getObservedFreq ();
-if (!this.spectrum.is1D ()) this.out.append ("##NUM DIM= ").append ("" + this.spectrum.numDim).append (JSV["export"].JDXExporter.newLine);
+if (!this.spectrum.is1D ()) this.out.append ("##NUM DIM= ").append ("" + this.spectrum.getNumDim ()).append (JSV["export"].JDXExporter.newLine);
 if (observedFreq != 1.7976931348623157E308) this.out.append ("##.OBSERVE FREQUENCY= ").append ("" + observedFreq).append (JSV["export"].JDXExporter.newLine);
-if (this.spectrum.observedNucl !== "") this.out.append ("##.OBSERVE NUCLEUS= ").append (this.spectrum.observedNucl).append (JSV["export"].JDXExporter.newLine);
+var nuc = this.spectrum.getObservedNucleus ();
+if (!"".equals (nuc)) this.out.append ("##.OBSERVE NUCLEUS= ").append (nuc).append (JSV["export"].JDXExporter.newLine);
 this.out.append ("##XUNITS= ").append (this.spectrum.isHZtoPPM () ? "HZ" : this.spectrum.getXUnits ()).append (JSV["export"].JDXExporter.newLine);
 this.out.append ("##YUNITS= ").append (this.spectrum.getYUnits ()).append (JSV["export"].JDXExporter.newLine);
 this.out.append ("##XFACTOR= ").append (JSV["export"].JDXExporter.fixExponentInt (tmpXFactor)).append (JSV["export"].JDXExporter.newLine);

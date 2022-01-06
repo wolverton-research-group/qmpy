@@ -223,7 +223,7 @@ var cX = (this.showNumbers ? Clazz.doubleToInt (this.vwr.getScreenWidth () / 2) 
 var cY = (this.showNumbers ? Clazz.doubleToInt (this.vwr.getScreenHeight () / 2) : 0);
 if (this.showNumbers) this.vwr.gdata.setFontFid (this.vwr.gdata.getFontFidFS ("Monospaced", 24));
 for (var i = (!this.imesh.hasGridPoints || this.imesh.firstRealVertex < 0 ? 0 : this.imesh.firstRealVertex); i < this.vertexCount; i += incr) {
-if (this.vertexValues != null && Float.isNaN (this.vertexValues[i]) || this.frontOnly && !this.isVisibleNormix (this.normixes[i]) || this.imesh.jvxlData.thisSet >= 0 && this.mesh.vertexSets[i] != this.imesh.jvxlData.thisSet || !this.mesh.isColorSolid && this.mesh.vcs != null && !this.setColix (this.mesh.vcs[i]) || this.haveBsDisplay && !this.mesh.bsDisplay.get (i) || slabPoints && !this.bsPolygons.get (i)) continue;
+if (this.vertexValues != null && Float.isNaN (this.vertexValues[i]) || this.frontOnly && !this.isVisibleNormix (this.normixes[i]) || this.imesh.jvxlData.thisSet != null && !this.imesh.jvxlData.thisSet.get (this.mesh.vertexSets[i]) || !this.mesh.isColorSolid && this.mesh.vcs != null && !this.setColix (this.mesh.vcs[i]) || this.haveBsDisplay && !this.mesh.bsDisplay.get (i) || slabPoints && !this.bsPolygons.get (i)) continue;
 this.hasColorRange = true;
 if (this.showNumbers && this.screens[i].z > 10 && Math.abs (this.screens[i].x - cX) < 150 && Math.abs (this.screens[i].y - cY) < 150) {
 var s = i + (this.mesh.isColorSolid ? "" : " " + this.mesh.vvs[i]);
@@ -284,7 +284,7 @@ if (polygon == null || this.selectedPolyOnly && !this.bsPolygons.get (i)) contin
 var iA = polygon[0];
 var iB = polygon[1];
 var iC = polygon[2];
-if (this.imesh.jvxlData.thisSet >= 0 && this.mesh.vertexSets != null && this.mesh.vertexSets[iA] != this.imesh.jvxlData.thisSet) continue;
+if (this.imesh.jvxlData.thisSet != null && this.mesh.vertexSets != null && !this.imesh.jvxlData.thisSet.get (this.mesh.vertexSets[iA])) continue;
 if (this.haveBsDisplay && (!this.mesh.bsDisplay.get (iA) || !this.mesh.bsDisplay.get (iB) || !this.mesh.bsDisplay.get (iC))) continue;
 var nA = this.normixes[iA];
 var nB = this.normixes[iB];

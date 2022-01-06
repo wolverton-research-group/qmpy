@@ -331,6 +331,12 @@ this.m31 -= m1.m31;
 this.m32 -= m1.m32;
 this.m33 -= m1.m33;
 }, "JU.M4");
+Clazz.defineMethod (c$, "add", 
+function (pt) {
+this.m03 += pt.x;
+this.m13 += pt.y;
+this.m23 += pt.z;
+}, "JU.T3");
 Clazz.defineMethod (c$, "transpose", 
 function () {
 this.transpose33 ();

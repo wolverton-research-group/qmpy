@@ -960,7 +960,8 @@ var isView = false;
 if (strUrl != null && strUrl.startsWith ("cache://")) {
 {
 data = Jmol.Cache.get(name = strUrl);
-}}if (data != null) {
+}}var file = null;
+if (data != null) {
 try {
 fileName = name;
 newPath = filePath = JSV.common.JSVFileManager.getFullPathName (name);
@@ -975,13 +976,13 @@ isView = true;
 newPath = fileName = filePath = "View" + (++this.nViews);
 } else if (strUrl != null) {
 try {
+file = this.apiPlatform.newFile (strUrl);
 var u =  new java.net.URL (JSV.common.JSVFileManager.appletDocumentBase, strUrl, null);
 filePath = u.toString ();
 this.recentURL = filePath;
 fileName = JSV.common.JSVFileManager.getTagName (filePath);
 } catch (e) {
 if (Clazz.exceptionOf (e, java.net.MalformedURLException)) {
-var file = this.apiPlatform.newFile (strUrl);
 fileName = file.getName ();
 newPath = filePath = file.getFullPath ();
 this.recentURL = null;
@@ -1000,7 +1001,7 @@ this.si.writeStatus (filePath + " is already open");
 }if (!isAppend && !isView) this.close ("all");
 this.si.setCursor (3);
 try {
-this.si.siSetCurrentSource (isView ? JSV.source.JDXSource.createView (specs) : JSV.source.JDXReader.createJDXSource (data, filePath, this.obscureTitleFromUser === Boolean.TRUE, this.loadImaginary, firstSpec, lastSpec, this.nmrMaxY));
+this.si.siSetCurrentSource (isView ? JSV.source.JDXSource.createView (specs) : JSV.source.JDXReader.createJDXSource (file, data, filePath, this.obscureTitleFromUser === Boolean.TRUE, this.loadImaginary, firstSpec, lastSpec, this.nmrMaxY));
 } catch (e) {
 if (Clazz.exceptionOf (e, Exception)) {
 {

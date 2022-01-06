@@ -87,9 +87,16 @@ Clazz.overrideMethod (c$, "jpiUpdateComputedMenus",
 function () {
 if (this.updateMode == -1) return;
 this.isTainted = true;
-this.updateMode = 0;
 this.getViewerData ();
+this.updateMode = 0;
+this.updateMenus ();
+});
+Clazz.defineMethod (c$, "updateMenus", 
+function () {
 this.updateSelectMenu ();
+this.updateModelSetComputedMenu ();
+this.updateAboutSubmenu ();
+if (this.updateMode == 0) {
 this.updateFileMenu ();
 this.updateElementsComputedMenu (this.vwr.getElementsPresentBitSet (this.modelIndex));
 this.updateHeteroComputedMenu (this.vwr.ms.getHeteroList (this.modelIndex));
@@ -100,10 +107,14 @@ this.updateMode = 1;
 this.updateConfigurationComputedMenu ();
 this.updateSYMMETRYComputedMenus ();
 this.updateFRAMESbyModelComputedMenu ();
-this.updateModelSetComputedMenu ();
 this.updateLanguageSubmenu ();
-this.updateAboutSubmenu ();
-});
+} else {
+this.updateSpectraMenu ();
+this.updateFRAMESbyModelComputedMenu ();
+this.updateSceneComputedMenu ();
+for (var i = this.Special.size (); --i >= 0; ) this.updateSpecialMenuItem (this.Special.get (i));
+
+}});
 Clazz.overrideMethod (c$, "appCheckItem", 
 function (item, newMenu) {
 if (item.indexOf ("!PDB") >= 0) {
@@ -237,21 +248,15 @@ if (this.updateMode == -1) return;
 this.isTainted = true;
 this.getViewerData ();
 this.updateMode = 2;
-this.updateSelectMenu ();
-this.updateSpectraMenu ();
-this.updateFRAMESbyModelComputedMenu ();
-this.updateSceneComputedMenu ();
-this.updateModelSetComputedMenu ();
-this.updateAboutSubmenu ();
-for (var i = this.Special.size (); --i >= 0; ) this.updateSpecialMenuItem (this.Special.get (i));
-
+this.updateMenus ();
 });
 Clazz.defineMethod (c$, "updateFileMenu", 
- function () {
+function () {
 var menu = this.htMenus.get ("fileMenu");
 if (menu == null) return;
 var text = this.getMenuText ("writeFileTextVARIABLE");
 menu = this.htMenus.get ("writeFileTextVARIABLE");
+if (menu == null) return;
 var ignore = (this.modelSetFileName.equals ("zapped") || this.modelSetFileName.equals (""));
 if (ignore) {
 this.menuSetLabel (menu, "");
@@ -266,14 +271,14 @@ var str = this.menuText.getProperty (key);
 return (str == null ? key : str);
 }, "~S");
 Clazz.defineMethod (c$, "updateSelectMenu", 
- function () {
+function () {
 var menu = this.htMenus.get ("selectMenuText");
 if (menu == null) return;
 this.menuEnable (menu, this.ac != 0);
 this.menuSetLabel (menu, this.gti ("selectMenuText", this.vwr.slm.getSelectionCount ()));
 });
 Clazz.defineMethod (c$, "updateElementsComputedMenu", 
- function (elementsPresentBitSet) {
+function (elementsPresentBitSet) {
 var menu = this.htMenus.get ("elementsComputedMenu");
 if (menu == null) return;
 this.menuRemoveAll (menu, 0);
@@ -297,13 +302,13 @@ this.menuCreateItem (menu, entryName, "SELECT " + elementName, null);
 this.menuEnable (menu, true);
 }, "JU.BS");
 Clazz.defineMethod (c$, "updateSpectraMenu", 
- function () {
-var menuh = this.htMenus.get ("hnmrMenu");
-var menuc = this.htMenus.get ("cnmrMenu");
-if (menuh != null) this.menuRemoveAll (menuh, 0);
-if (menuc != null) this.menuRemoveAll (menuc, 0);
+function () {
 var menu = this.htMenus.get ("spectraMenu");
 if (menu == null) return;
+var menuh = this.htMenus.get ("hnmrMenu");
+if (menuh != null) this.menuRemoveAll (menuh, 0);
+var menuc = this.htMenus.get ("cnmrMenu");
+if (menuc != null) this.menuRemoveAll (menuc, 0);
 this.menuRemoveAll (menu, 0);
 var isOK =  new Boolean (this.setSpectraMenu (menuh, this.hnmrPeaks) | this.setSpectraMenu (menuc, this.cnmrPeaks)).valueOf ();
 if (isOK) {
@@ -313,10 +318,10 @@ if (menuc != null) this.menuAddSubMenu (menu, menuc);
 });
 Clazz.defineMethod (c$, "setSpectraMenu", 
  function (menu, peaks) {
-if (menu == null) return false;
-this.menuEnable (menu, false);
 var n = (peaks == null ? 0 : peaks.size ());
 if (n == 0) return false;
+if (menu == null) return false;
+this.menuEnable (menu, false);
 for (var i = 0; i < n; i++) {
 var peak = peaks.get (i);
 var title = JU.PT.getQuotedAttribute (peak, "title");
@@ -327,7 +332,7 @@ this.menuEnable (menu, true);
 return true;
 }, "J.api.SC,JU.Lst");
 Clazz.defineMethod (c$, "updateHeteroComputedMenu", 
- function (htHetero) {
+function (htHetero) {
 var menu = this.htMenus.get ("PDBheteroComputedMenu");
 if (menu == null) return;
 this.menuRemoveAll (menu, 0);
@@ -345,7 +350,7 @@ n++;
 this.menuEnable (menu, (n > 0));
 }, "java.util.Map");
 Clazz.defineMethod (c$, "updateSurfMoComputedMenu", 
- function (moData) {
+function (moData) {
 var menu = this.htMenus.get ("surfMoComputedMenuText");
 if (menu == null) return;
 this.menuRemoveAll (menu, 0);
@@ -377,7 +382,7 @@ this.menuCreateItem (subMenu, entryName, script, null);
 }
 }, "java.util.Map");
 Clazz.defineMethod (c$, "updateFileTypeDependentMenus", 
- function () {
+function () {
 for (var i = this.NotPDB.size (); --i >= 0; ) this.menuEnable (this.NotPDB.get (i), !this.isPDB);
 
 for (var i = this.PDBOnly.size (); --i >= 0; ) this.menuEnable (this.PDBOnly.get (i), this.isPDB);
@@ -403,7 +408,7 @@ for (var i = this.TemperatureOnly.size (); --i >= 0; ) this.menuEnable (this.Tem
 this.updateSignedAppletItems ();
 });
 Clazz.defineMethod (c$, "updateSceneComputedMenu", 
- function () {
+function () {
 var menu = this.htMenus.get ("sceneComputedMenu");
 if (menu == null) return;
 this.menuRemoveAll (menu, 0);
@@ -415,20 +420,20 @@ for (var i = 0; i < scenes.length; i++) this.menuCreateItem (menu, scenes[i], "r
 this.menuEnable (menu, true);
 });
 Clazz.defineMethod (c$, "updatePDBComputedMenus", 
- function () {
-var menu = this.htMenus.get ("PDBaaResiduesComputedMenu");
-if (menu == null) return;
-this.menuRemoveAll (menu, 0);
-this.menuEnable (menu, false);
-var menu1 = this.htMenus.get ("PDBnucleicResiduesComputedMenu");
-if (menu1 == null) return;
+function () {
+var menu3 = this.htMenus.get ("PDBaaResiduesComputedMenu");
+if (menu3 != null) {
+this.menuRemoveAll (menu3, 0);
+this.menuEnable (menu3, false);
+}var menu1 = this.htMenus.get ("PDBnucleicResiduesComputedMenu");
+if (menu1 != null) {
 this.menuRemoveAll (menu1, 0);
 this.menuEnable (menu1, false);
-var menu2 = this.htMenus.get ("PDBcarboResiduesComputedMenu");
-if (menu2 == null) return;
+}var menu2 = this.htMenus.get ("PDBcarboResiduesComputedMenu");
+if (menu2 != null) {
 this.menuRemoveAll (menu2, 0);
 this.menuEnable (menu2, false);
-if (this.modelSetInfo == null) return;
+}if (this.modelSetInfo == null) return;
 var n = (this.modelIndex < 0 ? 0 : this.modelIndex + 1);
 var lists = (this.modelSetInfo.get ("group3Lists"));
 this.group3List = (lists == null ? null : lists[n]);
@@ -436,20 +441,23 @@ this.group3Counts = (lists == null ? null : (this.modelSetInfo.get ("group3Count
 if (this.group3List == null) return;
 var nItems = 0;
 var groupList = JM.Group.standardGroupList;
-for (var i = 1; i < 24; ++i) nItems += this.updateGroup3List (menu, groupList.substring (i * 6 - 4, i * 6 - 1).trim ());
+if (menu3 != null) {
+for (var i = 1; i < 24; ++i) nItems += this.updateGroup3List (menu3, groupList.substring (i * 6 - 4, i * 6 - 1).trim ());
 
-nItems += this.augmentGroup3List (menu, "p>", true);
-this.menuEnable (menu, (nItems > 0));
+nItems += this.augmentGroup3List (menu3, "p>", true);
+this.menuEnable (menu3, (nItems > 0));
 this.menuEnable (this.htMenus.get ("PDBproteinMenu"), (nItems > 0));
+}if (menu1 != null) {
 nItems = this.augmentGroup3List (menu1, "n>", false);
 this.menuEnable (menu1, nItems > 0);
 this.menuEnable (this.htMenus.get ("PDBnucleicMenu"), (nItems > 0));
 var dssr = (nItems > 0 && this.modelIndex >= 0 ? this.vwr.ms.getInfo (this.modelIndex, "dssr") : null);
 if (dssr != null) this.setSecStrucMenu (this.htMenus.get ("aaStructureMenu"), dssr);
+}if (menu2 != null) {
 nItems = this.augmentGroup3List (menu2, "c>", false);
 this.menuEnable (menu2, nItems > 0);
 this.menuEnable (this.htMenus.get ("PDBcarboMenu"), (nItems > 0));
-});
+}});
 Clazz.defineMethod (c$, "setSecStrucMenu", 
  function (menu, dssr) {
 var counts = dssr.get ("counts");
@@ -494,12 +502,12 @@ pt++;
 return nItems;
 }, "J.api.SC,~S,~B");
 Clazz.defineMethod (c$, "updateSYMMETRYComputedMenus", 
- function () {
+function () {
 this.updateSYMMETRYSelectComputedMenu ();
 this.updateSYMMETRYShowComputedMenu ();
 });
 Clazz.defineMethod (c$, "updateSYMMETRYShowComputedMenu", 
- function () {
+function () {
 var menu = this.htMenus.get ("SYMMETRYShowComputedMenu");
 if (menu == null) return;
 this.menuRemoveAll (menu, 0);
@@ -529,7 +537,7 @@ this.menuEnable (this.menuCreateItem (subMenu, entryName, "draw SYMOP " + (i + 1
 this.menuEnable (menu, true);
 });
 Clazz.defineMethod (c$, "updateSYMMETRYSelectComputedMenu", 
- function () {
+function () {
 var menu = this.htMenus.get ("SYMMETRYSelectComputedMenu");
 if (menu == null) return;
 this.menuRemoveAll (menu, 0);
@@ -555,7 +563,7 @@ this.menuEnable (this.menuCreateItem (subMenu, entryName, "SELECT symop=" + (i +
 this.menuEnable (menu, true);
 });
 Clazz.defineMethod (c$, "updateFRAMESbyModelComputedMenu", 
- function () {
+function () {
 var menu = this.htMenus.get ("FRAMESbyModelComputedMenu");
 if (menu == null) return;
 this.menuEnable (menu, (this.modelCount > 0));
@@ -587,7 +595,7 @@ this.menuCreateCheckboxItem (subMenu, entryName, "model " + script + " ##", null
 }
 });
 Clazz.defineMethod (c$, "updateConfigurationComputedMenu", 
- function () {
+function () {
 var menu = this.htMenus.get ("configurationComputedMenu");
 if (menu == null) return;
 this.menuEnable (menu, this.isMultiConfiguration);
@@ -604,7 +612,7 @@ this.menuCreateCheckboxItem (menu, entryName, script, null, (this.updateMode == 
 }
 });
 Clazz.defineMethod (c$, "updateModelSetComputedMenu", 
- function () {
+function () {
 var menu = this.htMenus.get ("modelSetMenu");
 if (menu == null) return;
 this.menuRemoveAll (menu, 0);
@@ -659,12 +667,12 @@ Clazz.defineMethod (c$, "gto",
 return J.i18n.GT.o (J.i18n.GT.$ (this.getMenuText (s)), o);
 }, "~S,~O");
 Clazz.defineMethod (c$, "updateAboutSubmenu", 
- function () {
+function () {
 if (this.isApplet) this.setText ("APPLETid", this.vwr.appletName);
 {
 }});
 Clazz.defineMethod (c$, "updateLanguageSubmenu", 
- function () {
+function () {
 var menu = this.htMenus.get ("languageComputedMenu");
 if (menu == null) return;
 this.menuRemoveAll (menu, 0);
@@ -685,7 +693,7 @@ this.menuCreateCheckboxItem (menu, menuLabel, "language = \"" + code + "\" ##" +
 }}
 });
 Clazz.defineMethod (c$, "updateSpecialMenuItem", 
- function (m) {
+function (m) {
 m.setText (this.getSpecialLabel (m.getName (), m.getText ()));
 }, "J.api.SC");
 Clazz.defineMethod (c$, "getSpecialLabel", 

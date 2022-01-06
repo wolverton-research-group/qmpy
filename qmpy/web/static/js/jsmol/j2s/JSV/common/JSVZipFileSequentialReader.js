@@ -32,7 +32,6 @@ return this;
 Clazz.overrideMethod (c$, "close", 
 function () {
 try {
-this.close ();
 this.zis.close ();
 } catch (e) {
 if (Clazz.exceptionOf (e, java.io.IOException)) {

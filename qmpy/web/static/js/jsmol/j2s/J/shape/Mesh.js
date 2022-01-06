@@ -355,19 +355,47 @@ function (isAll) {
 var info =  new java.util.Hashtable ();
 info.put ("id", this.thisID);
 info.put ("vertexCount", Integer.$valueOf (this.vc));
-info.put ("polygonCount", Integer.$valueOf (this.pc));
 info.put ("haveQuads", Boolean.$valueOf (this.haveQuads));
 info.put ("haveValues", Boolean.$valueOf (this.vvs != null));
+var np = this.pc;
 if (isAll) {
 if (this.vc > 0) {
 info.put ("vertices", JU.AU.arrayCopyPt (this.vs, this.vc));
 if (this.bsSlabDisplay != null) info.put ("bsVertices", this.getVisibleVBS ());
-}if (this.vvs != null) info.put ("vertexValues", JU.AU.arrayCopyF (this.vvs, this.vc));
-if (this.pc > 0) {
-info.put ("polygons", JU.AU.arrayCopyII (this.pis, this.pc));
-if (this.bsSlabDisplay != null) info.put ("bsPolygons", this.bsSlabDisplay);
-}}return info;
+}if (this.vvs != null) {
+info.put ("vertexValues", JU.AU.arrayCopyF (this.vvs, this.vc));
+}if (np > 0) {
+var ii = J.shape.Mesh.nonNull (this.pis, np);
+info.put ("polygons", ii);
+np = ii.length;
+if (this.bsSlabDisplay != null) {
+var bs = (ii.length == this.pc ? JU.BS.copy (this.bsSlabDisplay) : J.shape.Mesh.nonNullBS (this.bsSlabDisplay, this.pis, this.pc));
+info.put ("bsPolygons", bs);
+np = bs.cardinality ();
+}}}info.put ("polygonCount", Integer.$valueOf (np));
+return info;
 }, "~B");
+c$.nonNullBS = Clazz.defineMethod (c$, "nonNullBS", 
+ function (bsSlabDisplay, pis, pc) {
+var bs =  new JU.BS ();
+for (var pt = 0, i = 0; i < pc; i++) {
+if (pis[i] != null) {
+if (bsSlabDisplay.get (i)) bs.set (pt);
+pt++;
+}}
+return bs;
+}, "JU.BS,~A,~N");
+c$.nonNull = Clazz.defineMethod (c$, "nonNull", 
+ function (pis, pc) {
+var n = 0;
+for (var i = pc; --i >= 0; ) if (pis[i] != null) {
+n++;
+}
+var ii =  Clazz.newIntArray (n, 0);
+if (n > 0) for (var pt = 0, i = 0; i < pc; i++) if (pis[i] != null) ii[pt++] = pis[i];
+
+return ii;
+}, "~A,~N");
 Clazz.defineMethod (c$, "getBoundingBox", 
 function () {
 return null;

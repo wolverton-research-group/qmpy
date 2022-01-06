@@ -44,6 +44,8 @@ this.tryPt = 0;
 this.theToken = null;
 this.theTok = 0;
 this.pointers = null;
+this.why = null;
+this.privateFuncs = null;
 Clazz.instantialize (this, arguments);
 }, JS, "ScriptContext");
 Clazz.makeConstructor (c$, 

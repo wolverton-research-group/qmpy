@@ -10,6 +10,7 @@ Clazz.instantialize (this, arguments);
 }, JM, "Bond", JU.Edge);
 Clazz.makeConstructor (c$, 
 function (atom1, atom2, order, mad, colix) {
+Clazz.superConstructor (this, JM.Bond, []);
 this.atom1 = atom1;
 this.atom2 = atom2;
 this.colix = colix;
@@ -112,13 +113,13 @@ var i2 = 2147483647;
 var bonds = this.atom1.bonds;
 for (i1 = 0; i1 < bonds.length; i1++) {
 var a = bonds[i1].getOtherAtom (this.atom1);
-if (bs1.get (a.i) && a !== this.atom2) break;
+if (a !== this.atom2) break;
 }
 if (i1 < bonds.length) {
 bonds = this.atom2.bonds;
 for (i2 = 0; i2 < bonds.length; i2++) {
 var a = bonds[i2].getOtherAtom (this.atom2);
-if (bs2.get (a.i) && a !== this.atom1) break;
+if (a !== this.atom1) break;
 }
 }this.order = (i1 > 2 || i2 >= bonds.length || i2 > 2 ? 1 : JU.Edge.getAtropismOrder (i1 + 1, i2 + 1));
 }, "JU.BS,JU.BS");
@@ -133,5 +134,9 @@ Clazz.overrideMethod (c$, "toString",
 function () {
 return this.atom1 + " - " + this.atom2;
 });
+Clazz.overrideMethod (c$, "getAtom", 
+function (i) {
+return (i == 1 ? this.atom2 : this.atom1);
+}, "~N");
 c$.myVisibilityFlag = c$.prototype.myVisibilityFlag = JV.JC.getShapeVisibilityFlag (1);
 });

@@ -17,6 +17,7 @@ this.radius = NaN;
 this.isHetero = false;
 this.atomSerial = -2147483648;
 this.chainID = 0;
+this.bondRadius = NaN;
 this.altLoc = '\0';
 this.group3 = null;
 this.sequenceNumber = -2147483648;
@@ -24,6 +25,7 @@ this.insertionCode = '\0';
 this.anisoBorU = null;
 this.tensors = null;
 this.ignoreSymmetry = false;
+this.typeSymbol = null;
 Clazz.instantialize (this, arguments);
 }, J.adapter.smarter, "Atom", JU.P3, Cloneable);
 Clazz.defineMethod (c$, "addTensor", 
@@ -41,7 +43,16 @@ this.set (NaN, NaN, NaN);
 });
 Clazz.defineMethod (c$, "getClone", 
 function () {
-var a = this.clone ();
+var a;
+try {
+a = this.clone ();
+} catch (e) {
+if (Clazz.exceptionOf (e, CloneNotSupportedException)) {
+return null;
+} else {
+throw e;
+}
+}
 if (this.vib != null) {
 if (Clazz.instanceOf (this.vib, JU.Vibration)) {
 a.vib = (this.vib).clone ();
@@ -92,6 +103,12 @@ c$.isValidSymChar1 = Clazz.defineMethod (c$, "isValidSymChar1",
  function (ch) {
 return (ch >= 'A' && ch <= 'Z' && J.adapter.smarter.Atom.elementCharMasks[ch.charCodeAt (0) - 65] != 0);
 }, "~S");
+Clazz.defineMethod (c$, "copyTo", 
+function (pt, asc) {
+var a = asc.newCloneAtom (this);
+a.setT (pt);
+return a;
+}, "JU.P3,J.adapter.smarter.AtomSetCollection");
 Clazz.defineStatics (c$,
 "elementCharMasks",  Clazz.newIntArray (-1, [1972292, -2147351151, -2146019271, -2130706430, 1441792, -2147348464, 25, -2147205008, -2147344384, 0, -2147352576, 1179905, 548936, -2147434213, -2147221504, -2145759221, 0, 1056947, -2147339946, -2147477097, -2147483648, -2147483648, -2147483648, 8388624, -2147483646, 139264]));
 });

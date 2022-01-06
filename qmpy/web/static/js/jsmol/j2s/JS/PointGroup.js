@@ -1,5 +1,5 @@
 Clazz.declarePackage ("JS");
-Clazz.load (["JU.V3"], "JS.PointGroup", ["java.lang.Float", "java.util.Hashtable", "JU.Lst", "$.P3", "$.PT", "$.Quat", "$.SB", "J.bspt.Bspt", "JU.BSUtil", "$.Escape", "$.Logger", "$.Node", "$.Point3fi"], function () {
+Clazz.load (["JU.M3", "$.V3"], "JS.PointGroup", ["java.lang.Float", "java.util.Hashtable", "JU.Lst", "$.P3", "$.PT", "$.Quat", "$.SB", "J.bspt.Bspt", "JU.BSUtil", "$.Escape", "$.Logger", "$.Node", "$.Point3fi"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.isAtoms = false;
 this.drawInfo = null;
@@ -92,6 +92,7 @@ if (v != null) atomVibs[i].add (v);
 }
 this.points = atomVibs;
 }if (this.isEqual (pgLast)) return false;
+try {
 this.findInversionCenter ();
 if (this.isLinear (this.points)) {
 if (this.haveInversionCenter) {
@@ -110,7 +111,6 @@ var nPlanes = 0;
 this.findCAxes ();
 nPlanes = this.findPlanes ();
 this.findAdditionalAxes (nPlanes);
-try {
 var n = this.getHighestOrder ();
 if (this.nAxes[17] > 1) {
 if (this.nAxes[19] > 1) {
@@ -175,8 +175,9 @@ this.name = "??";
 } else {
 throw e;
 }
-}
+} finally {
 JU.Logger.info ("Point group found: " + this.name);
+}
 return true;
 }, "JS.PointGroup,~A");
 Clazz.defineMethod (c$, "setPrincipalAxis", 
@@ -227,20 +228,20 @@ var needCenter = (this.center == null);
 if (needCenter) this.center =  new JU.P3 ();
 var bspt =  new J.bspt.Bspt (3, 0);
 for (var i = this.bsAtoms.nextSetBit (0); i >= 0; i = this.bsAtoms.nextSetBit (i + 1), this.nAtoms++) {
-var p = this.points[this.nAtoms] = atomset[i];
+var p = atomset[i];
 if (Clazz.instanceOf (p, JU.Node)) {
 var bondIndex = (this.localEnvOnly ? 1 : 1 + Math.max (3, (p).getCovalentBondCount ()));
 this.elements[this.nAtoms] = (p).getElementNumber () * bondIndex;
 this.atomMap[(p).i] = this.nAtoms + 1;
-} else if (Clazz.instanceOf (p, JU.Point3fi)) {
-this.elements[this.nAtoms] = Math.max (0, (p).sD);
 } else {
 var newPt =  new JU.Point3fi ();
 newPt.setT (p);
-newPt.i = this.nAtoms;
+newPt.i = -1 - this.nAtoms;
+if (Clazz.instanceOf (p, JU.Point3fi)) this.elements[this.nAtoms] = Math.max (0, (p).sD);
 p = newPt;
 }bspt.addTuple (p);
-if (needCenter) this.center.add (this.points[this.nAtoms]);
+if (needCenter) this.center.add (p);
+this.points[this.nAtoms] = p;
 }
 this.iter = bspt.allocateCubeIterator ();
 if (needCenter) this.center.scale (1 / this.nAtoms);
@@ -268,7 +269,7 @@ Clazz.defineMethod (c$, "checkOperation",
 var pt =  new JU.P3 ();
 var nFound = 0;
 var isInversion = (iOrder < 14);
-out : for (var i = this.points.length; --i >= 0 && nFound < this.points.length; ) {
+out : for (var n = this.points.length, i = n; --i >= 0 && nFound < n; ) {
 if (i == this.centerAtomIndex) continue;
 var a1 = this.points[i];
 var e1 = this.elements[i];
@@ -288,7 +289,7 @@ while (this.iter.hasMoreElements ()) {
 var a2 = this.iter.nextElement ();
 if (a2 === a1) continue;
 var j = this.getPointIndex ((a2).i);
-if (this.centerAtomIndex >= 0 && j == this.centerAtomIndex || this.elements[j] != e1) continue;
+if (this.centerAtomIndex >= 0 && j == this.centerAtomIndex || j >= this.elements.length || this.elements[j] != e1) continue;
 if (pt.distanceSquared (a2) < this.distanceTolerance2) {
 nFound++;
 continue out;
@@ -299,7 +300,7 @@ return true;
 }, "JU.Quat,JU.T3,~N");
 Clazz.defineMethod (c$, "getPointIndex", 
  function (j) {
-return j < this.atomMap.length && this.atomMap[j] > 0 ? this.atomMap[j] - 1 : j;
+return (j < 0 ? -j : this.atomMap[j]) - 1;
 }, "~N");
 Clazz.defineMethod (c$, "isLinear", 
  function (atoms) {
@@ -456,10 +457,12 @@ break;
 case 19:
 if (this.nAxes[18] > 0 || this.nAxes[20] > 0 || this.nAxes[22] > 0) return false;
 break;
+case 16:
+break;
 }
 v.normalize ();
 if (this.haveAxis (iOrder, v)) return false;
-var q = JU.Quat.newVA (v, (iOrder < 14 ? 180 : 0) + Clazz.doubleToInt (360 / (iOrder % 14)));
+var q = JS.PointGroup.getQuaternion (v, iOrder);
 if (!this.checkOperation (q, center, iOrder)) return false;
 this.addAxis (iOrder, v);
 switch (iOrder) {
@@ -564,6 +567,10 @@ this.checkAxisOrder (16, this.vTemp, this.center);
 }
 }
 }}, "~N");
+c$.getQuaternion = Clazz.defineMethod (c$, "getQuaternion", 
+function (v, iOrder) {
+return JU.Quat.newVA (v, (iOrder < 14 ? 180 : 0) + (iOrder == 0 ? 0 : Clazz.doubleToInt (360 / (iOrder % 14))));
+}, "JU.V3,~N");
 Clazz.defineMethod (c$, "getInfo", 
 function (modelIndex, drawID, asInfo, type, index, scaleFactor) {
 var asDraw = (drawID != null);
@@ -595,7 +602,8 @@ if (this.nAxes[i] == 0) continue;
 var label = this.axes[i][0].getLabel ();
 offset += 0.25;
 var scale = scaleFactor * this.radius + offset;
-if (!haveType || type.equalsIgnoreCase (label) || anyProperAxis && i >= 14 || anyImproperAxis && i < 14) for (var j = 0; j < this.nAxes[i]; j++) {
+var isProper = (i >= 14);
+if (!haveType || type.equalsIgnoreCase (label) || anyProperAxis && isProper || anyImproperAxis && !isProper) for (var j = 0; j < this.nAxes[i]; j++) {
 if (index > 0 && j + 1 != index) continue;
 op = this.axes[i][j];
 v.add2 (op.normalOrAxis, this.center);
@@ -636,11 +644,18 @@ if (JU.Logger.debugging) JU.Logger.info (this.drawInfo);
 return this.drawInfo;
 }var n = 0;
 var nTotal = 1;
+var nElements = 0;
 var ctype = (this.haveInversionCenter ? "Ci" : "center");
-if (this.haveInversionCenter) nTotal++;
-if (asInfo) this.info.put (ctype, this.center);
- else sb.append ("\n\n").append (this.name).append ("\t").append (ctype).append ("\t").append (JU.Escape.eP (this.center));
-for (var i = JS.PointGroup.maxAxis; --i >= 0; ) {
+if (this.haveInversionCenter) {
+nTotal++;
+nElements++;
+}if (asInfo) {
+this.info.put (ctype, this.center);
+if (this.haveInversionCenter) this.info.put ("center", this.center);
+this.info.put (ctype, this.center);
+} else {
+sb.append ("\n\n").append (this.name).append ("\t").append (ctype).append ("\t").append (JU.Escape.eP (this.center));
+}for (var i = JS.PointGroup.maxAxis; --i >= 0; ) {
 if (this.nAxes[i] > 0) {
 n = JS.PointGroup.nUnique[i];
 var label = this.axes[i][0].getLabel ();
@@ -648,17 +663,25 @@ if (asInfo) this.info.put ("n" + label, Integer.$valueOf (this.nAxes[i]));
  else sb.append ("\n\n").append (this.name).append ("\tn").append (label).append ("\t").appendI (this.nAxes[i]).append ("\t").appendI (n);
 n *= this.nAxes[i];
 nTotal += n;
+nElements += this.nAxes[i];
 nType[this.axes[i][0].type][1] += n;
 var vinfo = (asInfo ?  new JU.Lst () : null);
+var minfo = (asInfo ?  new JU.Lst () : null);
 for (var j = 0; j < this.nAxes[i]; j++) {
-if (asInfo) vinfo.addLast (this.axes[i][j].normalOrAxis);
- else sb.append ("\n").append (this.name).append ("\t").append (label).append ("_").appendI (j + 1).append ("\t").appendO (this.axes[i][j].normalOrAxis);
-}
-if (asInfo) this.info.put (label, vinfo);
+var aop = this.axes[i][j];
+if (asInfo) {
+vinfo.addLast (aop.normalOrAxis);
+minfo.addLast (aop.getM3 ());
+} else {
+sb.append ("\n").append (this.name).append ("\t").append (label).append ("_").appendI (j + 1).append ("\t").appendO (aop.normalOrAxis);
 }}
+if (asInfo) {
+this.info.put (label, vinfo);
+this.info.put (label + "_m", minfo);
+}}}
 if (!asInfo) {
 sb.append ("\n");
-sb.append ("\n").append (this.name).append ("\ttype\tnType\tnUnique");
+sb.append ("\n").append (this.name).append ("\ttype\tnElements\tnUnique");
 sb.append ("\n").append (this.name).append ("\tE\t  1\t  1");
 n = (this.haveInversionCenter ? 1 : 0);
 sb.append ("\n").append (this.name).append ("\tCi\t  ").appendI (n).append ("\t  ").appendI (n);
@@ -677,7 +700,9 @@ return (this.textInfo = sb.toString ());
 }this.info.put ("name", this.name);
 this.info.put ("nAtoms", Integer.$valueOf (this.nAtoms));
 this.info.put ("nTotal", Integer.$valueOf (nTotal));
+this.info.put ("nElements", Integer.$valueOf (nElements));
 this.info.put ("nCi", Integer.$valueOf (this.haveInversionCenter ? 1 : 0));
+if (this.haveInversionCenter) this.info.put ("Ci_m", JU.M3.newM3 (JS.PointGroup.mInv));
 this.info.put ("nCs", Integer.$valueOf (this.nAxes[0]));
 this.info.put ("nCn", Integer.$valueOf (nType[1][0]));
 this.info.put ("nSn", Integer.$valueOf (nType[2][0]));
@@ -701,6 +726,8 @@ this.type = 0;
 this.order = 0;
 this.index = 0;
 this.normalOrAxis = null;
+this.typeOrder = 0;
+this.mat = null;
 Clazz.instantialize (this, arguments);
 }, JS.PointGroup, "Operation");
 Clazz.makeConstructor (c$, 
@@ -708,12 +735,14 @@ function () {
 this.index = ++this.b$["JS.PointGroup"].nOps;
 this.type = 3;
 this.order = 1;
+this.typeOrder = 1;
 if (JU.Logger.debugging) JU.Logger.debug ("new operation -- " + JS.PointGroup.typeNames[this.type]);
 });
 Clazz.makeConstructor (c$, 
 function (a, b) {
 this.index = ++this.b$["JS.PointGroup"].nOps;
 this.type = (b < 14 ? 2 : 1);
+this.typeOrder = b;
 this.order = b % 14;
 this.normalOrAxis = JU.Quat.newVA (a, 180).getNormal ();
 if (JU.Logger.debugging) JU.Logger.debug ("new operation -- " + (this.order == b ? "S" : "C") + this.order + " " + this.normalOrAxis);
@@ -737,6 +766,24 @@ default:
 return "C" + this.order;
 }
 });
+Clazz.defineMethod (c$, "getM3", 
+function () {
+if (this.mat != null) return this.mat;
+var a = JU.M3.newM3 (JS.PointGroup.getQuaternion (this.normalOrAxis, this.typeOrder).getMatrix ());
+if (this.type == 0 || this.type == 2) a.mul (JS.PointGroup.mInv);
+this.cleanMatrix (a);
+return this.mat = a;
+});
+Clazz.defineMethod (c$, "cleanMatrix", 
+ function (a) {
+for (var b = 0; b < 3; b++) for (var c = 0; c < 3; c++) a.setElement (b, c, this.approx0 (a.getElement (b, c)));
+
+
+}, "JU.M3");
+Clazz.defineMethod (c$, "approx0", 
+ function (a) {
+return (a > 1e-15 || a < -1.0E-15 ? a : 0);
+}, "~N");
 c$ = Clazz.p0p ();
 };
 Clazz.defineStatics (c$,
@@ -764,4 +811,5 @@ Clazz.defineStatics (c$,
 "OPERATION_IMPROPER_AXIS", 2,
 "OPERATION_INVERSION_CENTER", 3,
 "typeNames",  Clazz.newArray (-1, ["plane", "proper axis", "improper axis", "center of inversion"]));
+c$.mInv = c$.prototype.mInv = JU.M3.newA9 ( Clazz.newFloatArray (-1, [-1, 0, 0, 0, -1, 0, 0, 0, -1]));
 });

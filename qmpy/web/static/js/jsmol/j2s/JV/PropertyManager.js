@@ -1,5 +1,5 @@
 Clazz.declarePackage ("JV");
-Clazz.load (["J.api.JmolPropertyManager", "java.util.Hashtable"], "JV.PropertyManager", ["java.lang.Boolean", "$.Double", "$.Float", "java.util.Arrays", "$.Date", "$.Map", "JU.AU", "$.BArray", "$.BS", "$.Base64", "$.Lst", "$.M3", "$.M4", "$.P3", "$.PT", "$.SB", "$.V3", "$.XmlUtil", "J.api.Interface", "JM.BondSet", "$.LabelToken", "JS.SV", "$.T", "JU.BSUtil", "$.C", "$.Edge", "$.Escape", "$.JmolMolecule", "$.Logger", "JV.ActionManager", "$.FileManager", "$.JC", "$.Viewer", "JV.binding.Binding"], function () {
+Clazz.load (["J.api.JmolPropertyManager", "java.util.Hashtable"], "JV.PropertyManager", ["java.lang.Boolean", "$.Double", "$.Float", "java.util.Arrays", "$.Date", "$.Map", "JU.AU", "$.BArray", "$.BS", "$.Base64", "$.Lst", "$.M3", "$.M4", "$.P3", "$.PT", "$.SB", "$.V3", "J.api.Interface", "JM.BondSet", "$.LabelToken", "JS.SV", "$.T", "JU.BSUtil", "$.C", "$.Edge", "$.Escape", "$.JmolMolecule", "$.Logger", "JV.ActionManager", "$.FileManager", "$.JC", "$.Viewer", "JV.binding.Binding"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.vwr = null;
 this.map = null;
@@ -38,7 +38,8 @@ if (JV.PropertyManager.propertyTypes.length != 141) JU.Logger.warn ("propertyTyp
 var info;
 if (infoType.indexOf (".") >= 0 || infoType.indexOf ("[") >= 0) {
 var args = this.getArguments (infoType);
-info = this.extractProperty (this.getPropertyAsObject (args[0].asString (), paramInfo, null), args, 1, null, false);
+var h = this.getPropertyAsObject (args[0].asString (), paramInfo, null);
+info = this.extractProperty (h, args, 1, null, false);
 } else {
 info = this.getPropertyAsObject (infoType, paramInfo, returnType);
 }if (returnType == null) return info;
@@ -58,7 +59,10 @@ while ((pt = lc.indexOf ("[select ", ++pt)) >= 0) {
 var pt2 = lc.indexOf (" where ", pt);
 var pt2b = lc.indexOf (" wherein ", pt);
 if (pt2b > 0 && pt2b < pt2) pt2 = pt2b;
-var pt3 = lc.lastIndexOf ("]");
+var pt3 = lc.indexOf ("][select ", pt);
+if (pt3 < 0) pt3 = lc.lastIndexOf ("]");
+pt2b = lc.indexOf ("[", pt);
+if (pt2b >= 0 && pt2b < pt3) pt2 = pt2b;
 if (pt2 < 0 || pt2 > pt3) continue;
 propertyName = propertyName.substring (0, pt + 1) + propertyName.substring (pt + 1, pt3).$replace ('.', '\1').$replace ('[', '\2').$replace (']', '\3') + propertyName.substring (pt3);
 }
@@ -104,8 +108,23 @@ if (ptr < 0) {
 args = this.getArguments (args);
 ptr = 0;
 }if (ptr >= (args).length) return prop;
-if (!isCompiled) args = this.compileSelect (args);
-var pt;
+if (!isCompiled) {
+args = this.compileSelect (args);
+var svargs = args;
+for (var i = ptr, n = svargs.length; i < n; i++) {
+if (svargs[i].tok == 1275082245) {
+var a =  new Array (i + 1);
+for (var p = 0; p <= i; p++) a[p] = svargs[p];
+
+prop = this.extractProperty (prop, a, ptr, null, true);
+for (; ++i < n; ) {
+a[a.length - 1] = svargs[i];
+prop = this.extractProperty (prop, a, a.length - 1, null, true);
+}
+return prop;
+}}
+args = svargs;
+}var pt;
 var arg = (args)[ptr++];
 var property = JS.SV.oValue (prop);
 switch (arg.tok) {
@@ -119,49 +138,40 @@ return (pt >= 0 && pt < v.size () ? this.extractProperty (v.get (pt), args, ptr,
 var m = property;
 var f =  Clazz.newArray (-1, [ Clazz.newFloatArray (-1, [m.m00, m.m01, m.m02]),  Clazz.newFloatArray (-1, [m.m10, m.m11, m.m12]),  Clazz.newFloatArray (-1, [m.m20, m.m21, m.m22])]);
 if (pt < 0) pt += 3;
-if (pt >= 0 && pt < 3) return this.extractProperty (f, args, --ptr, null, true);
-return "";
+return (pt >= 0 && pt < 3 ? this.extractProperty (f, args, --ptr, null, true) : "");
 }if (Clazz.instanceOf (property, JU.M4)) {
 var m = property;
 var f =  Clazz.newArray (-1, [ Clazz.newFloatArray (-1, [m.m00, m.m01, m.m02, m.m03]),  Clazz.newFloatArray (-1, [m.m10, m.m11, m.m12, m.m13]),  Clazz.newFloatArray (-1, [m.m20, m.m21, m.m22, m.m23]),  Clazz.newFloatArray (-1, [m.m30, m.m31, m.m32, m.m33])]);
 if (pt < 0) pt += 4;
-if (pt >= 0 && pt < 4) return this.extractProperty (f, args, --ptr, null, true);
-return "";
+return (pt >= 0 && pt < 4 ? this.extractProperty (f, args, --ptr, null, true) : "");
 }if (JU.AU.isAI (property)) {
 var ilist = property;
 if (pt < 0) pt += ilist.length;
-if (pt >= 0 && pt < ilist.length) return Integer.$valueOf (ilist[pt]);
-return "";
+return (pt >= 0 && pt < ilist.length ? Integer.$valueOf (ilist[pt]) : "");
 }if (JU.AU.isAD (property)) {
 var dlist = property;
 if (pt < 0) pt += dlist.length;
-if (pt >= 0 && pt < dlist.length) return Double.$valueOf (dlist[pt]);
-return "";
+return (pt >= 0 && pt < dlist.length ? Double.$valueOf (dlist[pt]) : "");
 }if (JU.AU.isAF (property)) {
 var flist = property;
 if (pt < 0) pt += flist.length;
-if (pt >= 0 && pt < flist.length) return Float.$valueOf (flist[pt]);
-return "";
+return (pt >= 0 && pt < flist.length ? Float.$valueOf (flist[pt]) : "");
 }if (JU.AU.isAII (property)) {
 var iilist = property;
 if (pt < 0) pt += iilist.length;
-if (pt >= 0 && pt < iilist.length) return this.extractProperty (iilist[pt], args, ptr, null, true);
-return "";
+return (pt >= 0 && pt < iilist.length ? this.extractProperty (iilist[pt], args, ptr, null, true) : "");
 }if (JU.AU.isAFF (property)) {
 var fflist = property;
 if (pt < 0) pt += fflist.length;
-if (pt >= 0 && pt < fflist.length) return this.extractProperty (fflist[pt], args, ptr, null, true);
-return "";
+return (pt >= 0 && pt < fflist.length ? this.extractProperty (fflist[pt], args, ptr, null, true) : "");
 }if (JU.AU.isAS (property)) {
 var slist = property;
 if (pt < 0) pt += slist.length;
-if (pt >= 0 && pt < slist.length) return slist[pt];
-return "";
+return (pt >= 0 && pt < slist.length ? slist[pt] : "");
 }if (Clazz.instanceOf (property, Array)) {
 var olist = property;
 if (pt < 0) pt += olist.length;
-if (pt >= 0 && pt < olist.length) return olist[pt];
-return "";
+return (pt >= 0 && pt < olist.length ? olist[pt] : "");
 }break;
 case 1275082245:
 case 4:
@@ -245,12 +255,13 @@ var mapNew =  new java.util.Hashtable ();
 if (keys != null && keys.size () == 0) {
 keys = null;
 key = "*";
-}if (keys == null) {
+}asArray = new Boolean (asArray | (arg.index == 1)).valueOf ();
+if (keys == null) {
 var tokens = JU.PT.split (key, ",");
 for (var i = tokens.length; --i >= 0; ) JV.PropertyManager.getMapSubset (h, tokens[i], mapNew, asArray ? v2 : null);
 
 } else {
-for (var i = keys.size (); --i >= 0; ) JV.PropertyManager.getMapSubset (h, keys.get (i), mapNew, asArray ? v2 : null);
+for (var i = 0; i < keys.size (); i++) JV.PropertyManager.getMapSubset (h, keys.get (i), mapNew, asArray ? v2 : null);
 
 }if (asMap && !wasV2) return mapNew;
 if (ptr == (args).length) {
@@ -265,10 +276,16 @@ return (key != null && !isWild ? this.extractProperty (h.get (key), args, ptr, n
 var v = property;
 if (v2 == null) v2 =  new JU.Lst ();
 ptr--;
+var isList = false;
 for (pt = 0; pt < v.size (); pt++) {
 var o = v.get (pt);
-if (Clazz.instanceOf (o, java.util.Map) || Clazz.instanceOf (o, JU.Lst) || (Clazz.instanceOf (o, JS.SV)) && ((o).getMap () != null || (o).getList () != null)) this.extractProperty (o, args, ptr, v2, true);
-}
+if (Clazz.instanceOf (o, java.util.Map) || (isList = (Clazz.instanceOf (o, JU.Lst))) || (Clazz.instanceOf (o, JS.SV)) && ((o).getMap () != null || (isList = ((o).getList () != null)))) {
+if (isList || (arg.index == 1)) {
+var ret = this.extractProperty (o, args, ptr, null, true);
+if (ret !== "") v2.addLast (ret);
+} else {
+this.extractProperty (o, args, ptr, v2, true);
+}}}
 return v2;
 }break;
 }
@@ -305,13 +322,20 @@ var pt = ucKey.indexOf (" WHEREIN ");
 var ext = (pt < 0 ? "" : key.indexOf (";") >= 0 ? ";**" : ",**");
 if (pt < 0) pt = ucKey.indexOf (" WHERE ");
 var select = key.substring (0, pt < 0 ? key.length : pt).trim ();
-if (select.startsWith ("(") && select.endsWith (")")) select = select.substring (1, select.length - 1) + ";";
-if (pt < 0) {
+var index = 0;
+if (select.startsWith ("(") && select.endsWith (")")) {
+select = select.substring (1, select.length - 1) + ";";
+} else if (select.startsWith ("[") && select.endsWith ("]")) {
+select = select.substring (1, select.length - 1);
+index = 1;
+}if (pt < 0) {
 argsNew[i] = JS.SV.newV (1275082245,  Clazz.newArray (-1, [this.getKeys (select), null]));
 argsNew[i].myName = select;
+argsNew[i].index = index;
 } else {
 select += ext;
 argsNew[i] = JS.SV.newV (1275082245,  Clazz.newArray (-1, [this.getKeys (select), this.vwr.compileExpr (key.substring (pt + 6 + ext.length).trim ())]));
+argsNew[i].index = index;
 argsNew[i].myName = select;
 }}}}
 return (argsNew == null ? args : argsNew);
@@ -527,7 +551,7 @@ var haveType = (type != null && type.length > 0);
 if (Clazz.instanceOf (objHeader, java.util.Map)) {
 return (haveType ? (objHeader).get (type) : objHeader);
 }var lines = JU.PT.split (objHeader, "\n");
-if (lines.length == 0 || lines[0].length < 6 || lines[0].charAt (6) != ' ' || !lines[0].substring (0, 6).equals (lines[0].substring (0, 6).toUpperCase ())) {
+if (lines.length == 0 || lines[0].length < 7 || lines[0].charAt (6) != ' ' || !lines[0].substring (0, 6).equals (lines[0].substring (0, 6).toUpperCase ())) {
 ht.put ("fileHeader", objHeader);
 return ht;
 }var keyLast = "";
@@ -1466,8 +1490,8 @@ var sb =  new JU.SB ();
 var nAtoms = bs.cardinality ();
 if (nAtoms == 0) return "";
 if (JV.Viewer.isJS) J.api.Interface.getInterface ("JU.XmlUtil", this.vwr, "file");
-JU.XmlUtil.openTag (sb, "molecule");
-JU.XmlUtil.openTag (sb, "atomArray");
+JV.PropertyManager.openTag (sb, "molecule");
+JV.PropertyManager.openTag (sb, "atomArray");
 var bsAtoms =  new JU.BS ();
 var atoms = this.vwr.ms.at;
 for (var i = bs.nextSetBit (0); i >= 0; i = bs.nextSetBit (i + 1)) {
@@ -1476,11 +1500,11 @@ var atom = atoms[i];
 var name = atom.getAtomName ();
 JU.PT.rep (name, "\"", "''");
 bsAtoms.set (atom.i);
-JU.XmlUtil.appendTag (sb, "atom/",  Clazz.newArray (-1, ["id", "a" + (atom.i + 1), "title", atom.getAtomName (), "elementType", atom.getElementSymbol (), "x3", "" + atom.x, "y3", "" + atom.y, "z3", "" + atom.z]));
+JV.PropertyManager.appendTag (sb, "atom/",  Clazz.newArray (-1, ["id", "a" + (atom.i + 1), "title", atom.getAtomName (), "elementType", atom.getElementSymbol (), "x3", "" + atom.x, "y3", "" + atom.y, "z3", "" + atom.z]));
 }
-JU.XmlUtil.closeTag (sb, "atomArray");
+JV.PropertyManager.closeTag (sb, "atomArray");
 if (addBonds) {
-JU.XmlUtil.openTag (sb, "bondArray");
+JV.PropertyManager.openTag (sb, "bondArray");
 var bondCount = this.vwr.ms.bondCount;
 var bonds = this.vwr.ms.bo;
 for (var i = 0; i < bondCount; i++) {
@@ -1490,12 +1514,28 @@ var a2 = bond.atom2;
 if (!bsAtoms.get (a1.i) || !bsAtoms.get (a2.i)) continue;
 var order = JU.Edge.getCmlBondOrder (bond.order);
 if (order == null) continue;
-JU.XmlUtil.appendTag (sb, "bond/",  Clazz.newArray (-1, ["atomRefs2", "a" + (bond.atom1.i + 1) + " a" + (bond.atom2.i + 1), "order", order]));
+JV.PropertyManager.appendTag (sb, "bond/",  Clazz.newArray (-1, ["atomRefs2", "a" + (bond.atom1.i + 1) + " a" + (bond.atom2.i + 1), "order", order]));
 }
-JU.XmlUtil.closeTag (sb, "bondArray");
-}JU.XmlUtil.closeTag (sb, "molecule");
+JV.PropertyManager.closeTag (sb, "bondArray");
+}JV.PropertyManager.closeTag (sb, "molecule");
 return sb.toString ();
 }, "JU.BS,~N,~B,~B,~B");
+c$.openTag = Clazz.defineMethod (c$, "openTag", 
+function (sb, name) {
+sb.append ("<").append (name).append (">\n");
+}, "JU.SB,~S");
+c$.appendTag = Clazz.defineMethod (c$, "appendTag", 
+function (sb, name, attributes) {
+sb.append ("<").append (name);
+for (var i = 0; i < attributes.length; i++) {
+sb.append (" ").append (attributes[i]).append ("=\"").append (attributes[++i]).append ("\"");
+}
+sb.append ("/>\n");
+}, "JU.SB,~S,~A");
+c$.closeTag = Clazz.defineMethod (c$, "closeTag", 
+function (sb, name) {
+sb.append ("</").append (name).append (">\n");
+}, "JU.SB,~S");
 Clazz.overrideMethod (c$, "fixJMEFormalCharges", 
 function (bsAtoms, jme) {
 var haveCharges = false;

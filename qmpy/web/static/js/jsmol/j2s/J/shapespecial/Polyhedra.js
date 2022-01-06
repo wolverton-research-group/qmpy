@@ -319,6 +319,12 @@ p = this.findPoly (id, iatom, true);
 if (p == null) return false;
 data[1] = p.getInfo (this.vwr, "info");
 return true;
+}if (property === "syminfo") {
+p = this.findPoly (id, iatom, true);
+if (p == null) return false;
+p.getSymmetry (this.vwr, true);
+data[1] = p.getInfo (this.vwr, "info");
+return true;
 }if (property === "points") {
 p = this.findPoly (id, iatom, false);
 if (p == null) return false;
@@ -360,7 +366,7 @@ if (smiles == null) {
 bs.set (iatom);
 continue;
 }p.getSymmetry (this.vwr, false);
-var smiles0 = p.polySmiles;
+var smiles0 = sm.cleanSmiles (p.polySmiles);
 try {
 if (sm.areEqual (smiles, smiles0) > 0) bs.set (iatom);
 } catch (e) {
@@ -484,6 +490,7 @@ if (p.centralAtom != null) this.atoms[p.centralAtom.i].setShapeVisibility (this.
 Clazz.defineMethod (c$, "buildPolyhedra", 
  function () {
 var p = null;
+if (this.centers == null) return;
 if (this.thisID != null) {
 if (JU.PT.isWild (this.thisID)) return;
 if (this.center != null) {

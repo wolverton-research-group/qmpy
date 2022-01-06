@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding="UTF-8" standalone='yes'?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" width="850.0" height="400.0" viewBox="0 0 $svgWidth $svgHeight" preserveAspectRatio="none" onmousemove="getCoord(evt)">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" width="850.0" height="400.0" viewBox="0 0 $svgWidth $svgHeight" preserveAspectRatio="none" onmousemove="getCoord(evt)" style="font-size:9pt;cursor:default">
 <!-- Copyright (c) 2002-2012 Department of Chemistry, University of the West Indies, Jamaica -->
 <script >
   <![CDATA[
@@ -112,15 +112,22 @@
   ]]>
 </script>
 
+  <defs>
+    <clipPath id="plotbox">
+      <rect x="$leftPlotArea" y="$topPlotArea" width="$plotAreaWidth" height="$plotAreaHeight"/>
+          </clipPath>
+  </defs>
+
 <rect id="Border" style="stroke:$gridColor ;stroke-width:0.1; fill:none"
 x="$leftPlotArea" y="$topPlotArea" width="$plotAreaWidth" height="$plotAreaHeight"/>
 
 <rect id="Background" style="fill:$plotAreaColor; visibility:visible;"
 x="$leftPlotArea" y="$topPlotArea" width="$plotAreaWidth" height="$plotAreaHeight"/>
 
-<text id="titleText" x="$leftPlotArea" y="$titlePosition" style="stroke:$titleColor; font-size:12pt">$title</text>
+<text id="titleText" x="$leftPlotArea" y="$titlePosition" style="stroke-width:0.1;stroke:$titleColor;">$title</text>
 
 <path id="Grid" style="fill:none; stroke:$gridColor ;stroke-width:0.5; visibility:visible;"
+clip-path="url(#plotbox)"
 d="
 #foreach ($coord in $verticalGridCoords)
   M $coord.xVal $coord.yVal v $plotAreaHeight
@@ -141,7 +148,7 @@ d="
 <use xlink:href="#revPlotText" onclick="reversePlot('Plot');"/>
 <use xlink:href="#coordText" onclick="coordsOn = !coordsOn;"/>
 
-<g id="scale" style="visibility:visible; stroke:$scaleColor;">
+<g id="scale" style="visibility:visible; stroke-width:0.1;stroke:$scaleColor;">
 <text id="xScale" style="visibility:visible;">
 #foreach ($item in $xScaleList)
   <tspan x='$item.xVal' y='$item.yVal'>$item.number</tspan>
@@ -181,15 +188,15 @@ d="
     
  
  -->
-<text id="xUnit" x='$xUnitLabelX' y='$xUnitLabelY' style="stroke:$unitsColor;">$xUnits</text>
-<text id="yUnit" transform='rotate(-90)' x='$yUnitLabelX' y='$yUnitLabelY' style="stroke:$unitsColor;">$yUnits</text>
+<text id="xUnit" x='$xUnitLabelX' y='$xUnitLabelY' style="stroke-width:0.1;stroke:$unitsColor;">$xUnits</text>
+<text id="yUnit" transform='rotate(-90)' x='$yUnitLabelX' y='$yUnitLabelY' style="stroke-width:0.1;stroke:$unitsColor">$yUnits</text>
 
 <g id="Plot" transform="translate($firstTranslateX,$firstTranslateY) scale($scaleX,$scaleY) translate($secondTranslateX,$secondTranslateY)">
 
 #if($continuous)
   #if($overlaid)
     #foreach ($coordList in $xyCoords)
-      <path id="Spectrum" style="fill:none; stroke:$plotColor ;stroke-width:0.005;"
+      <path id="Spectrum" vector-effect="non-scaling-stroke" style="fill:none; stroke:$plotColor;"
       d="
       M
       #foreach ($coord in $coordList)
@@ -198,7 +205,7 @@ d="
       "/>
     #end
   #else
-    <path id="Spectrum" style="fill:none; stroke:$plotColor ;stroke-width:0.005;"
+    <path id="Spectrum" vector-effect="non-scaling-stroke" style="fill:none; stroke:$plotColor;"
     d="
     M
     #foreach ($coord in $xyCoords)

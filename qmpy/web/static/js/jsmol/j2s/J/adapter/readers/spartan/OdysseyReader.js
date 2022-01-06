@@ -5,6 +5,9 @@ Clazz.overrideMethod (c$, "initializeReader",
 function () {
 var title = this.readInputRecords ();
 this.asc.setAtomSetName (title == null ? "Odyssey file" : title);
+while (this.line != null && this.line.indexOf ("END ") < 0 && this.line.indexOf ("MOLSTATE") < 0) this.rd ();
+
+if (this.line != null && this.line.indexOf ("MOLSTATE") >= 0) this.readTransform ();
 this.continuing = false;
 });
 });

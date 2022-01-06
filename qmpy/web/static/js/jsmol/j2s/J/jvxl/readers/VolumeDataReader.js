@@ -113,8 +113,10 @@ min = -10;
 max = 10;
 }var range = max - min;
 var resolution = this.params.resolution;
-if (resolution != 3.4028235E38) ptsPerAngstrom = resolution;
-nGrid = Clazz.doubleToInt (Math.floor (range * ptsPerAngstrom)) + 1;
+if (resolution != 3.4028235E38) {
+ptsPerAngstrom = resolution;
+minPointsPerAngstrom = 0;
+}nGrid = Clazz.doubleToInt (Math.floor (range * ptsPerAngstrom)) + 1;
 if (nGrid > gridMax) {
 if ((this.dataType & 256) > 0) {
 if (resolution == 3.4028235E38) {
@@ -132,7 +134,7 @@ nGrid = Clazz.doubleToInt (Math.floor (ptsPerAngstrom * range + 1));
 ptsPerAngstrom = (nGrid - 1) / range;
 }d = this.volumeData.volumetricVectorLengths[index] = 1 / ptsPerAngstrom;
 this.voxelCounts[index] = nGrid;
-if (!this.isQuiet) JU.Logger.info ("isosurface resolution for axis " + (index + 1) + " set to " + ptsPerAngstrom + " points/Angstrom; " + this.voxelCounts[index] + " voxels");
+if (this.params.sbOut != null) this.params.sbOut.append ("isosurface resolution for axis " + (index + 1) + " set to " + ptsPerAngstrom + " points/Angstrom; " + this.voxelCounts[index] + " voxels\n");
 switch (index) {
 case 0:
 this.volumetricVectors[0].set (d, 0, 0);
@@ -147,6 +149,7 @@ this.volumetricVectors[2].set (0, 0, d);
 this.volumetricOrigin.z = min;
 if (this.isEccentric) this.eccentricityMatrix.rotate (this.volumetricOrigin);
 if (this.center != null && !Float.isNaN (this.center.x)) this.volumetricOrigin.add (this.center);
+if (this.params.sbOut != null) this.params.sbOut.append ((this.voxelCounts[0] * this.voxelCounts[1] * this.voxelCounts[2]) + " voxels total\n");
 }
 if (this.isEccentric) this.eccentricityMatrix.rotate (this.volumetricVectors[index]);
 return this.voxelCounts[index];
