@@ -3,10 +3,6 @@
 
 {% block title %}{{ entry.name }}{% endblock %}
 
-{% block extrascript %}
-<script type="text/javascript" src={% static "js/jsmol/JSmol.min.js" %}></script>
-{% endblock %} 
-
 {% block extrastyle %}
 <link rel="stylesheet" type="text/css" href="{% static "css/flot.css" %}"/>
 {% endblock %}
@@ -246,14 +242,16 @@
   {% if entry.natoms > 200 %}
   Structure contains more than 200 atoms, so is not being displayed. <br>
   {% else %}
+   <script type="text/javascript" src={% static "js/jsmol/JSmol.min.nojq.js" %}></script>
   <h2> Crystal structure </h2>
     <script>
       var Info = {
         j2sPath: "{% static 'js/jsmol/j2s' %}",
+	serverURL: "{% static 'js/jsmol/php/jsmol.php' %}",
         {% if primitive %}
-        src: "/materials/export/primitive/cif/{{entry_structure.id}}",
+        src: "/materials/export/primitive/poscar/{{entry_structure.id}}",
         {% else %}
-        src: "/materials/export/conventional/cif/{{entry_structure.id}}",
+        src: "/materials/export/conventional/poscar/{{entry_structure.id}}",
         {% endif %}
         use: "HTML5",
         width: 400,

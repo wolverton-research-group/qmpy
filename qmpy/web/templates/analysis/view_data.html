@@ -102,13 +102,9 @@ body {font-family: Arial;}
 </style>
 {% endblock %}
 
-
-
-{% block extrastyle %}
-<script type="text/javascript" src={% static "js/jsmol/JSmol.min.js" %}></script>
+{% block extrascript %}
+<script type="text/javascript" src={% static "js/jsmol/JSmol.min.nojq.js" %}></script>
 {% endblock %}
-
-
 
 {% block content_title %}
 <h1> JSMol visualizer </h1>
