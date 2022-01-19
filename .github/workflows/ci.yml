@@ -37,6 +37,8 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
+      - name: Install Graphviz
+        run: sudo apt-get install -y graphviz
       - name: Setup python environment # Need to change this section after Python version upgrades
         uses: actions/setup-python@v2
         with:
