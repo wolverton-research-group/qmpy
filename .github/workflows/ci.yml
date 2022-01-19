@@ -45,8 +45,8 @@ jobs:
           python-version: '3.7'
       - name: Check Python version 
         run: python --version
-      - name: Install requirements
-        run: pip install -r requirements.txt
+      - name: Install qmpy
+        run: python setup.py install
       - name: Run Migrations
         run: python qmpy/db/manage.py migrate
       - name: Run Test
