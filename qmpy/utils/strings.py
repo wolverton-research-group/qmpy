@@ -17,6 +17,7 @@ import itertools
 import numpy as np
 import re
 import yaml
+import math
 import fractions as frac
 import decimal as dec
 import logging
@@ -241,7 +242,7 @@ def unit_comp(comp):
 def reduce_by_gcd(values, tol=5e-2):
     least = min([v for v in values if v])
     ints = [roundclose(v / least, tol) for v in values]
-    gcd = reduce(frac.gcd, [roundclose(v, tol) for v in values if v])
+    gcd = reduce(math.gcd, [roundclose(v, tol) for v in values if v])
     return [v / gcd for v in values]
 
 
@@ -251,7 +252,7 @@ def reduce_by_partial_gcd(values):
         return values
     least = min(ints)
     ints = [v / least for v in ints]
-    gcd = reduce(frac.gcd, ints)
+    gcd = reduce(math.gcd, ints)
     return [v / gcd for v in values]
 
 
@@ -266,7 +267,7 @@ def reduce_by_any_means(values):
             break
         i += 1
         p = primes[i - 1]
-        d = reduce(frac.gcd, [roundclose(v, 5e-2) for v in vals * p])
+        d = reduce(math.gcd, [roundclose(v, 5e-2) for v in vals * p])
     else:
         vals = np.round(vals * p / d)
     return vals.tolist()

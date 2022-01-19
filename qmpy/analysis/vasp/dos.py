@@ -201,7 +201,7 @@ class DOS(models.Model):
                     "up",
                     line_width=2,
                     line_color="blue",
-                    legend="Spin Up",
+                    legend_label="Spin Up",
                     source=source,
                 )
                 p.line(
@@ -209,7 +209,7 @@ class DOS(models.Model):
                     "down",
                     line_width=2,
                     line_color="orange",
-                    legend="Spin Down",
+                    legend_label="Spin Down",
                     source=source,
                 )
             else:
