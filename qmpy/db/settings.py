@@ -3,13 +3,13 @@ import os
 from dotenv import load_dotenv, find_dotenv
 
 # Loading environment variables from .env file
-load_dotenv(find_dotenv())
+load_dotenv(os.environ.get("QMPY_ENV_FILEPATH"))
 
 INSTALL_PATH = os.path.dirname(os.path.abspath(__file__))
 INSTALL_PATH = os.path.split(INSTALL_PATH)[0]
 INSTALL_PATH = os.path.split(INSTALL_PATH)[0]
 
-DEBUG = True if os.environ.get("OQMD_WEB_debug").lower() == 'true' else False
+DEBUG = True if os.environ.get("OQMD_WEB_debug").lower() == "true" else False
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -190,8 +190,8 @@ REST_FRAMEWORK = {
         "rest_framework_xml.renderers.XMLRenderer",
         "rest_framework_yaml.renderers.YAMLRenderer",
     ),
-    'URL_FORMAT_OVERRIDE': 'response_format',
-    'FORMAT_SUFFIX_KWARG': 'response_format',
+    "URL_FORMAT_OVERRIDE": "response_format",
+    "FORMAT_SUFFIX_KWARG": "response_format",
 }
 
 CRIPSY_TEMPLATE_PACK = "bootstrap"

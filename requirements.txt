@@ -15,6 +15,7 @@ mysqlclient
 networkx
 numpy
 pexpect
+pre-commit
 PuLP == 1.6.10
 PyCifRW >= 4.3
 pygraphviz

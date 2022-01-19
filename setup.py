@@ -46,6 +46,5 @@ setup(
         "lark-parser",
         "requests",
         "pygraphviz",
-        "Jinja2 < 3.0",
     ],
 )

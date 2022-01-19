@@ -1,0 +1,52 @@
+# OQMD CI workflow
+name: qmpy ci workflow
+
+on:
+  pull_request:
+    branches:
+      - master
+      - develop
+  push:
+    branches:
+      - master
+
+jobs:
+  health-check-job: # running basic health checks
+    runs-on: ubuntu-latest # currently testing out only in ubuntu
+    env:
+      QMPY_ENV_FILEPATH: .env.example
+    services:
+      mysql: # latest mysql image is tested
+        image: mysql
+        env: 
+          MYSQL_ROOT_PASSWORD: secret
+          MYSQL_DATABASE: qmdb
+          MYSQL_USER: qmpy_user
+          MYSQL_PASSWORD: secret
+        ports:
+          - 3306:3306 # exposing the default 3306 port
+        # mysql healthcheck
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Cache dependency 
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      - name: Setup python environment # Need to change this section after Python version upgrades
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+      - name: Check Python version 
+        run: python --version
+      - name: Install requirements
+        run: pip install -r requirements.txt
+      - name: Run Migrations
+        run: python manage.py migrate
+      - name: Run Test
+        run: python manage.py test
+

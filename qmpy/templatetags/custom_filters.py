@@ -8,6 +8,7 @@ register = template.Library()
 def get_item(dictionary, key):
     return dictionary.get(key)
 
+
 @register.filter
 def USE_CDN(_):
-    return True if os.environ.get("OQMD_USE_CDN").lower() == 'true' else False
+    return True if os.environ.get("OQMD_USE_CDN").lower() == "true" else False
