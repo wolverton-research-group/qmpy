@@ -10,7 +10,7 @@ setup(
     author="The OQMD Development Team",
     author_email="oqmd.questions@gmail.com",
     license="LICENSE.txt",
-    classifiers=["Programming Language :: Python :: 3.7"],
+    classifiers=["Programming Language :: Python :: 3.9"],
     packages=find_packages(),
     scripts=["bin/oqmd", "bin/qmpy"],
     url="http://pypi.python.org/pypi/qmpy",

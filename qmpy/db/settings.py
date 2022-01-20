@@ -19,6 +19,9 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
+if not DEBUG:
+    WSGI_APPLICATION = "qmpy.db.wsgi.application"
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",

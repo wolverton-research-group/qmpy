@@ -239,10 +239,24 @@ def unit_comp(comp):
     return normalize_dict(comp)
 
 
+def frac_gcd(a, b):
+    # From fractions.gcd() that used to exist in python <3.8
+    # https://github.com/python/cpython/blob/3.7/Lib/fractions.py#L17
+    # Need to find a "not so deprecated" solution here
+    if type(a) is int is type(b):
+        if (b or a) < 0:
+            return -math.gcd(a, b)
+        return math.gcd(a, b)
+
+    while b:
+        a, b = b, a % b
+    return a
+
+
 def reduce_by_gcd(values, tol=5e-2):
     least = min([v for v in values if v])
     ints = [roundclose(v / least, tol) for v in values]
-    gcd = reduce(math.gcd, [roundclose(v, tol) for v in values if v])
+    gcd = reduce(frac_gcd, [roundclose(v, tol) for v in values if v])
     return [v / gcd for v in values]
 
 
@@ -252,7 +266,7 @@ def reduce_by_partial_gcd(values):
         return values
     least = min(ints)
     ints = [v / least for v in ints]
-    gcd = reduce(math.gcd, ints)
+    gcd = reduce(frac_gcd, ints)
     return [v / gcd for v in values]
 
 
@@ -267,7 +281,7 @@ def reduce_by_any_means(values):
             break
         i += 1
         p = primes[i - 1]
-        d = reduce(math.gcd, [roundclose(v, 5e-2) for v in vals * p])
+        d = reduce(frac_gcd, [roundclose(v, 5e-2) for v in vals * p])
     else:
         vals = np.round(vals * p / d)
     return vals.tolist()
