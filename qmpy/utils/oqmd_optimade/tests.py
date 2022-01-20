@@ -2,6 +2,13 @@ from qmpy.utils import *
 from django.test import TestCase
 from django.db.models import Q
 from rest_framework.exceptions import ParseError
+from qmpy.utils.oqmd_optimade.QueryLarkDjangoParser import (
+    NotImplementedErr,
+    LarkParserError,
+)
+
+# At some point, we need to run OPTIMADE Validatior Action tests
+# in qmpy Github Actions, instead of doing these tests - Abi
 
 
 class RESTfulTestCase(TestCase):
@@ -69,8 +76,9 @@ class RESTfulTestCase(TestCase):
         truth_value = "(AND: ('entry__composition__ntypes', '3'))"
         assert truth_value == self.transform_q("elements LENGTH 3")
 
-        # queries that return 'None'. i.e; no data is returned but a BadRequest400 error is not raised
-        truth_value = "None"
+        # queries that return None. i.e; no data is returned but a BadRequest400 error is not raised.
+        # A Django query to return no values is executed in this case
+        truth_value = "(AND: ('id', -1))"
         assert truth_value == self.transform_q("_abc_elements LENGTH 3")
 
         # Other property-dependant tests
@@ -90,61 +98,65 @@ class RESTfulTestCase(TestCase):
         )
         truth_value = "(AND: ('composition__formula__in', ['Al1']))"
         assert truth_value == self.transform_q('chemical_formula_reduced= "   Al "')
-        truth_value = "(AND: ('entry__natoms__lt', '8'))"
+        truth_value = "(AND: ('entry__natoms__lt', '8'), ('id', -1))"
         assert truth_value == self.transform_q("nsites<8 AND _<0")
-        truth_value = "(AND: ('entry__natoms__lt', '8'))"
+        truth_value = "(AND: ('entry__natoms__lt', '8'), ('id', -1))"
         assert truth_value == self.transform_q("nsites<8 AND _abc_stability<0")
         truth_value = "(AND: ('id', '112/23344'))"
         assert truth_value == self.transform_q('id="112/23344"')
 
     def test_errors(self):
-        self.assertRaises(ParseError, self.transform_q, "abc_elements LENGTH 3", 3)
-        self.assertRaises(ParseError, self.transform_q, "xyz = 3", 3)
         self.assertRaises(
-            ParseError,
+            NotImplementedErr, self.transform_q, "abc_elements LENGTH 3", 3
+        )
+        self.assertRaises(NotImplementedErr, self.transform_q, "xyz = 3", 3)
+        self.assertRaises(
+            NotImplementedErr,
             self.transform_q,
             "abcd=0 AND band_gap>0 OR lattice_vectors=12345",
             3,
         )
         self.assertRaises(
-            ParseError, self.transform_q, "stability>0 OR NOT lattice_vectors>12345", 3
+            NotImplementedErr,
+            self.transform_q,
+            "stability>0 OR NOT lattice_vectors>12345",
+            3,
         )
-        self.assertRaises(ParseError, self.transform_q, "band_gap>0 OR NOT id>12345", 3)
-        self.assertRaises(ParseError, self.transform_q, 'elements HAS "A"', 3)
-        self.assertRaises(ParseError, self.transform_q, 'elements HAS ANY "Al",D', 3)
-        self.assertRaises(ParseError, self.transform_q, "elements HAS Al", 3)
-        self.assertRaises(ParseError, self.transform_q, "id=112/23344", 3)
-        self.assertRaises(ParseError, self.transform_q, "elements LENGTH > 3", 3)
-        self.assertRaises(ParseError, self.transform_q, "stability HAS 1", 3)
-        self.assertRaises(ParseError, self.transform_q, 'id>"1234"', 3)
-        self.assertRaises(ParseError, self.transform_q, "OR stability > 3", 3)
-        self.assertRaises(ParseError, self.transform_q, "NOT abcd > 3", 3)
-        self.assertRaises(ParseError, self.transform_q, "AND", 3)
+        self.assertRaises(NotImplementedErr, self.transform_q, 'elements HAS "A"', 3)
         self.assertRaises(
-            ParseError, self.transform_q, "chemical_formula_reduced=Al2O3", 3
+            LarkParserError, self.transform_q, 'elements HAS ANY "Al",D', 3
+        )
+        self.assertRaises(LarkParserError, self.transform_q, "elements HAS Al", 3)
+        self.assertRaises(LarkParserError, self.transform_q, "id=112/23344", 3)
+        self.assertRaises(NotImplementedErr, self.transform_q, "elements LENGTH > 3", 3)
+        self.assertRaises(NotImplementedErr, self.transform_q, "stability HAS 1", 3)
+        self.assertRaises(LarkParserError, self.transform_q, "OR stability > 3", 3)
+        self.assertRaises(NotImplementedErr, self.transform_q, "NOT abcd > 3", 3)
+        self.assertRaises(LarkParserError, self.transform_q, "AND", 3)
+        self.assertRaises(
+            LarkParserError, self.transform_q, "chemical_formula_reduced=Al2O3", 3
         )
         self.assertRaises(
-            ParseError, self.transform_q, 'chemical_formula_reduced="{4z}"', 3
+            NotImplementedErr, self.transform_q, 'chemical_formula_reduced="{4z}"', 3
         )
-        self.assertRaises(ParseError, self.transform_q, 'elements HAS "   Al "', 3)
-        self.assertRaises(ParseError, self.transform_q, " < 0", 3)
-        self.assertRaises(ParseError, self.transform_q, "AND < 0", 3)
-        self.assertRaises(ParseError, self.transform_q, " < 0", 3)
-        self.assertRaises(ParseError, self.transform_q, " < 0", 3)
+        self.assertRaises(
+            NotImplementedErr, self.transform_q, 'elements HAS "   Al "', 3
+        )
+        self.assertRaises(LarkParserError, self.transform_q, " < 0", 3)
+        self.assertRaises(LarkParserError, self.transform_q, "AND < 0", 3)
+        self.assertRaises(LarkParserError, self.transform_q, " < 0", 3)
 
         # Following tests should be modified when OQMD start supporting these kinda queries
-        self.assertRaises(ParseError, self.transform_q, "3 > stability", 3)
-        self.assertRaises(ParseError, self.transform_q, "stability IS KNOWN", 3)
-        self.assertRaises(
-            ParseError, self.transform_q, 'chemical_formula_reduced CONTAINS "Al"', 3
-        )
+        self.assertRaises(NotImplementedErr, self.transform_q, "stability IS KNOWN", 3)
 
     def test_warnings(self):
-        assert self.transform_q("_abc_stability < 0", 1)[0].startswith(
-            "_oqmd_IgnoredProperty"
+        assert self.transform_q("_abc_stability < 0", 1)[0]["detail"].startswith(
+            "_oqmd_GeneralWarning"
         )
-        assert self.transform_q("_ >= 0", 1)[0].startswith("_oqmd_IgnoredProperty")
-        assert self.transform_q("nsites<8 AND _<0", 1)[0].startswith(
-            "_oqmd_IgnoredProperty"
+        assert self.transform_q("_ >= 0", 1)[0]["detail"].startswith(
+            "_oqmd_GeneralWarning"
+        )
+        assert self.transform_q("nsites<8 AND _<0", 1)[0]["detail"].startswith(
+            "_oqmd_GeneralWarning"
         )
         assert self.transform_q("nsites<8 AND nelements<4", 1) == []
