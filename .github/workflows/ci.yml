@@ -47,8 +47,10 @@ jobs:
         run: python --version
       - name: Install qmpy
         run: python setup.py install
+      - name: Change Directory
+        run: cd qmpy/db/
       - name: Run Migrations
-        run: python qmpy/db/manage.py migrate
-      - name: Run Test
-        run: python qmpy/db/manage.py test
+        run: python manage.py migrate
+      - name: Run Tests
+        run: python manage.py test qmpy
 
