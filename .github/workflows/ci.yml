@@ -49,6 +49,9 @@ jobs:
         run: python setup.py install
       - name: Set ENV
         run: echo "QMPY_ENV_FILEPATH=${GITHUB_WORKSPACE}/.env.example" >> $GITHUB_ENV
+      - name: Make Migrations
+        run: python manage.py makemigrations auth qmpy contenttypes sites
+        working-directory: qmpy/db
       - name: Run Migrations
         run: python manage.py migrate
         working-directory: qmpy/db
