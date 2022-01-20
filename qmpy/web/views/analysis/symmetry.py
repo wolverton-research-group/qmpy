@@ -5,7 +5,6 @@ from ..tools import get_globals
 
 
 def sg_view(request, spacegroup):
-    print("\n\n\n\n In sg_view \n\n\n")
     spacegroup = Spacegroup.objects.get(pk=spacegroup)
     structures = spacegroup.structure_set.filter(label="input")[:10]
     data = get_globals()
@@ -16,8 +15,6 @@ def sg_view(request, spacegroup):
 
 
 def op_view(request, operation):
-    print("\n\n\n\n In op_view \n\n\n")
-    print("\n\n\n Operation: \n\n", operation)
     operation = Operation.objects.get(pk=operation)
     data = get_globals()
     data["operation"] = operation

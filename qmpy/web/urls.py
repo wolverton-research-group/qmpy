@@ -6,6 +6,7 @@ from qmpy.db import settings
 
 from rest_framework import routers
 from qmpy.web import views
+import os
 
 # router = routers.DefaultRouter()
 # router.register(r'users', views.UserViewSet)
@@ -46,7 +47,6 @@ urlpatterns += [
         r"^materials/kpoints/(?P<mesh>.*)/(?P<structure_id>.*)/KPOINTS",
         views.export_kpoints,
     ),
-    url(r"^materials/discovery", views.disco_view),
     url(r"^materials/chem_pots", views.chem_pot_view),
     url(r"^materials/element_groups", views.element_group_view),
     url(r"^materials/deposit", views.deposit_view),
@@ -56,26 +56,6 @@ urlpatterns += [
     url(r"^reference/(?P<reference_id>.*)$", views.reference_view),
     ## calculations
     url(r"^analysis/calculation/(?P<calculation_id>.*)$", views.calculation_view),
-    ## computing
-    url(r"^computing/$", views.computing_view),
-    url(r"^computing/projects$", views.projects_view),
-    url(r"^computing/hosts$", views.hosts_view),
-    url(r"^computing/queue$", views.queue_view),
-    url(r"^computing/onlinesubmit$", views.online_view),
-    url(r"^computing/create/host$", views.new_host_view),
-    # url(r'^computing/create/project', views.new_project_view),
-    # url(r'^computing/create/user',    views.new_user_view),
-    # url(r'^computing/create/',        views.new_user_view),
-    url(
-        r"^computing/project/(?P<state>.*)/(?P<project_id>.*)$",
-        views.project_state_view,
-    ),
-    url(r"^computing/project/(?P<project_id>.*)$", views.project_view),
-    url(r"^computing/host/(?P<host_id>.*)$", views.host_view),
-    url(r"^computing/user/(?P<user_id>.*)$", views.user_view),
-    url(r"^computing/allocation/(?P<allocation_id>.*)$", views.allocation_view),
-    url(r"^computing/task/(?P<task_id>.*)$", views.task_view),
-    url(r"^computing/job/(?P<job_id>.*)$", views.job_view),
     ## analysis
     url(r"^analysis/$", views.analysis_view),
     url(r"^analysis/gclp/$", views.gclp_view),
@@ -130,5 +110,31 @@ urlpatterns += [
     url(r"^download/", views.download_home),
     ## other
     url(r"^faq", views.faq_view),
-    url(r"^playground", views.play_view),
 ]
+
+if os.environ.get("OQMD_WEB_debug").lower() == "true":
+    urlpatterns += [
+        url(r"^materials/discovery", views.disco_view),
+        ## computing
+        url(r"^computing/$", views.computing_view),
+        url(r"^computing/projects$", views.projects_view),
+        url(r"^computing/hosts$", views.hosts_view),
+        url(r"^computing/queue$", views.queue_view),
+        url(r"^computing/onlinesubmit$", views.online_view),
+        url(r"^computing/create/host$", views.new_host_view),
+        # url(r'^computing/create/project', views.new_project_view),
+        # url(r'^computing/create/user',    views.new_user_view),
+        # url(r'^computing/create/',        views.new_user_view),
+        url(
+            r"^computing/project/(?P<state>.*)/(?P<project_id>.*)$",
+            views.project_state_view,
+        ),
+        url(r"^computing/project/(?P<project_id>.*)$", views.project_view),
+        url(r"^computing/host/(?P<host_id>.*)$", views.host_view),
+        url(r"^computing/user/(?P<user_id>.*)$", views.user_view),
+        url(r"^computing/allocation/(?P<allocation_id>.*)$", views.allocation_view),
+        url(r"^computing/task/(?P<task_id>.*)$", views.task_view),
+        url(r"^computing/job/(?P<job_id>.*)$", views.job_view),
+        # other
+        url(r"^playground", views.play_view),
+    ]

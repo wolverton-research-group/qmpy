@@ -1,5 +1,6 @@
 {% extends "base_site.html" %}
 {% load static %}
+{% load custom_filters %}
 
 {% block title %}{{ entry.name }}{% endblock %}
 
@@ -218,6 +219,7 @@
 
 {% block sidebar %}
 <div id="sidebar" class="box">
+  {% if is_debug|IS_DEBUG %}
   {% if not entry.tasks %}
   <h1> Control Panel</h1>
   <form action="" method="post">{% csrf_token %}
@@ -237,6 +239,7 @@
     <!-- Add hold: <input type="text" name="add_hold"><br> -->
     <input type="submit">
   </form>
+  {% endif %}
 
   <h1> Visualization </h1>
   {% if entry.natoms > 200 %}

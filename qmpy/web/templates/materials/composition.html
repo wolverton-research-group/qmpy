@@ -339,6 +339,7 @@ function openWindow() {
 
 {% endif %}
 
+{% if is_debug|IS_DEBUG %}
 {% if running %}
 <div style="padding-top:20px;float:left">
 <h2> Compounds not completed at this composition </h2>
@@ -374,6 +375,7 @@ function openWindow() {
 </table>
 </div>
 
+{% endif %}
 {% endif %}
 
 {% endblock %}

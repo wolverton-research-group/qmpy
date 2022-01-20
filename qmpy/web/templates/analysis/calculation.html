@@ -1,5 +1,6 @@
 {% extends "base_site.html" %}
 {% load static %}
+{% load custom_filters %}
 
 {% block title %}{{ calculation.input.name }}{% endblock %}
 
@@ -8,9 +9,13 @@
 {% endblock %}
 
 {% block extrascript %}
+<script src="{% static "js/jquery.flot.compressed_all.js" %}"></script>
 <meta charset='UTF-8'>
-<link rel="stylesheet" href="{% static "css/bokeh-0.12.15.min.css" %}">
-<script src="{% static "js/bokeh-0.12.15.min.js" %}">
+{% if use_cdn|USE_CDN %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bokeh/2.4.2/bokeh.min.js" integrity="sha512-s+BZKh6QRI+kDc3dXNUhfc1rPH3TaAIPao5L5P3Rrb3rKCTrdatPUSDIDcdoT4/yqi+LANbzkxCMltL28s8Clw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+{% else %}
+<script src="{% static "js/bokeh-2.4.2.min.js" %}">
+{% endif %}
 <!--
 <script id="source" language="javascript" type="text/javascript">
     $(function() {

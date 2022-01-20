@@ -17,9 +17,15 @@
 
 {% block extrahead %}{% endblock %}
 
-{% block blockbots %}<meta name="robots" content="NONE,NOARCHIVE" />{% endblock %}
+{% block blockbots %}
+{% if is_debug|IS_DEBUG %}
+<meta name="robots" content="NONE,NOARCHIVE" />
+{% else %}
+<meta name="robots" content="NOARCHIVE" />
+{% endif %}
+{% endblock %}
 
-<link rel="icon" type="image/ico" href="/favicon.ico"/>
+<link rel="icon" type="image/ico" href="{% static "img/favicon.ico" %}"/>
 
 {% if use_cdn|USE_CDN %}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
