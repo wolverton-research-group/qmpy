@@ -46,5 +46,6 @@ setup(
         "lark-parser",
         "requests",
         "pygraphviz",
+        "python-dotenv",
     ],
 )
