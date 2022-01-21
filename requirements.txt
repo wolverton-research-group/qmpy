@@ -16,7 +16,7 @@ networkx
 numpy
 pexpect
 pre-commit
-PuLP == 1.6.10
+PuLP
 PyCifRW >= 4.3
 pygraphviz
 pyparsing

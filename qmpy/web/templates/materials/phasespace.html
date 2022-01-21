@@ -10,6 +10,7 @@
 {% endblock %}
 
 {% block extrascript %}
+<script src={% static "js/jquery.flot.compressed_all.js" %}></script>
 <script language="javascript" type="text/javascript">
   $(function() {
       {{ plot | safe }}

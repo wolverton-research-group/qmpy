@@ -270,9 +270,9 @@ class PhaseSpace(object):
 
     def clear_all(self):
         """
-        Clears input data and analyzed results. 
+        Clears input data and analyzed results.
         Same as:
-        >>> PhaseData.clear_data() 
+        >>> PhaseData.clear_data()
         >>> PhaseData.clear_analysis()
         """
         self.clear_data()
@@ -700,7 +700,7 @@ class PhaseSpace(object):
 
     def in_space(self, composition):
         """
-        Returns True, if the composition is in the right elemental-space 
+        Returns True, if the composition is in the right elemental-space
         for this PhaseSpace.
 
         Examples::
@@ -872,7 +872,7 @@ class PhaseSpace(object):
         phases from out of the space.
 
         Examples::
-            
+
             >>> space = PhaseSpace('FeSi2-Li')
             >>> space.get_hull_points()
             [<Phase FeSi2 (23408): -0.45110217625>,
@@ -989,12 +989,10 @@ class PhaseSpace(object):
                 == float(constraint),
                 "Conservation of " + elt,
             )
-        ##[vh]
-        ##print prob
         if pulp.GUROBI().available():
             prob.solve(pulp.GUROBI(msg=False))
         elif pulp.COIN_CMD().available():
-            prob.solve(pulp.COIN_CMD())
+            prob.solve(pulp.COIN_CMD(msg=False))
         else:
             prob.solve()
 
@@ -1036,9 +1034,9 @@ class PhaseSpace(object):
         if pulp.GUROBI().available():
             prob.solve(pulp.GUROBI(msg=False))
         elif pulp.COIN_CMD().available():
-            prob.solve(pulp.COIN_CMD())
+            prob.solve(pulp.COIN_CMD(msg=False))
         elif pulp.COINMP_DLL().available():
-            prob.solve(pulp.COINMP_DLL())
+            prob.solve(pulp.COINMP_DLL(msg=False))
         else:
             prob.solve()
 
@@ -1061,7 +1059,7 @@ class PhaseSpace(object):
     def compute_stability(self, p):
         """
         Compute the energy difference between the formation energy of a Phase,
-        and the energy of the convex hull in the absence of that phase. 
+        and the energy of the convex hull in the absence of that phase.
         """
         # if self.phase_dict[p.name] != p:
         #    stable = self.phase_dict[p.name]
@@ -1103,7 +1101,7 @@ class PhaseSpace(object):
                 List of Phases. If None, uses every Phase in PhaseSpace.phases
 
             save:
-                If True, save the value for stability to the database. 
+                If True, save the value for stability to the database.
 
             new_only:
                 If True, only compute the stability for Phases which did not
@@ -1178,7 +1176,7 @@ class PhaseSpace(object):
     def find_reaction_mus(self, element=None):
         """
         Find the chemical potentials of a specified element at which reactions
-        occur. 
+        occur.
 
         Examples::
 
@@ -1266,7 +1264,7 @@ class PhaseSpace(object):
         Plot of phase volume vs formation energy.
 
         Examples::
-            
+
             >>> s = PhaseSpace('Fe2O3')
             >>> r = s.make_as_unary()
             >>> r.plot_in_matplotlib()
@@ -1299,11 +1297,11 @@ class PhaseSpace(object):
         self.renderer.options["tooltip"] = True
 
     def make_1d_vs_chempot(self, **kwargs):
-        """ 
+        """
         Plot of phase stability vs chemical potential for a single composition.
 
         Examples::
-            
+
             >>> s = PhaseSpace('Fe', mus={'O':[0,-4]})
             >>> r = s.make_vs_chempot()
             >>> r.plot_in_matplotlib()
@@ -1321,7 +1319,7 @@ class PhaseSpace(object):
         compositions.
 
         Examples::
-            
+
             >>> s = PhaseSpace('Fe-Li', mus={'O':[0,-4]})
             >>> r = s.make_vs_chempot()
             >>> r.plot_in_matplotlib()
@@ -1398,7 +1396,7 @@ class PhaseSpace(object):
         :mod:`~qmpy.Renderer`.
 
         Examples::
-            
+
             >>> s = PhaseSpace('Fe-P')
             >>> r = s.make_as_binary()
             >>> r.plot_in_matplotlib()
@@ -1460,7 +1458,7 @@ class PhaseSpace(object):
         :mod:`~qmpy.Renderer`.
 
         Examples::
-            
+
             >>> s = PhaseSpace('Fe-Li-O-P')
             >>> r = s.make_as_quaternary()
             >>> r.plot_in_matplotlib()
@@ -1513,7 +1511,7 @@ class PhaseSpace(object):
         :mod:`~qmpy.Renderer`.
 
         Examples::
-            
+
             >>> s = PhaseSpace('Fe-Li-O-P')
             >>> r = s.make_as_quaternary()
             >>> r.plot_in_matplotlib()
@@ -1650,9 +1648,9 @@ class PhaseSpace(object):
         if pulp.GUROBI().available():
             prob.solve(pulp.GUROBI(msg=False))
         elif pulp.COIN_CMD().available():
-            prob.solve(pulp.COIN_CMD())
+            prob.solve(pulp.COIN_CMD(msg=False))
         elif pulp.COINMP_DLL().available():
-            prob.solve(pulp.COINMP_DLL())
+            prob.solve(pulp.COINMP_DLL(msg=False))
         else:
             prob.solve()
 

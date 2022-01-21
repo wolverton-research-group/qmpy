@@ -355,7 +355,7 @@ class Site(models.Model):
         return hash(self._get_pk_val())
 
     def __eq__(self, other):
-        return (self.x, self.y, self.z) == (other.x, other.y, other.z)
+        return norm([self.x - other.x, self.y - other.y, self.z - other.z]) < 1e-4
 
     def __str__(self):
         coord_str = ""
