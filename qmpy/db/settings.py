@@ -3,7 +3,8 @@ import os
 from dotenv import load_dotenv, find_dotenv
 
 # Loading environment variables from .env file
-load_dotenv(os.environ.get("QMPY_ENV_FILEPATH"))
+if os.environ.get("QMPY_ENV_FILEPATH"):
+    load_dotenv(os.environ.get("QMPY_ENV_FILEPATH"))
 
 INSTALL_PATH = os.path.dirname(os.path.abspath(__file__))
 INSTALL_PATH = os.path.split(INSTALL_PATH)[0]
