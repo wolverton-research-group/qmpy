@@ -1,3 +1,6 @@
+# Dockerfile to serve a non-production server of OQMD in 
+# Django's DEBUG=True mode
+
 FROM python:3.9
 
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -5,20 +8,27 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /qmpy
 
+# Modified pip requirements file - because packages like scikit-learn are
+# not needed to host an OQMD web server
+
 COPY ./dockerfiles/minimum.requirements.txt /qmpy/requirements.txt
+
+# The following debian packages are installed:
+# 1. python3-pulp: For COIN_CMD LP solver for PuLP (In phasespace calculations)
+# 2. graphviz, graphviz-dev: required to use pygraphviz
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
   graphviz \
   graphviz-dev \
   python3-pulp \
+  && pip install --no-cache-dir -r requirements.txt \
   && apt-get clean \
-  && rm -rf /var/lib/apt/lists/*; \
-  pip install -r requirements.txt; \
-  echo "/qmpy/" > /usr/local/lib/python3.9/site-packages/qmpy.pth;
+  && rm -rf /var/lib/apt/lists/* \
+  && echo "/qmpy/" > /usr/local/lib/python3.9/site-packages/qmpy.pth
 
 ADD ./ /qmpy
 
 WORKDIR /qmpy/qmpy/db
 
-#CMD python manage.py makemigrations auth qmpy contenttypes sites; python manage.py migrate;
-CMD python manage.py runserver 0.0.0.0:$OQMD_REST_port
+# Running a Django DBEUG server without wsgi. So it is definitely not for the public server
+CMD python manage.py makemigrations auth qmpy contenttypes sites; python manage.py migrate; python manage.py runserver 0.0.0.0:$OQMD_REST_port
