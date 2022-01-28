@@ -3,4 +3,5 @@ repos:
     rev: stable
     hooks:
     - id: black
-      types_or: [python, pyi]
+      language: python
+      files: \.py$

@@ -137,7 +137,7 @@ MIDDLEWARE = [
 ROOT_URLCONF = "qmpy.web.urls"
 
 
-INSTALLED_APPS = (
+INSTALLED_APPS = [
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
@@ -150,7 +150,7 @@ INSTALLED_APPS = (
     "rest_framework_xml",
     "rest_framework_yaml",
     "crispy_forms",
-)
+]
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to

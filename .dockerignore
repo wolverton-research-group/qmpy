@@ -48,8 +48,12 @@ coverage.xml
 *.log
 *.pot
 
-# Sphinx documentation
-docs/_build/
+# Sphinx documentation is needed 
+# to be included unlike in .gitignore
+#
+# Because, symlinks does not work 
+# inside docker as of Docker v20.10.12
+#docs/_build/
 
 # Linux tempfiles
 *.swp

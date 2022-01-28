@@ -8,6 +8,7 @@ djangorestframework > 3.10
 djangorestframework-queryfields
 djangorestframework-xml
 djangorestframework-yaml
+gunicorn
 lark-parser
 lxml
 matplotlib
