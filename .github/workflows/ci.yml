@@ -63,7 +63,7 @@ jobs:
       - name: Build dev docker image
         run: docker build . --file dockerfiles/Dockerfile.debug -t qmpy_debug
       - name: Build production docker image
-        run: docker build . --file dockerfiles/Dockerfile.deploy --env-file .env.example -t qmpy_deploy
+        run: docker build . --file dockerfiles/Dockerfile.deploy -t qmpy_deploy
       - name: Run the dev server in a container
         run: docker run -dp 8000:8000 qmpy_debug
       - name: Run OPTIMADE validator
