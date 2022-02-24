@@ -1,0 +1,36 @@
+# Dockerfile to serve a test production server of OQMD in 
+# Django's DEBUG=False mode
+
+FROM python:3.9
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+WORKDIR /qmpy
+
+# Modified pip requirements file - because packages like scikit-learn are
+# not needed to host an OQMD web server
+
+COPY ./dockerfiles/requirements.docker.txt /qmpy/requirements.txt
+
+# The following debian packages are installed:
+# 1. python3-pulp: For COIN_CMD LP solver for PuLP (In phasespace calculations)
+# 2. graphviz, graphviz-dev: required to use pygraphviz
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  graphviz \
+  graphviz-dev \
+  python3-pulp \
+  && pip install --no-cache-dir -r requirements.txt \ 
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/* \ 
+  && echo "/qmpy/" > /usr/local/lib/python3.9/site-packages/qmpy.pth \
+  && chown -R www-data:www-data /qmpy 
+
+ADD ./ /qmpy
+
+# set env variables
+ENV QMPY_ENV_FILEPATH=/qmpy/dockerfiles/.env.wsgi
+RUN chown -R www-data:www-data /qmpy
+# Running a wsgi server with gunicorn
+CMD gunicorn qmpy.db.wsgi --user www-data --bind 0.0.0.0:8000
