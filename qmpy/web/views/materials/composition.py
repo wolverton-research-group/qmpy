@@ -1,5 +1,3 @@
-from tempfile import mkstemp
-import os.path
 from pprint import pprint
 
 from django.http import HttpResponse

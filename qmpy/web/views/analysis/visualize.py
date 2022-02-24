@@ -1,5 +1,4 @@
-from tempfile import mkstemp
-import os.path
+import os
 
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -69,6 +68,7 @@ direct
         s = read(f)
         s.symmetrize()
         data["structure"] = s
+    data["jsmol_serverURL"] = os.environ.get("JSMOL_serverURL")
     data.update(csrf(request))
     custom_data = data["crystal_data"]
     return render(request, "analysis/view_data.html", context=get_globals(data))

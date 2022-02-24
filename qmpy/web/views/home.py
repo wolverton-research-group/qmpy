@@ -1,5 +1,3 @@
-import os.path
-
 from django.contrib.auth import authenticate
 from django.shortcuts import render
 from qmpy.models import Entry, Task, Calculation, Formation, MetaData

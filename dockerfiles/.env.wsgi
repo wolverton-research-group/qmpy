@@ -81,3 +81,13 @@ OQMD_USE_CDN=False
 #        https://github.com/django/django/blob/stable/2.2.x/django/core/management/utils.py#L76
 #    The key given is randomly generated, but not used in any of our servers:
 OQMD_DJANGO_secretkey='48o2)h#gwow!iyg&__4d%zkv8v&h=n!sv)0rvj$*1yj8tw0riu'
+
+# URL of the PHP server to do CORS operations for JSMOL.
+# More details: 
+#        https://wiki.jmol.org/index.php/Jmol_JavaScript_Object/Info
+#
+# According to the official docs, if you can't host a php server,
+# it is fine to set the value as:
+#        https://chemapps.stolaf.edu/jmol/jsmol/php/jsmol.php
+
+JSMOL_serverURL='/static/js/jsmol/php/jsmol.php'

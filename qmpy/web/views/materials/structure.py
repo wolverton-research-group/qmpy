@@ -1,5 +1,4 @@
-from tempfile import mkstemp
-import os.path
+import os
 import csv
 from io import StringIO
 
@@ -61,6 +60,7 @@ def structure_view(request, structure_id):
     data["lpstr"] = lpstr
     data["pdf"] = pdf.plot().get_flot_script(div="pdf")
     data["xrd"] = xrd.plot().get_flot_script(div="xrd")
+    data["jsmol_serverURL"] = os.environ.get("JSMOL_serverURL")
     data.update(csrf(request))
     return render(request, "materials/structure.html", context=data)
 
@@ -95,6 +95,7 @@ def prototype_view(request, name):
             structure = example[0].structure
     data["structure"] = structure
 
+    data["jsmol_serverURL"] = os.environ.get("JSMOL_serverURL")
     data.update(csrf(request))
     return render(request, "materials/prototype.html", context=data)
 

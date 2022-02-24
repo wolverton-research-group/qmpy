@@ -249,8 +249,8 @@
   <h2> Crystal structure </h2>
     <script>
       var Info = {
+	serverURL: "{{jsmol_serverURL}}",
         j2sPath: "{% static 'js/jsmol/j2s' %}",
-	serverURL: "{% static 'js/jsmol/php/jsmol.php' %}",
         {% if primitive %}
         src: "/materials/export/primitive/poscar/{{entry_structure.id}}",
         {% else %}

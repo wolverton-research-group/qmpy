@@ -1,6 +1,3 @@
-from tempfile import mkstemp
-import os.path
-import pulp
 import json
 
 from django.http import HttpResponse
@@ -117,18 +114,6 @@ def phase_diagram_view(request):
             )
             if not data["chem_pots"]:
                 ps.compute_stabilities()
-
-            # < Mohan
-            # This following code might not be needed. WIll be removed in future updates.
-            # Original Codes:
-            # if p.get('stability') and not data["chem_pots"]:
-            #    ps.compute_stabilities()
-            #    data['stability'] = p.get('stability')
-            #    for phase in ps._phases:
-            #        if phase.stability > float(p.get('stability', 0.25)):
-            #            phase.use = False
-            #            phase.show_label = False
-            # Mohan >
 
         if ps.shape == (3, 0):
             data["plotlyjs"] = ps.phase_diagram.get_plotly_script_3d("placeholder")

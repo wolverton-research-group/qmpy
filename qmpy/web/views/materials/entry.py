@@ -1,5 +1,4 @@
-from tempfile import mkstemp
-import os.path
+import os
 
 from django.http import HttpResponse
 from django.template import RequestContext
@@ -72,7 +71,7 @@ def entry_view(request, entry_id):
 
     # pdf = get_pdf(entry.input)
     # data['pdf'] = pdf.get_flot_script()
-
+    data["jsmol_serverURL"] = os.environ.get("JSMOL_serverURL")
     data.update(csrf(request))
     return render_to_response("materials/entry.html", data, RequestContext(request))
 
@@ -90,6 +89,7 @@ def duplicate_view(request, entry_id):
     data = get_globals()
     data["entries"] = entries
     data["entry"] = Entry.objects.get(pk=entry_id)
+    data["jsmol_serverURL"] = os.environ.get("JSMOL_serverURL")
     return render_to_response(
         "materials/duplicates.html", data, RequestContext(request)
     )
