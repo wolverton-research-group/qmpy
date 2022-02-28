@@ -1,6 +1,6 @@
 ase
 bokeh == 0.12.15
-Django == 2.2.24
+Django < 2.3
 django-crispy-forms
 django-extensions > 2.2.5
 django-filter == 21.1

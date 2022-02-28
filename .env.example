@@ -48,9 +48,8 @@ OQMD_WEB_debug=False
 #     These values should match the host:port values provided in server hosting command
 #     Eg: 
 #         A server hosted using "python manage.py runserver example.com:8888" should
-#         have OQMD_REST_host='example.com' and OQMD_REST_port='8888'
-OQMD_REST_host=0.0.0.0
-OQMD_REST_port=8000
+#         have OQMD_REST_baseURL='http://example.com:8888'
+OQMD_REST_baseURL="http://127.0.0.1:8000"
 
 
 # Static file storage-related variables

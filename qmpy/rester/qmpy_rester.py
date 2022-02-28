@@ -1,11 +1,11 @@
 import json
 import os
+from urllib.parse import urljoin
 
-REST_WEBHOST = os.environ.get("OQMD_REST_host")
-REST_WEBPORT = os.environ.get("OQMD_REST_port")
+REST_baseURL = os.environ.get("OQMD_REST_baseURL")
 
-REST_OPTIMADE = "http://{}:{}/optimade".format(REST_WEBHOST,REST_WEBPORT)
-REST_OQMDAPI  = "http://{}:{}/oqmdapi".format(REST_WEBHOST,REST_WEBPORT)
+REST_OPTIMADE = urljoin(REST_baseURL, "optimade")
+REST_OQMDAPI  = urljoin(REST_baseURL, "oqmdapi")
 
 REST_END_POINT = REST_OQMDAPI
 
