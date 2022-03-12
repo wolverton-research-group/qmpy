@@ -1,5 +1,5 @@
 ase
-bokeh == 0.12.15
+bokeh
 Django < 2.3
 django-crispy-forms
 django-extensions > 2.2.5
