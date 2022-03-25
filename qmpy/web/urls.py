@@ -138,3 +138,7 @@ if os.environ.get("OQMD_WEB_debug").lower() == "true":
         # other
         url(r"^playground", views.play_view),
     ]
+else:
+    urlpatterns += [
+        url(r"^robots.txt", views.robots_view),
+    ]
