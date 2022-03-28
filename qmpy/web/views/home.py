@@ -31,13 +31,11 @@ def play_view(request):
 def robots_view(request):
     lines = [
         "User-agent: Googlebot",
-        "Disallow:",
-        "\n",
         "User-agent: Bingbot",
-        "Disallow:",
-        "\n",
         "User-agent: DuckDuckBot",
-        "Disallow:",
+        "Disallow: /optimade/structures*",
+        "Disallow: /oqmdapi/*",
+        "Disallow: /api/search*",
         "\n",
         "User-agent: *",
         "Disallow: /",

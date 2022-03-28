@@ -13,17 +13,22 @@ def element_set_conversion(filter_expr):
                 '~': NOT operator
                 '(', ')': to change precedence
             Examples:
-                element_set=Al;O,H
-                element_set=(Mn;Fe),O
+                element_set=Al,O,H
+                element_set=(Mn,Fe),O
     Output:
         :str : converted filter expression
     """
     filter_expr_out = filter_expr
 
     for els in re.findall("element_set=[\S]*", filter_expr):
-        els_out = els.replace("element_set=", "")
-        for el in re.findall("[A-Z][a-z]*", els):
-            els_out = els_out.replace(el, ' element="' + el + '" ')
+        els_out = ""
+        for e in re.split("(\W+)", els.replace("element_set=", "")):
+            if len(e) == 0:
+                continue
+            elif e[0].isupper():
+                els_out += 'element="' + e + '"'
+            else:
+                els_out += e
         els_out = els_out.replace(",", " AND ")
         els_out = els_out.replace("-", " OR ")
 

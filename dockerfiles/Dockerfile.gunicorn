@@ -33,4 +33,4 @@ ADD ./ /qmpy
 ENV QMPY_ENV_FILEPATH=/qmpy/dockerfiles/.env.wsgi
 RUN chown -R www-data:www-data /qmpy
 # Running a wsgi server with gunicorn
-CMD gunicorn qmpy.db.wsgi --user www-data --bind 0.0.0.0:8000
+CMD gunicorn qmpy.db.wsgi --user www-data --bind 0.0.0.0:8000 --access-logfile '-' --error-logfile '-'
