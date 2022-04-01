@@ -23,7 +23,8 @@ pyparsing
 pytest
 python-dotenv
 python-memcached
-PyYAML 
+PyYAML
+redis 
 requests
 scipy
 spglib > 1.10

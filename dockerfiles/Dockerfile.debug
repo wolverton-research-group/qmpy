@@ -39,4 +39,4 @@ RUN make html
 WORKDIR /qmpy/qmpy/db
 
 # Running a Django DBEUG server without wsgi. So it is definitely not for the public server
-CMD python manage.py makemigrations auth qmpy contenttypes sites; python manage.py migrate; python manage.py runserver 0.0.0.0:$OQMD_REST_port
+CMD python manage.py makemigrations auth qmpy contenttypes sites; python manage.py migrate; python manage.py runserver 0.0.0.0:8000

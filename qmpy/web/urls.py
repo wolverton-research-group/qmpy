@@ -64,7 +64,7 @@ urlpatterns += [
     url(r"^analysis/spacegroup/(?P<spacegroup>.*)$", views.sg_view),
     url(r"^analysis/operation/(?P<operation>.*)$", views.op_view),
     url(r"^analysis/visualize$", views.vis_data),
-    url(r"^analysis/visualize/custom$", views.jsmol),
+    url(r"^analysis/visualize/custom/(?P<data_key>.*)$", views.jsmol_custom),
     ## documentation
     url(r"^documentation/$", views.docs_view),
     url(r"^documentation/vasp$", views.vasp_docs),

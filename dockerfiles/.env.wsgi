@@ -82,7 +82,7 @@ OQMD_USE_CDN=False
 OQMD_DJANGO_secretkey='48o2)h#gwow!iyg&__4d%zkv8v&h=n!sv)0rvj$*1yj8tw0riu'
 
 # URL of the PHP server to do CORS operations for JSMOL.
-# More details: 
+# More details:
 #        https://wiki.jmol.org/index.php/Jmol_JavaScript_Object/Info
 #
 # According to the official docs, if you can't host a php server,
@@ -90,3 +90,24 @@ OQMD_DJANGO_secretkey='48o2)h#gwow!iyg&__4d%zkv8v&h=n!sv)0rvj$*1yj8tw0riu'
 #        https://chemapps.stolaf.edu/jmol/jsmol/php/jsmol.php
 
 JSMOL_serverURL='/static/js/jsmol/php/jsmol.php'
+
+
+
+# Redis cache server - optional
+# _____________________________
+# Currently (as of March, 2022), Redis is used in OQMD only for 
+# storing data to do custom structure visualization. 
+# Leave this section commented - just like this, if you don't 
+# have a redis server running.
+#
+# If you wanna use Redis with qmpy,
+# first install and start a redis server in your machine:
+#         https://redis.io/docs/getting-started/
+# Now install redis's python handler in qmpy's python environment:
+#         pip install redis
+
+# Once the redis dependency is installed and the server is running,
+# uncomment the lines below and set the correct Redis server host and port
+
+#REDIS_SERVER_HOST=127.0.0.1
+#REDIS_SERVER_PORT=6379
