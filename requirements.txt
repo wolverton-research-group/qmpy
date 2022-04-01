@@ -15,7 +15,6 @@ mysqlclient
 networkx
 numpy
 pexpect
-pre-commit
 PuLP
 PyCifRW >= 4.3
 pygraphviz
@@ -25,6 +24,5 @@ python-dotenv
 python-memcached
 PyYAML 
 requests
-scikit-learn
 scipy
 spglib > 1.10
