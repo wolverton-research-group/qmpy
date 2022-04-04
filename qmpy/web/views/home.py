@@ -36,6 +36,8 @@ def robots_view(request):
         "Disallow: /optimade/structures*",
         "Disallow: /oqmdapi/*",
         "Disallow: /api/search*",
+        "Disallow: /materials/export*",
+        "Disallow: /analysis/visualize/custom*",
         "\n",
         "User-agent: *",
         "Disallow: /",
