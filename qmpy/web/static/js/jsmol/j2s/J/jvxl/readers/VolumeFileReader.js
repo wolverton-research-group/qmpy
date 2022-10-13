@@ -103,7 +103,6 @@ JU.Logger.info ("downsampling axis " + (i + 1) + " from " + n + " to " + this.vo
 }if (!this.vertexDataOnly) for (var i = 0; i < 3; ++i) {
 if (!this.isAngstroms) this.volumetricVectors[i].scale (0.5291772);
 this.line = this.voxelCounts[i] + " " + this.volumetricVectors[i].x + " " + this.volumetricVectors[i].y + " " + this.volumetricVectors[i].z;
-this.jvxlFileHeaderBuffer.append (this.line).appendC ('\n');
 JU.Logger.info ("voxel grid count/vector:" + this.line);
 }
 this.scaleIsosurface (this.params.scale);

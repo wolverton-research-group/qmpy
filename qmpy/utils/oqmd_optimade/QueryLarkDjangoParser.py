@@ -496,6 +496,14 @@ class Lark2Django(Transformer):
         try:
             a = self.property_dict[_property]
         except:
+            if _property.startswith("_") and not _property.startswith("_oqmd_"):
+                error_message = "Cannot resolve the property name."
+                error_message += (
+                    "This particular query field is considered as unknown and ignored."
+                )
+                error_message += "A dummy query (id=-1) to return None is executed"
+                self.handle_error("T4", error_message, _property, raise_error=False)
+                return self.eq(self.property_dict["id"], -1)
             self.handle_error("T1", "Cannot resolve the property name", _property)
             return
 

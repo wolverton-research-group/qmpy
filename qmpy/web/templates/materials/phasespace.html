@@ -1,6 +1,7 @@
 {% extends "base_site.html" %}
 {% load static %}
 {% load i18n %}
+{% load custom_filters %}
 
 {% block title %}{{ search }}{% endblock %}
 
@@ -9,6 +10,7 @@
 {% endblock %}
 
 {% block extrascript %}
+<script src={% static "js/jquery.flot.compressed_all.js" %}></script>
 <script language="javascript" type="text/javascript">
   $(function() {
       {{ plot | safe }}
@@ -16,8 +18,11 @@
     </script>
     
 {% if pd3d %}
-<script type="text/javascript" src="https://cdn.plot.ly/plotly-1.49.4.min.js">
-</script>
+{% if use_cdn|USE_CDN %}
+    <script type="text/javascript" src="https://cdn.plot.ly/plotly-2.8.3.min.js"></script>
+{% else %}
+    <script language="javascript" type="text/javascript" src={% static "js/plotly-v1.49.4.min.js" %}></script>
+{% endif %}
 <script language="javascript" type="text/javascript">
 $(function() {
     {{ pd3d | safe }}

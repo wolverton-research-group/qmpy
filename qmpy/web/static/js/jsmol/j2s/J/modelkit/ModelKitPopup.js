@@ -1,6 +1,8 @@
 Clazz.declarePackage ("J.modelkit");
-Clazz.load (["J.popup.JmolGenericPopup", "java.util.Hashtable", "JU.BS", "$.P3", "J.i18n.GT", "J.modelkit.ModelKitPopupResourceBundle"], "J.modelkit.ModelKitPopup", ["java.lang.Boolean", "$.Float", "JU.PT", "$.SB", "$.V3", "JM.Atom", "JU.BSUtil", "$.Edge", "$.Elements", "$.Logger"], function () {
+Clazz.load (["J.popup.JmolGenericPopup", "java.util.Hashtable", "JU.BS", "$.P3", "J.i18n.GT", "J.modelkit.ModelKitPopupResourceBundle"], "J.modelkit.ModelKitPopup", ["java.lang.Boolean", "$.Float", "JU.AU", "$.Lst", "$.PT", "$.SB", "$.V3", "JM.Atom", "JU.BSUtil", "$.Edge", "$.Elements", "$.Escape", "$.Logger"], function () {
 c$ = Clazz.decorateAsClass (function () {
+this.allowPopup = true;
+this.hidden = false;
 this.hasUnitCell = false;
 this.allOperators = null;
 this.currentModelIndex = -1;
@@ -11,6 +13,7 @@ this.xtalHoverLabel = null;
 this.activeMenu = null;
 this.lastModelSet = null;
 this.pickAtomAssignType = "C";
+this.lastElementType = "C";
 this.pickBondAssignType = "p";
 this.$isPickAtomAssignCharge = false;
 this.bsHighlight = null;
@@ -25,6 +28,7 @@ this.mkdata = null;
 this.showSymopInfo = true;
 this.addXtalHydrogens = true;
 this.clickToSetElement = true;
+this.autoBond = false;
 this.centerPoint = null;
 this.spherePoint = null;
 this.viewOffset = null;
@@ -36,16 +40,23 @@ this.atomIndexSphere = -1;
 this.drawData = null;
 this.drawScript = null;
 this.iatom0 = 0;
-this.state = 0;
-this.rotationDeg = 0;
+this.bondRotationCheckBox = null;
+this.prevBondCheckBox = null;
+this.bondRotationName = ".modelkitMenu.bondMenu.rotateBondP!RD";
 this.lastCenter = "0 0 0";
 this.lastOffset = "0 0 0";
+this.state = 0;
+this.rotationDeg = 0;
 Clazz.instantialize (this, arguments);
 }, J.modelkit, "ModelKitPopup", J.popup.JmolGenericPopup);
 Clazz.prepareFields (c$, function () {
 this.bsHighlight =  new JU.BS ();
 this.screenXY =  Clazz.newIntArray (2, 0);
 this.mkdata =  new java.util.Hashtable ();
+});
+Clazz.defineMethod (c$, "isHidden", 
+function () {
+return this.hidden;
 });
 Clazz.makeConstructor (c$, 
 function () {
@@ -72,41 +83,36 @@ this.hasUnitCell = (this.vwr.getCurrentUnitCell () != null);
 this.symop = null;
 this.setDefaultState (this.hasUnitCell ? 1 : 0);
 });
+Clazz.defineMethod (c$, "jpiShow", 
+function (x, y) {
+if (!this.hidden && this.allowPopup) Clazz.superCall (this, J.modelkit.ModelKitPopup, "jpiShow", [x, y]);
+}, "~N,~N");
 Clazz.overrideMethod (c$, "jpiUpdateComputedMenus", 
 function () {
 this.hasUnitCell = (this.vwr.getCurrentUnitCell () != null);
-if (!this.checkUpdateSymmetryInfo ()) this.updateAllXtalMenus ();
-});
-Clazz.overrideMethod (c$, "appUpdateForShow", 
-function () {
-this.updateAllXtalMenuOptions ();
-});
-Clazz.defineMethod (c$, "checkUpdateSymmetryInfo", 
- function () {
 this.htMenus.get ("xtalMenu").setEnabled (this.hasUnitCell);
 var isOK = true;
 if (this.vwr.ms !== this.lastModelSet) {
 this.lastModelSet = this.vwr.ms;
 isOK = false;
-} else if (this.currentModelIndex == -1 || this.currentModelIndex != this.vwr.am.cmi) {
-isOK = false;
 }this.currentModelIndex = Math.max (this.vwr.am.cmi, 0);
 this.iatom0 = this.vwr.ms.am[this.currentModelIndex].firstAtomIndex;
 if (!isOK) {
 this.allOperators = null;
-}return isOK;
-});
-Clazz.defineMethod (c$, "updateAllXtalMenus", 
- function () {
 this.updateOperatorMenu ();
-this.updateAllXtalMenuOptions ();
+}this.updateAllXtalMenuOptions ();
+});
+Clazz.overrideMethod (c$, "appUpdateForShow", 
+function () {
+this.jpiUpdateComputedMenus ();
 });
 Clazz.defineMethod (c$, "updateOperatorMenu", 
- function () {
+function () {
 if (this.allOperators != null) return;
 var data = this.runScriptBuffered ("show symop");
 this.allOperators = JU.PT.split (data.trim ().$replace ('\t', ' '), "\n");
-this.addAllCheckboxItems (this.htMenus.get ("xtalOp!PersistMenu"), this.allOperators);
+var menu = this.htMenus.get ("xtalOp!PersistMenu");
+if (menu != null) this.addAllCheckboxItems (menu, this.allOperators);
 });
 Clazz.defineMethod (c$, "addAllCheckboxItems", 
  function (menu, labels) {
@@ -126,7 +132,7 @@ this.menuEnable (this.menuCreateItem (subMenu, sym, sym, subMenu.getName () + ".
 }
 }, "J.api.SC,~A");
 Clazz.defineMethod (c$, "updateAllXtalMenuOptions", 
- function () {
+function () {
 var text = "";
 switch (this.getMKState ()) {
 case 0:
@@ -184,18 +190,27 @@ if (active != null) {
 this.activeMenu = active;
 if ((active === "xtalMenu") == (this.getMKState () == 0)) this.setMKState (active === "xtalMenu" ? 1 : 0);
 this.vwr.refresh (1, "modelkit");
+if (active === "bondMenu" && this.prevBondCheckBox == null) this.prevBondCheckBox = this.htMenus.get ("assignBond_pP!RD");
 }return active;
 }, "~S");
 Clazz.overrideMethod (c$, "appUpdateSpecialCheckBoxValue", 
 function (source, actionCommand, selected) {
+if (!selected) return;
 var name = source.getName ();
 if (!this.updatingForShow && this.setActiveMenu (name) != null) {
+this.exitBondRotation ();
 var text = source.getText ();
-if (name.indexOf ("Bond") >= 0) {
+if (this.activeMenu === "bondMenu") {
 this.bondHoverLabel = text;
-} else if (name.indexOf ("assignAtom") >= 0) this.atomHoverLabel = text;
- else if (this.activeMenu === "xtalMenu") this.xtalHoverLabel = this.atomHoverLabel = text;
-}}, "J.api.SC,~S,~B");
+if (name.equals (this.bondRotationName)) {
+this.bondRotationCheckBox = source;
+} else {
+this.prevBondCheckBox = source;
+}} else if (this.activeMenu === "atomMenu") {
+this.atomHoverLabel = text;
+} else if (this.activeMenu === "xtalMenu") {
+this.xtalHoverLabel = this.atomHoverLabel = text;
+}}}, "J.api.SC,~S,~B");
 Clazz.defineMethod (c$, "isXtalState", 
  function () {
 return ((this.state & 3) != 0);
@@ -244,9 +259,25 @@ return this.setProperty (key, value);
 }, "~O");
 Clazz.defineMethod (c$, "setProperty", 
 function (name, value) {
+try {
 name = name.toLowerCase ().intern ();
-if (name === "isMolecular") {
+if (name === "addhydrogen" || name === "addhydrogens") {
+if (value != null) this.addXtalHydrogens = J.modelkit.ModelKitPopup.isTrue (value);
+return Boolean.$valueOf (this.addXtalHydrogens);
+}if (name === "autobond") {
+if (value != null) this.autoBond = J.modelkit.ModelKitPopup.isTrue (value);
+return Boolean.$valueOf (this.autoBond);
+}if (name === "clicktosetelement") {
+if (value != null) this.clickToSetElement = J.modelkit.ModelKitPopup.isTrue (value);
+return Boolean.$valueOf (this.clickToSetElement);
+}if (name === "hidden") {
+if (value != null) this.hidden = J.modelkit.ModelKitPopup.isTrue (value);
+return Boolean.$valueOf (this.hidden);
+}if (name === "ismolecular") {
 return Boolean.$valueOf (this.getMKState () == 0);
+}if (name === "showsymopinfo") {
+if (value != null) this.showSymopInfo = J.modelkit.ModelKitPopup.isTrue (value);
+return Boolean.$valueOf (this.showSymopInfo);
 }if (name === "hoverlabel") {
 return this.getHoverLabel ((value).intValue ());
 }if (name === "alloperators") {
@@ -257,67 +288,20 @@ return this.getData (value == null ? null : value.toString ());
 var iatom = (Clazz.instanceOf (value, JU.BS) ? (value).nextSetBit (0) : -1);
 var atom = this.vwr.ms.getAtom (iatom);
 if (atom == null) return null;
-return this.vwr.getSymmetryInfo (iatom, null, -1, atom, atom, 1275068418, null, 0, 0, 0);
-}if (name === "assignatom") {
-var o = (value);
-var type = o[0];
-var data = o[1];
-var atomIndex = data[0];
-if (this.isVwrRotateBond ()) {
-this.bondAtomIndex1 = atomIndex;
-} else if (!this.processAtomClick (data[0]) && (this.clickToSetElement || this.vwr.ms.getAtom (atomIndex).getElementNumber () == 1)) this.assignAtom (atomIndex, type, data[1] >= 0, data[2] >= 0);
-return null;
-}if (name === "bondatomindex") {
-var i = (value).intValue ();
-if (i != this.bondAtomIndex2) this.bondAtomIndex1 = i;
-this.bsRotateBranch = null;
-return null;
-}if (name === "highlight") {
-if (value == null) this.bsHighlight =  new JU.BS ();
- else this.bsHighlight = value;
-return null;
-}if (name === "mode") {
-var isEdit = ("edit".equals (value));
-this.setMKState ("view".equals (value) ? 1 : isEdit ? 2 : 0);
-if (isEdit) this.addXtalHydrogens = false;
-return null;
-}if (name === "symmetry") {
-this.setDefaultState (2);
-name = (value).toLowerCase ().intern ();
-this.setSymEdit (name === "applylocal" ? 32 : name === "retainlocal" ? 64 : name === "applyfull" ? 128 : 0);
-this.showXtalSymmetry ();
-return null;
-}if (name === "unitcell") {
-var isPacked = "packed".equals (value);
-this.setUnitCell (isPacked ? 0 : 256);
-this.viewOffset = (isPacked ? J.modelkit.ModelKitPopup.Pt000 : null);
-return null;
+return this.vwr.getSymmetryInfo (iatom, null, -1, null, atom, atom, 1275068418, null, 0, 0, 0);
 }if (name === "symop") {
 this.setDefaultState (1);
 if (value != null) {
 this.symop = value;
 this.showSymop (this.symop);
 }return this.symop;
-}if (name === "center") {
-this.setDefaultState (1);
-var centerAtom = value;
-this.lastCenter = centerAtom.x + " " + centerAtom.y + " " + centerAtom.z;
-this.centerAtomIndex = (Clazz.instanceOf (centerAtom, JM.Atom) ? (centerAtom).i : -1);
-this.atomIndexSphere = -1;
-this.secondAtomIndex = -1;
-this.processAtomClick (this.centerAtomIndex);
-return null;
-}if (name === "scriptassignbond") {
-this.appRunScript ("assign bond [{" + value + "}] \"" + this.pickBondAssignType + "\"");
-return null;
-}if (name === "assignbond") {
-var data = value;
-return this.assignBond (data[0], data[1]);
 }if (name === "atomtype") {
 if (value != null) {
 this.pickAtomAssignType = value;
 this.$isPickAtomAssignCharge = (this.pickAtomAssignType.equals ("pl") || this.pickAtomAssignType.equals ("mi"));
-}return this.pickAtomAssignType;
+if (!this.$isPickAtomAssignCharge && !"X".equals (this.pickAtomAssignType)) {
+this.lastElementType = this.pickAtomAssignType;
+}}return this.pickAtomAssignType;
 }if (name === "bondtype") {
 if (value != null) {
 this.pickBondAssignType = (value).substring (0, 1).toLowerCase ();
@@ -330,15 +314,6 @@ this.setBondIndex ((value).intValue (), false);
 if (value != null) {
 this.setBondIndex ((value).intValue (), true);
 }return (this.bondIndex < 0 ? null : Integer.$valueOf (this.bondIndex));
-}if (name === "addhydrogen" || name === "addhydrogens") {
-if (value != null) this.addXtalHydrogens = J.modelkit.ModelKitPopup.isTrue (value);
-return Boolean.$valueOf (this.addXtalHydrogens);
-}if (name === "clicktosetelement") {
-if (value != null) this.clickToSetElement = J.modelkit.ModelKitPopup.isTrue (value);
-return Boolean.$valueOf (this.clickToSetElement);
-}if (name === "showsymopinfo") {
-if (value != null) this.showSymopInfo = J.modelkit.ModelKitPopup.isTrue (value);
-return Boolean.$valueOf (this.showSymopInfo);
 }if (name === "offset") {
 if (value === "none") {
 this.viewOffset = null;
@@ -365,6 +340,43 @@ this.atomIndexSphere = (Clazz.instanceOf (this.spherePoint, JM.Atom) ? (this.sph
 if (value != null) {
 this.screenXY = value;
 }return this.screenXY;
+}if (name === "bondatomindex") {
+var i = (value).intValue ();
+if (i != this.bondAtomIndex2) this.bondAtomIndex1 = i;
+this.bsRotateBranch = null;
+return null;
+}if (name === "highlight") {
+if (value == null) this.bsHighlight =  new JU.BS ();
+ else this.bsHighlight = value;
+return null;
+}if (name === "mode") {
+var isEdit = ("edit".equals (value));
+this.setMKState ("view".equals (value) ? 1 : isEdit ? 2 : 0);
+if (isEdit) this.addXtalHydrogens = false;
+return null;
+}if (name === "symmetry") {
+this.setDefaultState (2);
+name = (value).toLowerCase ().intern ();
+this.setSymEdit (name === "applylocal" ? 32 : name === "retainlocal" ? 64 : name === "applyfull" ? 128 : 0);
+this.showXtalSymmetry ();
+return null;
+}if (name === "unitcell") {
+var isPacked = "packed".equals (value);
+this.setUnitCell (isPacked ? 0 : 256);
+this.viewOffset = (isPacked ? J.modelkit.ModelKitPopup.Pt000 : null);
+return null;
+}if (name === "center") {
+this.setDefaultState (1);
+this.centerPoint = value;
+this.lastCenter = this.centerPoint.x + " " + this.centerPoint.y + " " + this.centerPoint.z;
+this.centerAtomIndex = (Clazz.instanceOf (this.centerPoint, JM.Atom) ? (this.centerPoint).i : -1);
+this.atomIndexSphere = -1;
+this.secondAtomIndex = -1;
+this.processAtomClick (this.centerAtomIndex);
+return null;
+}if (name === "scriptassignbond") {
+this.appRunScript ("modelkit assign bond [{" + value + "}] \"" + this.pickBondAssignType + "\"");
+return null;
 }if (name === "addconstraint") {
 J.modelkit.ModelKitPopup.notImplemented ("setProperty: addConstraint");
 }if (name === "removeconstraint") {
@@ -372,6 +384,13 @@ J.modelkit.ModelKitPopup.notImplemented ("setProperty: removeConstraint");
 }if (name === "removeallconstraints") {
 J.modelkit.ModelKitPopup.notImplemented ("setProperty: removeAllConstraints");
 }System.err.println ("ModelKitPopup.setProperty? " + name + " " + value);
+} catch (e) {
+if (Clazz.exceptionOf (e, Exception)) {
+return "?";
+} else {
+throw e;
+}
+}
 return null;
 }, "~S,~O");
 c$.isTrue = Clazz.defineMethod (c$, "isTrue", 
@@ -380,6 +399,11 @@ return (Boolean.$valueOf (value.toString ()) === Boolean.TRUE);
 }, "~O");
 Clazz.defineMethod (c$, "getData", 
  function (key) {
+this.addData ("addHydrogens", Boolean.$valueOf (this.addXtalHydrogens));
+this.addData ("autobond", Boolean.$valueOf (this.autoBond));
+this.addData ("clickToSetElement", Boolean.$valueOf (this.clickToSetElement));
+this.addData ("hidden", Boolean.$valueOf (this.hidden));
+this.addData ("showSymopInfo", Boolean.$valueOf (this.showSymopInfo));
 this.addData ("centerPoint", this.centerPoint);
 this.addData ("centerAtomIndex", Integer.$valueOf (this.centerAtomIndex));
 this.addData ("secondAtomIndex", Integer.$valueOf (this.secondAtomIndex));
@@ -387,6 +411,7 @@ this.addData ("symop", this.symop);
 this.addData ("offset", this.viewOffset);
 this.addData ("drawData", this.drawData);
 this.addData ("drawScript", this.drawScript);
+this.addData ("isMolecular", Boolean.$valueOf (this.getMKState () == 0));
 return this.mkdata;
 }, "~S");
 Clazz.defineMethod (c$, "addData", 
@@ -414,9 +439,7 @@ return false;
 Clazz.defineMethod (c$, "getHoverLabel", 
  function (atomIndex) {
 var state = this.getMKState ();
-if (state != 1 && atomIndex >= 0 && !this.vwr.ms.isAtomInLastModel (atomIndex)) {
-return "Only atoms in the last model may be edited.";
-}var msg = null;
+var msg = null;
 switch (state) {
 case 1:
 if (this.symop == null) this.symop = Integer.$valueOf (1);
@@ -447,8 +470,14 @@ switch (this.bsHighlight.cardinality ()) {
 case 0:
 this.vwr.highlight (JU.BSUtil.newAndSetBit (atomIndex));
 case 1:
+if (!this.isRotateBond) this.setActiveMenu ("atomMenu");
+if (this.atomHoverLabel.indexOf ("charge") >= 0) {
+var ch = this.vwr.ms.at[atomIndex].getFormalCharge ();
+ch += (this.atomHoverLabel.indexOf ("increase") >= 0 ? 1 : -1);
+msg = this.atomHoverLabel + " to " + (ch > 0 ? "+" : "") + ch;
+} else {
 msg = this.atomHoverLabel;
-break;
+}break;
 case 2:
 msg = this.bondHoverLabel;
 break;
@@ -524,27 +553,34 @@ break;
 }
 });
 Clazz.defineMethod (c$, "assignAtom", 
- function (atomIndex, type, autoBond, addHsAndBond) {
+ function (atomIndex, type, autoBond, addHsAndBond, isClick) {
+if (isClick) {
+if (this.isVwrRotateBond ()) {
+this.bondAtomIndex1 = atomIndex;
+return;
+}if (this.processAtomClick (atomIndex) || !this.clickToSetElement && this.vwr.ms.getAtom (atomIndex).getElementNumber () != 1) return;
+}var atom = this.vwr.ms.at[atomIndex];
+if (atom == null) return;
 this.vwr.ms.clearDB (atomIndex);
 if (type == null) type = "C";
-var atom = this.vwr.ms.at[atomIndex];
 var bs =  new JU.BS ();
 var wasH = (atom.getElementNumber () == 1);
 var atomicNumber = (JU.PT.isUpperCase (type.charAt (0)) ? JU.Elements.elementNumberFromSymbol (type, true) : -1);
 var isDelete = false;
 if (atomicNumber > 0) {
-this.vwr.ms.setElement (atom, atomicNumber, !addHsAndBond);
+var doTaint = (atomicNumber > 1 || !addHsAndBond);
+this.vwr.ms.setElement (atom, atomicNumber, doTaint);
 this.vwr.shm.setShapeSizeBs (0, 0, this.vwr.rd, JU.BSUtil.newAndSetBit (atomIndex));
-this.vwr.ms.setAtomName (atomIndex, type + atom.getAtomNumber (), !addHsAndBond);
+this.vwr.ms.setAtomName (atomIndex, type + atom.getAtomNumber (), doTaint);
 if (this.vwr.getBoolean (603983903)) this.vwr.ms.am[atom.mi].isModelKit = true;
-if (!this.vwr.ms.am[atom.mi].isModelKit) this.vwr.ms.taintAtom (atomIndex, 0);
+if (!this.vwr.ms.am[atom.mi].isModelKit || atomicNumber > 1) this.vwr.ms.taintAtom (atomIndex, 0);
 } else if (type.toLowerCase ().equals ("pl")) {
 atom.setFormalCharge (atom.getFormalCharge () + 1);
 } else if (type.toLowerCase ().equals ("mi")) {
 atom.setFormalCharge (atom.getFormalCharge () - 1);
 } else if (type.equals ("X")) {
 isDelete = true;
-} else if (!type.equals (".")) {
+} else if (!type.equals (".") || !this.addXtalHydrogens) {
 return;
 }if (!addHsAndBond) return;
 this.vwr.ms.removeUnnecessaryBonds (atom, isDelete);
@@ -570,11 +606,11 @@ if (bs.nextSetBit (0) >= 0) this.vwr.deleteAtoms (bs, false);
 bs = this.vwr.getModelUndeletedAtomsBitSet (atom.mi);
 bs.andNot (this.vwr.ms.getAtomBitsMDa (1612709900, null,  new JU.BS ()));
 this.vwr.ms.makeConnections2 (0.1, 1.8, 1, 1073741904, bsA, bs, null, false, false, 0);
-}if (this.addXtalHydrogens) this.vwr.addHydrogens (bsA, false, true);
-}, "~N,~S,~B,~B");
+}if (this.addXtalHydrogens) this.vwr.addHydrogens (bsA, 1);
+}, "~N,~S,~B,~B,~B");
 Clazz.defineMethod (c$, "assignBond", 
  function (bondIndex, type) {
-var bondOrder = type - 48;
+var bondOrder = type.charCodeAt (0) - 48;
 var bond = this.vwr.ms.bo[bondIndex];
 this.vwr.ms.clearDB (bond.atom1.i);
 switch (type) {
@@ -587,7 +623,7 @@ case '5':
 break;
 case 'p':
 case 'm':
-bondOrder = JU.Edge.getBondOrderNumberFromOrder (bond.getCovalentOrder ()).charCodeAt (0) - 48 + (type == 112 ? 1 : -1);
+bondOrder = JU.Edge.getBondOrderNumberFromOrder (bond.getCovalentOrder ()).charCodeAt (0) - 48 + (type == 'p' ? 1 : -1);
 if (bondOrder > 3) bondOrder = 1;
  else if (bondOrder < 0) bondOrder = 3;
 break;
@@ -616,9 +652,9 @@ JU.Logger.error ("Exception in seBondOrder: " + e.toString ());
 throw e;
 }
 }
-if (type != 48 && this.addXtalHydrogens) this.vwr.addHydrogens (bsAtoms, false, true);
+if (type != '0' && this.addXtalHydrogens) this.vwr.addHydrogens (bsAtoms, 1);
 return bsAtoms;
-}, "~N,~N");
+}, "~N,~S");
 Clazz.defineMethod (c$, "isVwrRotateBond", 
  function () {
 return (this.vwr.acm.getBondPickingMode () == 34);
@@ -689,8 +725,18 @@ this.vwr.rotateAboutPointsInternal (null, atomFix, atomMove, 0, degrees, false, 
 }, "~N,~N,~N,~N,~B");
 Clazz.overrideMethod (c$, "menuFocusCallback", 
 function (name, actionCommand, gained) {
-if (gained && !this.processSymop (name, true)) this.setActiveMenu (name);
+if (gained && !this.processSymop (name, true)) {
+this.setActiveMenu (name);
+}this.exitBondRotation ();
 }, "~S,~S,~B");
+Clazz.defineMethod (c$, "exitBondRotation", 
+function () {
+System.out.println ("MKP exitBondRotation");
+this.isRotateBond = false;
+this.vwr.highlight (null);
+if (this.prevBondCheckBox != null) this.bondHoverLabel = this.prevBondCheckBox.getText ();
+this.vwr.setPickingMode (null, 33);
+});
 Clazz.overrideMethod (c$, "menuClickCallback", 
 function (source, script) {
 this.doMenuClickCallbackMK (source, script);
@@ -850,7 +896,6 @@ Clazz.defineMethod (c$, "runScriptBuffered",
  function (script) {
 var sb =  new JU.SB ();
 try {
-System.out.println ("MKP\n" + script);
 (this.vwr.eval).runBufferedSafely (script, sb);
 } catch (e) {
 if (Clazz.exceptionOf (e, Exception)) {
@@ -872,12 +917,15 @@ var isCharge = this.$isPickAtomAssignCharge;
 var atomType = this.pickAtomAssignType;
 if (mp.count == 2) {
 this.vwr.undoMoveActionClear (-1, 4146, true);
-this.appRunScript ("assign connect " + mp.getMeasurementScript (" ", false));
-} else if (atomType.equals ("Xx")) {
-return false;
+if ((mp.getAtom (1)).isBonded (mp.getAtom (2))) {
+this.appRunScript ("modelkit assign bond " + mp.getMeasurementScript (" ", false) + "'p'");
 } else {
-if (inRange) {
-var s = "assign atom ({" + dragAtomIndex + "}) \"" + atomType + "\"";
+this.appRunScript ("modelkit connect " + mp.getMeasurementScript (" ", false));
+}} else {
+if (atomType.equals ("Xx")) {
+atomType = this.lastElementType;
+}if (inRange) {
+var s = "modelkit assign atom ({" + dragAtomIndex + "}) \"" + atomType + "\" true";
 if (isCharge) {
 s += ";{atomindex=" + dragAtomIndex + "}.label='%C'; ";
 this.vwr.undoMoveActionClear (dragAtomIndex, 4, true);
@@ -888,7 +936,7 @@ this.vwr.undoMoveActionClear (-1, 4146, true);
 this.vwr.undoMoveActionClear (-1, 4146, true);
 var a = this.vwr.ms.at[dragAtomIndex];
 if (a.getElementNumber () == 1) {
-this.vwr.assignAtom (dragAtomIndex, "X", null);
+this.assignAtomClick (dragAtomIndex, "X", null);
 } else {
 var x = dragged.x;
 var y = dragged.y;
@@ -897,13 +945,118 @@ x <<= 1;
 y <<= 1;
 }var ptNew = JU.P3.new3 (x, y, a.sZ);
 this.vwr.tm.unTransformPoint (ptNew, ptNew);
-this.vwr.assignAtom (dragAtomIndex, atomType, ptNew);
+this.assignAtomClick (dragAtomIndex, atomType, ptNew);
 }}}return true;
 }, "JV.MouseState,JV.MouseState,JM.MeasurementPending,~N");
-Clazz.defineStatics (c$,
-"MAX_LABEL", 32);
+Clazz.defineMethod (c$, "cmdAssignAtom", 
+function (atomIndex, pt, type, cmd, isClick) {
+if (isClick && type.equals ("X")) this.vwr.setModelKitRotateBondIndex (-1);
+var ac = this.vwr.ms.ac;
+var atom = (atomIndex < 0 ? null : this.vwr.ms.at[atomIndex]);
+if (pt == null) {
+if (atomIndex < 0 || atom == null) return;
+var mi = atom.mi;
+this.vwr.sm.modifySend (atomIndex, mi, 1, cmd);
+this.assignAtom (atomIndex, type, this.autoBond, true, true);
+if (!JU.PT.isOneOf (type, ";Mi;Pl;X;")) this.vwr.ms.setAtomNamesAndNumbers (0, -ac, null);
+this.vwr.sm.modifySend (atomIndex, mi, -1, "OK");
+this.vwr.refresh (3, "assignAtom");
+return;
+}var bs = (atomIndex < 0 ?  new JU.BS () : JU.BSUtil.newAndSetBit (atomIndex));
+var pts =  Clazz.newArray (-1, [pt]);
+var vConnections =  new JU.Lst ();
+var modelIndex = -1;
+if (atom != null) {
+vConnections.addLast (atom);
+modelIndex = atom.mi;
+this.vwr.sm.modifySend (atomIndex, modelIndex, 3, cmd);
+}try {
+var pickingMode = this.vwr.acm.getAtomPickingMode ();
+var wasHidden = this.hidden;
+var isMK = this.vwr.getBoolean (603983903);
+if (!isMK) {
+this.allowPopup = false;
+this.vwr.setBooleanProperty ("modelkitmode", true);
+this.hidden = true;
+}bs = this.vwr.addHydrogensInline (bs, vConnections, pts);
+if (!isMK) {
+this.vwr.setBooleanProperty ("modelkitmode", false);
+this.hidden = wasHidden;
+this.allowPopup = true;
+this.vwr.acm.setPickingMode (pickingMode);
+this.menuHidePopup (this.popupMenu);
+}var atomIndex2 = bs.nextSetBit (0);
+this.assignAtom (atomIndex2, type, false, atomIndex >= 0, true);
+if (atomIndex >= 0) this.assignAtom (atomIndex, ".", false, true, isClick);
+atomIndex = atomIndex2;
+} catch (ex) {
+if (Clazz.exceptionOf (ex, Exception)) {
+} else {
+throw ex;
+}
+}
+this.vwr.ms.setAtomNamesAndNumbers (0, -ac, null);
+this.vwr.sm.modifySend (atomIndex, modelIndex, -3, "OK");
+}, "~N,JU.P3,~S,~S,~B");
+Clazz.defineMethod (c$, "cmdAssignBond", 
+function (bondIndex, type, cmd) {
+var modelIndex = -1;
+try {
+modelIndex = this.vwr.ms.bo[bondIndex].atom1.mi;
+var ac = this.vwr.ms.ac;
+this.vwr.sm.modifySend (bondIndex, modelIndex, 2, cmd);
+var bsAtoms = this.assignBond (bondIndex, type);
+this.vwr.ms.setAtomNamesAndNumbers (0, -ac, null);
+if (bsAtoms == null || type == '0') this.vwr.refresh (3, "setBondOrder");
+this.vwr.sm.modifySend (bondIndex, modelIndex, -2, "" + type);
+} catch (ex) {
+if (Clazz.exceptionOf (ex, Exception)) {
+JU.Logger.error ("assignBond failed");
+this.vwr.sm.modifySend (bondIndex, modelIndex, -2, "ERROR " + ex);
+} else {
+throw ex;
+}
+}
+}, "~N,~S,~S");
+Clazz.defineMethod (c$, "cmdAssignConnect", 
+function (index, index2, cmd) {
+var connections = JU.AU.newFloat2 (1);
+connections[0] =  Clazz.newFloatArray (-1, [index, index2]);
+var modelIndex = this.vwr.ms.at[index].mi;
+this.vwr.sm.modifySend (index, modelIndex, 2, cmd);
+this.vwr.ms.connect (connections);
+var ac = this.vwr.ms.ac;
+this.assignAtom (index, ".", true, true, false);
+this.assignAtom (index2, ".", true, true, false);
+this.vwr.ms.setAtomNamesAndNumbers (0, -ac, null);
+this.vwr.sm.modifySend (index, modelIndex, -2, "OK");
+this.vwr.refresh (3, "assignConnect");
+}, "~N,~N,~S");
+Clazz.defineMethod (c$, "assignAtomClick", 
+function (atomIndex, element, ptNew) {
+this.vwr.script ("modelkit assign atom ({" + atomIndex + "}) \"" + element + "\" " + (ptNew == null ? "" : JU.Escape.eP (ptNew)) + " true");
+}, "~N,~S,JU.P3");
+Clazz.defineMethod (c$, "appRunSpecialCheckBox", 
+function (item, basename, script, TF) {
+if (basename.indexOf ("assignAtom_Xx") == 0) {
+this.pickAtomAssignType = this.lastElementType;
+}return Clazz.superCall (this, J.modelkit.ModelKitPopup, "appRunSpecialCheckBox", [item, basename, script, TF]);
+}, "J.api.SC,~S,~S,~B");
+Clazz.defineMethod (c$, "getDefaultModel", 
+function () {
+return (this.addXtalHydrogens ? "5\n\nC 0 0 0\nH .63 .63 .63\nH -.63 -.63 .63\nH -.63 .63 -.63\nH .63 -.63 -.63" : "1\n\nC 0 0 0\n");
+});
 c$.bundle = c$.prototype.bundle =  new J.modelkit.ModelKitPopupResourceBundle (null, null);
 Clazz.defineStatics (c$,
+"MODE_OPTIONS", ";view;edit;molecular;",
+"SYMMETRY_OPTIONS", ";none;applylocal;retainlocal;applyfull;",
+"UNITCELL_OPTIONS", ";packed;extend;",
+"BOOLEAN_OPTIONS", ";autobond;hidden;showsymopinfo;clicktosetelement;addhydrogen;addhydrogens;",
+"SET_OPTIONS", ";element;",
+"MAX_LABEL", 32,
+"ATOM_MENU", "atomMenu",
+"BOND_MENU", "bondMenu",
+"XTAL_MENU", "xtalMenu",
 "STATE_BITS_XTAL", 0x03,
 "STATE_MOLECULAR", 0x00,
 "STATE_XTALVIEW", 0x01,
@@ -917,11 +1070,6 @@ Clazz.defineStatics (c$,
 "STATE_SYM_APPLYFULL", 0x80,
 "STATE_BITS_UNITCELL", 0x700,
 "STATE_UNITCELL_PACKED", 0x000,
-"STATE_UNITCELL_EXTEND", 0x100,
-"MODE_OPTIONS", ";view;edit;molecular;",
-"SYMMETRY_OPTIONS", ";none;applylocal;retainlocal;applyfull;",
-"UNITCELL_OPTIONS", ";packed;extend;",
-"BOOLEAN_OPTIONS", ";showsymopinfo;clicktosetelement;addhydrogen;addhydrogens;",
-"SET_OPTIONS", ";element;");
+"STATE_UNITCELL_EXTEND", 0x100);
 c$.Pt000 = c$.prototype.Pt000 =  new JU.P3 ();
 });

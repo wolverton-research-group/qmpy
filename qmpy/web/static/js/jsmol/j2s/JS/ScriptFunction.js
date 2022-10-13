@@ -15,6 +15,7 @@ this.aatoken = null;
 this.lineIndices = null;
 this.lineNumbers = null;
 this.script = null;
+this.isPrivate = false;
 Clazz.instantialize (this, arguments);
 }, JS, "ScriptFunction", null, J.api.JmolScriptFunction);
 Clazz.prepareFields (c$, function () {

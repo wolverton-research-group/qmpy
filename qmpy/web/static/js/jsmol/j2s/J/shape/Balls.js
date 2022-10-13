@@ -82,6 +82,7 @@ function () {
 var bsDeleted = this.vwr.slm.bsDeleted;
 for (var i = this.ac; --i >= 0; ) {
 var atom = this.atoms[i];
+if (atom == null) continue;
 atom.setClickable (0);
 if (bsDeleted != null && bsDeleted.get (i) || (atom.shapeVisibilityFlags & this.vf) == 0 || this.ms.isAtomHidden (i)) continue;
 atom.setClickable (this.vf);

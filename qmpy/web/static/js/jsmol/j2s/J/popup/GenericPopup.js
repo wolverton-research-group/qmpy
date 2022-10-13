@@ -45,14 +45,6 @@ this.popupMenu = this.helper.menuCreatePopup (title, applet);
 this.thisPopup = this.popupMenu;
 this.htMenus.put (title, this.popupMenu);
 this.addMenuItems ("", title, this.popupMenu, bundle);
-try {
-this.jpiUpdateComputedMenus ();
-} catch (e) {
-if (Clazz.exceptionOf (e, NullPointerException)) {
-} else {
-throw e;
-}
-}
 }, "~S,J.popup.PopupResource,~O,~B,~B,~B");
 Clazz.defineMethod (c$, "addMenuItems", 
 function (parentId, key, menu, popupResourceBundle) {
@@ -89,8 +81,7 @@ continue;
 if (item.indexOf ("more") < 0) this.helper.menuAddButtonGroup (null);
 var subMenu = this.menuNewSubMenu (label, id + "." + item);
 this.menuAddSubMenu (menu, subMenu);
-if (item.indexOf ("Computed") < 0) this.addMenuItems (id, item, subMenu, popupResourceBundle);
-this.appCheckSpecialMenu (item, subMenu, label);
+this.addMenu (id, item, subMenu, label, popupResourceBundle);
 newItem = subMenu;
 } else if (item.endsWith ("Checkbox") || (isCB = (item.endsWith ("CB") || item.endsWith ("RD")))) {
 script = popupResourceBundle.getStructure (item);
@@ -111,6 +102,11 @@ if (!this.allowSignedFeatures) this.menuEnable (newItem, false);
 }this.appCheckItem (item, newItem);
 }
 }, "~S,~S,J.api.SC,J.popup.PopupResource");
+Clazz.defineMethod (c$, "addMenu", 
+function (id, item, subMenu, label, popupResourceBundle) {
+if (item.indexOf ("Computed") < 0) this.addMenuItems (id, item, subMenu, popupResourceBundle);
+this.appCheckSpecialMenu (item, subMenu, label);
+}, "~S,~S,J.api.SC,~S,J.popup.PopupResource");
 Clazz.defineMethod (c$, "updateSignedAppletItems", 
 function () {
 for (var i = this.SignedOnly.size (); --i >= 0; ) this.menuEnable (this.SignedOnly.get (i), this.allowSignedFeatures);
@@ -147,6 +143,7 @@ return this.menuCreateItem (menuItem, entry, "", null);
 }, "J.api.SC,~S");
 Clazz.defineMethod (c$, "menuSetLabel", 
 function (m, entry) {
+if (m == null) return;
 m.setText (entry);
 this.isTainted = true;
 }, "J.api.SC,~S");

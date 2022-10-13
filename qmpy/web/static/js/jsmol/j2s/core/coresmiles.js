@@ -94,42 +94,53 @@ Clazz_declarePackage ("J.api");
 Clazz_declareInterface (J.api, "SmilesMatcherInterface");
 Clazz_declarePackage ("JS");
 Clazz_load (["J.api.SmilesMatcherInterface"], "JS.SmilesMatcher", ["JU.AU", "$.BS", "$.PT", "JS.InvalidSmilesException", "$.SmilesAtom", "$.SmilesBond", "$.SmilesGenerator", "$.SmilesParser", "$.SmilesSearch", "JU.BSUtil", "$.Elements", "$.Logger", "$.Node", "$.Point3fi"], function () {
-c$ = Clazz_declareType (JS, "SmilesMatcher", null, J.api.SmilesMatcherInterface);
+c$ = Clazz_decorateAsClass (function () {
+this.okMF = true;
+Clazz_instantialize (this, arguments);
+}, JS, "SmilesMatcher", null, J.api.SmilesMatcherInterface);
 Clazz_overrideMethod (c$, "getLastException", 
 function () {
-return JS.InvalidSmilesException.getLastError ();
+return (this.okMF == true ? JS.InvalidSmilesException.getLastError () : "MF_FAILED");
 });
 Clazz_overrideMethod (c$, "getMolecularFormula", 
 function (pattern, isSmarts) {
-JS.InvalidSmilesException.clear ();
+this.clearExceptions ();
 var search = JS.SmilesParser.newSearch ("/nostereo/" + pattern, isSmarts, true);
 search.createTopoMap (null);
 search.nodes = search.targetAtoms;
 return search.getMolecularFormula (!isSmarts, null, false);
 }, "~S,~B");
+Clazz_defineMethod (c$, "clearExceptions", 
+ function () {
+this.okMF = true;
+JS.InvalidSmilesException.clear ();
+});
 Clazz_overrideMethod (c$, "getSmiles", 
 function (atoms, ac, bsSelected, bioComment, flags) {
-JS.InvalidSmilesException.clear ();
+this.clearExceptions ();
 return ( new JS.SmilesGenerator ()).getSmiles (this, atoms, ac, bsSelected, bioComment, flags);
 }, "~A,~N,JU.BS,~S,~N");
 Clazz_overrideMethod (c$, "areEqual", 
 function (smiles1, smiles2) {
-JS.InvalidSmilesException.clear ();
-var result = this.findPriv (smiles1, JS.SmilesParser.newSearch (smiles2, false, true), (smiles1.indexOf ("*") >= 0 ? 2 : 1) | 8, 2);
+this.clearExceptions ();
+var isWild = (smiles1.indexOf ("*") >= 0);
+if (!isWild && smiles1.equals (smiles2)) return 1;
+var flags = (isWild ? 2 : 1) | 8;
+var result = this.matchPriv (smiles1, null, 0, null, null, false, flags, 2, JS.SmilesParser.newSearch (smiles2, false, true));
 return (result == null ? -1 : result.length);
 }, "~S,~S");
 Clazz_defineMethod (c$, "areEqualTest", 
 function (smiles, search) {
-var ret = this.findPriv (smiles, search, 9, 2);
+var ret = this.matchPriv (smiles, null, 0, null, null, false, 9, 2, search);
 return (ret != null && ret.length == 1);
 }, "~S,JS.SmilesSearch");
 Clazz_overrideMethod (c$, "find", 
 function (pattern, target, flags) {
-JS.InvalidSmilesException.clear ();
+this.clearExceptions ();
 target = JS.SmilesParser.cleanPattern (target);
 pattern = JS.SmilesParser.cleanPattern (pattern);
 var search = JS.SmilesParser.newSearch (target, false, true);
-var array = this.findPriv (pattern, search, flags, 3);
+var array = this.matchPriv (pattern, null, 0, null, null, false, flags, 3, search);
 for (var i = array.length; --i >= 0; ) {
 var a = array[i];
 for (var j = a.length; --j >= 0; ) a[j] = (search.targetAtoms[a[j]]).mapIndex;
@@ -139,7 +150,7 @@ return array;
 }, "~S,~S,~N");
 Clazz_overrideMethod (c$, "getAtoms", 
 function (target) {
-JS.InvalidSmilesException.clear ();
+this.clearExceptions ();
 target = JS.SmilesParser.cleanPattern (target);
 var search = JS.SmilesParser.newSearch (target, false, true);
 search.createTopoMap ( new JU.BS ());
@@ -175,11 +186,11 @@ return smiles;
 }, "~S");
 Clazz_overrideMethod (c$, "getSubstructureSet", 
 function (pattern, atoms, ac, bsSelected, flags) {
-return this.matchPriv (pattern, atoms, ac, bsSelected, null, true, flags | JS.SmilesParser.getFlags (pattern), 1);
+return this.matchPriv (pattern, atoms, ac, bsSelected, null, true, flags | JS.SmilesParser.getFlags (pattern), 1, null);
 }, "~S,~A,~N,JU.BS,~N");
 Clazz_overrideMethod (c$, "getMMFF94AtomTypes", 
 function (smarts, atoms, ac, bsSelected, ret, vRings) {
-JS.InvalidSmilesException.clear ();
+this.clearExceptions ();
 var sp =  new JS.SmilesParser (true, true);
 var search = null;
 var flags = (770);
@@ -208,11 +219,11 @@ if (bsDone.cardinality () == ac) return;
 }, "~A,~A,~N,JU.BS,JU.Lst,~A");
 Clazz_overrideMethod (c$, "getSubstructureSetArray", 
 function (pattern, atoms, ac, bsSelected, bsAromatic, flags) {
-return this.matchPriv (pattern, atoms, ac, bsSelected, bsAromatic, true, flags, 2);
+return this.matchPriv (pattern, atoms, ac, bsSelected, bsAromatic, true, flags, 2, null);
 }, "~S,~A,~N,JU.BS,JU.BS,~N");
 Clazz_defineMethod (c$, "getAtropisomerKeys", 
 function (pattern, atoms, ac, bsSelected, bsAromatic, flags) {
-return this.matchPriv (pattern, atoms, ac, bsSelected, bsAromatic, false, flags, 4);
+return this.matchPriv (pattern, atoms, ac, bsSelected, bsAromatic, false, flags, 4, null);
 }, "~S,~A,~N,JU.BS,JU.BS,~N");
 Clazz_overrideMethod (c$, "polyhedronToSmiles", 
 function (center, faces, atomCount, points, flags, details) {
@@ -227,6 +238,7 @@ atoms[i].atomNumber = (pt).getAtomNumber ();
 atoms[i].setT (pt);
 } else {
 atoms[i].elementNumber = (Clazz_instanceOf (pt, JU.Point3fi) ? (pt).sD : -2);
+if (pt != null) atoms[i].setT (pt);
 }atoms[i].index = i;
 }
 var nBonds = 0;
@@ -249,58 +261,74 @@ if (n == 0 || n != atoms[i].bonds.length) atoms[i].bonds = JU.AU.arrayCopyObject
 var s = null;
 var g =  new JS.SmilesGenerator ();
 if (points != null) g.polySmilesCenter = center;
-JS.InvalidSmilesException.clear ();
+this.clearExceptions ();
 s = g.getSmiles (this, atoms, atomCount, JU.BSUtil.newBitSet2 (0, atomCount), null, flags | 4096 | 16 | 32);
 if ((flags & 65536) == 65536) {
-s = "//* " + center + " *//\t[" + JU.Elements.elementSymbolFromNumber (center.getElementNumber ()) + "@PH" + atomCount + (details == null ? "" : "/" + details + "/") + "]." + s;
+s = ((flags & 131072) == 0 ? "" : "//* " + center + " *//\t") + "[" + JU.Elements.elementSymbolFromNumber (center.getElementNumber ()) + "@PH" + atomCount + (details == null ? "" : "/" + details + "/") + "]." + s;
 }return s;
 }, "JU.Node,~A,~N,~A,~N,~S");
 Clazz_overrideMethod (c$, "getCorrelationMaps", 
 function (pattern, atoms, atomCount, bsSelected, flags) {
-return this.matchPriv (pattern, atoms, atomCount, bsSelected, null, true, flags, 3);
+return this.matchPriv (pattern, atoms, atomCount, bsSelected, null, true, flags, 3, null);
 }, "~S,~A,~N,JU.BS,~N");
-Clazz_defineMethod (c$, "findPriv", 
- function (pattern, search, flags, mode) {
-var bsAromatic =  new JU.BS ();
-search.setFlags (search.flags | JS.SmilesParser.getFlags (pattern));
-search.createTopoMap (bsAromatic);
-return this.matchPriv (pattern, search.targetAtoms, -search.targetAtoms.length, null, bsAromatic, bsAromatic.isEmpty (), flags, mode);
-}, "~S,JS.SmilesSearch,~N,~N");
 Clazz_defineMethod (c$, "matchPriv", 
- function (pattern, atoms, ac, bsSelected, bsAromatic, doTestAromatic, flags, mode) {
-JS.InvalidSmilesException.clear ();
+ function (pattern, atoms, ac, bsSelected, bsAromatic, doTestAromatic, flags, mode, searchTarget) {
+this.clearExceptions ();
 try {
 var isSmarts = ((flags & 2) == 2);
 var search = JS.SmilesParser.newSearch (pattern, isSmarts, false);
+var isTopo = ((flags & 16384) == 16384);
+if (searchTarget != null) {
+search.haveTopo = true;
+bsAromatic =  new JU.BS ();
+searchTarget.setFlags (searchTarget.flags | JS.SmilesParser.getFlags (pattern));
+searchTarget.createTopoMap (bsAromatic);
+atoms = searchTarget.targetAtoms;
+ac = searchTarget.targetAtoms.length;
+if (isSmarts) {
+var a1 = searchTarget.elementCounts;
+var a2 = search.elementCounts;
+for (var i = Math.max (searchTarget.elementNumberMax, search.elementNumberMax); i > 0; i--) {
+if (a1[i] < a2[i]) {
+this.okMF = false;
+break;
+}}
+} else {
+var mf = (isTopo ? null : search.getMolecularFormulaImpl (true, null, false));
+this.okMF = (mf == null || mf.equals (searchTarget.getMolecularFormulaImpl (true, null, false)));
+}searchTarget.mf = search.mf = null;
+}if (this.okMF) {
 if (!isSmarts && !search.patternAromatic) {
 if (bsAromatic == null) bsAromatic =  new JU.BS ();
-JS.SmilesSearch.normalizeAromaticity (search.patternAtoms, bsAromatic, search.flags);
+search.normalizeAromaticity (bsAromatic);
 search.isNormalized = true;
 }search.targetAtoms = atoms;
-search.targetAtomCount = Math.abs (ac);
-if (ac < 0) search.haveTopo = true;
+search.targetAtomCount = ac;
+search.setSelected (bsSelected);
 if (ac != 0 && (bsSelected == null || !bsSelected.isEmpty ())) {
 var is3D = !(Clazz_instanceOf (atoms[0], JS.SmilesAtom));
-search.setSelected (bsSelected);
 search.getSelections ();
 if (!doTestAromatic) search.bsAromatic = bsAromatic;
 search.setRingData (null, null, is3D || doTestAromatic);
 search.exitFirstMatch = ((flags & 8) == 8);
 search.mapUnique = ((flags & 128) == 128);
-}switch (mode) {
+}}switch (mode) {
 case 1:
 search.asVector = false;
-return search.search ();
+return (this.okMF ? search.search () :  new JU.BS ());
 case 2:
+if (!this.okMF) return  new Array (0);
 search.asVector = true;
 var vb = search.search ();
 return vb.toArray ( new Array (vb.size ()));
 case 4:
+if (!this.okMF) return "";
 search.exitFirstMatch = true;
 search.setAtropicity = true;
 search.search ();
 return search.atropKeys;
 case 3:
+if (!this.okMF) return  Clazz_newIntArray (0, 0, 0);
 search.getMaps = true;
 search.setFlags (flags | search.flags);
 var vl = search.search ();
@@ -309,14 +337,14 @@ return vl.toArray (JU.AU.newInt2 (vl.size ()));
 } catch (e) {
 if (Clazz_exceptionOf (e, Exception)) {
 if (JU.Logger.debugging) e.printStackTrace ();
-if (JS.InvalidSmilesException.getLastError () == null) JS.InvalidSmilesException.clear ();
+if (JS.InvalidSmilesException.getLastError () == null) this.clearExceptions ();
 throw  new JS.InvalidSmilesException (JS.InvalidSmilesException.getLastError ());
 } else {
 throw e;
 }
 }
 return null;
-}, "~S,~A,~N,JU.BS,JU.BS,~B,~N,~N");
+}, "~S,~A,~N,JU.BS,JU.BS,~B,~N,~N,JS.SmilesSearch");
 Clazz_overrideMethod (c$, "cleanSmiles", 
 function (smiles) {
 return JS.SmilesParser.cleanPattern (smiles);
@@ -408,7 +436,7 @@ Clazz_defineStatics (c$,
 "lastError", null);
 });
 Clazz_declarePackage ("JS");
-Clazz_load (["JU.JmolMolecule", "JU.BS", "$.Lst"], "JS.SmilesSearch", ["java.lang.Float", "java.util.Hashtable", "JU.AU", "$.SB", "JS.InvalidSmilesException", "$.SmilesAromatic", "$.SmilesAtom", "$.SmilesBond", "$.SmilesMeasure", "$.SmilesParser", "$.VTemp", "JU.BSUtil", "$.Edge", "$.Logger"], function () {
+Clazz_load (["JU.JmolMolecule", "JU.BS", "$.Lst"], "JS.SmilesSearch", ["java.lang.Float", "java.util.Hashtable", "JU.AU", "$.SB", "JS.InvalidSmilesException", "$.SmilesAromatic", "$.SmilesAtom", "$.SmilesBond", "$.SmilesMeasure", "$.SmilesParser", "$.SmilesStereo", "$.VTemp", "JU.BSUtil", "$.Logger"], function () {
 c$ = Clazz_decorateAsClass (function () {
 this.isSmarts = false;
 this.top = null;
@@ -427,6 +455,7 @@ this.aromaticDefined = false;
 this.aromaticUnknown = false;
 this.noAromatic = false;
 this.ignoreAtomClass = false;
+this.ignoreElement = false;
 this.ignoreStereochemistry = false;
 this.invertStereochemistry = false;
 this.exitFirstMatch = false;
@@ -474,6 +503,8 @@ this.bsReturn = null;
 this.bsCheck = null;
 this.mapUnique = false;
 this.bsAromaticRings = null;
+this.polyhedronStereo = null;
+this.polyAtom = null;
 Clazz_instantialize (this, arguments);
 }, JS, "SmilesSearch", JU.JmolMolecule);
 Clazz_prepareFields (c$, function () {
@@ -501,7 +532,8 @@ c$.addFlags = Clazz_defineMethod (c$, "addFlags",
 function (flags, strFlags) {
 if (strFlags.indexOf ("OPEN") >= 0) flags |= 5;
 if (strFlags.indexOf ("BIO") >= 0) flags |= 1048576;
-if (strFlags.indexOf ("HYDROGEN") >= 0) flags |= 4096;
+if (strFlags.indexOf ("HYDROGEN2") >= 0) flags |= 8192;
+ else if (strFlags.indexOf ("HYDROGEN") >= 0) flags |= 4096;
 if (strFlags.indexOf ("FIRSTMATCHONLY") >= 0) flags |= 8;
 if (strFlags.indexOf ("STRICT") >= 0) flags |= 256;
 if (strFlags.indexOf ("PLANAR") >= 0) flags |= 1024;
@@ -509,7 +541,7 @@ if (strFlags.indexOf ("NOAROMATIC") >= 0 || strFlags.indexOf ("NONAROMATIC") >= 
 if (strFlags.indexOf ("AROMATICDOUBLE") >= 0) flags |= 512;
 if (strFlags.indexOf ("AROMATICDEFINED") >= 0) flags |= 128;
 if (strFlags.indexOf ("MMFF94") >= 0) flags |= 768;
-if (strFlags.indexOf ("TOPOLOGY") >= 0) flags |= 8192;
+if (strFlags.indexOf ("TOPOLOGY") >= 0) flags |= 16384;
 if (strFlags.indexOf ("NOATOMCLASS") >= 0) flags |= 2048;
 if (strFlags.indexOf ("NOSTEREO") >= 0) {
 flags |= 32;
@@ -535,12 +567,13 @@ this.aromaticStrict = ((flags & 256) == 256);
 this.aromaticPlanar = ((flags & 1024) == 1024);
 this.aromaticMMFF94 = ((flags & 768) == 768);
 this.aromaticDefined = ((flags & 128) == 128);
-this.noAromatic = ((flags & 16) == 16);
+this.noAromatic = new Boolean (this.noAromatic | ((flags & 16) == 16)).valueOf ();
 this.aromaticUnknown = !this.noAromatic && !this.aromaticOpen && !this.aromaticDouble && !this.aromaticStrict && !this.aromaticPlanar && !this.aromaticMMFF94 && !this.aromaticDefined;
 this.groupByModel = ((flags & 67108864) == 67108864);
 this.ignoreAtomClass = ((flags & 2048) == 2048);
 this.ignoreStereochemistry = ((flags & 32) == 32);
 this.invertStereochemistry = !this.ignoreStereochemistry && ((flags & 64) == 64);
+this.ignoreElement = ((flags & 16384) == 16384);
 }, "~N");
 Clazz_defineMethod (c$, "set", 
 function () {
@@ -573,6 +606,7 @@ for (var k = this.ac; --k >= 0; ) if (this.patternAtoms[k].component == ia) this
 }});
 Clazz_defineMethod (c$, "setSelected", 
 function (bs) {
+this.selectedAtomCount = (bs == null ? this.targetAtomCount : bs.cardinality ());
 if (bs == null) {
 bs = JU.BS.newN (this.targetAtomCount);
 bs.setBits (0, this.targetAtomCount);
@@ -627,8 +661,8 @@ return n;
 Clazz_defineMethod (c$, "setRingData", 
 function (bsA, vRings, doProcessAromatic) {
 if (this.isTopology || this.patternBioSequence) this.needAromatic = false;
-if (this.needAromatic) this.needRingData = true;
 this.needAromatic = new Boolean (this.needAromatic & ( new Boolean ((bsA == null) & !this.noAromatic).valueOf ())).valueOf ();
+if (this.needAromatic) this.needRingData = true;
 if (!this.needAromatic) {
 this.bsAromatic.clearAll ();
 if (bsA != null) this.bsAromatic.or (bsA);
@@ -658,7 +692,7 @@ this.ringCounts =  Clazz_newIntArray (this.targetAtomCount, 0);
 this.ringConnections =  Clazz_newIntArray (this.targetAtomCount, 0);
 this.ringData =  new Array (this.ringDataMax + 1);
 }this.ringSets =  new JU.Lst ();
-if (this.targetAtomCount < 3) return;
+if (this.selectedAtomCount < 3) return;
 var s = "****";
 var max = this.ringDataMax;
 while (s.length < max) s += s;
@@ -718,6 +752,7 @@ search.mapUnique = this.mapUnique;
 search.targetAtoms = this.targetAtoms;
 search.targetAtomCount = this.targetAtomCount;
 search.bsSelected = this.bsSelected;
+search.selectedAtomCount = this.selectedAtomCount;
 search.htNested = this.htNested;
 search.haveTopo = this.haveTopo;
 search.bsCheck = this.bsCheck;
@@ -758,12 +793,8 @@ return this.search2 (false);
 Clazz_defineMethod (c$, "search2", 
  function (firstAtomOnly) {
 this.setFlags (this.flags);
-if (!this.isRingCheck && JU.Logger.debugging && !this.isSilent) JU.Logger.debug ("SmilesSearch processing " + this.pattern);
+if (!this.isRingCheck && JU.Logger.debuggingHigh && !this.isSilent) JU.Logger.debug ("SmilesSearch processing " + this.pattern);
 if (this.vReturn == null && (this.asVector || this.getMaps)) this.vReturn =  new JU.Lst ();
-if (this.bsSelected == null) {
-this.bsSelected = JU.BS.newN (this.targetAtomCount);
-this.bsSelected.setBits (0, this.targetAtomCount);
-}this.selectedAtomCount = this.bsSelected.cardinality ();
 if (this.subSearches != null) {
 for (var i = 0; i < this.subSearches.length; i++) {
 if (this.subSearches[i] == null) continue;
@@ -771,7 +802,7 @@ this.subsearch (this.subSearches[i], 3);
 if (this.exitFirstMatch) {
 if (this.vReturn == null ? this.bsReturn.nextSetBit (0) >= 0 : this.vReturn.size () > 0) break;
 }}
-} else if (this.ac > 0) {
+} else if (this.ac > 0 && this.ac <= this.selectedAtomCount) {
 if (this.nestedBond == null) {
 this.clearBsFound (-1);
 } else {
@@ -797,6 +828,8 @@ var ii = a.getOffsetResidueAtom ("\0", 1);
 if (ii >= 0) bs.set (ii);
 ii = a.getOffsetResidueAtom ("\0", -1);
 if (ii >= 0) bs.set (ii);
+} else if (pa === this.polyAtom) {
+bs.set (pa.getMatchingAtomIndex ());
 } else {
 jmolBonds = a.getEdges ();
 for (var k = 0; k < jmolBonds.length; k++) bs.set (jmolBonds[k].getOtherNode (a).getIndex ());
@@ -851,8 +884,13 @@ if (this.doCheckAtom (ia) && !this.nextTargetAtom (newPatternAtom, this.targetAt
 }
 this.clearBsFound (iAtom);
 return true;
-}if (!this.ignoreStereochemistry && !this.isRingCheck && !this.checkStereochemistry ()) return true;
-var bs =  new JU.BS ();
+}if (!this.ignoreStereochemistry && !this.isRingCheck) {
+if (JU.Logger.debuggingHigh) {
+for (var i = 0; i < atomNum; i++) JU.Logger.debug ("pattern atoms " + this.patternAtoms[i] + " " + this.patternAtoms[i].matchingComponent);
+
+JU.Logger.debug ("--ss-- " + this.bsFound.cardinality ());
+}if (!this.checkStereochemistry ()) return true;
+}var bs =  new JU.BS ();
 var nMatch = 0;
 for (var j = 0; j < this.ac; j++) {
 var i = this.patternAtoms[j].getMatchingAtomIndex ();
@@ -947,11 +985,7 @@ if (!this.checkMatchBond (patternAtom, atom1, patternBond, iAtom, matchingAtom, 
 patternAtom = this.patternAtoms[patternAtom.index];
 patternAtom.setMatchingAtom (this.targetAtoms[iAtom], iAtom);
 patternAtom.matchingComponent = c;
-if (JU.Logger.debuggingHigh && !this.isRingCheck) {
-for (var i = 0; i <= atomNum; i++) JU.Logger.debug ("pattern atoms " + this.patternAtoms[i] + " " + this.patternAtoms[i].matchingComponent);
-
-JU.Logger.debug ("--ss--");
-}this.bsFound.set (iAtom);
+this.bsFound.set (iAtom);
 if (!this.nextPatternAtom (atomNum, iAtom, firstAtomOnly, c)) return false;
 if (iAtom >= 0) this.clearBsFound (iAtom);
 return true;
@@ -977,7 +1011,7 @@ if (!patternAtom.isBioAtom) this.setNested (patternAtom.iNested, o);
 break;
 }var na = targetAtom.getElementNumber ();
 var n = patternAtom.elementNumber;
-if (na >= 0 && n >= 0 && n != na) break;
+if (na >= 0 && n >= 0 && n != na && !this.ignoreElement) break;
 if (patternAtom.isBioResidue) {
 var a = targetAtom;
 if (patternAtom.bioAtomName != null && (patternAtom.isLeadAtom () ? !a.isLeadAtom () : !patternAtom.bioAtomName.equals (a.getAtomName ().toUpperCase ()))) break;
@@ -1038,7 +1072,7 @@ if (n >= 0 && n != targetAtom.getTotalHydrogenCount ()) break;
 if ((n = patternAtom.implicitHydrogenCount) != -2147483648) {
 na = targetAtom.getImplicitHydrogenCount ();
 if (n == -1 ? na == 0 : n != na) break;
-}if (patternAtom.degree > 0 && patternAtom.degree != targetAtom.getCovalentBondCount () - targetAtom.getImplicitHydrogenCount ()) break;
+}if (patternAtom.degree > 0 && patternAtom.degree != targetAtom.getCovalentBondCount ()) break;
 if (patternAtom.nonhydrogenDegree > 0 && patternAtom.nonhydrogenDegree != targetAtom.getCovalentBondCount () - targetAtom.getCovalentHydrogenCount ()) break;
 if (this.isSmarts && patternAtom.valence > 0 && patternAtom.valence != targetAtom.getTotalValence ()) break;
 if (patternAtom.connectivity > 0 && patternAtom.connectivity != targetAtom.getCovalentBondCountPlusMissingH ()) break;
@@ -1267,7 +1301,7 @@ if (dbAtom1a == null || dbAtom2a == null) return false;
 if (this.haveTopo) this.setTopoCoordinates (dbAtom1, dbAtom2, dbAtom1a, dbAtom2a, bondType);
 var d = JS.SmilesMeasure.setTorsionData (dbAtom1a, dbAtom1, dbAtom2, dbAtom2a, this.v, isAtropisomer);
 if (isAtropisomer) {
-d *= dir1 * (bondType == 65537 ? 1 : -1) * (indexOrder ? 1 : -1);
+d *= dir1 * (bondType == 65537 ? 1 : -1) * (indexOrder ? 1 : -1) * 1 * -1;
 if (JU.Logger.debugging) JU.Logger.info ("atrop dihedral " + d + " " + sAtom1 + " " + sAtom2 + " " + b);
 if (d < 1.0) return false;
 } else {
@@ -1275,29 +1309,46 @@ if (this.v.vTemp1.dot (this.v.vTemp2) * dir1 * dir2 < 0) return false;
 }}
 if (this.setAtropicity) {
 this.atropKeys = "";
-for (var i = 0; i < lstAtrop.size (); i++) this.atropKeys += "," + this.getAtropIndex ((b = lstAtrop.get (i)), true) + this.getAtropIndex (b, false);
+for (var i = 0; i < lstAtrop.size (); i++) this.atropKeys += "," + this.getAtropIndex (lstAtrop.get (i));
 
 }return true;
 });
 Clazz_defineMethod (c$, "getAtropIndex", 
- function (b, isFirst) {
-var s1 = (isFirst ? b.atom1 : b.atom2);
-var a1 = s1.getMatchingAtom ();
-var a11 = JU.Edge.getAtropismNode (b.matchingBond.order, a1, isFirst);
-var b1 = s1.bonds;
-for (var i = s1.getBondCount (); --i >= 0; ) if ((b1[i].getOtherNode (s1)).getMatchingAtom () === a11) return i + 1;
-
-return 0;
-}, "JS.SmilesBond,~B");
+ function (b) {
+var nodes =  new Array (4);
+var s = "";
+nodes[1] = b.atom1.getMatchingAtom ();
+nodes[2] = b.atom2.getMatchingAtom ();
+var b1 = b.atom1.bonds;
+var a;
+for (var i = b.atom1.getBondCount (); --i >= 0; ) {
+if ((a = b1[i].getOtherNode (b.atom1)) !== b.atom2) {
+s += (i + 1);
+nodes[0] = a.getMatchingAtom ();
+break;
+}}
+b1 = b.atom2.bonds;
+for (var i = 0; i <= b.atom2.getBondCount (); i++) {
+if ((a = b1[i].getOtherNode (b.atom2)) !== b.atom1) {
+s += (i + 1);
+nodes[3] = a.getMatchingAtom ();
+break;
+}}
+if (s.equals ("22")) s = "";
+s = (JS.SmilesStereo.getAtropicStereoFlag (nodes) == 1 ? "" : "^") + s;
+return (s + "   ").substring (0, 3);
+}, "JS.SmilesBond");
 Clazz_defineMethod (c$, "setTopoCoordinates", 
  function (dbAtom1, dbAtom2, dbAtom1a, dbAtom2a, bondType) {
 dbAtom1.set (-1, 0, 0);
 dbAtom2.set (1, 0, 0);
 if (bondType != 2) {
 var bond = dbAtom1.getBondTo (dbAtom2);
-var dir = (bond.order == 65537 ? 1 : -1);
+var ok1 = dbAtom1.getBondedAtomIndex (bond.atropType[0]) == dbAtom1a.index;
+var ok2 = dbAtom2.getBondedAtomIndex (bond.atropType[1]) == dbAtom2a.index;
+var dir = (bond.order == 65537 ? 1 : -1) * (ok1 == ok2 ? 1 : -1);
 dbAtom1a.set (-1, 1, 0);
-dbAtom2a.set (1, 1, dir / 2.0);
+dbAtom2a.set (1, 1, dir / 2.0 * 1 * -1);
 return;
 }var nBonds = 0;
 var dir1 = 0;
@@ -1411,6 +1462,8 @@ break;
 var atom2 = atoms[sBond.atom2.getMatchingAtomIndex ()];
 var b =  new JS.SmilesBond (atom1, atom2, order, false);
 b.isConnection = sBond.isConnection;
+b.atropType = sBond.atropType;
+b.isNot = sBond.isNot;
 atom2.bondCount--;
 if (JU.Logger.debugging) JU.Logger.info ("" + b);
 } else {
@@ -1435,10 +1488,12 @@ var sAtom = this.patternAtoms[i];
 if (sAtom.stereo != null) sAtom.stereo.fixStereo (sAtom);
 }
 }, "JU.BS");
-c$.normalizeAromaticity = Clazz_defineMethod (c$, "normalizeAromaticity", 
-function (atoms, bsAromatic, flags) {
+Clazz_defineMethod (c$, "normalizeAromaticity", 
+function (bsAromatic) {
+var atoms = this.patternAtoms;
 var ss =  new JS.SmilesSearch ();
-ss.setFlags (flags);
+ss.noAromatic = this.noAromatic;
+ss.setFlags (this.flags);
 ss.targetAtoms = atoms;
 ss.targetAtomCount = atoms.length;
 ss.bsSelected = JU.BSUtil.newBitSet2 (0, atoms.length);
@@ -1455,7 +1510,7 @@ if (a.isAromatic || a.elementNumber == -2 || a.elementNumber == 0) continue;
 a.setSymbol (a.symbol.toLowerCase ());
 }
 }
-}}, "~A,JU.BS,~N");
+}}, "JU.BS");
 Clazz_defineMethod (c$, "getSelections", 
 function () {
 var ht = this.top.htNested;
@@ -1488,7 +1543,8 @@ return sb.toString ();
 Clazz_defineStatics (c$,
 "SUBMODE_NESTED", 1,
 "SUBMODE_RINGCHECK", 2,
-"SUBMODE_OR", 3);
+"SUBMODE_OR", 3,
+"ATROPIC_SWITCH", 1);
 });
 Clazz_declarePackage ("JS");
 Clazz_load (["java.util.Hashtable", "JU.BS", "JS.VTemp"], "JS.SmilesGenerator", ["JU.AU", "$.Lst", "$.SB", "JS.InvalidSmilesException", "$.SmilesAtom", "$.SmilesBond", "$.SmilesParser", "$.SmilesSearch", "$.SmilesStereo", "JU.BSUtil", "$.Elements", "$.JmolMolecule", "$.Logger"], function () {
@@ -1498,7 +1554,7 @@ this.ac = 0;
 this.bsSelected = null;
 this.bsAromatic = null;
 this.flags = 0;
-this.explicitH = false;
+this.explicitH = 0;
 this.ringSets = null;
 this.vTemp = null;
 this.nPairs = 0;
@@ -1506,6 +1562,7 @@ this.nPairsMax = 0;
 this.bsBondsUp = null;
 this.bsBondsDn = null;
 this.bsToDo = null;
+this.bsIgnoreH =  new JU.BS ();
 this.prevAtom = null;
 this.prevSp2Atoms = null;
 this.alleneStereo = null;
@@ -1526,6 +1583,7 @@ this.isPolyhedral = false;
 this.aromaticRings = null;
 this.sm = null;
 this.iHypervalent = 0;
+this.is2D = false;
 this.ptAtom = 0;
 this.ptSp2Atom0 = 0;
 this.atemp = null;
@@ -1549,17 +1607,36 @@ this.flags = flags;
 this.atoms = atoms;
 this.ac = ac;
 bsSelected = JU.BSUtil.copy (bsSelected);
-this.bsSelected = bsSelected;
+this.bsSelected = JU.BS.copy (bsSelected);
 this.flags = flags = JS.SmilesSearch.addFlags (flags, comment == null ? "" : comment.toUpperCase ());
 if ((flags & 1048576) == 1048576) return this.getBioSmiles (bsSelected, comment, flags);
 this.openSMILES = ((flags & 5) == 5);
 this.addAtomComment = ((flags & 131072) == 131072);
 this.aromaticDouble = ((flags & 512) == 512);
-this.explicitH = ((flags & 4096) == 4096);
-this.topologyOnly = ((flags & 8192) == 8192);
+this.explicitH = ((flags & 8192) == 8192 ? 8192 : (flags & 4096) == 4096 ? 4096 : 0);
+if (this.explicitH == 8192) {
+var bsHa =  new JU.BS ();
+for (var i = bsSelected.nextSetBit (0); i >= 0; i = bsSelected.nextSetBit (i + 1)) {
+var a = atoms[i];
+if (a.getCovalentHydrogenCount () == 3 && (a.getCovalentBondCount () == 4)) {
+var doIgnore = true;
+bsHa.clearAll ();
+for (var j = a.getBondCount (); --j >= 0; ) {
+var aj = a.getBondedAtomIndex (j);
+if (atoms[aj].getElementNumber () == 1) {
+doIgnore = (atoms[aj].getElementNumber () == 1);
+if (doIgnore) bsHa.set (aj);
+ else break;
+}if (doIgnore) {
+this.bsIgnoreH.set (i);
+bsSelected.andNot (bsHa);
+}}
+}}
+}this.topologyOnly = ((flags & 16384) == 16384);
 this.getAromatic = !((flags & 16) == 16);
 this.noStereo = ((flags & 32) == 32);
 this.isPolyhedral = ((flags & 65536) == 65536);
+this.is2D = ((flags & 134217728) == 134217728);
 return this.getSmilesComponent (atoms[ipt], bsSelected, true, false, false);
 }, "JS.SmilesMatcher,~A,~N,JU.BS,~S,~N");
 Clazz_defineMethod (c$, "getBioSmiles", 
@@ -1678,14 +1755,14 @@ sb.append (JU.Elements.elementNameFromNumber (atom.getElementNumber ()));
 }, "JU.SB,JU.Node,~S,~B");
 Clazz_defineMethod (c$, "getSmilesComponent", 
  function (atom, bs, allowBioResidues, allowConnectionsToOutsideWorld, forceBrackets) {
-if (!this.explicitH && atom.getAtomicAndIsotopeNumber () == 1 && atom.getEdges ().length > 0) atom = this.atoms[atom.getBondedAtomIndex (0)];
+if (this.explicitH == 0 && atom.getAtomicAndIsotopeNumber () == 1 && atom.getEdges ().length > 0) atom = this.atoms[atom.getBondedAtomIndex (0)];
 this.bsSelected = JU.JmolMolecule.getBranchBitSet (this.atoms, atom.getIndex (), JU.BSUtil.copy (bs), null, -1, true, allowBioResidues);
 bs.andNot (this.bsSelected);
 this.iHypervalent = -1;
 for (var i = this.bsSelected.nextSetBit (0); i >= 0 && this.iHypervalent < 0; i = this.bsSelected.nextSetBit (i + 1)) if (this.atoms[i].getCovalentBondCount () > 4 || this.isPolyhedral) this.iHypervalent = i;
 
 this.bsIncludingH = JU.BSUtil.copy (this.bsSelected);
-if (!this.explicitH) for (var j = this.bsSelected.nextSetBit (0); j >= 0; j = this.bsSelected.nextSetBit (j + 1)) {
+if (this.explicitH == 0) for (var j = this.bsSelected.nextSetBit (0); j >= 0; j = this.bsSelected.nextSetBit (j + 1)) {
 var a = this.atoms[j];
 if (a.getAtomicAndIsotopeNumber () == 1 && a.getBondCount () > 0 && a.getBondedAtomIndex (0) != this.iHypervalent) this.bsSelected.clear (j);
 }
@@ -1726,12 +1803,12 @@ var keys = this.sm.getAtropisomerKeys (s, this.atoms, this.ac, this.bsSelected, 
 for (var i = 1; i < keys.length; ) {
 var pt = s.indexOf ("^-");
 if (pt < 0) break;
-s = s.substring (0, pt + 1) + keys.substring (i, i + 2) + s.substring (pt + 1);
+s = s.substring (0, pt + 1) + keys.substring (i, i + 3).trim () + s.substring (pt + 1);
 i += 3;
 }
 } catch (e) {
 if (Clazz_exceptionOf (e, Exception)) {
-System.out.println ("???");
+e.printStackTrace ();
 s = s0;
 } else {
 throw e;
@@ -1796,7 +1873,7 @@ var atomA = atom12[j];
 var bb = (atomA).getEdges ();
 for (var b = 0; b < bb.length; b++) {
 var other;
-if (bb[b].getCovalentOrder () != 1 || !this.explicitH && (other = bb[b].getOtherNode (atomA)).getElementNumber () == 1 && other.getIsotopeNumber () == 0) continue;
+if (bb[b].getCovalentOrder () != 1 || this.explicitH == 0 && (other = bb[b].getOtherNode (atomA)).getElementNumber () == 1 && other.getIsotopeNumber () == 0) continue;
 edges[j][edgeCount++] = bb[b];
 if (this.getBondStereochemistry (bb[b], atomA) != '\0') {
 b0 = bb[b];
@@ -1837,7 +1914,7 @@ var atomIndex = atom.getIndex ();
 if (!this.bsToDo.get (atomIndex)) return null;
 this.ptAtom++;
 this.bsToDo.clear (atomIndex);
-var includeHs = (atomIndex == this.iHypervalent || this.explicitH);
+var includeHs = (atomIndex == this.iHypervalent || this.explicitH != 0 && !this.bsIgnoreH.get (atomIndex));
 var isExtension = (!this.bsSelected.get (atomIndex));
 var prevIndex = (this.prevAtom == null ? -1 : this.prevAtom.getIndex ());
 var isAromatic = this.bsAromatic.get (atomIndex);
@@ -1853,7 +1930,7 @@ var bondPrev = null;
 var bonds = atom.getEdges ();
 if (this.polySmilesCenter != null) {
 allowBranches = false;
-this.sortBonds (atom, this.prevAtom, this.polySmilesCenter);
+this.sortPolyBonds (atom, this.prevAtom, this.polySmilesCenter);
 }var aH = null;
 var stereoFlag = (isAromatic ? 10 : 0);
 if (JU.Logger.debugging) JU.Logger.debug (sb.toString ());
@@ -2003,7 +2080,7 @@ var groupType = (atom).getBioStructureTypeName ();
 if (this.addAtomComment) sb.append ("\n//* " + atom.toString () + " *//\t");
 if (this.topologyOnly) sb.append ("*");
  else if (isExtension && groupType.length != 0 && atomName.length != 0) this.addBracketedBioName (sb, atom, "." + atomName, false);
- else sb.append (JS.SmilesAtom.getAtomLabel (atomicNumber, isotope, (forceBrackets ? -1 : valence), charge, osclass, nH, isAromatic, atat != null ? atat : this.noStereo ? null : this.checkStereoPairs (atom, this.alleneStereo == null ? atomIndex : -1, stereo, stereoFlag)));
+ else sb.append (JS.SmilesAtom.getAtomLabel (atomicNumber, isotope, (forceBrackets ? -1 : valence), charge, osclass, nH, isAromatic, atat != null ? atat : this.noStereo ? null : this.checkStereoPairs (atom, this.alleneStereo == null ? atomIndex : -1, stereo, stereoFlag, prevIndex == -1), this.is2D));
 sb.appendSB (sbRings);
 if (bondNext != null) {
 sb.appendSB (sbBranches);
@@ -2050,7 +2127,7 @@ for (var i = this.aromaticRings.size (); --i >= 0; ) if ((bs = this.aromaticRing
 
 return false;
 }, "~N,~N");
-Clazz_defineMethod (c$, "sortBonds", 
+Clazz_defineMethod (c$, "sortPolyBonds", 
 function (atom, refAtom, center) {
 if (this.smilesStereo == null) try {
 this.smilesStereo = JS.SmilesStereo.newStereo (null);
@@ -2060,7 +2137,7 @@ if (Clazz_exceptionOf (e, JS.InvalidSmilesException)) {
 throw e;
 }
 }
-this.smilesStereo.sortBondsByStereo (atom, refAtom, center, atom.getEdges (), this.vTemp.vA);
+this.smilesStereo.sortPolyBondsByStereo (atom, refAtom, center, atom.getEdges (), this.vTemp.vA);
 }, "JU.SimpleNode,JU.SimpleNode,JU.P3");
 Clazz_defineMethod (c$, "sortInorganic", 
  function (atom, v, vTemp) {
@@ -2132,26 +2209,55 @@ stereo[i + 1] = bond1.getOtherNode (atom);
 }
 v.addLast (pair0[1]);
 stereo[n - 1] = pair0[1].getOtherNode (atom);
-return JS.SmilesStereo.getStereoFlag (atom, stereo, n, vTemp);
+return JS.SmilesStereo.getStereoFlag (atom, stereo, n, vTemp, this.is2D);
 }, "JU.SimpleNode,JU.Lst,JS.VTemp");
 Clazz_defineMethod (c$, "checkStereoPairs", 
- function (atom, atomIndex, stereo, stereoFlag) {
-if (stereoFlag < 4) return "";
-if (atomIndex >= 0 && stereoFlag == 4 && (atom.getElementNumber ()) == 6) {
+ function (atom, atomIndex, stereo, stereoFlag, isFirst) {
+if (stereoFlag == 10 || stereoFlag < (this.is2D ? 3 : 4)) return "";
+if (this.explicitH == 0 && atomIndex >= 0 && stereoFlag == 4 && (atom.getElementNumber ()) == 6) {
 var s = "";
 for (var i = 0; i < 4; i++) {
 if ((s = this.addStereoCheck (0, atomIndex, stereo[i], s, JU.BSUtil.newAndSetBit (atomIndex))) == null) {
-stereoFlag = 10;
+return "";
+}}
+}if (this.is2D) {
+var dir = (stereoFlag == 4 || !isFirst ? 1 : -1);
+var bonds = atom.getEdges ();
+var c = null;
+for (var i = atom.getBondCount (); --i >= 0; ) {
+var b = bonds[i];
+if (atom === b.getAtom (0)) {
+switch (b.getBondType ()) {
+case 1025:
+this.setStereoTemp (stereo, c = b.getAtom (1), dir);
+break;
+case 1041:
+this.setStereoTemp (stereo, c = b.getAtom (1), -dir);
+break;
+}
+}}
+if (c == null) return "";
+if (stereoFlag == 3) {
+stereo[stereoFlag++] = c;
+}}return JS.SmilesStereo.getStereoFlag (atom, stereo, stereoFlag, this.vTemp, this.is2D);
+}, "JU.SimpleNode,~N,~A,~N,~B");
+Clazz_defineMethod (c$, "setStereoTemp", 
+ function (stereo, a, z) {
+for (var i = 0; i < 4; i++) {
+if (stereo[i] === a) {
+var b =  new JS.SmilesAtom ();
+var c = a.getXYZ ();
+b.set (c.x, c.y, z);
+stereo[i] = b;
 break;
 }}
-}return (stereoFlag > 6 ? "" : JS.SmilesStereo.getStereoFlag (atom, stereo, stereoFlag, this.vTemp));
-}, "JU.SimpleNode,~N,~A,~N");
+}, "~A,JU.SimpleNode,~N");
 Clazz_defineMethod (c$, "addStereoCheck", 
  function (level, atomIndex, atom, s, bsDone) {
 if (bsDone != null) bsDone.set (atomIndex);
 var n = (atom).getAtomicAndIsotopeNumber ();
 var nx = atom.getCovalentBondCount ();
-var nh = (n == 6 && !this.explicitH ? (atom).getCovalentHydrogenCount () : 0);
+var nh = (n == 6 && this.explicitH != 0 ? (atom).getCovalentHydrogenCount () : 0);
 if (n == 6 ? nx != 4 : n == 1 || nx > 1) return s + (++this.chainCheck);
 var sa = ";" + level + "/" + n + "/" + nh + "/" + nx + (level == 0 ? "," : "_");
 if (n == 6) {
@@ -3050,14 +3156,18 @@ function () {
 return "";
 });
 c$.getAtomLabel = Clazz_defineMethod (c$, "getAtomLabel", 
-function (atomicNumber, isotopeNumber, valence, charge, osclass, nH, isAromatic, stereo) {
+function (atomicNumber, isotopeNumber, valence, charge, osclass, nH, isAromatic, stereo, is2D) {
 var sym = JU.Elements.elementSymbolFromNumber (atomicNumber);
 if (isAromatic) {
 sym = sym.toLowerCase ();
 if (atomicNumber != 6) valence = 2147483647;
-}var count = (valence == 2147483647 || isotopeNumber != 0 || charge != 0 || !Float.isNaN (osclass) || stereo != null && stereo.length > 0 ? -1 : JS.SmilesAtom.getDefaultCount (atomicNumber, false));
-return (count == valence ? sym : "[" + (isotopeNumber <= 0 ? "" : "" + isotopeNumber) + sym + (stereo == null ? "" : stereo) + (nH > 1 ? "H" + nH : nH == 1 ? "H" : "") + (charge < 0 && charge != -2147483648 ? "" + charge : charge > 0 ? "+" + charge : "") + (Float.isNaN (osclass) ? "" : ":" + Clazz_floatToInt (osclass)) + "]");
-}, "~N,~N,~N,~N,~N,~N,~B,~S");
+}var simple = (valence != 2147483647 && isotopeNumber == 0 && charge == 0 && Float.isNaN (osclass) && (stereo == null || stereo.length == 0));
+var norm = JS.SmilesAtom.getDefaultCount (atomicNumber, false);
+if (is2D && nH == 0) {
+if (simple && atomicNumber == 6) return sym;
+nH = norm - valence;
+}return (simple && norm == valence ? sym : "[" + (isotopeNumber <= 0 ? "" : "" + isotopeNumber) + sym + (stereo == null ? "" : stereo) + (nH > 1 ? "H" + nH : nH == 1 ? "H" : "") + (charge < 0 && charge != -2147483648 ? "" + charge : charge > 0 ? "+" + charge : "") + (Float.isNaN (osclass) ? "" : ":" + Clazz_floatToInt (osclass)) + "]");
+}, "~N,~N,~N,~N,~N,~N,~B,~S,~B");
 Clazz_overrideMethod (c$, "getBioSmilesType", 
 function () {
 return this.bioType;
@@ -3205,6 +3315,7 @@ this.primitives = bond.primitives;
 this.nPrimitives = bond.nPrimitives;
 this.bondsOr = bond.bondsOr;
 this.nBondsOr = bond.nBondsOr;
+this.atropType = bond.atropType;
 }, "JS.SmilesBond");
 Clazz_defineMethod (c$, "setAtropType", 
 function (nn) {
@@ -3294,10 +3405,6 @@ default:
 return 1;
 }
 }, "~S,~B,~B");
-Clazz_defineMethod (c$, "getBondType", 
-function () {
-return this.order;
-});
 Clazz_defineMethod (c$, "getValence", 
 function () {
 return (this.order & 7);
@@ -3365,6 +3472,10 @@ Clazz_defineMethod (c$, "getMatchingBond",
 function () {
 return this.matchingBond == null ? this : this.matchingBond;
 });
+Clazz_overrideMethod (c$, "getAtom", 
+function (i) {
+return (i == 1 ? this.atom2 : this.atom1);
+}, "~N");
 Clazz_defineStatics (c$,
 "TYPE_UNKNOWN", -1,
 "TYPE_NONE", 0,
@@ -3977,7 +4088,7 @@ if (this.isSmarts && ch == '!') {
 ch = JS.SmilesParser.getChar (pattern, ++index);
 if (ch == '\0') throw  new JS.InvalidSmilesException ("invalid '!'");
 newAtom.not = isNot = true;
-}var biopt = pattern.indexOf ('.');
+}var biopt = (pattern.indexOf ("@PH") >= 0 ? -1 : pattern.indexOf ('.'));
 if (biopt >= 0) {
 newAtom.isBioResidue = true;
 var resOrName = pattern.substring (index, biopt);
@@ -4235,7 +4346,7 @@ Clazz_defineMethod (c$, "checkLogic",
 var pt = pattern.lastIndexOf ("!");
 if (atom != null) atom.pattern = pattern;
 while (pt > 0) {
-if (",;&!".indexOf (pattern.charAt (pt - 1)) < 0) pattern = pattern.substring (0, pt) + "&" + pattern.substring (pt);
+if (",;&!(".indexOf (pattern.charAt (pt - 1)) < 0) pattern = pattern.substring (0, pt) + "&" + pattern.substring (pt);
 pt = pattern.lastIndexOf ("!", pt - 1);
 }
 pt = pattern.indexOf (',');
@@ -4398,7 +4509,6 @@ Clazz_declarePackage ("JS");
 Clazz_load (null, "JS.SmilesExt", ["java.lang.Float", "JU.AU", "$.BS", "$.Lst", "$.M4", "$.Measure", "$.P3", "J.api.Interface", "JU.Logger"], function () {
 c$ = Clazz_decorateAsClass (function () {
 this.e = null;
-this.sm = null;
 Clazz_instantialize (this, arguments);
 }, JS, "SmilesExt");
 Clazz_makeConstructor (c$, 
@@ -4407,7 +4517,6 @@ function () {
 Clazz_defineMethod (c$, "init", 
 function (se) {
 this.e = se;
-this.sm = this.e.vwr.getSmilesMatcher ();
 return this;
 }, "~O");
 Clazz_defineMethod (c$, "getSmilesCorrelation", 
@@ -4421,14 +4530,15 @@ ptsB =  new JU.Lst ();
 var c =  new JU.P3 ();
 var atoms = this.e.vwr.ms.at;
 var ac = this.e.vwr.ms.ac;
-var maps = this.sm.getCorrelationMaps (smiles, atoms, ac, bsA, flags | 8);
-if (maps == null) this.e.evalError (this.sm.getLastException (), null);
+var sm = this.e.vwr.getSmilesMatcher ();
+var maps = sm.getCorrelationMaps (smiles, atoms, ac, bsA, flags | 8);
+if (maps == null) this.e.evalError (sm.getLastException (), null);
 if (maps.length == 0) return NaN;
 var mapFirst = maps[0];
 for (var i = 0; i < mapFirst.length; i++) ptsA.addLast (atoms[mapFirst[i]]);
 
-maps = this.sm.getCorrelationMaps (smiles, atoms, ac, bsB, flags);
-if (maps == null) this.e.evalError (this.sm.getLastException (), null);
+maps = sm.getCorrelationMaps (smiles, atoms, ac, bsB, flags);
+if (maps == null) this.e.evalError (sm.getLastException (), null);
 if (maps.length == 0) return NaN;
 JU.Logger.info (maps.length + " mappings found");
 if (bestMap || !asMap) {
@@ -4474,9 +4584,9 @@ return 0;
 }, "JU.BS,JU.BS,~S,JU.Lst,JU.Lst,JU.M4,JU.Lst,~B,~A,JU.P3,~B,~N");
 Clazz_defineMethod (c$, "getSmilesMatches", 
 function (pattern, smiles, bsSelected, bsMatch3D, flags, asOneBitset, firstMatchOnly) {
-if (pattern.length == 0 || pattern.endsWith ("///") || pattern.equals ("H") || pattern.equals ("top") || pattern.equalsIgnoreCase ("NOAROMATIC")) {
+if (pattern.length == 0 || pattern.endsWith ("///") || pattern.equals ("H") || pattern.equals ("H2") || pattern.equals ("top") || pattern.equalsIgnoreCase ("NOAROMATIC")) {
 try {
-return this.e.vwr.getSmilesOpt (bsSelected, 0, 0, flags | (pattern.equals ("H") ? 4096 : 0) | (pattern.equals ("top") ? 8192 : 0) | (pattern.equalsIgnoreCase ("NOAROMATIC") ? 16 : 0), (pattern.endsWith ("///") ? pattern : null));
+return this.e.vwr.getSmilesOpt (bsSelected, 0, 0, flags | (pattern.equals ("H2") ? 8192 : 0) | (pattern.equals ("H") ? 4096 : 0) | (pattern.equals ("top") ? 16384 : 0) | (pattern.equalsIgnoreCase ("NOAROMATIC") ? 16 : 0), (pattern.endsWith ("///") ? pattern : null));
 } catch (ex) {
 if (Clazz_exceptionOf (ex, Exception)) {
 this.e.evalError (ex.getMessage (), null);
@@ -4486,15 +4596,15 @@ throw ex;
 }
 }var b;
 if (bsMatch3D == null) {
-var isSmarts = ((flags & 2) == 2);
-var isOK = true;
 try {
 if (smiles == null) {
 b = this.e.vwr.getSubstructureSetArray (pattern, bsSelected, flags);
 } else if (pattern.equals ("chirality")) {
 return this.e.vwr.calculateChiralityForSmiles (smiles);
 } else {
-var map = this.sm.find (pattern, smiles, (isSmarts ? 2 : 1) | (firstMatchOnly ? 8 : 0));
+var isSmarts = ((flags & 2) == 2);
+var ignoreElements = ((flags & 16384) == 16384);
+var map = this.e.vwr.getSmilesMatcher ().find (pattern, smiles, (isSmarts ? 2 : 1) | (firstMatchOnly ? 8 : 0) | (ignoreElements ? 16384 : 0));
 if (!asOneBitset) return (!firstMatchOnly ? map : map.length == 0 ?  Clazz_newIntArray (0, 0) : map[0]);
 var bs =  new JU.BS ();
 for (var j = 0; j < map.length; j++) {
@@ -4567,6 +4677,34 @@ if (v - diff[i][0] > 180) v -= 360;
 }diff[i][pt] = v;
 }
 }, "~A,~A,~A,~N");
+Clazz_defineMethod (c$, "mapPolyhedra", 
+function (i1, i2, isSmiles, m) {
+var ptsA =  new JU.Lst ();
+var ptsB =  new JU.Lst ();
+var data;
+data =  Clazz_newArray (-1, [Integer.$valueOf (i1), null]);
+this.e.getShapePropertyData (21, "syminfo", data);
+var p1 = data[1];
+data[0] = Integer.$valueOf (i2);
+data[1] = null;
+this.e.getShapePropertyData (21, "syminfo", data);
+var p2 = data[1];
+if (p1 == null || p2 == null) return NaN;
+var smiles1 = p1.get ("polySmiles");
+var smiles2 = p2.get ("polySmiles");
+var map = this.getSmilesMatches (smiles2, smiles1, null, null, isSmiles ? 1 : 16385, false, true);
+if (map.length == 0) return NaN;
+ptsA.addLast (p1.get ("center"));
+var a = p1.get ("vertices");
+for (var i = 0, n = a.length; i < n; i++) ptsA.add (a[map[i + 1] - 1]);
+
+ptsB.addLast (p2.get ("center"));
+a = p2.get ("vertices");
+for (var i = 0, n = a.length; i < n; i++) ptsB.add (a[i]);
+
+J.api.Interface.getInterface ("JU.Eigen", this.e.vwr, "script");
+return JU.Measure.getTransformMatrix4 (ptsA, ptsB, m, null);
+}, "~N,~N,~B,JU.M4");
 });
 })(Clazz
 ,Clazz.getClassName

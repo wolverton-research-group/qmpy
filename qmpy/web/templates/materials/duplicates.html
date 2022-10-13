@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block extrascript %}
-<script type="text/javascript" src={% static "js/jsmol/JSmol.min.js" %}></script>
+<script type="text/javascript" src={% static "js/jsmol/JSmol.min.nojq.js" %}></script>
 {% endblock %}
 
 {% block content_title %}
@@ -22,11 +22,12 @@
   <div id="jmol">
     <script>
       var Info = {
+	serverURL: "{{jsmol_serverURL}}",
         j2sPath: "{% static 'js/jsmol/j2s' %}",
         {% if primitive %}
-        src: "/materials/export/primitive/cif/{{entry.structure.id}}",
+        src: "/materials/export/primitive/poscar/{{entry.structure.id}}",
         {% else %}
-        src: "/materials/export/conventional/cif/{{entry.structure.id}}",
+        src: "/materials/export/conventional/poscar/{{entry.structure.id}}",
         {% endif %}
         use: "HTML5",
         width: 300,

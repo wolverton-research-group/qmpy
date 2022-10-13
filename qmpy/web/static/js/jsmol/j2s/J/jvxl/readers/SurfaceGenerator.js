@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.jvxl.readers");
-Clazz.load (["JU.P3", "$.V3"], "J.jvxl.readers.SurfaceGenerator", ["java.lang.Float", "java.util.Map", "JU.AU", "$.BS", "$.Measure", "$.P4", "$.PT", "$.Rdr", "J.jvxl.data.JvxlCoder", "$.JvxlData", "$.MeshData", "$.VolumeData", "J.jvxl.readers.Parameters", "$.SurfaceReader", "JU.Logger", "JV.FileManager"], function () {
+Clazz.load (["JU.P3", "$.V3"], "J.jvxl.readers.SurfaceGenerator", ["java.lang.Float", "java.util.Map", "JU.AU", "$.BS", "$.Measure", "$.P4", "$.PT", "$.Rdr", "$.SB", "J.jvxl.data.JvxlCoder", "$.JvxlData", "$.MeshData", "$.VolumeData", "J.jvxl.readers.Parameters", "$.SurfaceReader", "JU.Logger", "JV.FileManager"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.params = null;
 this.jvxlData = null;
@@ -579,6 +579,8 @@ Clazz.defineMethod (c$, "generateSurface",
  function () {
 if (++this.params.state != 2) return;
 this.setReader ();
+if (this.params.sbOut == null) this.params.sbOut =  new JU.SB ();
+this.jvxlData.sbOut = this.params.sbOut;
 var haveMeshDataServer = (this.meshDataServer != null);
 if (this.params.colorBySign) this.params.isBicolorMap = true;
 if (this.surfaceReader == null) {
@@ -589,12 +591,16 @@ JU.Logger.error ("Could not create isosurface");
 this.params.cutoff = NaN;
 this.surfaceReader.closeReader ();
 return;
+}if (this.params.probes != null) {
+for (var i = this.params.probeValues.length; --i >= 0; ) {
+this.params.probeValues[i] = this.surfaceReader.getValueAtPoint (this.params.probes[i], false);
+}
 }if (this.params.pocket != null && haveMeshDataServer) this.surfaceReader.selectPocket (!this.params.pocket.booleanValue ());
 if (this.params.minSet > 0) this.surfaceReader.excludeMinimumSet ();
 if (this.params.maxSet > 0) this.surfaceReader.excludeMaximumSet ();
 if (this.params.slabInfo != null) this.surfaceReader.slabIsosurface (this.params.slabInfo);
 if (haveMeshDataServer && this.meshDataServer.notifySurfaceGenerationCompleted ()) this.surfaceReader.hasColorData = false;
-if (this.jvxlData.thisSet >= 0) this.getSurfaceSets ();
+if (this.jvxlData.thisSet != null) this.getSurfaceSets ();
 if (this.jvxlData.jvxlDataIs2dContour) {
 this.surfaceReader.colorIsosurface ();
 this.params.state = 3;

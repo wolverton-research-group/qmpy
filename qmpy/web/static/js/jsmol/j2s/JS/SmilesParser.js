@@ -512,7 +512,7 @@ if (this.isSmarts && ch == '!') {
 ch = JS.SmilesParser.getChar (pattern, ++index);
 if (ch == '\0') throw  new JS.InvalidSmilesException ("invalid '!'");
 newAtom.not = isNot = true;
-}var biopt = pattern.indexOf ('.');
+}var biopt = (pattern.indexOf ("@PH") >= 0 ? -1 : pattern.indexOf ('.'));
 if (biopt >= 0) {
 newAtom.isBioResidue = true;
 var resOrName = pattern.substring (index, biopt);
@@ -770,7 +770,7 @@ Clazz.defineMethod (c$, "checkLogic",
 var pt = pattern.lastIndexOf ("!");
 if (atom != null) atom.pattern = pattern;
 while (pt > 0) {
-if (",;&!".indexOf (pattern.charAt (pt - 1)) < 0) pattern = pattern.substring (0, pt) + "&" + pattern.substring (pt);
+if (",;&!(".indexOf (pattern.charAt (pt - 1)) < 0) pattern = pattern.substring (0, pt) + "&" + pattern.substring (pt);
 pt = pattern.lastIndexOf ("!", pt - 1);
 }
 pt = pattern.indexOf (',');

@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 {% load i18n %}
+{% load custom_filters %}
 
 {% block title %} OQMD | The Open Quantum Materials Database {% endblock %}
 
@@ -42,8 +43,11 @@ Welcome, {{ user.username }}.<br>
   <ul>
     <li> <a href="/materials/composition">Search Compositions</a></li>
     <li> <a href="/api/search">Query Materials</a></li>
+    {% if is_debug|IS_DEBUG %}
     <li> <a href="/materials/discovery">Compound discovery</a> </li>
+    {% endif %}
   </ul>
+  {% if is_debug|IS_DEBUG %}
   <li><a href="/computing/">Computing</a>
   <ul>
     <li> <a href="/computing/hosts">Hosts</a>
@@ -63,6 +67,7 @@ Welcome, {{ user.username }}.<br>
     </li>
     <li> <a href="/computing/queue">Queue</a></li>
   </ul>
+  {% endif %}
 	<li><a href="/analysis/">Analysis</a>
   <ul>
     <li> <a href="/analysis/gclp/">GCLP</a> </li>
@@ -81,8 +86,7 @@ Welcome, {{ user.username }}.<br>
 
 	<li><a href="/api">API</a>
   <ul>
-    <li> <a href="/oqmdapi/formationenergy">OQMD API</a></li>
-    <li> <a href="/optimade/structures">Optimade API</a></li>
+    <li> <a href="/optimade">OPTIMADE API</a></li>
     <li> <a href="{% static "docs/restful.html" %}">RESTful API Documentation</a></li>
   </ul>
 

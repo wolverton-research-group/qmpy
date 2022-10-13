@@ -2,7 +2,6 @@ Clazz.declarePackage ("JS");
 Clazz.load (null, "JS.SmilesExt", ["java.lang.Float", "JU.AU", "$.BS", "$.Lst", "$.M4", "$.Measure", "$.P3", "J.api.Interface", "JU.Logger"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.e = null;
-this.sm = null;
 Clazz.instantialize (this, arguments);
 }, JS, "SmilesExt");
 Clazz.makeConstructor (c$, 
@@ -11,7 +10,6 @@ function () {
 Clazz.defineMethod (c$, "init", 
 function (se) {
 this.e = se;
-this.sm = this.e.vwr.getSmilesMatcher ();
 return this;
 }, "~O");
 Clazz.defineMethod (c$, "getSmilesCorrelation", 
@@ -25,14 +23,15 @@ ptsB =  new JU.Lst ();
 var c =  new JU.P3 ();
 var atoms = this.e.vwr.ms.at;
 var ac = this.e.vwr.ms.ac;
-var maps = this.sm.getCorrelationMaps (smiles, atoms, ac, bsA, flags | 8);
-if (maps == null) this.e.evalError (this.sm.getLastException (), null);
+var sm = this.e.vwr.getSmilesMatcher ();
+var maps = sm.getCorrelationMaps (smiles, atoms, ac, bsA, flags | 8);
+if (maps == null) this.e.evalError (sm.getLastException (), null);
 if (maps.length == 0) return NaN;
 var mapFirst = maps[0];
 for (var i = 0; i < mapFirst.length; i++) ptsA.addLast (atoms[mapFirst[i]]);
 
-maps = this.sm.getCorrelationMaps (smiles, atoms, ac, bsB, flags);
-if (maps == null) this.e.evalError (this.sm.getLastException (), null);
+maps = sm.getCorrelationMaps (smiles, atoms, ac, bsB, flags);
+if (maps == null) this.e.evalError (sm.getLastException (), null);
 if (maps.length == 0) return NaN;
 JU.Logger.info (maps.length + " mappings found");
 if (bestMap || !asMap) {
@@ -78,9 +77,9 @@ return 0;
 }, "JU.BS,JU.BS,~S,JU.Lst,JU.Lst,JU.M4,JU.Lst,~B,~A,JU.P3,~B,~N");
 Clazz.defineMethod (c$, "getSmilesMatches", 
 function (pattern, smiles, bsSelected, bsMatch3D, flags, asOneBitset, firstMatchOnly) {
-if (pattern.length == 0 || pattern.endsWith ("///") || pattern.equals ("H") || pattern.equals ("top") || pattern.equalsIgnoreCase ("NOAROMATIC")) {
+if (pattern.length == 0 || pattern.endsWith ("///") || pattern.equals ("H") || pattern.equals ("H2") || pattern.equals ("top") || pattern.equalsIgnoreCase ("NOAROMATIC")) {
 try {
-return this.e.vwr.getSmilesOpt (bsSelected, 0, 0, flags | (pattern.equals ("H") ? 4096 : 0) | (pattern.equals ("top") ? 8192 : 0) | (pattern.equalsIgnoreCase ("NOAROMATIC") ? 16 : 0), (pattern.endsWith ("///") ? pattern : null));
+return this.e.vwr.getSmilesOpt (bsSelected, 0, 0, flags | (pattern.equals ("H2") ? 8192 : 0) | (pattern.equals ("H") ? 4096 : 0) | (pattern.equals ("top") ? 16384 : 0) | (pattern.equalsIgnoreCase ("NOAROMATIC") ? 16 : 0), (pattern.endsWith ("///") ? pattern : null));
 } catch (ex) {
 if (Clazz.exceptionOf (ex, Exception)) {
 this.e.evalError (ex.getMessage (), null);
@@ -90,15 +89,15 @@ throw ex;
 }
 }var b;
 if (bsMatch3D == null) {
-var isSmarts = ((flags & 2) == 2);
-var isOK = true;
 try {
 if (smiles == null) {
 b = this.e.vwr.getSubstructureSetArray (pattern, bsSelected, flags);
 } else if (pattern.equals ("chirality")) {
 return this.e.vwr.calculateChiralityForSmiles (smiles);
 } else {
-var map = this.sm.find (pattern, smiles, (isSmarts ? 2 : 1) | (firstMatchOnly ? 8 : 0));
+var isSmarts = ((flags & 2) == 2);
+var ignoreElements = ((flags & 16384) == 16384);
+var map = this.e.vwr.getSmilesMatcher ().find (pattern, smiles, (isSmarts ? 2 : 1) | (firstMatchOnly ? 8 : 0) | (ignoreElements ? 16384 : 0));
 if (!asOneBitset) return (!firstMatchOnly ? map : map.length == 0 ?  Clazz.newIntArray (0, 0) : map[0]);
 var bs =  new JU.BS ();
 for (var j = 0; j < map.length; j++) {
@@ -171,4 +170,32 @@ if (v - diff[i][0] > 180) v -= 360;
 }diff[i][pt] = v;
 }
 }, "~A,~A,~A,~N");
+Clazz.defineMethod (c$, "mapPolyhedra", 
+function (i1, i2, isSmiles, m) {
+var ptsA =  new JU.Lst ();
+var ptsB =  new JU.Lst ();
+var data;
+data =  Clazz.newArray (-1, [Integer.$valueOf (i1), null]);
+this.e.getShapePropertyData (21, "syminfo", data);
+var p1 = data[1];
+data[0] = Integer.$valueOf (i2);
+data[1] = null;
+this.e.getShapePropertyData (21, "syminfo", data);
+var p2 = data[1];
+if (p1 == null || p2 == null) return NaN;
+var smiles1 = p1.get ("polySmiles");
+var smiles2 = p2.get ("polySmiles");
+var map = this.getSmilesMatches (smiles2, smiles1, null, null, isSmiles ? 1 : 16385, false, true);
+if (map.length == 0) return NaN;
+ptsA.addLast (p1.get ("center"));
+var a = p1.get ("vertices");
+for (var i = 0, n = a.length; i < n; i++) ptsA.add (a[map[i + 1] - 1]);
+
+ptsB.addLast (p2.get ("center"));
+a = p2.get ("vertices");
+for (var i = 0, n = a.length; i < n; i++) ptsB.add (a[i]);
+
+J.api.Interface.getInterface ("JU.Eigen", this.e.vwr, "script");
+return JU.Measure.getTransformMatrix4 (ptsA, ptsB, m, null);
+}, "~N,~N,~B,JU.M4");
 });

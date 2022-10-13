@@ -111,7 +111,7 @@ case J.atomdata.RadiusData.EnumType.ABSOLUTE:
 if (rd.value == 0) isVisible = false;
 setRadius = rd.value;
 default:
-rd.valueExtended = this.vwr.getCurrentSolventProbeRadius ();
+rd.valueExtended = (this.vwr.getBoolean (603979948) ? this.vwr.getFloat (570425394) : 0);
 }
 var maxRadius;
 switch (rd.vdwType) {
@@ -138,7 +138,7 @@ var isAll = (bsSelected == null);
 var i0 = (isAll ? this.ac - 1 : bsSelected.nextSetBit (0));
 for (var i = i0; i >= 0; i = (isAll ? i - 1 : bsSelected.nextSetBit (i + 1))) this.bsOn.setBitTo (i, false);
 
-}for (var i = this.ac; --i >= 0; ) this.atoms[i].setShapeVisibility (this.vf, this.bsOn.get (i));
+}for (var i = this.ac; --i >= 0; ) if (this.atoms[i] != null) this.atoms[i].setShapeVisibility (this.vf, this.bsOn.get (i));
 
 if (!isVisible) return;
 if (newSet) {
@@ -146,7 +146,7 @@ this.mads = null;
 this.ec.newSet ();
 }var dotsConvexMaps = this.ec.getDotsConvexMaps ();
 if (dotsConvexMaps != null) {
-for (var i = this.ac; --i >= 0; ) if (this.bsOn.get (i)) {
+for (var i = this.ac; --i >= 0; ) if (this.atoms[i] != null && this.bsOn.get (i)) {
 dotsConvexMaps[i] = null;
 }
 }if (dotsConvexMaps == null && (this.colixes == null || this.colixes.length != this.ac)) this.checkColixLength (4, this.ac);
@@ -157,7 +157,7 @@ Clazz.overrideMethod (c$, "setAtomClickability",
 function () {
 for (var i = this.ac; --i >= 0; ) {
 var atom = this.atoms[i];
-if ((atom.shapeVisibilityFlags & this.vf) == 0 || this.ms.isAtomHidden (i)) continue;
+if (atom != null && ((atom.shapeVisibilityFlags & this.vf) == 0 || this.ms.isAtomHidden (i))) continue;
 atom.setClickable (this.vf);
 }
 });

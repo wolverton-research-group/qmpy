@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.adapter.readers.spartan");
-Clazz.load (null, "J.adapter.readers.spartan.SpartanUtil", ["java.io.BufferedInputStream", "java.util.Hashtable", "$.StringTokenizer", "JU.Lst", "$.PT", "$.Rdr", "$.SB", "J.api.Interface", "JU.Escape", "$.Logger"], function () {
+Clazz.load (null, "J.adapter.readers.spartan.SpartanUtil", ["java.io.BufferedInputStream", "java.util.Hashtable", "$.StringTokenizer", "javajs.api.GenericZipInputStream", "JU.Lst", "$.PT", "$.Rdr", "$.SB", "J.api.Interface", "JU.Escape", "$.Logger"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.fm = null;
 Clazz.instantialize (this, arguments);
@@ -56,7 +56,7 @@ function (is, zipDirectory) {
 var data =  new JU.SB ();
 data.append ("Zip File Directory: ").append ("\n").append (JU.Escape.eAS (zipDirectory, true)).append ("\n");
 var fileData =  new java.util.Hashtable ();
-this.fm.vwr.getJzt ().getAllZipData (is,  Clazz.newArray (-1, []), "", "Molecule", "__MACOSX", fileData);
+this.getAllZipData (is,  Clazz.newArray (-1, []), "", "Molecule", "__MACOSX", fileData);
 var prefix = "|";
 var outputData = fileData.get (prefix + "output");
 if (outputData == null) outputData = fileData.get ((prefix = "|" + zipDirectory[1]) + "output");
@@ -164,7 +164,7 @@ var doc = J.api.Interface.getInterface ("JU.CompoundDocument", this.fm.vwr, "fil
 doc.setDocStream (this.fm.vwr.getJzt (), bis);
 doc.getAllDataMapped (name, "Molecule", fileData);
 } else if (JU.Rdr.isZipS (bis)) {
-this.fm.vwr.getJzt ().getAllZipData (bis, subFileList, name, "Molecule", "__MACOSX", fileData);
+this.getAllZipData (bis, subFileList, name, "Molecule", "__MACOSX", fileData);
 } else if (asBinaryString) {
 var bd = J.api.Interface.getInterface ("JU.BinaryDocument", this.fm.vwr, "file");
 bd.setStream (bis, false);
@@ -212,4 +212,44 @@ throw e;
 if (!fileData.containsKey (path)) fileData.put (path, "FILE NOT FOUND: " + path + "\n");
 return path;
 }, "~S,~S,java.util.Map");
+Clazz.defineMethod (c$, "getAllZipData", 
+ function (is, subfileList, name0, binaryFileList, exclude, fileData) {
+var zis =  new javajs.api.GenericZipInputStream (Clazz.instanceOf (is, java.io.BufferedInputStream) ? is :  new java.io.BufferedInputStream (is));
+var ze;
+var listing =  new JU.SB ();
+binaryFileList = "|" + binaryFileList + "|";
+var prefix = JU.PT.join (subfileList, '/', 1);
+var prefixd = null;
+if (prefix != null) {
+prefixd = prefix.substring (0, prefix.indexOf ("/") + 1);
+if (prefixd.length == 0) prefixd = null;
+}try {
+while ((ze = zis.getNextEntry ()) != null) {
+var name = ze.getName ();
+if (prefix != null && prefixd != null && !(name.equals (prefix) || name.startsWith (prefixd)) || exclude != null && name.contains (exclude)) continue;
+listing.append (name).appendC ('\n');
+var sname = "|" + name.substring (name.lastIndexOf ("/") + 1) + "|";
+var asBinaryString = (binaryFileList.indexOf (sname) >= 0);
+var bytes = JU.Rdr.getLimitedStreamBytes (zis, ze.getSize ());
+var str;
+if (asBinaryString) {
+var ret =  new JU.SB ();
+for (var i = 0; i < bytes.length; i++) ret.append (Integer.toHexString (bytes[i] & 0xFF)).appendC (' ');
+
+str = ret.toString ();
+name += ":asBinaryString";
+} else {
+str = JU.Rdr.fixUTF (bytes);
+}str = "BEGIN Directory Entry " + name + "\n" + str + "\nEND Directory Entry " + name + "\n";
+var key = name0 + "|" + name;
+fileData.put (key, str);
+}
+} catch (e) {
+if (Clazz.exceptionOf (e, Exception)) {
+} else {
+throw e;
+}
+}
+fileData.put ("#Directory_Listing", listing.toString ());
+}, "java.io.InputStream,~A,~S,~S,~S,java.util.Map");
 });

@@ -102,13 +102,9 @@ body {font-family: Arial;}
 </style>
 {% endblock %}
 
-
-
-{% block extrastyle %}
-<script type="text/javascript" src={% static "js/jsmol/JSmol.min.js" %}></script>
+{% block extrascript %}
+<script type="text/javascript" src={% static "js/jsmol/JSmol.min.nojq.js" %}></script>
 {% endblock %}
-
-
 
 {% block content_title %}
 <h1> JSMol visualizer </h1>
@@ -119,8 +115,9 @@ body {font-family: Arial;}
 <div>
         <script type="text/javascript">
                 var Info = {
+                        serverURL: "{{jsmol_serverURL}}",
                         j2sPath: "{% static 'js/jsmol/j2s' %}",
-                        src: "/analysis/visualize/custom",
+                        src: "{{jsmol_srcFileURL}}",
                         use: "HTML5",
                         width: 650,
                         height: 650,

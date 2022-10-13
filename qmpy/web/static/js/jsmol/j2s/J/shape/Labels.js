@@ -143,6 +143,7 @@ return;
 }if ("offset" === propertyName) {
 if (!(Clazz.instanceOf (value, Integer))) {
 if (!this.setDefaults) {
+this.checkColixLength (-1, this.ac);
 for (var i = bsSelected.nextSetBit (0); i >= 0 && i < this.ac; i = bsSelected.nextSetBit (i + 1)) this.setPymolOffset (i, value);
 
 }return;
@@ -417,7 +418,7 @@ function () {
 if (this.strings == null) return;
 for (var i = this.strings.length; --i >= 0; ) {
 var label = this.strings[i];
-if (label != null && this.ms.at.length > i && !this.ms.isAtomHidden (i)) this.ms.at[i].setClickable (this.vf);
+if (label != null && this.ms.at.length > i && this.ms.at[i] != null && !this.ms.isAtomHidden (i)) this.ms.at[i].setClickable (this.vf);
 }
 });
 Clazz.overrideMethod (c$, "checkObjectClicked", 

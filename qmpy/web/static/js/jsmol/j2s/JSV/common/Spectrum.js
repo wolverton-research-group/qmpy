@@ -1,28 +1,25 @@
 Clazz.declarePackage ("JSV.common");
 Clazz.load (["java.lang.Enum", "JSV.source.JDXDataObject", "JU.Lst"], "JSV.common.Spectrum", ["java.lang.Boolean", "$.Double", "java.util.Hashtable", "JU.PT", "JSV.common.Coordinate", "$.Parameters", "$.PeakInfo", "JSV.source.JDXSourceStreamTokenizer", "JU.Logger"], function () {
 c$ = Clazz.decorateAsClass (function () {
+this.id = "";
+this.fillColor = null;
 this.subSpectra = null;
 this.peakList = null;
-this.piUnitsX = null;
-this.piUnitsY = null;
+this.peakXLabel = null;
+this.peakYLabel = null;
 this.selectedPeak = null;
 this.highlightedPeak = null;
+this.convertedSpectrum = null;
 this.specShift = 0;
+this.userYFactor = 1;
 this.currentSubSpectrumIndex = 0;
 this.$isForcedSubset = false;
-this.id = "";
-this.convertedSpectrum = null;
-this.userYFactor = 1;
 this.exportXAxisLeftToRight = false;
-this.fillColor = null;
+this.titleLabel = null;
 Clazz.instantialize (this, arguments);
 }, JSV.common, "Spectrum", JSV.source.JDXDataObject);
 Clazz.prepareFields (c$, function () {
 this.peakList =  new JU.Lst ();
-});
-Clazz.overrideMethod (c$, "finalize", 
-function () {
-System.out.println ("JDXSpectrum " + this + " finalized " + this.title);
 });
 Clazz.defineMethod (c$, "dispose", 
 function () {
@@ -46,7 +43,7 @@ Clazz.defineMethod (c$, "copy",
 function () {
 var newSpectrum =  new JSV.common.Spectrum ();
 this.copyTo (newSpectrum);
-newSpectrum.setPeakList (this.peakList, this.piUnitsX, null);
+newSpectrum.setPeakList (this.peakList, this.peakXLabel, null);
 newSpectrum.fillColor = this.fillColor;
 return newSpectrum;
 });
@@ -59,10 +56,10 @@ function () {
 return this.peakList;
 });
 Clazz.defineMethod (c$, "setPeakList", 
-function (list, piUnitsX, piUnitsY) {
+function (list, peakXLabel, peakYLabel) {
 this.peakList = list;
-this.piUnitsX = piUnitsX;
-this.piUnitsY = piUnitsY;
+this.peakXLabel = peakXLabel;
+this.peakYLabel = peakYLabel;
 for (var i = list.size (); --i >= 0; ) this.peakList.get (i).spectrum = this;
 
 if (JU.Logger.debugging) JU.Logger.info ("Spectrum " + this.getTitle () + " peaks: " + list.size ());
@@ -135,13 +132,14 @@ return (this.selectedPeak != null ? this.selectedPeak.getTitle () : this.highlig
 });
 Clazz.defineMethod (c$, "getTitleLabel", 
 function () {
+if (this.titleLabel != null) return this.titleLabel;
 var type = (this.peakList == null || this.peakList.size () == 0 ? this.getQualifiedDataType () : this.peakList.get (0).getType ());
 if (type != null && type.startsWith ("NMR")) {
 if (this.nucleusY != null && !this.nucleusY.equals ("?")) {
 type = "2D" + type;
 } else {
-type = this.nucleusX + type;
-}}return (type != null && type.length > 0 ? type + " " : "") + this.getTitle ();
+type = JSV.source.JDXDataObject.getNominalSpecFreq (this.nucleusX, this.getObservedFreq ()) + " MHz " + this.nucleusX + " " + type;
+}}return this.titleLabel = (type != null && type.length > 0 ? type + " " : "") + this.getTitle ();
 });
 Clazz.defineMethod (c$, "setNextPeak", 
 function (coord, istep) {
@@ -283,7 +281,7 @@ return (this.currentSubSpectrumIndex = JSV.common.Coordinate.intoRange (n, 0, th
 }, "~N");
 Clazz.defineMethod (c$, "addSubSpectrum", 
 function (spectrum, forceSub) {
-if (!forceSub && (this.numDim < 2 || this.blockID != spectrum.blockID) || !JSV.common.Spectrum.allowSubSpec (this, spectrum)) return false;
+if (!forceSub && (this.is1D () || this.blockID != spectrum.blockID) || !JSV.common.Spectrum.allowSubSpec (this, spectrum)) return false;
 this.$isForcedSubset = forceSub;
 if (this.subSpectra == null) {
 this.subSpectra =  new JU.Lst ();
@@ -347,7 +345,7 @@ keys += "  titleLabel type isHZToPPM subSpectrumCount";
 } else {
 JSV.common.Parameters.putInfo (key, info, "titleLabel", this.getTitleLabel ());
 JSV.common.Parameters.putInfo (key, info, "type", this.getDataType ());
-JSV.common.Parameters.putInfo (key, info, "isHZToPPM", Boolean.$valueOf (this.$isHZtoPPM));
+JSV.common.Parameters.putInfo (key, info, "isHZToPPM", Boolean.$valueOf (this.isHZtoPPM ()));
 JSV.common.Parameters.putInfo (key, info, "subSpectrumCount", Integer.$valueOf (this.subSpectra == null ? 0 : this.subSpectra.size ()));
 }}if (keys != null) info.put ("KEYS", keys);
 return info;
@@ -372,10 +370,6 @@ throw e;
 }
 return info;
 }, "~S");
-Clazz.overrideMethod (c$, "toString", 
-function () {
-return this.getTitleLabel ();
-});
 Clazz.defineMethod (c$, "findMatchingPeakInfo", 
 function (pi) {
 for (var i = 0; i < this.peakList.size (); i++) if (this.peakList.get (i).checkTypeMatch (pi)) return this.peakList.get (i);
@@ -388,10 +382,10 @@ return (this.peakList.size () == 0 ?  new JSV.common.PeakInfo () :  new JSV.comm
 });
 Clazz.defineMethod (c$, "getAxisLabel", 
 function (isX) {
-var units = (isX ? this.piUnitsX : this.piUnitsY);
-if (units == null) units = (isX ? this.xLabel : this.yLabel);
-if (units == null) units = (isX ? this.xUnits : this.yUnits);
-return (units == null ? "" : units.equalsIgnoreCase ("WAVENUMBERS") ? "1/cm" : units.equalsIgnoreCase ("nanometers") ? "nm" : units);
+var label = (isX ? this.peakXLabel : this.peakYLabel);
+if (label == null) label = (isX ? this.xLabel : this.yLabel);
+if (label == null) label = (isX ? this.xUnits : this.yUnits);
+return (label == null ? "" : label.equalsIgnoreCase ("WAVENUMBERS") ? "1/cm" : label.equalsIgnoreCase ("nanometers") ? "nm" : label);
 }, "~B");
 Clazz.defineMethod (c$, "findXForPeakNearest", 
 function (x) {
@@ -439,10 +433,6 @@ c$.areLinkableY = Clazz.defineMethod (c$, "areLinkableY",
 function (s1, s2) {
 return (s1.isNMR () && s2.isNMR () && s1.nucleusX.equals (s2.nucleusY));
 }, "JSV.common.Spectrum,JSV.common.Spectrum");
-Clazz.defineMethod (c$, "setNHydrogens", 
-function (nH) {
-this.nH = nH;
-}, "~N");
 Clazz.defineMethod (c$, "getPeakWidth", 
 function () {
 var w = this.getLastX () - this.getFirstX ();
@@ -461,6 +451,10 @@ function (color) {
 this.fillColor = color;
 if (this.convertedSpectrum != null) this.convertedSpectrum.fillColor = color;
 }, "javajs.api.GenericColor");
+Clazz.overrideMethod (c$, "toString", 
+function () {
+return this.getTitleLabel () + (this.xyCoords == null ? "" : " xyCoords.length=" + this.xyCoords.length);
+});
 Clazz.pu$h(self.c$);
 c$ = Clazz.declareType (JSV.common.Spectrum, "IRMode", Enum);
 c$.getMode = Clazz.defineMethod (c$, "getMode", 

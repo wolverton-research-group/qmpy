@@ -25,7 +25,7 @@ this.isXLowToHigh = true;
 this.precalculateVoxelData = false;
 this.params.fullyLit = true;
 this.isPlanarMapping = (this.params.thePlane != null || this.params.state == 3);
-if (this.params.func != null) this.volumeData.sr = this;
+this.volumeData.sr = (this.params.func == null ? null : this);
 }, "J.jvxl.readers.SurfaceGenerator");
 Clazz.overrideMethod (c$, "setup", 
 function (isMapData) {
@@ -69,12 +69,12 @@ return plane;
 }, "~N");
 Clazz.defineMethod (c$, "setPlane", 
  function (x, plane) {
-for (var y = 0, ptyz = 0; y < this.nPointsY; ++y) for (var z = 0; z < this.nPointsZ; ++z) plane[ptyz++] = this.getValue (x, y, z);
+for (var y = 0, ptyz = 0; y < this.nPointsY; ++y) for (var z = 0; z < this.nPointsZ; ++z) plane[ptyz++] = this.getValue (x, y, z, 0);
 
 
 }, "~N,~A");
-Clazz.defineMethod (c$, "getValue", 
-function (x, y, z) {
+Clazz.overrideMethod (c$, "getValue", 
+function (x, y, z, pxyz) {
 var value;
 if (this.data == null) {
 value = this.evaluateValue (x, y, z);
@@ -82,7 +82,7 @@ value = this.evaluateValue (x, y, z);
 this.volumeData.voxelPtToXYZ (x, y, z, this.ptTemp);
 value = this.data[x][y];
 }return (this.isPlanarMapping ? value : value - this.ptTemp.z);
-}, "~N,~N,~N");
+}, "~N,~N,~N,~N");
 Clazz.overrideMethod (c$, "getValueAtPoint", 
 function (pt, getSource) {
 if (this.params.func == null) return 0;

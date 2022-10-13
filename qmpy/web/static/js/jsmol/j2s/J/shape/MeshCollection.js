@@ -1,6 +1,7 @@
 Clazz.declarePackage ("J.shape");
 Clazz.load (["J.shape.Shape"], "J.shape.MeshCollection", ["java.util.Hashtable", "JU.AU", "$.Lst", "$.P3", "$.PT", "$.SB", "JS.T", "J.shape.Mesh", "JU.C", "$.Escape", "$.Logger", "JV.StateManager"], function () {
 c$ = Clazz.decorateAsClass (function () {
+this.jvxlData = null;
 this.meshCount = 0;
 this.meshes = null;
 this.currentMesh = null;
@@ -223,6 +224,7 @@ var key = (this.explicitID && JU.PT.isWild (this.previousMeshID) ? this.previous
 var list = this.getMeshList (key, false);
 for (var i = list.size (); --i >= 0; ) this.setMeshTokenProperty (list.get (i), tokProp, bProp, testD);
 
+if (list.size () == 1) this.currentMesh = list.get (0);
 } else {
 this.setMeshTokenProperty (this.currentMesh, tokProp, bProp, testD);
 if (this.linkedMesh != null) this.setMeshTokenProperty (this.linkedMesh, tokProp, bProp, testD);
@@ -340,15 +342,29 @@ var info = this.getProperty ("jvxlFileInfo", 0);
 if (info != null) sb.append (info).appendC ('\n');
 }}
 return sb.toString ();
-}if (property === "vertices") return this.getVertices (m);
-if (property === "info") return (m == null ? null : m.getInfo (false));
-if (property === "data") return (m == null ? null : m.getInfo (true));
+}if (property === "values") return this.getValues (m);
+if (property === "vertices") return this.getVertices (m);
+if (property === "info") {
+if (m == null) return null;
+var info = m.getInfo (false);
+if (info != null && this.jvxlData != null) {
+var ss = this.jvxlData.jvxlFileTitle;
+if (ss != null) info.put ("jvxlFileTitle", ss.trim ());
+ss = this.jvxlData.jvxlFileSource;
+if (ss != null) info.put ("jvxlFileSource", ss);
+ss = this.jvxlData.jvxlFileMessage;
+if (ss != null) info.put ("jvxlFileMessage", ss.trim ());
+}return info;
+}if (property === "data") return (m == null ? null : m.getInfo (true));
 return null;
 }, "~S,~N");
+Clazz.defineMethod (c$, "getValues", 
+function (mesh) {
+return (mesh == null ? null : mesh.vvs);
+}, "J.shape.Mesh");
 Clazz.defineMethod (c$, "getVertices", 
- function (mesh) {
-if (mesh == null) return null;
-return mesh.vs;
+function (mesh) {
+return (mesh == null ? null : mesh.vs);
 }, "J.shape.Mesh");
 Clazz.defineMethod (c$, "clean", 
 function () {

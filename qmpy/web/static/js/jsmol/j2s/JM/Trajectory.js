@@ -45,10 +45,12 @@ var iFirst = am[baseModelIndex].firstAtomIndex;
 var iMax = iFirst + this.ms.getAtomCountInModel (baseModelIndex);
 if (f == 0) {
 for (var pt = 0, i = iFirst; i < iMax && pt < t1.length; i++, pt++) {
-at[i].mi = modelIndex;
+var a = at[i];
+if (a == null) continue;
+a.mi = modelIndex;
 if (t1[pt] == null) continue;
-if (isFractional) at[i].setFractionalCoordTo (t1[pt], true);
- else at[i].setT (t1[pt]);
+if (isFractional) a.setFractionalCoordTo (t1[pt], true);
+ else a.setT (t1[pt]);
 if (this.ms.vibrationSteps != null) {
 if (vibs != null && vibs[pt] != null) vib = vibs[pt];
 this.ms.setVibrationVector (i, vib);
@@ -58,12 +60,14 @@ this.ms.setVibrationVector (i, vib);
 var p =  new JU.P3 ();
 var n = Math.min (t1.length, t2.length);
 for (var pt = 0, i = iFirst; i < iMax && pt < n; i++, pt++) {
-at[i].mi = modelIndex;
+var a = at[i];
+if (a == null) continue;
+a.mi = modelIndex;
 if (t1[pt] == null || t2[pt] == null) continue;
 p.sub2 (t2[pt], t1[pt]);
 p.scaleAdd2 (f, p, t1[pt]);
-if (isFractional) at[i].setFractionalCoordTo (p, true);
- else at[i].setT (p);
+if (isFractional) a.setFractionalCoordTo (p, true);
+ else a.setT (p);
 bs.set (i);
 }
 }this.ms.initializeBspf ();
@@ -130,8 +134,9 @@ for (var i = 1, count = measure[0]; i <= count; i++) if ((atomIndex = measure[i]
 }, "~A");
 Clazz.defineMethod (c$, "selectDisplayed", 
 function (bs) {
+var a;
 for (var i = this.ms.mc; --i >= 0; ) {
-if (this.ms.am[i].isTrajectory && this.ms.at[this.ms.am[i].firstAtomIndex].mi != i) bs.clear (i);
+if (this.ms.am[i].isTrajectory && ((a = this.ms.at[this.ms.am[i].firstAtomIndex]) == null || a.mi != i)) bs.clear (i);
 }
 }, "JU.BS");
 Clazz.defineMethod (c$, "getModelBS", 

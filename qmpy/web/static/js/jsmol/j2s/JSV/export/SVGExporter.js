@@ -8,6 +8,7 @@ Clazz.superConstructor (this, JSV["export"].SVGExporter, []);
 Clazz.overrideMethod (c$, "exportTheSpectrum", 
 function (viewer, mode, out, spec, startIndex, endIndex, pd, asBase64) {
 this.initForm (viewer, out);
+if (pd == null) pd = viewer.pd ();
 var plotAreaColor;
 var backgroundColor;
 var plotColor;
@@ -16,7 +17,9 @@ var titleColor;
 var scaleColor;
 var unitsColor;
 if (pd == null) {
-plotAreaColor = backgroundColor = plotColor = gridColor = titleColor = scaleColor = unitsColor = JSV.common.ColorParameters.BLACK;
+plotAreaColor = backgroundColor = JSV.common.ColorParameters.LIGHT_GRAY;
+plotColor = JSV.common.ColorParameters.BLUE;
+gridColor = titleColor = scaleColor = unitsColor = JSV.common.ColorParameters.BLACK;
 } else {
 plotAreaColor = pd.getColor (JSV.common.ScriptToken.PLOTAREACOLOR);
 backgroundColor = pd.bgcolor;
@@ -52,8 +55,8 @@ var horizGridCoords =  new JU.Lst ();
 for (var i = minXOnScale; i < maxXOnScale + xStep / 2; i += xStep) {
 xPt = leftPlotArea + ((i - minXOnScale) * xScaleFactor);
 yPt = topPlotArea;
-xStr = JU.DF.formatDecimalTrimmed (xPt, 6);
-yStr = JU.DF.formatDecimalTrimmed (yPt, 6);
+xStr = JSV["export"].SVGExporter.formatDecimalTrimmed (xPt, 6);
+yStr = JSV["export"].SVGExporter.formatDecimalTrimmed (yPt, 6);
 var hash =  new java.util.Hashtable ();
 hash.put ("xVal", xStr);
 hash.put ("yVal", yStr);
@@ -62,8 +65,8 @@ vertGridCoords.addLast (hash);
 for (var i = minYOnScale; i < maxYOnScale + yStep / 2; i += yStep) {
 xPt = leftPlotArea;
 yPt = topPlotArea + ((i - minYOnScale) * yScaleFactor);
-xStr = JU.DF.formatDecimalTrimmed (xPt, 6);
-yStr = JU.DF.formatDecimalTrimmed (yPt, 6);
+xStr = JSV["export"].SVGExporter.formatDecimalTrimmed (xPt, 6);
+yStr = JSV["export"].SVGExporter.formatDecimalTrimmed (yPt, 6);
 var hash =  new java.util.Hashtable ();
 hash.put ("xVal", xStr);
 hash.put ("yVal", yStr);
@@ -78,8 +81,8 @@ for (var i = minXOnScale; i < (maxXOnScale + xStep / 2); i += xStep) {
 xPt = leftPlotArea + ((i - minXOnScale) * xScaleFactor);
 xPt -= 10;
 yPt = bottomPlotArea + 15;
-xStr = JU.DF.formatDecimalTrimmed (xPt, 6);
-yStr = JU.DF.formatDecimalTrimmed (yPt, 6);
+xStr = JSV["export"].SVGExporter.formatDecimalTrimmed (xPt, 6);
+yStr = JSV["export"].SVGExporter.formatDecimalTrimmed (yPt, 6);
 var iStr = JU.DF.formatDecimalDbl (i, precisionX);
 var hash =  new java.util.Hashtable ();
 hash.put ("xVal", xStr);
@@ -91,8 +94,8 @@ for (var i = minXOnScale, j = maxXOnScale; i < (maxXOnScale + xStep / 2); i += x
 xPt = leftPlotArea + ((j - minXOnScale) * xScaleFactor);
 xPt -= 10;
 yPt = bottomPlotArea + 15;
-xStr = JU.DF.formatDecimalTrimmed (xPt, 6);
-yStr = JU.DF.formatDecimalTrimmed (yPt, 6);
+xStr = JSV["export"].SVGExporter.formatDecimalTrimmed (xPt, 6);
+yStr = JSV["export"].SVGExporter.formatDecimalTrimmed (yPt, 6);
 var iStr = JU.DF.formatDecimalDbl (i, precisionX);
 var hash =  new java.util.Hashtable ();
 hash.put ("xVal", xStr);
@@ -104,8 +107,8 @@ for (var i = minYOnScale; (i < maxYOnScale + yStep / 2); i += yStep) {
 xPt = leftPlotArea - 55;
 yPt = bottomPlotArea - ((i - minYOnScale) * yScaleFactor);
 yPt += 3;
-xStr = JU.DF.formatDecimalTrimmed (xPt, 6);
-yStr = JU.DF.formatDecimalTrimmed (yPt, 6);
+xStr = JSV["export"].SVGExporter.formatDecimalTrimmed (xPt, 6);
+yStr = JSV["export"].SVGExporter.formatDecimalTrimmed (yPt, 6);
 var iStr = JU.DF.formatDecimalDbl (i, precisionY);
 var hash =  new java.util.Hashtable ();
 hash.put ("xVal", xStr);
@@ -119,7 +122,7 @@ var secondTranslateX;
 var secondTranslateY;
 var scaleX;
 var scaleY;
-var increasing = spec.isXIncreasing ();
+var increasing = (pd != null && pd.getBoolean (JSV.common.ScriptToken.REVERSEPLOT));
 if (increasing) {
 firstTranslateX = leftPlotArea;
 firstTranslateY = bottomPlotArea;
@@ -136,13 +139,13 @@ secondTranslateX = -minXOnScale;
 secondTranslateY = -minYOnScale;
 }var yTickA = minYOnScale - (yStep / 2);
 var yTickB = yStep / 5;
-this.context.put ("plotAreaColor", JU.CU.toRGBHexString (plotAreaColor));
-this.context.put ("backgroundColor", JU.CU.toRGBHexString (backgroundColor));
-this.context.put ("plotColor", JU.CU.toRGBHexString (plotColor));
-this.context.put ("gridColor", JU.CU.toRGBHexString (gridColor));
-this.context.put ("titleColor", JU.CU.toRGBHexString (titleColor));
-this.context.put ("scaleColor", JU.CU.toRGBHexString (scaleColor));
-this.context.put ("unitsColor", JU.CU.toRGBHexString (unitsColor));
+this.context.put ("plotAreaColor", JSV["export"].SVGExporter.toRGBHexString (plotAreaColor));
+this.context.put ("backgroundColor", JSV["export"].SVGExporter.toRGBHexString (backgroundColor));
+this.context.put ("plotColor", JSV["export"].SVGExporter.toRGBHexString (plotColor));
+this.context.put ("gridColor", JSV["export"].SVGExporter.toRGBHexString (gridColor));
+this.context.put ("titleColor", JSV["export"].SVGExporter.toRGBHexString (titleColor));
+this.context.put ("scaleColor", JSV["export"].SVGExporter.toRGBHexString (scaleColor));
+this.context.put ("unitsColor", JSV["export"].SVGExporter.toRGBHexString (unitsColor));
 this.context.put ("svgHeight",  new Integer (JSV["export"].SVGExporter.svgHeight));
 this.context.put ("svgWidth",  new Integer (JSV["export"].SVGExporter.svgWidth));
 this.context.put ("leftPlotArea",  new Integer (leftPlotArea));
@@ -171,7 +174,8 @@ var lastX;
 firstX = xyCoords[startIndex].getXVal ();
 firstY = xyCoords[startIndex].getYVal ();
 lastX = xyCoords[endIndex].getXVal ();
-this.context.put ("title", titleColor);
+System.out.println ("SVG " + spec.isXIncreasing () + " " + spec.shouldDisplayXAxisIncreasing () + " " + firstX + " " + lastX + " " + startIndex + " " + endIndex + " " + newXYCoords.get (0).toString () + " " + increasing);
+this.context.put ("title", spec.getTitle ());
 this.context.put ("xyCoords", newXYCoords);
 this.context.put ("continuous",  new Boolean (spec.isContinuous ()));
 this.context.put ("firstTranslateX",  new Double (firstTranslateX));
@@ -180,6 +184,7 @@ this.context.put ("scaleX",  new Double (scaleX));
 this.context.put ("scaleY",  new Double (scaleY));
 this.context.put ("secondTranslateX",  new Double (secondTranslateX));
 this.context.put ("secondTranslateY",  new Double (secondTranslateY));
+this.context.put ("plotStrokeWidth", this.getPlotStrokeWidth (scaleX, scaleY));
 if (increasing) {
 this.context.put ("xScaleList", xScaleList);
 this.context.put ("xScaleListReversed", xScaleListReversed);
@@ -209,6 +214,19 @@ var vm = (mode === JSV.common.ExportType.SVGI ? "plot_ink.vm" : "plot.vm");
 JU.Logger.info ("SVGExporter using " + vm);
 return this.writeForm (vm);
 }, "JSV.common.JSViewer,JSV.common.ExportType,JU.OC,JSV.common.Spectrum,~N,~N,JSV.common.PanelData,~B");
+Clazz.defineMethod (c$, "getPlotStrokeWidth", 
+ function (scaleX, scaleY) {
+var s = JSV["export"].SVGExporter.formatDecimalTrimmed (Math.abs (scaleY / 1e12 * 2), 10);
+return s;
+}, "~N,~N");
+c$.toRGBHexString = Clazz.defineMethod (c$, "toRGBHexString", 
+ function (c) {
+return "#" + JU.CU.toRGBHexString (c);
+}, "javajs.api.GenericColor");
+c$.formatDecimalTrimmed = Clazz.defineMethod (c$, "formatDecimalTrimmed", 
+ function (x, precision) {
+return JU.DF.formatDecimalTrimmed0 (x, precision);
+}, "~N,~N");
 Clazz.defineStatics (c$,
 "svgWidth", 850,
 "svgHeight", 400,

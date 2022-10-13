@@ -194,7 +194,8 @@ for (var i = 0; i < this.nCoef; i++) {
 var a = org.qcschema.QCSchemaUnits.getDoubleArray (listS.get (i), null);
 this.addSlater (Clazz.doubleToInt (a[0]), Clazz.doubleToInt (a[1]), Clazz.doubleToInt (a[2]), Clazz.doubleToInt (a[3]), Clazz.doubleToInt (a[4]), a[5], a[6]);
 }
-this.setSlaters (false, false);
+this.scaleSlaters = false;
+this.setSlaters (false);
 return true;
 }, "java.util.ArrayList");
 Clazz.defineMethod (c$, "readGaussianBasis", 

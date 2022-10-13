@@ -1,5 +1,4 @@
-from tempfile import mkstemp
-import os.path
+import os
 
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -10,14 +9,31 @@ from qmpy.io import read
 from qmpy import *
 from ..tools import get_globals
 
+REDIS_HOST = os.environ.get("REDIS_SERVER_HOST")
+if REDIS_HOST:
+    REDIS_PORT = os.environ.get("REDIS_SERVER_PORT")
+    import redis
+    from django.utils.crypto import get_random_string
+
+    rds = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
+
 global custom_data
 custom_data = None
 
 
 def vis_data(request):
-    global custom_data
-    data = {
-        "crystal_data": """Cr Te O
+    data = {}
+    if request.method == "POST":
+        p = request.POST
+        crystal_data = p.get("crystal_data", "")
+        data["crystal_data"] = crystal_data
+        f = StringIO()
+        f.write(crystal_data)
+        s = read(f)
+        s.symmetrize()
+        data["structure"] = s
+    else:
+        crystal_data = """Cr Te O
  1.0
 7.016000 0.000000 0.000000
 0.000000 7.545000 0.000000
@@ -59,23 +75,36 @@ direct
  0.327700 0.361800 0.084200
  0.327700 0.138200 0.584200
  0.672300 0.638200 0.915800"""
-    }
-    p = request.POST
-    if request.method == "POST":
-        custom_data = p.get("crystal_data", "")
-        data["crystal_data"] = custom_data
-        f = StringIO()
-        f.write(custom_data)
-        s = read(f)
-        s.symmetrize()
-        data["structure"] = s
+
+    if REDIS_HOST:
+        data_key = get_random_string(length=8)
+        # There is no need to encrypt/hash the data_key here because
+        # by design, Redis is immune to string escaping.
+        # (as of March, 2022)
+        # https://redis.io/docs/manual/security/#string-escaping-and-nosql-injection
+        rds.set(data_key, crystal_data, ex=40)
+        data["jsmol_srcFileURL"] = "/analysis/visualize/custom/{}".format(data_key)
+    else:
+        global custom_data
+        custom_data = crystal_data
+        data["jsmol_srcFileURL"] = "/analysis/visualize/custom/"
+
+    data["crystal_data"] = crystal_data
+    data["jsmol_serverURL"] = os.environ.get("JSMOL_serverURL")
     data.update(csrf(request))
-    custom_data = data["crystal_data"]
     return render(request, "analysis/view_data.html", context=get_globals(data))
 
 
-def jsmol(request):
-    global custom_data
+def jsmol_custom(request, data_key=""):
+    if REDIS_HOST:
+        crystal_data = rds.get(data_key)
+        if not crystal_data is None:
+            crystal_data = crystal_data.decode()
+        else:
+            crystal_data = ""
+    else:
+        global custom_data
+        crystal_data = custom_data
     f = StringIO()
-    f.write(custom_data)
+    f.write(crystal_data)
     return HttpResponse(f.getvalue(), content_type="plain/text")

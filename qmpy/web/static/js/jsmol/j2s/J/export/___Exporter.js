@@ -63,7 +63,7 @@ this.gdata = g3d;
 this.privateKey = privateKey;
 this.backgroundColix = vwr.getObjectColix (0);
 this.center.setT (this.tm.fixedRotationCenter);
-this.exportScale = vwr.getFloat (570425358);
+this.exportScale = vwr.getFloat (570425357);
 if (this.exportScale == 0) {
 this.exportScale = 10;
 }JU.Logger.info ("__Exporter exportScale: " + this.exportScale);

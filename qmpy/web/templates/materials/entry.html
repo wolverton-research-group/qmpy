@@ -1,11 +1,8 @@
 {% extends "base_site.html" %}
 {% load static %}
+{% load custom_filters %}
 
 {% block title %}{{ entry.name }}{% endblock %}
-
-{% block extrascript %}
-<script type="text/javascript" src={% static "js/jsmol/JSmol.min.js" %}></script>
-{% endblock %} 
 
 {% block extrastyle %}
 <link rel="stylesheet" type="text/css" href="{% static "css/flot.css" %}"/>
@@ -222,6 +219,7 @@
 
 {% block sidebar %}
 <div id="sidebar" class="box">
+  {% if is_debug|IS_DEBUG %}
   {% if not entry.tasks %}
   <h1> Control Panel</h1>
   <form action="" method="post">{% csrf_token %}
@@ -241,19 +239,22 @@
     <!-- Add hold: <input type="text" name="add_hold"><br> -->
     <input type="submit">
   </form>
+  {% endif %}
 
   <h1> Visualization </h1>
   {% if entry.natoms > 200 %}
   Structure contains more than 200 atoms, so is not being displayed. <br>
   {% else %}
+   <script type="text/javascript" src={% static "js/jsmol/JSmol.min.nojq.js" %}></script>
   <h2> Crystal structure </h2>
     <script>
       var Info = {
+	serverURL: "{{jsmol_serverURL}}",
         j2sPath: "{% static 'js/jsmol/j2s' %}",
         {% if primitive %}
-        src: "/materials/export/primitive/cif/{{entry_structure.id}}",
+        src: "/materials/export/primitive/poscar/{{entry_structure.id}}",
         {% else %}
-        src: "/materials/export/conventional/cif/{{entry_structure.id}}",
+        src: "/materials/export/conventional/poscar/{{entry_structure.id}}",
         {% endif %}
         use: "HTML5",
         width: 400,

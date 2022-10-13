@@ -25,6 +25,7 @@ var boxed = Integer.$valueOf (JU.Elements.altElementNumbers[i]);
 map.put (symbol, boxed);
 if (symbol.length == 2) map.put (symbol.toUpperCase (), boxed);
 }
+map.put ("Z", Integer.$valueOf (0));
 JU.Elements.htElementMap = map;
 }if (elementSymbol == null) return 0;
 var boxedAtomicNumber = JU.Elements.htElementMap.get (elementSymbol);

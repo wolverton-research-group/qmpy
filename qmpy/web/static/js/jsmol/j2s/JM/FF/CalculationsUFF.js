@@ -47,7 +47,7 @@ var oopCalc =  new JM.FF.UFFOOPCalc ().set (this);
 var elemNo;
 for (var i = 0; i < this.ac; i++) {
 var a = this.minAtoms[i];
-if (a.nBonds == 3 && JM.FF.CalculationsUFF.isInvertible (elemNo = a.atom.getElementNumber ())) oopCalc.setData (calc, i, elemNo, 0);
+if (a.nBonds == 3 && a.sType !== "C_3" && JM.FF.CalculationsUFF.isInvertible (elemNo = a.atom.getElementNumber ())) oopCalc.setData (calc, i, elemNo, 0);
 }
 this.pairSearch (this.calculations[5] =  new JU.Lst (),  new JM.FF.UFFVDWCalc ().set (this), null, null);
 return true;

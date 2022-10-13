@@ -31,7 +31,7 @@ this.cross1 =  new JU.P3 ();
 Clazz.overrideMethod (c$, "render", 
 function () {
 var dipoles = this.shape;
-this.dipoleVectorScale = this.vwr.getFloat (570425355);
+this.dipoleVectorScale = this.vwr.getFloat (570425354);
 var needTranslucent = false;
 var vis = this.vwr.ms.getVisibleSet (false);
 for (var i = dipoles.dipoleCount; --i >= 0; ) {

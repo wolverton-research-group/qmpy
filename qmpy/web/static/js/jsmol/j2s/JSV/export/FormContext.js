@@ -1,5 +1,5 @@
 Clazz.declarePackage ("JSV.export");
-Clazz.load (["java.util.Hashtable", "JU.Lst"], "JSV.export.FormContext", ["java.lang.Character", "$.Double", "java.util.Map", "JU.PT", "JSV.common.Coordinate", "JU.Logger"], function () {
+Clazz.load (["java.util.Hashtable", "JU.Lst"], "JSV.export.FormContext", ["java.lang.Character", "$.Double", "java.util.Map", "JU.DF", "$.PT", "JSV.common.Coordinate", "JU.Logger"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.tokens = null;
 this.context = null;
@@ -106,8 +106,8 @@ var c = varData;
 this.context.put ("pointCount",  new Integer (vt.pointCount));
 this.context.put (vt.$var + ".xVal",  new Double (c.getXVal ()));
 this.context.put (vt.$var + ".yVal",  new Double (c.getYVal ()));
-this.context.put (vt.$var + ".getXString()", c.getXString ());
-this.context.put (vt.$var + ".getYString()", c.getYString ());
+this.context.put (vt.$var + ".getXString()", this.getXString (c));
+this.context.put (vt.$var + ".getYString()", this.getYString (c));
 } else if (Clazz.instanceOf (varData, java.util.Map)) {
 for (var entry, $entry = (varData).entrySet ().iterator (); $entry.hasNext () && ((entry = $entry.next ()) || true);) this.context.put (vt.$var + "." + entry.getKey (), entry.getValue ());
 
@@ -117,6 +117,14 @@ continue;
 }
 return (this.strError != null ? this.strError : out != null ? out.toString () : null);
 }, "JU.OC");
+Clazz.defineMethod (c$, "getXString", 
+function (c) {
+return JU.DF.formatDecimalTrimmed0 (c.getXVal (), 8);
+}, "JSV.common.Coordinate");
+Clazz.defineMethod (c$, "getYString", 
+function (c) {
+return JU.DF.formatDecimalTrimmed0 (c.getYVal (), 8);
+}, "JSV.common.Coordinate");
 Clazz.defineMethod (c$, "foreach", 
  function (vt) {
 var data = vt.data;

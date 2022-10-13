@@ -117,6 +117,7 @@ if (isAtom || isModel) this.getHeader = false;
 this.isMultiModel = isModel;
 this.getHeader = false;
 var modelNo = (forceNewModel ? this.modelNumber + 1 : this.getModelNumber ());
+var modelName = this.getModelName ();
 this.modelNumber = (this.useFileModelNumbers ? modelNo : this.modelNumber + 1);
 if (!this.doGetModel (this.modelNumber, null)) {
 this.handleTlsMissingModels ();
@@ -125,7 +126,7 @@ if (!isOK && this.isConcatenated) isOK = this.continuing = true;
 return isOK;
 }if (!this.isCourseGrained) this.connectAll (this.maxSerial, this.isConnectStateBug);
 if (this.ac > 0) this.applySymmetryAndSetTrajectory ();
-this.model (modelNo);
+this.model (modelNo, modelName);
 if (this.isLegacyModelType || !isAtom) return true;
 }if (this.isMultiModel && !this.doProcessLines) {
 return true;
@@ -221,8 +222,8 @@ this.finalizeReaderPDB ();
 Clazz.defineMethod (c$, "finalizeReaderPDB", 
 function () {
 this.checkNotPDB ();
-if (this.pdbID != null) {
-this.asc.setAtomSetName (this.pdbID);
+if (this.pdbID != null && this.pdbID.length > 0) {
+if (!this.isMultiModel) this.asc.setAtomSetName (this.pdbID);
 this.asc.setCurrentModelInfo ("pdbID", this.pdbID);
 }this.checkUnitCellParams ();
 if (!this.isCourseGrained) this.connectAll (this.maxSerial, this.isConnectStateBug);
@@ -747,20 +748,27 @@ if (endModelColumn > this.lineLength) endModelColumn = this.lineLength;
 var iModel = this.parseIntRange (this.line, startModelColumn, endModelColumn);
 return (iModel == -2147483648 ? 0 : iModel);
 });
+Clazz.defineMethod (c$, "getModelName", 
+ function () {
+if (this.lineLength < 16) return null;
+var name = this.line.substring (15, this.lineLength).trim ();
+return (name.length == 0 ? null : name);
+});
 Clazz.defineMethod (c$, "model", 
-function (modelNumber) {
+function (modelNumber, name) {
 this.checkNotPDB ();
+if (name == null) name = this.pdbID;
 this.haveMappedSerials = false;
 this.sbConect = null;
 this.asc.newAtomSet ();
 this.asc.setCurrentModelInfo ("pdbID", this.pdbID);
 if (this.asc.iSet == 0 || this.isTrajectory) this.asc.setAtomSetName (this.pdbID);
- else this.asc.setCurrentModelInfo ("name", this.pdbID);
+this.asc.setCurrentModelInfo ("name", name);
 this.checkUnitCellParams ();
 if (!this.isCourseGrained) this.setModelPDB (true);
 this.asc.setCurrentAtomSetNumber (modelNumber);
 if (this.isCourseGrained) this.asc.setCurrentModelInfo ("courseGrained", Boolean.TRUE);
-}, "~N");
+}, "~N,~S");
 Clazz.defineMethod (c$, "checkNotPDB", 
  function () {
 var isPDB = (!this.isCourseGrained && (this.nRes == 0 || this.nUNK != this.nRes));

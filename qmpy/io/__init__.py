@@ -2,6 +2,7 @@
 
 from . import cif
 from . import poscar
+from . import ase_mapper
 import ase
 import ase.io
 

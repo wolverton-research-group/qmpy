@@ -61,7 +61,7 @@ var toHz = this.spec.isNMR () && units.equalsIgnoreCase ("HZ");
 var data = JU.AU.newDouble2 (this.size ());
 for (var pt = 0, i = this.size (); --i >= 0; ) {
 var y = this.get (i).getValue ();
-if (toHz) y *= this.spec.observedFreq;
+if (toHz) y *= this.spec.getObservedFreq ();
 data[pt++] =  Clazz.newDoubleArray (-1, [this.get (i).getXVal (), this.get (i).getXVal2 (), y]);
 }
 return data;

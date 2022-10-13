@@ -87,6 +87,10 @@ Clazz.overrideMethod (c$, "getSpaceGroupOperation",
 function (i) {
 return (this.spaceGroup == null || this.spaceGroup.operations == null || i >= this.spaceGroup.operations.length ? null : this.spaceGroup.finalOperations == null ? this.spaceGroup.operations[i] : this.spaceGroup.finalOperations[i]);
 }, "~N");
+Clazz.overrideMethod (c$, "getSpaceGroupOperationRaw", 
+function (i) {
+return this.spaceGroup.getRawOperation (i);
+}, "~N");
 Clazz.overrideMethod (c$, "getSpaceGroupXyz", 
 function (i, doNormalize) {
 return this.spaceGroup.getXyz (i, doNormalize);
@@ -389,9 +393,9 @@ Clazz.defineMethod (c$, "getDesc",
 return (this.desc == null ? (this.desc = (J.api.Interface.getInterface ("JS.SymmetryDesc", modelSet.vwr, "eval"))) : this.desc).set (modelSet);
 }, "JM.ModelSet");
 Clazz.overrideMethod (c$, "getSymmetryInfoAtom", 
-function (modelSet, iatom, xyz, op, pt, pt2, id, type, scaleFactor, nth, options) {
-return this.getDesc (modelSet).getSymopInfo (iatom, xyz, op, pt, pt2, id, type, scaleFactor, nth, options);
-}, "JM.ModelSet,~N,~S,~N,JU.P3,JU.P3,~S,~N,~N,~N,~N");
+function (modelSet, iatom, xyz, op, translation, pt, pt2, id, type, scaleFactor, nth, options) {
+return this.getDesc (modelSet).getSymopInfo (iatom, xyz, op, translation, pt, pt2, id, type, scaleFactor, nth, options);
+}, "JM.ModelSet,~N,~S,~N,JU.P3,JU.P3,JU.P3,~S,~N,~N,~N,~N");
 Clazz.overrideMethod (c$, "getSpaceGroupInfo", 
 function (modelSet, sgName, modelIndex, isFull, cellParams) {
 var isForModel = (sgName == null);

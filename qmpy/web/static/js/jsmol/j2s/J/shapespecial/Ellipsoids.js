@@ -279,7 +279,7 @@ for (var e, $e = this.atomEllipsoids.values ().iterator (); $e.hasNext () && ((e
 var iType = e.tensor.iType;
 if (bsDone.get (iType + 1)) continue;
 bsDone.set (iType + 1);
-var isADP = (e.tensor.iType == 1);
+var isADP = (e.tensor.iType == 1 || e.tensor.iType == 0);
 var cmd = (isADP ? null : "Ellipsoids set " + JU.PT.esc (e.tensor.type));
 for (var e2, $e2 = this.atomEllipsoids.values ().iterator (); $e2.hasNext () && ((e2 = $e2.next ()) || true);) {
 if (e2.tensor.iType != iType || isADP && !e2.isOn) continue;

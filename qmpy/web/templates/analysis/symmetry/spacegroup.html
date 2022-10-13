@@ -1,8 +1,8 @@
 {% extends "base_site.html" %}
 {% load static %}
 
-{% block extrastyle %}
-<script type="text/javascript" src={% static "js/jsmol/JSmol.min.js" %}></script>
+{% block extrascript %}
+<script type="text/javascript" src={% static "js/jsmol/JSmol.min.nojq.js" %}></script>
 {% endblock %}
 
 {% block title %}Spacegroup: {{ spacegroup.symbol }}{% endblock %}
@@ -26,8 +26,9 @@
     <table class=matrix>
       {% for op in spacegroup.sym_ops %}
       <tr>
-        <td> {{ op }} </td>
-      </tr>
+	<tr class=clickableRow href="/analysis/operation/{{op.pk}}">
+		<td> {{ op }} </td>
+        </tr>
       {% endfor %}
     </table>
     <br>

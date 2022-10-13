@@ -166,8 +166,11 @@ J.jvxl.data.JvxlCoder.addAttrib (attribs, "\n  translucency", "" + jvxlData.tran
 if (jvxlData.meshColor != null) J.jvxl.data.JvxlCoder.addAttrib (attribs, "\n  meshColor", jvxlData.meshColor);
 if (jvxlData.colorScheme != null) J.jvxl.data.JvxlCoder.addAttrib (attribs, "\n  colorScheme", jvxlData.colorScheme);
 if (jvxlData.rendering != null) J.jvxl.data.JvxlCoder.addAttrib (attribs, "\n  rendering", jvxlData.rendering);
-if (jvxlData.thisSet >= 0) J.jvxl.data.JvxlCoder.addAttrib (attribs, "\n  set", "" + (jvxlData.thisSet + 1));
-if (jvxlData.slabValue != -2147483648) J.jvxl.data.JvxlCoder.addAttrib (attribs, "\n  slabValue", "" + jvxlData.slabValue);
+if (jvxlData.thisSet != null) {
+var s = J.jvxl.data.JvxlCoder.subsetString (jvxlData.thisSet);
+if (s.startsWith ("[")) J.jvxl.data.JvxlCoder.addAttrib (attribs, "\n  subset", s);
+ else J.jvxl.data.JvxlCoder.addAttrib (attribs, "\n  set", s);
+}if (jvxlData.slabValue != -2147483648) J.jvxl.data.JvxlCoder.addAttrib (attribs, "\n  slabValue", "" + jvxlData.slabValue);
 if (jvxlData.isSlabbable) J.jvxl.data.JvxlCoder.addAttrib (attribs, "\n  slabbable", "true");
 if (jvxlData.nVertexColors > 0) J.jvxl.data.JvxlCoder.addAttrib (attribs, "\n  nVertexColors", "" + jvxlData.nVertexColors);
 var min = (jvxlData.mappedDataMin == 3.4028235E38 ? 0 : jvxlData.mappedDataMin);
@@ -199,6 +202,16 @@ JU.XmlUtil.openTagAttr (info, "jvxlSurfaceInfo", attribs.toArray ( new Array (at
 JU.XmlUtil.closeTag (info, "jvxlSurfaceInfo");
 return info.toString ();
 }, "J.jvxl.data.JvxlData,~B");
+c$.subsetString = Clazz.defineMethod (c$, "subsetString", 
+ function (bs) {
+var n = bs.cardinality ();
+if (n > 1) {
+var a = "[ ";
+for (var ia = bs.nextSetBit (0); ia >= 0; ia = bs.nextSetBit (ia)) a += (++ia) + " ";
+
+return a + "]";
+}return "" + (bs.nextSetBit (0) + 1);
+}, "JU.BS");
 c$.addAttrib = Clazz.defineMethod (c$, "addAttrib", 
  function (attribs, name, value) {
 attribs.addLast ( Clazz.newArray (-1, [name, value]));

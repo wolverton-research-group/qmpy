@@ -44,20 +44,30 @@ htData.put ("spin", type);
 htData.put ("index", Integer.$valueOf (0));
 for (var n = tokens.length, i = 0; i < n; i++) {
 var org = tokens[i];
-if (org.contains ("(ry)")) break;
-if (org.contains ("*") || org.contains ("(cr)")) continue;
-var isLP = org.endsWith ("(lp)");
+if (org.contains ("(ry)") || org.contains ("Ryd") || org.contains ("RY")) break;
+if (org.contains ("*") || org.contains ("(cr)") || org.startsWith ("CR(") || org.contains ("Cor(")) continue;
+if (org.startsWith ("LP(")) {
+var ia = J.adapter.readers.quantum.NBOParser.getAtomIndex (org.substring (org.indexOf (")") + 1));
+matrix[ia][ia] += 1;
+continue;
+}var isLP = org.endsWith ("(lp)");
 if (isLP || org.endsWith ("(lv)")) {
 var ia = J.adapter.readers.quantum.NBOParser.getAtomIndex (org.substring (0, org.length - 4));
 matrix[ia][ia] += (isLP ? 1 : 10);
 continue;
 }var names = JU.PT.split (org, "-");
-if (names.length == 3) {
+switch (names.length) {
+case 3:
 System.out.println ("NBOParser 3-center bonnd " + org + " ignored for Kekule structure");
 continue;
+case 2:
+if (names[0].startsWith ("BD(")) {
+names[0] = names[0].substring (names[0].indexOf (")") + 1);
 }var ia = J.adapter.readers.quantum.NBOParser.getAtomIndex (names[0]);
 var ib = J.adapter.readers.quantum.NBOParser.getAtomIndex (names[1]);
 matrix[ia][ib]++;
+break;
+}
 }
 J.adapter.readers.quantum.NBOParser.dumpMatrix (type, 0, matrix);
 }, "~A,~S,JU.Lst,~N");

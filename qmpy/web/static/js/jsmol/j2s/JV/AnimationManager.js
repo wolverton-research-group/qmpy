@@ -302,6 +302,14 @@ throw e;
 }
 }
 }, "~N");
+Clazz.defineMethod (c$, "getUnitCellAtomIndex", 
+function () {
+return this.cai;
+});
+Clazz.defineMethod (c$, "setUnitCellAtomIndex", 
+function (iAtom) {
+this.cai = iAtom;
+}, "~N");
 Clazz.defineMethod (c$, "setViewer", 
  function (clearBackgroundModel) {
 this.vwr.ms.setTrajectory (this.cmi);

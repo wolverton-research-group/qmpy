@@ -22,10 +22,7 @@ if (this.modelAtomCount > 1) {
 this.discardLinesUntilContains ("HESSIAN");
 if (this.line != null) this.readBonds (ac0);
 if (this.line != null && this.line.indexOf ("BEGINCONSTRAINTS") >= 0) this.readConstraints ();
-}while (this.line != null && this.line.indexOf ("END ") < 0 && this.line.indexOf ("MOLSTATE") < 0) this.rd ();
-
-if (this.line != null && this.line.indexOf ("MOLSTATE") >= 0) this.readTransform ();
-return modelName;
+}return modelName;
 });
 Clazz.defineMethod (c$, "readConstraints", 
  function () {
@@ -39,7 +36,7 @@ this.asc.setAtomSetModelProperty (".PATH", "EnergyProfile");
 this.asc.setAtomSetModelProperty ("Constraint", this.constraints);
 });
 Clazz.defineMethod (c$, "readTransform", 
- function () {
+function () {
 this.rd ();
 var tokens = JU.PT.getTokens (this.rd () + " " + this.rd ());
 this.setTransform (this.parseFloatStr (tokens[0]), this.parseFloatStr (tokens[1]), this.parseFloatStr (tokens[2]), this.parseFloatStr (tokens[4]), this.parseFloatStr (tokens[5]), this.parseFloatStr (tokens[6]), this.parseFloatStr (tokens[8]), this.parseFloatStr (tokens[9]), this.parseFloatStr (tokens[10]));

@@ -80,7 +80,7 @@ class DOS(models.Model):
         """Set the Fermi level."""
         ef = efermi - self._efermi
         self._efermi = efermi
-        if isinstance(self.data,np.ndarray):
+        if isinstance(self.data, np.ndarray):
             try:
                 self.data[0, :] = self.data[0, :] + ef
                 self._site_dos[:, 0, :] = self._site_dos[:, 0, :] + ef
@@ -160,11 +160,18 @@ class DOS(models.Model):
 
             if spinflag:
                 source = bkp.ColumnDataSource(
-                    data=dict(en=self.energy, up=self.dos[0], down=-self.dos[1],)
+                    data=dict(
+                        en=self.energy,
+                        up=self.dos[0],
+                        down=-self.dos[1],
+                    )
                 )
             else:
                 source = bkp.ColumnDataSource(
-                    data=dict(en=self.energy, dos=self.dos[0],)
+                    data=dict(
+                        en=self.energy,
+                        dos=self.dos[0],
+                    )
                 )
 
             p = bkp.figure(
@@ -201,7 +208,7 @@ class DOS(models.Model):
                     "up",
                     line_width=2,
                     line_color="blue",
-                    legend="Spin Up",
+                    legend_label="Spin Up",
                     source=source,
                 )
                 p.line(
@@ -209,7 +216,7 @@ class DOS(models.Model):
                     "down",
                     line_width=2,
                     line_color="orange",
-                    legend="Spin Down",
+                    legend_label="Spin Down",
                     source=source,
                 )
             else:
@@ -218,7 +225,7 @@ class DOS(models.Model):
                     "dos",
                     line_width=2,
                     line_color="blue",
-                    legend="total",
+                    legend_label="total",
                     source=source,
                 )
 
@@ -242,8 +249,8 @@ class DOS(models.Model):
             Which orbitals to retrieve. See site_dos for options.
             Use None to integrate all orbitals
             If you specify an orbital without phase factors or spins,
-                this operation will automatically sum all bands that 
-                match that criteria (ex: if you specify 'd+', this 
+                this operation will automatically sum all bands that
+                match that criteria (ex: if you specify 'd+', this
                 may sum the dxy+, dyz+, dz2+, ... orbitals. Another
                 example, if you put "+" it will get only the positive band
         """

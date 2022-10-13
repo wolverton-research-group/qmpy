@@ -65,10 +65,6 @@ Clazz.overrideMethod (c$, "isSigned",
 function () {
 return this.app.isSigned ();
 });
-Clazz.overrideMethod (c$, "finalize", 
-function () {
-System.out.println ("JSpecView " + this + " finalized");
-});
 Clazz.overrideMethod (c$, "destroy", 
 function () {
 this.app.dispose ();

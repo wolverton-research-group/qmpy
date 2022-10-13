@@ -14,6 +14,7 @@ this.elementNumberMax = 0;
 this.altElementMax = 0;
 this.mf = null;
 this.atomList = null;
+this.atNos = null;
 Clazz.instantialize (this, arguments);
 }, JU, "JmolMolecule");
 Clazz.prepareFields (c$, function () {
@@ -33,10 +34,11 @@ var moleculeCount = 0;
 var molecules =  new Array (4);
 if (bsExclude == null) bsExclude =  new JU.BS ();
 for (var i = 0; i < atoms.length; i++) if (!bsExclude.get (i) && !bsBranch.get (i)) {
-if (atoms[i].isDeleted ()) {
+var a = atoms[i];
+if (a == null || a.isDeleted ()) {
 bsExclude.set (i);
 continue;
-}var modelIndex = atoms[i].getModelIndex ();
+}var modelIndex = a.getModelIndex ();
 if (modelIndex != thisModelIndex) {
 thisModelIndex = modelIndex;
 indexInModel = 0;
@@ -70,19 +72,28 @@ return m.getMolecularFormula (false, wts, isEmpirical);
 }, "~A,JU.BS,~A,~B");
 Clazz.defineMethod (c$, "getMolecularFormula", 
 function (includeMissingHydrogens, wts, isEmpirical) {
+return this.getMolecularFormulaImpl (includeMissingHydrogens, wts, isEmpirical);
+}, "~B,~A,~B");
+Clazz.defineMethod (c$, "getMolecularFormulaImpl", 
+function (includeMissingHydrogens, wts, isEmpirical) {
 if (this.mf != null) return this.mf;
 if (this.atomList == null) {
 this.atomList =  new JU.BS ();
-this.atomList.setBits (0, this.nodes.length);
+this.atomList.setBits (0, this.atNos == null ? this.nodes.length : this.atNos.length);
 }this.elementCounts =  Clazz.newIntArray (JU.Elements.elementNumberMax, 0);
 this.altElementCounts =  Clazz.newIntArray (JU.Elements.altElementMax, 0);
 this.ac = this.atomList.cardinality ();
 this.nElements = 0;
 for (var p = 0, i = this.atomList.nextSetBit (0); i >= 0; i = this.atomList.nextSetBit (i + 1), p++) {
-var node = this.nodes[i];
+var n;
+var node = null;
+if (this.atNos == null) {
+node = this.nodes[i];
 if (node == null) continue;
-var n = node.getAtomicAndIsotopeNumber ();
-var f = (wts == null ? 1 : Clazz.floatToInt (8 * wts[p]));
+n = node.getAtomicAndIsotopeNumber ();
+} else {
+n = this.atNos[i];
+}var f = (wts == null ? 1 : Clazz.floatToInt (8 * wts[p]));
 if (n < JU.Elements.elementNumberMax) {
 if (this.elementCounts[n] == 0) this.nElements++;
 this.elementCounts[n] += f;

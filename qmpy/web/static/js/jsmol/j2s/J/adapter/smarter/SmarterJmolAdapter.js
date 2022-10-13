@@ -1,14 +1,10 @@
 Clazz.declarePackage ("J.adapter.smarter");
-Clazz.load (["J.api.JmolAdapter"], "J.adapter.smarter.SmarterJmolAdapter", ["java.io.BufferedReader", "$.InputStream", "javajs.api.GenericBinaryDocument", "JU.PT", "$.Rdr", "J.adapter.smarter.AtomIterator", "$.AtomSetCollection", "$.AtomSetCollectionReader", "$.BondIterator", "$.Resolver", "$.StructureIterator", "JS.SV", "JU.Logger", "JV.Viewer"], function () {
+Clazz.load (["J.api.JmolAdapter"], "J.adapter.smarter.SmarterJmolAdapter", ["java.io.BufferedReader", "$.InputStream", "java.lang.UnsupportedOperationException", "javajs.api.GenericBinaryDocument", "JU.PT", "$.Rdr", "J.adapter.smarter.AtomIterator", "$.AtomSetCollection", "$.AtomSetCollectionReader", "$.BondIterator", "$.Resolver", "$.StructureIterator", "JS.SV", "JU.Logger", "JV.Viewer"], function () {
 c$ = Clazz.declareType (J.adapter.smarter, "SmarterJmolAdapter", J.api.JmolAdapter);
 Clazz.makeConstructor (c$, 
 function () {
 Clazz.superConstructor (this, J.adapter.smarter.SmarterJmolAdapter, []);
 });
-Clazz.makeConstructor (c$, 
-function (string) {
-Clazz.superConstructor (this, J.adapter.smarter.SmarterJmolAdapter, []);
-}, "~S");
 Clazz.overrideMethod (c$, "getFileTypeName", 
 function (ascOrReader) {
 if (Clazz.instanceOf (ascOrReader, J.adapter.smarter.AtomSetCollection)) return (ascOrReader).fileTypeName;
@@ -197,20 +193,7 @@ result = (asc.length == 1 ? asc[0] :  new J.adapter.smarter.AtomSetCollection ("
 }, "~O,~O,java.util.Map");
 Clazz.overrideMethod (c$, "getAtomSetCollectionFromDOM", 
 function (DOMNode, htParams) {
-try {
-var ret = J.adapter.smarter.Resolver.DOMResolve (htParams);
-if (!(Clazz.instanceOf (ret, J.adapter.smarter.AtomSetCollectionReader))) return ret;
-var a = ret;
-a.setup ("DOM node", htParams, null);
-ret = a.readDataObject (DOMNode);
-if (!(Clazz.instanceOf (ret, J.adapter.smarter.AtomSetCollection))) return ret;
-var asc = ret;
-if (asc.errorMessage != null) return asc.errorMessage;
-return asc;
-} catch (e) {
-JU.Logger.error ("" + e);
-return "" + e;
-}
+throw  new UnsupportedOperationException ();
 }, "~O,java.util.Map");
 Clazz.overrideMethod (c$, "finish", 
 function (asc) {

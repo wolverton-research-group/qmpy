@@ -422,7 +422,7 @@ return (this.elementCount == 0);
 });
 Clazz.defineMethod (c$, "allNaN", 
 function () {
-return (this.allSame () && JU.PT.parseFloat (isNaN(this.$lastElement)) == true);
+return (this.allSame () && JU.PT.parseFloat (this.$lastElement) == NaN);
 });
 Clazz.defineMethod (c$, "allNull", 
 function () {
@@ -438,7 +438,7 @@ return (!this.isEmpty () && this.elementCount == this.repeatCount);
 });
 Clazz.defineMethod (c$, "allZero", 
 function () {
-return (this.allSame () && JU.PT.parseFloat (isNaN(this.$lastElement)) == false);
+return (this.allSame () && JU.PT.parseFloat (this.$lastElement) != NaN);
 });
 Clazz.defineMethod (c$, "hasValues", 
 function () {

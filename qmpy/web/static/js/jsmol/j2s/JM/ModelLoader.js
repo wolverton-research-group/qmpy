@@ -13,6 +13,7 @@ this.specialAtomIndexes = null;
 this.someModelsHaveUnitcells = false;
 this.someModelsAreModulated = false;
 this.is2D = false;
+this.isMOL2D = false;
 this.isMutate = false;
 this.isTrajectory = false;
 this.isPyMOLsession = false;
@@ -47,10 +48,13 @@ this.adapterTrajectoryCount = 0;
 this.noAutoBond = false;
 this.modulationOn = false;
 this.htGroup1 = null;
+this.appendToModelIndex = null;
 this.$mergeGroups = null;
 this.iChain = 0;
 this.vStereo = null;
+this.lastModel = -1;
 this.structuresDefinedInFile = null;
+this.stereodir = 1;
 Clazz.instantialize (this, arguments);
 }, JM, "ModelLoader");
 Clazz.prepareFields (c$, function () {
@@ -154,7 +158,8 @@ Clazz.defineMethod (c$, "createModelSet",
 var nAtoms = (adapter == null ? 0 : adapter.getAtomCount (asc));
 if (nAtoms > 0) JU.Logger.info ("reading " + nAtoms + " atoms");
 this.adapterModelCount = (adapter == null ? 1 : adapter.getAtomSetCount (asc));
-this.appendNew = !this.isMutate && (!this.merging || adapter == null || this.adapterModelCount > 1 || this.isTrajectory || this.vwr.getBoolean (603979792));
+this.appendToModelIndex = (this.ms.msInfo == null ? null : (this.ms.msInfo.get ("appendToModelIndex")));
+this.appendNew = !this.isMutate && (!this.merging || adapter == null || this.adapterModelCount > 1 || this.isTrajectory || this.vwr.getBoolean (603979792) && this.appendToModelIndex == null);
 this.htAtomMap.clear ();
 this.chainOf =  new Array (32);
 this.group3Of =  new Array (32);
@@ -203,7 +208,7 @@ var atoms = this.ms.at;
 for (var i = this.baseAtomIndex; i < ac; i++) atoms[i].setMadAtom (this.vwr, rd);
 
 var models = this.ms.am;
-for (var i = models[this.baseModelIndex].firstAtomIndex; i < ac; i++) models[atoms[i].mi].bsAtoms.set (i);
+for (var i = models[this.baseModelIndex].firstAtomIndex; i < ac; i++) if (atoms[i] != null) models[atoms[i].mi].bsAtoms.set (i);
 
 this.freeze ();
 this.finalizeShapes ();
@@ -286,8 +291,8 @@ if (this.appendNew) {
 this.baseModelIndex = this.baseModelCount;
 this.ms.mc = this.baseModelCount + this.adapterModelCount;
 } else {
-this.baseModelIndex = this.vwr.am.cmi;
-if (this.baseModelIndex < 0) this.baseModelIndex = this.baseModelCount - 1;
+this.baseModelIndex = (this.appendToModelIndex == null ? this.vwr.am.cmi : this.appendToModelIndex.intValue ());
+if (this.baseModelIndex < 0 || this.baseModelIndex >= this.baseModelCount) this.baseModelIndex = this.baseModelCount - 1;
 this.ms.mc = this.baseModelCount;
 }this.ms.ac = this.baseAtomIndex = this.modelSet0.ac;
 this.ms.bondCount = this.modelSet0.bondCount;
@@ -345,7 +350,7 @@ this.vwr.setStringProperty ("_fileType", modelAuxiliaryInfo.get ("fileType"));
 if (modelName == null) modelName = (this.jmolData != null && this.jmolData.indexOf (";") > 2 ? this.jmolData.substring (this.jmolData.indexOf (":") + 2, this.jmolData.indexOf (";")) : this.appendNew ? "" + (modelNumber % 1000000) : "");
 this.setModelNameNumberProperties (ipt, iTrajectory, modelName, modelNumber, modelProperties, modelAuxiliaryInfo, this.jmolData);
 }
-var m = this.ms.am[this.baseModelIndex];
+var m = this.ms.am[this.appendToModelIndex == null ? this.baseModelIndex : this.ms.mc - 1];
 this.vwr.setSmilesString (this.ms.msInfo.get ("smilesString"));
 var loadState = this.ms.msInfo.remove ("loadState");
 var loadScript = this.ms.msInfo.remove ("loadScript");
@@ -358,8 +363,10 @@ if (pt < 0 || pt != m.loadState.lastIndexOf (lines[i])) sb.append (lines[i]).app
 }
 m.loadState += m.loadScript.toString () + sb.toString ();
 m.loadScript =  new JU.SB ();
-if (loadScript.indexOf ("load append ") >= 0) loadScript.append ("; set appendNew true");
-m.loadScript.append ("  ").appendSB (loadScript).append (";\n");
+if (loadScript.indexOf ("load append ") >= 0 || loadScript.indexOf ("data \"append ") >= 0) {
+loadScript.insert (0, ";var anew = appendNew;");
+loadScript.append (";set appendNew anew");
+}m.loadScript.append ("  ").appendSB (loadScript).append (";\n");
 }if (this.isTrajectory) {
 var n = (this.ms.mc - ipt + 1);
 JU.Logger.info (n + " trajectory steps read");
@@ -473,8 +480,9 @@ this.iModel = modelIndex;
 this.model = models[modelIndex];
 this.currentChainID = 2147483647;
 this.isNewChain = true;
-models[modelIndex].bsAtoms.clearAll ();
-isPdbThisModel = models[modelIndex].isBioModel;
+this.model.bsAtoms.clearAll ();
+this.model.isOrderly = (this.appendToModelIndex == null);
+isPdbThisModel = this.model.isBioModel;
 iLast = modelIndex;
 addH = isPdbThisModel && this.doAddHydrogens;
 if (this.jbr != null) this.jbr.setHaveHsAlready (false);
@@ -485,15 +493,16 @@ var isotope = iterAtom.getElementNumber ();
 if (addH && JU.Elements.getElementNumber (isotope) == 1) this.jbr.setHaveHsAlready (true);
 var name = iterAtom.getAtomName ();
 var charge = (addH ? this.getPdbCharge (group3, name) : iterAtom.getFormalCharge ());
-this.addAtom (isPdbThisModel, iterAtom.getSymmetry (), iterAtom.getAtomSite (), iterAtom.getUniqueID (), isotope, name, charge, iterAtom.getPartialCharge (), iterAtom.getTensors (), iterAtom.getOccupancy (), iterAtom.getBfactor (), iterAtom.getXYZ (), iterAtom.getIsHetero (), iterAtom.getSerial (), iterAtom.getSeqID (), group3, iterAtom.getVib (), iterAtom.getAltLoc (), iterAtom.getRadius ());
+this.addAtom (isPdbThisModel, iterAtom.getSymmetry (), iterAtom.getAtomSite (), iterAtom.getUniqueID (), isotope, name, charge, iterAtom.getPartialCharge (), iterAtom.getTensors (), iterAtom.getOccupancy (), iterAtom.getBfactor (), iterAtom.getXYZ (), iterAtom.getIsHetero (), iterAtom.getSerial (), iterAtom.getSeqID (), group3, iterAtom.getVib (), iterAtom.getAltLoc (), iterAtom.getRadius (), iterAtom.getBondRadius ());
 }
 if (this.groupCount > 0 && addH) {
 this.jbr.addImplicitHydrogenAtoms (adapter, this.groupCount - 1, this.isNewChain && !isLegacyHAddition ? 1 : 0);
 }iLast = -1;
 var vdwtypeLast = null;
 var atoms = this.ms.at;
+models[0].firstAtomIndex = 0;
 for (var i = 0; i < this.ms.ac; i++) {
-if (atoms[i].mi != iLast) {
+if (atoms[i] != null && atoms[i].mi > iLast) {
 iLast = atoms[i].mi;
 models[iLast].firstAtomIndex = i;
 var vdwtype = this.ms.getDefaultVdwType (iLast);
@@ -533,7 +542,7 @@ Clazz.defineMethod (c$, "getPdbCharge",
 return (group3.equals ("ARG") && name.equals ("NH1") || group3.equals ("LYS") && name.equals ("NZ") || group3.equals ("HIS") && name.equals ("ND1") ? 1 : 0);
 }, "~S,~S");
 Clazz.defineMethod (c$, "addAtom", 
- function (isPDB, atomSymmetry, atomSite, atomUid, atomicAndIsotopeNumber, atomName, formalCharge, partialCharge, tensors, occupancy, bfactor, xyz, isHetero, atomSerial, atomSeqID, group3, vib, alternateLocationID, radius) {
+ function (isPDB, atomSymmetry, atomSite, atomUid, atomicAndIsotopeNumber, atomName, formalCharge, partialCharge, tensors, occupancy, bfactor, xyz, isHetero, atomSerial, atomSeqID, group3, vib, alternateLocationID, radius, bondRadius) {
 var specialAtomID = 0;
 var atomType = null;
 if (atomName != null) {
@@ -545,10 +554,10 @@ atomName = atomName.substring (0, i);
 if (atomName.indexOf ('*') >= 0) atomName = atomName.$replace ('*', '\'');
 specialAtomID = this.vwr.getJBR ().lookupSpecialAtomID (atomName);
 if (specialAtomID == 2 && "CA".equalsIgnoreCase (group3)) specialAtomID = 0;
-}}var atom = this.ms.addAtom (this.iModel, this.nullGroup, atomicAndIsotopeNumber, atomName, atomType, atomSerial, atomSeqID, atomSite, xyz, radius, vib, formalCharge, partialCharge, occupancy, bfactor, tensors, isHetero, specialAtomID, atomSymmetry);
+}}var atom = this.ms.addAtom (this.iModel, this.nullGroup, atomicAndIsotopeNumber, atomName, atomType, atomSerial, atomSeqID, atomSite, xyz, radius, vib, formalCharge, partialCharge, occupancy, bfactor, tensors, isHetero, specialAtomID, atomSymmetry, bondRadius);
 atom.altloc = alternateLocationID;
 this.htAtomMap.put (atomUid, atom);
-}, "~B,JU.BS,~N,~O,~N,~S,~N,~N,JU.Lst,~N,~N,JU.P3,~B,~N,~N,~S,JU.V3,~S,~N");
+}, "~B,JU.BS,~N,~O,~N,~S,~N,~N,JU.Lst,~N,~N,JU.P3,~B,~N,~N,~S,JU.V3,~S,~N,~N");
 Clazz.defineMethod (c$, "checkNewGroup", 
  function (adapter, chainID, group3, groupSequenceNumber, groupInsertionCode, addH, isLegacyHAddition) {
 var group3i = (group3 == null ? null : group3.intern ());
@@ -622,7 +631,12 @@ var isNear = (order == 1025);
 var isFar = (order == 1041);
 var bond;
 if (isNear || isFar) {
-bond = this.ms.bondMutually (atom1, atom2, (this.is2D ? order : 1), this.ms.getDefaultMadFromOrder (1), 0);
+var m = atom1.getModelIndex ();
+if (m != this.lastModel) {
+this.lastModel = m;
+var info = this.ms.getModelAuxiliaryInfo (m);
+this.isMOL2D = (info != null && "2D".equals (info.get ("dimension")));
+}bond = this.ms.bondMutually (atom1, atom2, (this.isMOL2D ? order : 1), this.ms.getDefaultMadFromOrder (1), 0);
 if (this.vStereo == null) {
 this.vStereo =  new JU.Lst ();
 }this.vStereo.addLast (bond);
@@ -683,16 +697,18 @@ for (var imodel = this.baseModelIndex; imodel < this.ms.mc; imodel++) if (this.m
 }});
 Clazz.defineMethod (c$, "initializeBonding", 
  function () {
-var bsExclude = (this.ms.getInfoM ("someModelsHaveCONECT") == null ? null :  new JU.BS ());
-if (bsExclude != null) this.ms.setPdbConectBonding (this.baseAtomIndex, this.baseModelIndex, bsExclude);
+var modelCount = this.ms.mc;
+var models = this.ms.am;
 var modelAtomCount = 0;
-var symmetryAlreadyAppliedToBonds = this.vwr.getBoolean (603979794);
+var bsExclude = this.ms.getInfoM ("bsExcludeBonding");
+if (bsExclude == null) {
+bsExclude = (this.ms.getInfoM ("someModelsHaveCONECT") == null ? null :  new JU.BS ());
+if (bsExclude != null) this.ms.setPdbConectBonding (this.baseAtomIndex, this.baseModelIndex, bsExclude);
+}var symmetryAlreadyAppliedToBonds = this.vwr.getBoolean (603979794);
 var doAutoBond = this.vwr.getBoolean (603979798);
 var forceAutoBond = this.vwr.getBoolean (603979846);
 var bs = null;
 var autoBonding = false;
-var modelCount = this.ms.mc;
-var models = this.ms.am;
 if (!this.noAutoBond) for (var i = this.baseModelIndex; i < modelCount; i++) {
 modelAtomCount = models[i].bsAtoms.cardinality ();
 var modelBondCount = this.ms.getInfoI (i, "initialBondCount");
@@ -797,14 +813,33 @@ this.ms.elementsPresent =  new Array (this.ms.mc);
 for (var i = 0; i < this.ms.mc; i++) this.ms.elementsPresent[i] = JU.BS.newN (64);
 
 for (var i = this.ms.ac; --i >= 0; ) {
-var n = this.ms.at[i].getAtomicAndIsotopeNumber ();
+var a = this.ms.at[i];
+if (a == null) continue;
+var n = a.getAtomicAndIsotopeNumber ();
 if (n >= JU.Elements.elementNumberMax) n = JU.Elements.elementNumberMax + JU.Elements.altElementIndexFromNumber (n);
-this.ms.elementsPresent[this.ms.at[i].mi].set (n);
+this.ms.elementsPresent[a.mi].set (n);
 }
 });
 Clazz.defineMethod (c$, "applyStereochemistry", 
  function () {
-this.set2dZ (this.baseAtomIndex, this.ms.ac);
+this.set2DLengths (this.baseAtomIndex, this.ms.ac);
+var v =  new JU.V3 ();
+if (this.vStereo != null) {
+out : for (var i = this.vStereo.size (); --i >= 0; ) {
+var b = this.vStereo.get (i);
+var a1 = b.atom1;
+var bonds = a1.bonds;
+for (var j = a1.getBondCount (); --j >= 0; ) {
+var b2 = bonds[j];
+if (b2 === b) continue;
+var a2 = b2.getOtherAtom (a1);
+v.sub2 (a2, a1);
+if (Math.abs (v.x) < 0.1) {
+if ((b.order == 1025) == (v.y < 0)) this.stereodir = -1;
+break out;
+}}
+}
+}this.set2dZ (this.baseAtomIndex, this.ms.ac, v);
 if (this.vStereo != null) {
 var bsToTest =  new JU.BS ();
 bsToTest.setBits (this.baseAtomIndex, this.ms.ac);
@@ -823,32 +858,53 @@ b.atom2.y = (b.atom1.y + b.atom2.y) / 2;
 this.vStereo = null;
 }this.is2D = false;
 });
-Clazz.defineMethod (c$, "set2dZ", 
+Clazz.defineMethod (c$, "set2DLengths", 
  function (iatom1, iatom2) {
+var scaling = 0;
+var n = 0;
+for (var i = iatom1; i < iatom2; i++) {
+var a = this.ms.at[i];
+var bonds = a.bonds;
+if (bonds == null) continue;
+for (var j = bonds.length; --j >= 0; ) {
+if (bonds[j] == null) continue;
+var b = bonds[j].getOtherAtom (a);
+if (b.getAtomNumber () != 1 && b.getIndex () > i) {
+scaling += b.distance (a);
+n++;
+}}
+}
+if (n == 0) return;
+scaling = 1.45 / (scaling / n);
+for (var i = iatom1; i < iatom2; i++) {
+this.ms.at[i].scale (scaling);
+}
+}, "~N,~N");
+Clazz.defineMethod (c$, "set2dZ", 
+ function (iatom1, iatom2, v) {
 var atomlist = JU.BS.newN (iatom2);
 var bsBranch =  new JU.BS ();
-var v =  new JU.V3 ();
 var v0 = JU.V3.new3 (0, 1, 0);
 var v1 =  new JU.V3 ();
 var bs0 =  new JU.BS ();
 bs0.setBits (iatom1, iatom2);
 for (var i = iatom1; i < iatom2; i++) if (!atomlist.get (i) && !bsBranch.get (i)) {
-bsBranch = this.getBranch2dZ (i, -1, bs0, bsBranch, v, v0, v1);
+bsBranch = this.getBranch2dZ (i, -1, bs0, bsBranch, v, v0, v1, this.stereodir);
 atomlist.or (bsBranch);
 }
-}, "~N,~N");
+}, "~N,~N,JU.V3");
 Clazz.defineMethod (c$, "getBranch2dZ", 
- function (atomIndex, atomIndexNot, bs0, bsBranch, v, v0, v1) {
+ function (atomIndex, atomIndexNot, bs0, bsBranch, v, v0, v1, dir) {
 var bs = JU.BS.newN (this.ms.ac);
 if (atomIndex < 0) return bs;
 var bsToTest =  new JU.BS ();
 bsToTest.or (bs0);
 if (atomIndexNot >= 0) bsToTest.clear (atomIndexNot);
-JM.ModelLoader.setBranch2dZ (this.ms.at[atomIndex], bs, bsToTest, v, v0, v1);
+JM.ModelLoader.setBranch2dZ (this.ms.at[atomIndex], bs, bsToTest, v, v0, v1, dir);
 return bs;
-}, "~N,~N,JU.BS,JU.BS,JU.V3,JU.V3,JU.V3");
+}, "~N,~N,JU.BS,JU.BS,JU.V3,JU.V3,JU.V3,~N");
 c$.setBranch2dZ = Clazz.defineMethod (c$, "setBranch2dZ", 
- function (atom, bs, bsToTest, v, v0, v1) {
+ function (atom, bs, bsToTest, v, v0, v1, dir) {
 var atomIndex = atom.i;
 if (!bsToTest.get (atomIndex)) return;
 bsToTest.clear (atomIndex);
@@ -858,19 +914,20 @@ for (var i = atom.bonds.length; --i >= 0; ) {
 var bond = atom.bonds[i];
 if (bond.isHydrogen ()) continue;
 var atom2 = bond.getOtherAtom (atom);
-JM.ModelLoader.setAtom2dZ (atom, atom2, v, v0, v1);
-JM.ModelLoader.setBranch2dZ (atom2, bs, bsToTest, v, v0, v1);
+JM.ModelLoader.setAtom2dZ (atom, atom2, v, v0, v1, dir);
+JM.ModelLoader.setBranch2dZ (atom2, bs, bsToTest, v, v0, v1, dir);
 }
-}, "JM.Atom,JU.BS,JU.BS,JU.V3,JU.V3,JU.V3");
+}, "JM.Atom,JU.BS,JU.BS,JU.V3,JU.V3,JU.V3,~N");
 c$.setAtom2dZ = Clazz.defineMethod (c$, "setAtom2dZ", 
- function (atomRef, atom2, v, v0, v1) {
+ function (atomRef, atom2, v, v0, v1, dir) {
 v.sub2 (atom2, atomRef);
 v.z = 0;
 v.normalize ();
 v1.cross (v0, v);
 var theta = Math.acos (v.dot (v0));
-atom2.z = atomRef.z + (0.8 * Math.sin (4 * theta));
-}, "JM.Atom,JM.Atom,JU.V3,JU.V3,JU.V3");
+var f = (0.4 * -dir * Math.sin (4 * theta));
+atom2.z = atomRef.z + f;
+}, "JM.Atom,JM.Atom,JU.V3,JU.V3,JU.V3,~N");
 Clazz.defineMethod (c$, "finalizeShapes", 
  function () {
 this.ms.sm = this.vwr.shm;

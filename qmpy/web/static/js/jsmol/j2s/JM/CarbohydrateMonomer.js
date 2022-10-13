@@ -22,7 +22,7 @@ if (possiblyPreviousMonomer == null) return true;
 for (var i = this.firstAtomIndex; i <= this.lastAtomIndex; i++) for (var j = possiblyPreviousMonomer.firstAtomIndex; j <= possiblyPreviousMonomer.lastAtomIndex; j++) {
 var a = this.chain.model.ms.at[i];
 var b = this.chain.model.ms.at[j];
-if (a.getElementNumber () + b.getElementNumber () == 14 && a.distanceSquared (b) < 3.24) return true;
+if (a != null && b != null && a.getElementNumber () + b.getElementNumber () == 14 && a.distanceSquared (b) < 3.24) return true;
 }
 
 return false;

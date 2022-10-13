@@ -1,9 +1,8 @@
-import os.path
-
 from django.contrib.auth import authenticate
 from django.shortcuts import render
 from qmpy.models import Entry, Task, Calculation, Formation, MetaData
 from .tools import get_globals
+from django.http import HttpResponse
 
 
 def home_page(request):
@@ -27,6 +26,23 @@ def faq_view(request):
 
 def play_view(request):
     return render(request, "play.html")
+
+
+def robots_view(request):
+    lines = [
+        "User-agent: Googlebot",
+        "User-agent: Bingbot",
+        "User-agent: DuckDuckBot",
+        "Disallow: /optimade/structures*",
+        "Disallow: /oqmdapi/*",
+        "Disallow: /api/search*",
+        "Disallow: /materials/export*",
+        "Disallow: /analysis/visualize/custom*",
+        "\n",
+        "User-agent: *",
+        "Disallow: /",
+    ]
+    return HttpResponse("\n".join(lines), content_type="text/plain")
 
 
 def login(request):

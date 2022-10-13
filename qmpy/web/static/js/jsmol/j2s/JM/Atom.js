@@ -345,7 +345,7 @@ return type;
 Clazz.defineMethod (c$, "getBondingRadius", 
 function () {
 var rr = this.group.chain.model.ms.bondingRadii;
-var r = (rr == null ? 0 : rr[this.i]);
+var r = (rr == null || this.i >= rr.length ? 0 : rr[this.i]);
 return (r == 0 ? JU.Elements.getBondingRadius (this.atomicAndIsotopeNumber, this.getFormalCharge ()) : r);
 });
 Clazz.defineMethod (c$, "getVolume", 
@@ -388,7 +388,7 @@ this.group.setAtomBits (bs);
 }, "JU.BS");
 Clazz.overrideMethod (c$, "getAtomName", 
 function () {
-return (this.atomID > 0 ? JM.Group.specialAtomNames[this.atomID] : this.group.chain.model.ms.atomNames[this.i]);
+return (this.atomID > 0 ? JM.Group.specialAtomNames[this.atomID] : this.group.chain.model.ms.atomNames == null ? "" : this.group.chain.model.ms.atomNames[this.i]);
 });
 Clazz.overrideMethod (c$, "getAtomType", 
 function () {

@@ -65,7 +65,7 @@ var center = this.findCumulativeCenter (b, c);
 if (center == null) return 0;
 var jn = center.stereo.getAlleneAtoms (center, b.atom);
 if (jn == null) return 0;
-center.stereo.setTopoCoordinates (center, null, null, jn);
+center.stereo.setTopoCoordinates (center, null, null, jn, false);
 var angle = JU.Measure.computeTorsion (jn[0].getXYZ (), jn[1].getXYZ (), jn[2].getXYZ (), jn[3].getXYZ (), true);
 return ((angle > 0) == ((a.atom.getIndex () == jn[0].getIndex ()) && (d.atom.getIndex () == jn[3].getIndex ()) || (a.atom.getIndex () == jn[1].getIndex ()) && (d.atom.getIndex () == jn[2].getIndex ())) ? 18 : 17);
 }, "JS.CIPChirality.CIPAtom,JS.CIPChirality.CIPAtom,JS.CIPChirality.CIPAtom,JS.CIPChirality.CIPAtom");
@@ -94,7 +94,7 @@ if (a.stereo == null) return false;
 var edges = a.getEdges ();
 for (var i = edges.length; --i >= 0; ) this.nodes[i] = edges[i].getOtherNode (a);
 
-a.stereo.setTopoCoordinates (a, null, null, this.nodes);
+a.stereo.setTopoCoordinates (a, null, null, this.nodes, false);
 return true;
 }, "JU.SimpleNode,~A");
 Clazz.defineMethod (c$, "getSmilesChiralityArray", 

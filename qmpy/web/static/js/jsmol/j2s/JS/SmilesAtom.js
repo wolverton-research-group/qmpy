@@ -488,14 +488,18 @@ function () {
 return "";
 });
 c$.getAtomLabel = Clazz.defineMethod (c$, "getAtomLabel", 
-function (atomicNumber, isotopeNumber, valence, charge, osclass, nH, isAromatic, stereo) {
+function (atomicNumber, isotopeNumber, valence, charge, osclass, nH, isAromatic, stereo, is2D) {
 var sym = JU.Elements.elementSymbolFromNumber (atomicNumber);
 if (isAromatic) {
 sym = sym.toLowerCase ();
 if (atomicNumber != 6) valence = 2147483647;
-}var count = (valence == 2147483647 || isotopeNumber != 0 || charge != 0 || !Float.isNaN (osclass) || stereo != null && stereo.length > 0 ? -1 : JS.SmilesAtom.getDefaultCount (atomicNumber, false));
-return (count == valence ? sym : "[" + (isotopeNumber <= 0 ? "" : "" + isotopeNumber) + sym + (stereo == null ? "" : stereo) + (nH > 1 ? "H" + nH : nH == 1 ? "H" : "") + (charge < 0 && charge != -2147483648 ? "" + charge : charge > 0 ? "+" + charge : "") + (Float.isNaN (osclass) ? "" : ":" + Clazz.floatToInt (osclass)) + "]");
-}, "~N,~N,~N,~N,~N,~N,~B,~S");
+}var simple = (valence != 2147483647 && isotopeNumber == 0 && charge == 0 && Float.isNaN (osclass) && (stereo == null || stereo.length == 0));
+var norm = JS.SmilesAtom.getDefaultCount (atomicNumber, false);
+if (is2D && nH == 0) {
+if (simple && atomicNumber == 6) return sym;
+nH = norm - valence;
+}return (simple && norm == valence ? sym : "[" + (isotopeNumber <= 0 ? "" : "" + isotopeNumber) + sym + (stereo == null ? "" : stereo) + (nH > 1 ? "H" + nH : nH == 1 ? "H" : "") + (charge < 0 && charge != -2147483648 ? "" + charge : charge > 0 ? "+" + charge : "") + (Float.isNaN (osclass) ? "" : ":" + Clazz.floatToInt (osclass)) + "]");
+}, "~N,~N,~N,~N,~N,~N,~B,~S,~B");
 Clazz.overrideMethod (c$, "getBioSmilesType", 
 function () {
 return this.bioType;

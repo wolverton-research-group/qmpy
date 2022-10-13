@@ -114,14 +114,16 @@ break;
 }
 JU.Logger.info ("MRC header: bytes read: " + this.binarydoc.getPosition () + "\n");
 this.getVectorsAndOrigin ();
+this.jvxlFileHeaderBuffer =  new JU.SB ();
+this.jvxlFileHeaderBuffer.append ("MRC DATA ").append (nlabel > 0 ? this.labels[0] : "").append ("\n");
+this.jvxlFileHeaderBuffer.append ("see http://ami.scripps.edu/software/mrctools/mrc_specification.php\n");
 if (this.params.thePlane == null && (this.params.cutoffAutomatic || !Float.isNaN (this.params.sigma))) {
 var sigma = (this.params.sigma < 0 || Float.isNaN (this.params.sigma) ? 1 : this.params.sigma);
 this.params.cutoff = rmsDeviation * sigma + this.dmean;
-JU.Logger.info ("Cutoff set to (mean + rmsDeviation*" + sigma + " = " + this.params.cutoff + ")\n");
-}this.jvxlFileHeaderBuffer =  new JU.SB ();
-this.jvxlFileHeaderBuffer.append ("MRC DATA ").append (nlabel > 0 ? this.labels[0] : "").append ("\n");
-this.jvxlFileHeaderBuffer.append ("see http://ami.scripps.edu/software/mrctools/mrc_specification.php\n");
-});
+s = "cutoff set to " + this.params.cutoff + " (mean + rmsDeviation*sigma = " + this.dmean + " + " + rmsDeviation + "*" + sigma + ")";
+JU.Logger.info (s);
+this.jvxlFileHeaderBuffer.append (s + "\n");
+}});
 Clazz.overrideMethod (c$, "nextVoxel", 
 function () {
 var voxelValue;

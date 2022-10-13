@@ -13,10 +13,18 @@ return JU.Edge.argbsHbondType[argbIndex];
 c$.getBondOrderNumberFromOrder = Clazz.defineMethod (c$, "getBondOrderNumberFromOrder", 
 function (order) {
 order &= -131073;
-if (order == 131071 || order == 65535) return "0";
-if (JU.Edge.isOrderH (order) || JU.Edge.isAtropism (order) || (order & 256) != 0) return JU.Edge.EnumBondOrder.SINGLE.number;
+switch (order) {
+case 131071:
+case 65535:
+return "0";
+case 1025:
+case 1041:
+return "1";
+default:
+if (JU.Edge.isOrderH (order) || JU.Edge.isAtropism (order) || (order & 256) != 0) return "1";
 if ((order & 224) != 0) return (order >> 5) + "." + (order & 0x1F);
 return JU.Edge.EnumBondOrder.getNumberFromCode (order);
+}
 }, "~N");
 c$.getCmlBondOrder = Clazz.defineMethod (c$, "getCmlBondOrder", 
 function (order) {
@@ -43,6 +51,10 @@ switch (order) {
 case 65535:
 case 131071:
 return "";
+case 1025:
+return "near";
+case 1041:
+return "far";
 case 32768:
 return JU.Edge.EnumBondOrder.STRUT.$$name;
 case 1:
@@ -60,7 +72,7 @@ return JU.Edge.EnumBondOrder.getNameFromCode (order);
 }, "~N");
 c$.getAtropismOrder = Clazz.defineMethod (c$, "getAtropismOrder", 
 function (nn, mm) {
-return JU.Edge.getAtropismOrder12 (((nn + 1) << 2) + mm + 1);
+return JU.Edge.getAtropismOrder12 (((nn) << 2) + mm);
 }, "~N,~N");
 c$.getAtropismOrder12 = Clazz.defineMethod (c$, "getAtropismOrder12", 
 function (nnmm) {
@@ -72,7 +84,7 @@ return (order >> (11)) & 0xF;
 }, "~N");
 c$.getAtropismNode = Clazz.defineMethod (c$, "getAtropismNode", 
 function (order, a1, isFirst) {
-var i1 = (order >> (11 + (isFirst ? 2 : 0))) & 3;
+var i1 = (order >> (11 + (isFirst ? 0 : 2))) & 3;
 return a1.getEdges ()[i1 - 1].getOtherNode (a1);
 }, "~N,JU.Node,~B");
 c$.isAtropism = Clazz.defineMethod (c$, "isAtropism", 
@@ -138,6 +150,10 @@ throw e;
 }
 return order;
 }, "~S");
+Clazz.overrideMethod (c$, "getBondType", 
+function () {
+return this.order;
+});
 Clazz.defineMethod (c$, "setCIPChirality", 
 function (c) {
 }, "~N");

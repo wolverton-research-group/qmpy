@@ -1,6 +1,7 @@
 {% extends "base_site.html" %}
 {% load static %}
 {% load i18n %}
+{% load custom_filters %}
 
 
 {% block title %}
@@ -26,8 +27,7 @@ OQMD | Search Phases
 {% endblock %}
 
 {% block extrascript %}
-<script language="javascript" type="text/javascript" src={% static "js/jquery.flot.pie.js" %}></script>
-
+<script src={% static "js/jquery.flot.compressed_all.js" %}></script>
 {% if phase_comp %}
 <script language="javascript" type="text/javascript">
   function labelFormatter(label, series) {
@@ -60,8 +60,11 @@ $(function() {
 </script>
 
 {% if pd3d %}
-<script type="text/javascript" src="https://cdn.plot.ly/plotly-1.49.4.min.js">
-</script>
+{% if use_cdn|USE_CDN %}
+    <script type="text/javascript" src="https://cdn.plot.ly/plotly-2.8.3.min.js"></script>
+{% else %}
+    <script language="javascript" type="text/javascript" src={% static "js/plotly-v1.49.4.min.js" %}></script>
+{% endif %}
 <script language="javascript" type="text/javascript">
 $(function() {
     {{ pd3d | safe }}
@@ -336,6 +339,7 @@ function openWindow() {
 
 {% endif %}
 
+{% if is_debug|IS_DEBUG %}
 {% if running %}
 <div style="padding-top:20px;float:left">
 <h2> Compounds not completed at this composition </h2>
@@ -371,6 +375,7 @@ function openWindow() {
 </table>
 </div>
 
+{% endif %}
 {% endif %}
 
 {% endblock %}

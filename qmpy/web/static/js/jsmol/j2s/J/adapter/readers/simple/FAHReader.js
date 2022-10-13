@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.adapter.readers.simple");
-Clazz.load (["J.adapter.smarter.AtomSetCollectionReader"], "J.adapter.readers.simple.FAHReader", ["JU.PT", "$.Rdr", "J.adapter.smarter.Atom", "$.Bond", "JU.Logger"], function () {
+Clazz.load (["J.adapter.smarter.AtomSetCollectionReader"], "J.adapter.readers.simple.FAHReader", ["JU.PT", "$.Rdr", "J.adapter.smarter.Atom", "$.Bond", "JU.Logger", "JV.FileManager"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.factor = 1;
 this.pt = null;
@@ -115,10 +115,8 @@ return false;
 });
 Clazz.defineMethod (c$, "getTopData", 
  function () {
-var fileName = this.htParams.get ("fullPathName");
-var pt = fileName.indexOf ("::");
-if (pt > 0) fileName = fileName.substring (pt + 2);
-pt = fileName.lastIndexOf (".");
+var fileName = JV.FileManager.stripTypePrefix (this.htParams.get ("fullPathName"));
+var pt = fileName.lastIndexOf (".");
 if (pt < 0) pt = fileName.length;
 var ptv = fileName.lastIndexOf ("Frame", pt);
 fileName = fileName.substring (0, ptv) + "Top" + fileName.substring (pt);

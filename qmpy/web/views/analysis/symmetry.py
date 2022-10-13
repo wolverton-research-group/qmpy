@@ -15,7 +15,7 @@ def sg_view(request, spacegroup):
 
 
 def op_view(request, operation):
-    operation = Spacegroup.objects.get(id=operation)
+    operation = Operation.objects.get(pk=operation)
     data = get_globals()
     data["operation"] = operation
     data["request"] = request

@@ -389,7 +389,12 @@ function () {
 this.RL ();
 if (!this.purging && this.line != null && this.line.startsWith ("--")) {
 this.purging = true;
-this.discardLinesUntilStartsWith ("*");
+if (this.rd ().indexOf ("EAF") == 0) {
+this.rd ();
+this.discardLinesUntilStartsWith ("--");
+this.purging = false;
+return this.rd ();
+};this.discardLinesUntilStartsWith ("*");
 this.rd ();
 this.purging = false;
 this.RL ();

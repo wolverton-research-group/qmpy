@@ -104,7 +104,6 @@ if (Clazz.instanceOf (ret, JU.SB) || Clazz.instanceOf (ret, String)) return  new
 if (JSV.common.JSVFileManager.isAB (ret)) return  new java.io.BufferedReader ( new java.io.StringReader ( String.instantialize (ret)));
 var bis =  new java.io.BufferedInputStream (ret);
 var $in = bis;
-if (JSV.common.JSVFileManager.isZipFile (bis)) return (JSV.common.JSViewer.getInterface ("JSV.common.JSVZipUtil")).newJSVZipFileSequentialReader ($in, subFileList, startCode);
 if (JSV.common.JSVFileManager.isGzip (bis)) $in = (JSV.common.JSViewer.getInterface ("JSV.common.JSVZipUtil")).newGZIPInputStream ($in);
 return  new java.io.BufferedReader ( new java.io.InputStreamReader ($in, "UTF-8"));
 } catch (e) {
@@ -154,9 +153,8 @@ return JSV.common.JSVFileManager.getBufferedReaderForStringOrBytes (data);
 }, "~S");
 c$.isAB = Clazz.defineMethod (c$, "isAB", 
 function (x) {
-{
-return Clazz.isAB(x);
-}}, "~O");
+return JU.AU.isAB (x);
+}, "~O");
 c$.isZipFile = Clazz.defineMethod (c$, "isZipFile", 
 function (is) {
 try {
@@ -526,7 +524,7 @@ Clazz.defineStatics (c$,
 c$.htCorrelationCache = c$.prototype.htCorrelationCache =  new java.util.Hashtable ();
 Clazz.defineStatics (c$,
 "nciResolver", "https://cactus.nci.nih.gov/chemical/structure/%FILE/file?format=sdf&get3d=True",
-"nmrdbServerH1", "http://www.nmrdb.org/tools/jmol/predict.php?POST?molfile=",
-"nmrdbServerC13", "http://www.nmrdb.org/service/jsmol13c?POST?molfile=",
+"nmrdbServerH1", "https://www.nmrdb.org/tools/jmol/predict.php?POST?molfile=",
+"nmrdbServerC13", "https://www.nmrdb.org/service/jsmol13c?POST?molfile=",
 "stringCount", 0);
 });

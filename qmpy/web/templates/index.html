@@ -1,5 +1,7 @@
 {% extends "base_site.html" %}
 {% load static %}
+{% load custom_filters %}
+
 {% block title %}
 OQMD
 {% endblock %}
@@ -24,15 +26,21 @@ OQMD
     1);min-height:30px;border-width:5px;" class="box">
     <p> The OQMD is a database of DFT calculated thermodynamic and structural 
     properties of <b>{{done}}</b> materials, created in 
-        <a href="http://wolverton.northwestern.edu" target="_blank">Chris Wolverton's</a> 
+        <a href="https://www.wolverton.northwestern.edu" target="_blank">Chris Wolverton's</a> 
         group at Northwestern University.
     </p>
 </div>
 
 <div id='pdgraph' class="flot-container" style="width:500px;margin-top:15%">
-    <script type="text/javascript" src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    {% if use_cdn|USE_CDN %}
+        <script type="text/javascript" src="https://cdn.plot.ly/plotly-2.8.3.min.js"></script>
+    {% else %}
+        <script language="javascript" type="text/javascript" src={% static "js/plotly-v1.49.4.min.js" %}></script>
+    {% endif %}
     <script type="text/javascript" src="{% static 'js/phasediagram_home.min.js' %}"></script>
 </div>
+
+<img src="{% static "img/grayscaled-all-logo.png" %}" title="CHiMaD, TRI, DOE, Northwestern Quest" width=200 align="right" alt="CHiMaD, TRI, DOE, Northwestern Quest">
 
 {% endblock %}
 
@@ -68,10 +76,8 @@ OQMD
   </div>
 
   <div style="width:40%;box-shadow:none;border-color:white;border-width:5px;" class="box">
-      <a style="color:white;" href="/api" title="RESTful API endpoints for faster and convenient material data query within OQMD"><h2>RESTful API</h2></a>
-      <a style="color:white;" href="/oqmdapi/formationenergy" title="RESTful endpoint based on OQMDAPI"> OQMD API</a>
-      <br>
-      <a style="color:white;" href="/optimade/structures" title="RESTful endpoint based on OPTiMaDe Specification"> Optimade API</a>
+      <a style="color:white;" href="/optimade" title="OPTIMADE-compliant RESTful API for automated material data query from OQMD"><h2>RESTful API</h2>
+      (OPTIMADE)</a>
   </div>
 
 </div>

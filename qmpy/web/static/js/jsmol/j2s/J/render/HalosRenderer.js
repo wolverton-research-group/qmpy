@@ -18,7 +18,7 @@ var needTranslucent = false;
 this.g3d.addRenderer (1073741880);
 for (var i = this.ms.ac; --i >= 0; ) {
 var atom = atoms[i];
-if ((atom.shapeVisibilityFlags & 1) == 0) continue;
+if (atom == null || (atom.shapeVisibilityFlags & 1) == 0) continue;
 var isHidden = this.ms.isAtomHidden (i);
 this.mad = (halos.mads == null ? 0 : halos.mads[i]);
 this.colix = (halos.colixes == null || i >= halos.colixes.length ? 0 : halos.colixes[i]);

@@ -7,6 +7,7 @@
 {% endblock %}
 
 {% block extrascript %}
+<script type="text/javascript" src={% static "js/jquery.flot.compressed_all.js" %}></script>
 {% endblock %} 
 
 {% block content %}
@@ -56,16 +57,17 @@ Spacegroup: <a href="/analysis/spacegroup/{{structure.spacegroup_id}}">
 
 {% block sidebar %}
 <div id="sidebar" class="box">
-  <script type="text/javascript" src={% static "js/jsmol/JSmol.min.js" %}></script>
+  <script type="text/javascript" src={% static "js/jsmol/JSmol.min.nojq.js" %}></script>
   <div id="jmol">
     <h1> Visualization </h1>
     <script>
       var Info = {
+	serverURL: "{{jsmol_serverURL}}",
         j2sPath: "{% static 'js/jsmol/j2s' %}",
         {% if primitive %}
-        src: "/materials/export/primitive/cif/{{structure.id}}",
+        src: "/materials/export/primitive/poscar/{{structure.id}}",
         {% else %}
-        src: "/materials/export/conventional/cif/{{structure.id}}",
+        src: "/materials/export/conventional/poscar/{{structure.id}}",
         {% endif %}
         use: "HTML5",
         width: 400,

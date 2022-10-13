@@ -33,7 +33,7 @@ var zb;
 for (var i = xyCoords.length; --i >= 0; ) {
 var x = xyCoords[i].getXVal ();
 if (x < 400 || x > 700) continue;
-cie = JSV.common.Visible.gauss (85.7145, 2.05719E-5, x - 607.263) + JSV.common.Visible.gauss (57.7256, 0.000126451, x - 457.096);
+cie = JSV.common.Visible.gauss (15.2438, 4.99542E-03, x - 412.281) + JSV.common.Visible.gauss (92.747, 1.12996E-05, x - 540.046) + JSV.common.Visible.gauss (13.8872, 5.16966E-04, x - 525.74) + JSV.common.Visible.gauss (16.7377, 5.55018E-03, x - 448.038) + JSV.common.Visible.gauss (23.9973, 1.28306E-03, x - 469.107) + JSV.common.Visible.gauss (5.68614, 1.03616E-02, x - 672.024);
 xb = JSV.common.Visible.gauss (1.06561, 0.000500819, x - 598.623) + JSV.common.Visible.gauss (0.283831, 0.00292745, x - 435.734) + JSV.common.Visible.gauss (0.113771, 0.00192849, x - 549.271) + JSV.common.Visible.gauss (0.239103, 0.00255944, x - 460.547);
 yb = JSV.common.Visible.gauss (0.239617, 0.00117296, x - 530.517) + JSV.common.Visible.gauss (0.910377, 0.000300984, x - 565.635) + JSV.common.Visible.gauss (0.0311013, 0.00152386, x - 463.833);
 zb = JSV.common.Visible.gauss (0.988366, 0.00220336, x - 456.345) + JSV.common.Visible.gauss (0.381551, 0.000848554, x - 450.871) + JSV.common.Visible.gauss (0.355693, 0.000628546, x - 470.668) + JSV.common.Visible.gauss (0.81862, 0.00471059, x - 433.144);

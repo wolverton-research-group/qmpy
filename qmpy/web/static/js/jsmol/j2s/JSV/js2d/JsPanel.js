@@ -9,10 +9,6 @@ this.name = null;
 this.bgcolor = null;
 Clazz.instantialize (this, arguments);
 }, JSV.js2d, "JsPanel", null, JSV.api.JSVPanel);
-Clazz.overrideMethod (c$, "finalize", 
-function () {
-JU.Logger.info ("JSVPanel " + this + " finalized");
-});
 Clazz.overrideMethod (c$, "getApiPlatform", 
 function () {
 return this.apiPlatform;

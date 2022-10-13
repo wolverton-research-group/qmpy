@@ -7,8 +7,8 @@
 {% endblock %}
 
 {% block extrascript %}
-<script language="javascript" type="text/javascript" src={% static "js/jquery.flot.pie.min.js" %}></script>
-
+<script src={% static "js/jquery.flot.compressed_all.js" %}></script>
+{% if plot %}
 <script language="javascript" type="text/javascript">
   function labelFormatter(label, series) {
         return "<div style='font-size:12pt; text-align:center; padding:2px; color:black;'>" + label + "<br/>" + Math.round(series.percent) + "%</div>";
@@ -27,6 +27,7 @@
       });
     });
   </script>
+{% endif %}
 {% endblock %}
 
 {% block content %}

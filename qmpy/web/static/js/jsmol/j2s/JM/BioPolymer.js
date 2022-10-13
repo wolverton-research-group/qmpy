@@ -204,10 +204,13 @@ var previousVectorC = null;
 for (var i = 1; i < this.monomerCount; ++i) {
 vectorA.sub2 (this.leadMidpoints[i], this.leadPoints[i]);
 vectorB.sub2 (this.leadPoints[i], this.leadMidpoints[i + 1]);
+if (vectorB.length () == 0) {
+vectorC = previousVectorC;
+} else {
 vectorC.cross (vectorA, vectorB);
 vectorC.normalize ();
 if (previousVectorC != null && previousVectorC.angle (vectorC) > 1.5707963267948966) vectorC.scale (-1);
-previousVectorC = this.wingVectors[i] = JU.V3.newV (vectorC);
+}previousVectorC = this.wingVectors[i] = JU.V3.newV (vectorC);
 }
 }}this.wingVectors[0] = this.wingVectors[1];
 this.wingVectors[this.monomerCount] = this.wingVectors[this.monomerCount - 1];
@@ -313,6 +316,10 @@ return this.type;
 Clazz.defineMethod (c$, "isCyclic", 
 function () {
 return ((this.cyclicFlag == 0 ? (this.cyclicFlag = (this.monomerCount >= 4 && this.monomers[0].isConnectedAfter (this.monomers[this.monomerCount - 1])) ? 1 : -1) : this.cyclicFlag) == 1);
+});
+Clazz.overrideMethod (c$, "toString", 
+function () {
+return "[Polymer type " + this.type + " n=" + this.monomerCount + " " + (this.monomerCount > 0 ? this.monomers[0] + " " + this.monomers[this.monomerCount - 1] : "") + "]";
 });
 Clazz.defineStatics (c$,
 "TYPE_NOBONDING", 0,

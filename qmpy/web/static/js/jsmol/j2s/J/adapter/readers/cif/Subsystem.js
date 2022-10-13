@@ -72,14 +72,14 @@ for (var iop = 0; iop < nOps; iop++) {
 var rv = s0.getOperationRsVs (iop);
 var r0 = rv.getRotation ();
 var v0 = rv.getTranslation ();
-var r = this.w.mul (r0).mul (winv);
-var v = this.w.mul (v0);
+var r = this.cleanMatrix (this.w.mul (r0).mul (winv));
+var v = this.cleanMatrix (this.w.mul (v0));
 var code = this.code;
 if (this.isMixed (r)) {
 for (var e, $e = this.msRdr.htSubsystems.entrySet ().iterator (); $e.hasNext () && ((e = $e.next ()) || true);) {
 var ss = e.getValue ();
 if (ss === this) continue;
-var rj = ss.w.mul (r0).mul (winv);
+var rj = this.cleanMatrix (ss.w.mul (r0).mul (winv));
 if (!this.isMixed (rj)) {
 r = rj;
 v = ss.w.mul (v0);
@@ -90,6 +90,20 @@ break;
 JU.Logger.info (this.code + "." + (iop + 1) + (this.code.equals (code) ? "   " : ">" + code + " ") + jf);
 }
 }, "~B");
+Clazz.defineMethod (c$, "cleanMatrix", 
+ function (m) {
+var a = m.getArray ();
+var d1 = a.length;
+var d2 = a[0].length;
+for (var i = d1; --i >= 0; ) for (var j = d2; --j >= 0; ) if (J.adapter.readers.cif.Subsystem.approxZero (a[i][j])) a[i][j] = 0;
+
+
+return m;
+}, "JU.Matrix");
+c$.approxZero = Clazz.defineMethod (c$, "approxZero", 
+ function (d) {
+return d < 1e-7 && d > -1.0E-7;
+}, "~N");
 Clazz.defineMethod (c$, "isMixed", 
  function (r) {
 var a = r.getArray ();

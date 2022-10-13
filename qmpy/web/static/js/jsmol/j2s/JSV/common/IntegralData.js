@@ -301,7 +301,8 @@ nCount = 0;
 nCount = 0;
 y0 = y;
 }}
-if (this.spec.nH > 0) this.factorAllIntegrals (this.spec.nH / this.percentRange, false);
+var nH = this.spec.getHydrogenCount ();
+if (nH > 0) this.factorAllIntegrals (nH / this.percentRange, false);
 });
 Clazz.defineMethod (c$, "getInfo", 
 function (info) {

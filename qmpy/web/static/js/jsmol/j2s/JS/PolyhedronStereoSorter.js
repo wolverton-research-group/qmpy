@@ -27,7 +27,7 @@ if (Math.abs (torA - torB) < 1) {
 torA = 0;
 this.vTemp.sub2 (b[2], a[2]);
 torB = this.vRef.dot (this.vTemp);
-}return (torA < torB ? 1 : torA > torB ? -1 : 0);
+}return (torA < torB ? -1 : torA > torB ? 1 : 0);
 }, "~A,~A");
 Clazz.defineMethod (c$, "isAligned", 
 function (pt1, pt2, pt3) {

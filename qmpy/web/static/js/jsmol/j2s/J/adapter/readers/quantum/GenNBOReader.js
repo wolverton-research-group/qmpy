@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.adapter.readers.quantum");
-Clazz.load (["J.adapter.readers.quantum.MOReader"], "J.adapter.readers.quantum.GenNBOReader", ["java.lang.Boolean", "$.Exception", "$.Float", "java.util.Hashtable", "JU.AU", "$.Lst", "$.P3", "$.PT", "$.Rdr", "$.SB", "J.adapter.readers.quantum.NBOParser", "JU.Logger"], function () {
+Clazz.load (["J.adapter.readers.quantum.MOReader"], "J.adapter.readers.quantum.GenNBOReader", ["java.lang.Boolean", "$.Exception", "$.Float", "java.util.Hashtable", "JU.AU", "$.Lst", "$.P3", "$.PT", "$.Rdr", "$.SB", "J.adapter.readers.quantum.NBOParser", "JU.Logger", "JV.FileManager", "$.JC"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.isOutputFile = false;
 this.nboType = "";
@@ -104,16 +104,21 @@ return structures;
 });
 Clazz.defineMethod (c$, "getFileData", 
  function (ext) {
-var fileName = this.htParams.get ("fullPathName");
+var fileName = JV.FileManager.stripTypePrefix (this.htParams.get ("fullPathName"));
 var pt = fileName.lastIndexOf (".");
 if (pt < 0) pt = fileName.length;
 fileName = fileName.substring (0, pt);
 this.moData.put ("nboRoot", fileName);
+if (ext.startsWith (".")) {
 fileName += ext;
-var data = this.vwr.getFileAsString3 (fileName, false, null);
+} else {
+pt = fileName.lastIndexOf ("/");
+fileName = fileName.substring (0, pt + 1) + ext;
+}var data = this.vwr.getFileAsString3 (fileName, false, null);
 JU.Logger.info (data.length + " bytes read from " + fileName);
 var isError = (data.indexOf ("java.io.") >= 0);
 if (data.length == 0 || isError && this.nboType !== "AO") throw  new Exception (" supplemental file " + fileName + " was not found");
+if (!isError) J.adapter.readers.quantum.GenNBOReader.addAuxFile (this.moData, fileName, this.htParams);
 return (isError ? null : data);
 }, "~S");
 Clazz.defineMethod (c$, "getFile31", 
@@ -134,13 +139,58 @@ throw e;
 });
 Clazz.defineMethod (c$, "getFile46", 
  function () {
-var data = this.getFileData (".46");
-if (data == null) return;
+this.nNOs = this.nAOs = this.nOrbitals;
+var labelKey = J.adapter.readers.quantum.GenNBOReader.getLabelKey (this.nboType);
+var map = null;
 var readerSave = this.reader;
-this.reader = JU.Rdr.getBR (data);
-this.readData46 ();
+try {
+this.reader = JU.Rdr.getBR (this.getFileData (".46"));
+map = this.readData46 (labelKey);
+} catch (e) {
+if (Clazz.exceptionOf (e, Exception)) {
+try {
+map = this.readOutputProperties (this.getFileData ("output.properties"));
+} catch (ee) {
+if (Clazz.exceptionOf (ee, Exception)) {
+map =  new java.util.Hashtable ();
+this.setMap (map, "NHO", this.nNOs, false);
+this.setMap (map, "NBO", this.nNOs, false);
+this.setMap (map, "NAO", this.nNOs, false);
+} else {
+throw ee;
+}
+}
+} else {
+throw e;
+}
+}
+this.setMap (map, labelKey, this.nNOs, true);
 this.reader = readerSave;
 });
+Clazz.defineMethod (c$, "readOutputProperties", 
+ function (data) {
+var map =  new java.util.Hashtable ();
+var lines = data.$plit ("\n");
+for (var i = lines.length; --i >= 0; ) {
+var line = lines[i];
+if (line.startsWith ("Natural Atomic Orbitals=")) {
+this.setLabels (map, "NAO", line);
+} else if (line.startsWith ("Natural Hybrid Orbitals=")) {
+this.setLabels (map, "NHO", line);
+} else if (line.startsWith ("Natural Bond Orbitals=")) {
+this.setLabels (map, "NBO", line);
+}}
+return map;
+}, "~S");
+Clazz.defineMethod (c$, "setLabels", 
+ function (map, key, line) {
+var tokens = JU.PT.split (line, ":");
+for (var i = tokens.length; --i >= 0; ) {
+var s = JU.PT.split (tokens[i], ",")[1];
+tokens[i] = (s.indexOf ("%") >= 0 ? s.substring (0, s.indexOf (" ")) : JU.PT.rep (s, " ", ""));
+}
+map.put (key, tokens);
+}, "java.util.Map,~S,~S");
 Clazz.defineMethod (c$, "readData47", 
  function () {
 this.allowNoOrbitals = true;
@@ -151,9 +201,6 @@ while (this.rd ().indexOf ("$END") < 0) {
 var tokens = this.getTokens ();
 this.addAtomXYZSymName (tokens, 2, null, null).elementNumber = this.parseIntStr (tokens[0]);
 }
-if (this.doReadMolecularOrbitals && !this.getFile31 ()) {
-this.alphaOnly = true;
-this.betaOnly = false;
 this.discardLinesUntilContains ("$BASIS");
 this.appendLoadNote ("basis AOs are unnormalized");
 var centers = this.getIntData ();
@@ -185,7 +232,7 @@ this.line = l;
 this.getAlphasAndExponents ();
 this.nboType = "AO";
 this.readMOs ();
-}this.continuing = false;
+this.continuing = false;
 });
 Clazz.defineMethod (c$, "getIntData", 
  function () {
@@ -209,11 +256,11 @@ case 1:
 slater[1] = 0;
 break;
 case 3:
-if (!this.getDFMap ("P", this.line, 1, J.adapter.readers.quantum.GenNBOReader.$P_LIST, 3)) return false;
+if (!this.getDFMap ("P", this.line, 1, J.adapter.readers.quantum.GenNBOReader.$P_LIST, 3) && this.resetDF () && !this.getDFMap ("P", this.line, 1, J.adapter.readers.quantum.GenNBOReader.PS_LIST, 3)) return false;
 slater[1] = 1;
 break;
 case 4:
-if (!this.getDFMap ("SP", this.line, 2, J.adapter.readers.quantum.GenNBOReader.SP_LIST, 1)) return false;
+if (!this.getDFMap ("SP", this.line, 2, J.adapter.readers.quantum.GenNBOReader.SP_LIST, 1) && this.resetDF () && !this.getDFMap ("SP", this.line, 2, J.adapter.readers.quantum.GenNBOReader.SPS_LIST, 2)) return false;
 slater[1] = 2;
 break;
 case 5:
@@ -265,6 +312,11 @@ slater[3] = ng;
 this.shells.addLast (slater);
 return true;
 }, "~A,~N,~N,~N");
+Clazz.defineMethod (c$, "resetDF", 
+ function () {
+this.dfCoefMaps[1][0] = 0;
+return true;
+});
 Clazz.defineMethod (c$, "getAlphasAndExponents", 
  function () {
 for (var j = 0; j < 5; j++) {
@@ -324,7 +376,6 @@ this.line = this.rd ();
 for (var j = Clazz.doubleToInt ((n - 1) / 10); --j >= 0; ) this.line += this.rd ().substring (1);
 
 this.line = this.line.trim ();
-System.out.println (this.line);
 if (!this.fillSlater (slater, n, pt, ng)) return false;
 }
 this.rd ();
@@ -332,12 +383,11 @@ this.getAlphasAndExponents ();
 return true;
 }, "~S");
 Clazz.defineMethod (c$, "readData46", 
- function () {
+ function (labelKey) {
 var map =  new java.util.Hashtable ();
 var tokens =  new Array (0);
 this.rd ();
-var nNOs = this.nNOs = this.nAOs = this.nOrbitals;
-var labelKey = J.adapter.readers.quantum.GenNBOReader.getLabelKey (this.nboType);
+var nNOs = this.nNOs;
 while (this.line != null && this.line.length > 0) {
 tokens = JU.PT.getTokens (this.line);
 var type = tokens[0];
@@ -352,13 +402,16 @@ nNOs = this.parseIntStr (count);
 var sb =  new JU.SB ();
 while (this.rd () != null && this.line.length > 4 && " NA NB AO NH".indexOf (this.line.substring (1, 4)) < 0) sb.append (this.line.substring (1));
 
-System.out.println (sb.length ());
 tokens =  new Array (Clazz.doubleToInt (sb.length () / 10));
 for (var i = 0, pt = 0; i < tokens.length; i++, pt += 10) tokens[i] = JU.PT.rep (sb.substring2 (pt, pt + 10), " ", "");
 
 map.put (key, tokens);
 }
-tokens = map.get ((this.betaOnly ? "beta_" : "") + labelKey);
+return map;
+}, "~S");
+Clazz.defineMethod (c$, "setMap", 
+ function (map, labelKey, nNOs, doAll) {
+var tokens = map.get ((this.betaOnly ? "beta_" : "") + labelKey);
 this.moData.put ("nboLabelMap", map);
 if (tokens == null) {
 tokens =  new Array (nNOs);
@@ -366,7 +419,8 @@ for (var i = 0; i < nNOs; i++) tokens[i] = this.nboType + (i + 1);
 
 map.put (labelKey, tokens);
 if (this.isOpenShell) map.put ("beta_" + labelKey, tokens);
-}this.moData.put ("nboLabels", tokens);
+}if (!doAll) return;
+this.moData.put ("nboLabels", tokens);
 this.addBetaSet = (this.isOpenShell && !this.betaOnly && !this.is47File);
 if (this.addBetaSet) this.nOrbitals *= 2;
 for (var i = 0; i < this.nOrbitals; i++) this.setMO ( new java.util.Hashtable ());
@@ -378,7 +432,7 @@ J.adapter.readers.quantum.GenNBOReader.setNboLabels (map.get ("beta_" + labelKey
 }var structures = this.getStructureList ();
 J.adapter.readers.quantum.NBOParser.getStructures46 (map.get ("NBO"), "alpha", structures, this.asc.ac);
 J.adapter.readers.quantum.NBOParser.getStructures46 (map.get ("beta_NBO"), "beta", structures, this.asc.ac);
-});
+}, "java.util.Map,~S,~N,~B");
 c$.getLabelKey = Clazz.defineMethod (c$, "getLabelKey", 
  function (labelKey) {
 if (labelKey.startsWith ("P")) labelKey = labelKey.substring (1);
@@ -388,8 +442,7 @@ return labelKey;
 }, "~S");
 c$.readNBOCoefficients = Clazz.defineMethod (c$, "readNBOCoefficients", 
 function (moData, nboType, vwr) {
-var ext = ";AO;  ;PNAO;;NAO; ;PNHO;;NHO; ;PNBO;;NBO; ;PNLMO;NLMO;;MO;  ;NO;".indexOf (";" + nboType + ";");
-ext = Clazz.doubleToInt (ext / 6) + 31;
+var ext = JV.JC.getNBOTypeFromName (nboType);
 var isAO = nboType.equals ("AO");
 var isNBO = nboType.equals ("NBO");
 var hasNoBeta = JU.PT.isOneOf (nboType, ";AO;PNAO;NAO;");
@@ -411,7 +464,8 @@ if (orbitals == null) {
 var data = null;
 if (!isAO) {
 var fileName = moData.get ("nboRoot") + "." + ext;
-if ((data = vwr.getFileAsString3 (fileName, true, null)) == null) return false;
+if ((data = vwr.getFileAsString3 (fileName, true, null)) == null || data.indexOf ("Exception:") >= 0) return false;
+J.adapter.readers.quantum.GenNBOReader.addAuxFile (moData, fileName, null);
 data = data.substring (data.indexOf ("--\n") + 3).toLowerCase ();
 if (ext == 33) data = data.substring (0, data.indexOf ("--\n") + 3);
 }orbitals = moData.get ("mos");
@@ -465,6 +519,13 @@ throw e;
 }
 return true;
 }, "java.util.Map,~S,JV.Viewer");
+c$.addAuxFile = Clazz.defineMethod (c$, "addAuxFile", 
+ function (moData, fileName, htParams) {
+var auxFiles = moData.get ("auxFiles");
+if (auxFiles == null) moData.put ("auxFiles", auxFiles =  new JU.Lst ());
+auxFiles.addLast (fileName);
+if (htParams != null) htParams.put ("auxFiles", auxFiles);
+}, "java.util.Map,~S,java.util.Map");
 c$.getNBOOccupanciesStatic = Clazz.defineMethod (c$, "getNBOOccupanciesStatic", 
  function (orbitals, nAOs, pt, data, len, next) {
 var occupancies =  Clazz.newFloatArray (nAOs, 0);
@@ -541,7 +602,9 @@ if (addOccupancy) mo.put ("occupancy", Float.$valueOf (alphaBeta ? 1 : type.inde
 }, "~A,~N,JU.Lst,~N,~S");
 Clazz.defineStatics (c$,
 "$P_LIST", "101   102   103",
+"PS_LIST", "151   152   153",
 "SP_LIST", "1     101   102   103",
+"SPS_LIST", "51    151   152   153",
 "$DS_LIST", "255   252   253   254   251",
 "$DC_LIST", "201   204   206   202   203   205",
 "$FS_LIST", "351   352   353   354   355   356   357",
