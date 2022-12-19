@@ -104,8 +104,8 @@ class PhononCalculation(models.Model):
                     sc_key = 'x'.join(map(str, [n1, n2, n3]))
                     lat_vec = np.array([[n1, 0, 0],
                                         [0, n2, 0],
-                                        [0, 0, n3]])*prim_structure.cell
-                    sc_score = Structure.deviation_from_cell_shape(
+                                        [0, 0, n3]]).dot(prim_structure.cell)
+                    sc_score = Structure.get_deviation_from_cell_shape(
                             lattice_vectors=lat_vec,
                             target_cell_shape=sc_shape
                     )
@@ -639,23 +639,10 @@ class PhononCalculation(models.Model):
                 phonon_calc.perturbed_supercells[sc_label] = sc
 
 
-
-
-
-
-
-
-
-
-
-
-
-
         """TODO:
         1. Generate csld.ini; read from csld.ini
         2. Generate rattled supercells
         3. Generate paraphernalia: CONTROL, sc.txt, info, lat.in
-        
         """
 
 

@@ -2204,8 +2204,8 @@ class Structure(models.Model, object):
         if target_cell_shape is None:
             raise StructureError('Target cell shape not specified')
         if not volume_factor:
-            volume_factor = (np.linalg.det(lattice_vectors)/np.linalg.det(
-                    target_cell_shape))**(-1./3.)
+            volume_factor = abs(np.linalg.det(lattice_vectors)/np.linalg.det(
+                target_cell_shape))**(-1./3.)
         return np.linalg.norm(volume_factor*lattice_vectors - target_cell_shape)
 
     def get_matching_atom(self, atom, tol=0.01):
