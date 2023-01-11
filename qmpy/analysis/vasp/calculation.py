@@ -2,7 +2,6 @@
 
 import os
 import copy
-import json
 import gzip
 import numpy as np
 import numpy.linalg
@@ -23,17 +22,15 @@ import qmpy.materials.structure as strx
 import qmpy.io.poscar as poscar
 import potential as pot
 import qmpy.materials.formation_energy as fe
-import qmpy.utils as utils
-import qmpy.db.custom as cdb
 import qmpy.analysis.thermodynamics as thermo
 import qmpy.analysis.griddata as grid
 import dos
 from qmpy.data import chem_pots
-from qmpy.materials.atom import Atom, Site
+from qmpy.materials.atom import Atom
 from qmpy.utils import *
 from qmpy.data.meta_data import MetaData, add_meta_data
 from qmpy.materials.element import Element
-from qmpy.db.custom import DictField, NumpyArrayField
+from qmpy.db.custom import DictField
 from qmpy.configuration.vasp_settings import *
 from qmpy.configuration.vasp_incar_format import *
 
@@ -1397,11 +1394,11 @@ class Calculation(models.Model):
         if not os.path.exists(self.path):
             return
         for file in os.listdir(self.path):
-            if os.path.isdir(self.path+'/'+file):
+            if os.path.isdir(os.path.join(self.path, file)):
                 continue
             if file in ['INCAR', 'POSCAR', 'KPOINTS', 'POTCAR']:
                 continue
-            os.unlink('%s/%s' % (self.path, file))
+            os.unlink(os.path.join(self.path, file))
 
     def clear_results(self):
         self.energy = None
@@ -1565,14 +1562,13 @@ class Calculation(models.Model):
         Return: None
         """
         if path is None:
-            new_dir = '%s_' % self.attempt
+            new_dir = '{}_'.format(str(self.attempt))
             new_dir += '_'.join(self.errors)
             new_dir = new_dir.replace(' ','')
         else:
             new_dir = path
-        logger.info('backing up %s to %s' % 
-                (self.path.replace(self.entry.path+'/', ''), new_dir))
-        self.move(self.path+'/'+new_dir)
+        logger.info('backing up {} to {}'.format(os.path.basename(self.path), new_dir))
+        self.move(os.path.join(self.path, new_dir))
 
     def clean_start(self):
         depth = self.path.count('/') - self.path.count('..')
@@ -1960,7 +1956,7 @@ class Calculation(models.Model):
             structure = os.path.abspath(structure)
             if path is None:
                 path = os.path.dirname(structure)
-            structure = io.read(structure, **kwargs)
+            structure = qmpy.io.read(structure, **kwargs)
 
         # Where to do the calculation
         if path is None:
@@ -2019,9 +2015,12 @@ class Calculation(models.Model):
         calc.set_hubbards(vasp_settings.get('hubbards', hubbard))
         calc.set_magmoms(vasp_settings.get('magnetism', 'ferro'))
 
-        # set ENCUT = 1.3*ENMAX for relaxation calculations
-        if 'relaxation' in configuration:
-            encut = int(max(pot.enmax for pot in calc.potentials)*1.3)
+        # set ENCUT = 1.3*ENMAX for relaxation calculations to the nearest 10th
+        encut = vasp_settings.get('encut', None)
+        scale_encut = vasp_settings.get('scale_encut', 1.3)
+        if encut is None or encut == 0:
+            encut = max(pot.enmax for pot in calc.potentials)*scale_encut
+            encut = int(math.ceil(encut/10.))*10
             if encut > 520:
                 encut = 520
             vasp_settings.update({'encut': encut})
@@ -2054,6 +2053,9 @@ class Calculation(models.Model):
                          }
             vasp_settings.update(U_settings)
 
+        # override settings based on keyword arguments
+        settings_override = kwargs.get('settings_override', {})
+        vasp_settings.update(settings_override)
 
         calc.settings = vasp_settings
 
@@ -2091,13 +2093,14 @@ class Calculation(models.Model):
         calc.backup()
         calc.save()
 
-        ##fixed_calc.set_magmoms(calc.settings.get('magnetism', 'ferro'))
         fixed_calc.clear_results()
         fixed_calc.clear_outputs()
+
         try:
             fixed_calc.set_chgcar(calc)
         except VaspError:
             pass
+
         try:
             fixed_calc.set_wavecar(calc)
         except VaspError:

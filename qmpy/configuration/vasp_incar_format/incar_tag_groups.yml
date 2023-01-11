@@ -9,6 +9,8 @@
       - kspacing
       - kgamma
       - nbands
+      - addgrid
+      - enaug
   - - electronic_relaxation
     - - algo
       - ediff

@@ -2,7 +2,7 @@ istart: 0
 icharg: 2
 prec: acc
 lreal: false
-encut: 0
+encut: None
 kspacing: 0.15
 kgamma: True
 algo: normal
@@ -22,4 +22,4 @@ lwave: False
 potentials: vasp_rec_lda
 hubbards: wang
 magnetism: ferro
-kpoints_gen: TM
+scale_encut: 1.3

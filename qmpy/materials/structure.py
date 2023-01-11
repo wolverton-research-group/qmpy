@@ -12,6 +12,7 @@ import copy
 import pprint
 import random
 import subprocess
+import numbers
 from collections import defaultdict
 import logging
 
@@ -324,6 +325,14 @@ class Structure(models.Model, object):
         self.natoms = len(atoms)
 
     @property
+    def site_comp_indices(self):
+        """
+        List of site compositions, length equal to number of sites, each
+        unique site composition identified by an integer.
+        """
+        return list(np.unique(self.species_types, return_inverse=True)[-1])
+
+    @property
     def elements(self):
         """List of Elements"""
         return [ Element.get(e) for e in self.comp.keys() ]
@@ -514,7 +523,14 @@ class Structure(models.Model, object):
     @property
     def species_types(self):
         """List of species, length equal to number of atoms."""
-        return np.array([ atom.species_id for atom in self.atoms ])
+        return np.array([ atom.species for atom in self.atoms ])
+
+    @property
+    def species_id_types(self):
+        """List of species, length equal to number of atoms, each unique species
+        identified by an integer.
+        """
+        return np.unique(self.species_types, return_inverse=True)[-1]
 
     def symmetrize(self, tol=1e-3, angle_tol=-1):
         """
@@ -817,7 +833,7 @@ class Structure(models.Model, object):
     def get_coord(self, vec, wrap=True):
         trans = self.inv.T.dot(vec)
         if wrap:
-            return wrap(trans)
+            return qmpy.utils.wrap(trans)
         else:
             return trans
 
@@ -829,7 +845,7 @@ class Structure(models.Model, object):
             if abs(atom2.dist - atom.dist) > tol:
                 continue
             d = self.get_distance(atom, atom2, limit=1)
-            if d < tol and not d is None:
+            if d < tol and d is not None:
                 return True
         return False
 
@@ -979,8 +995,8 @@ class Structure(models.Model, object):
             for atom in self.atoms:
                 if atom.element.d_elec > 0 and atom.element.d_elec < 10:
                     atom.magmom = 5
-                elif atom.element.f_elec > 0 and atom.element.f_elec < 14:
-                    atom.magmom = 7
+                # elif atom.element.f_elec > 0 and atom.element.f_elec < 14:
+                #     atom.magmom = 7
                 else:
                     atom.magmom = 0
                 if atom.id is not None:
@@ -988,8 +1004,7 @@ class Structure(models.Model, object):
         elif order == 'anti-ferro':
             if not elements:
                 raise NotImplementedError
-            ln = self.get_lattice_network(elements)
-
+        # TODO: get space group for the structure with magmoms
         self.spacegroup = None
 
     @property
@@ -1085,7 +1100,7 @@ class Structure(models.Model, object):
     @forces.setter
     def forces(self, forces):
         for forces, atom in zip(forces, self.atoms):
-            atom.forces = force
+            atom.forces = forces
 
     @property
     def reciprocal_lattice(self):
@@ -1193,7 +1208,7 @@ class Structure(models.Model, object):
         self.sites = [ Site() for i in range(n) ]
         self._atoms = None
 
-    def make_conventional(self, in_place=True, tol=1e-5):
+    def make_conventional(self, in_place=True, tol=1e-3):
         """Uses spglib to convert to the conventional cell.
 
         Keyword Arguments:
@@ -1221,7 +1236,7 @@ class Structure(models.Model, object):
 
         refine_cell(self, symprec=tol)
 
-    def make_primitive(self, in_place=True, tol=1e-5):
+    def make_primitive(self, in_place=True, tol=1e-3):
         """Uses spglib to convert to the primitive cell.
 
         Keyword Arguments:
@@ -1288,13 +1303,13 @@ class Structure(models.Model, object):
             if abs(G[0,2]) > abs(G[0,1]) - tol:
                 return False
 
-    def is_niggli_cell(self, tol=1e-5):
+    def is_niggli_cell(self, tol=1e-3):
         """
         Tests whether or not the structure is a Niggli cell.
         """
         if not self.is_grueber_cell():
             return False
-        (a,b,c),(d,e,f) = self.niggli_form
+        (a, b, c), (d, e, f) = self.niggli_form
         if abs(d-b) < tol:
             if f > 2*e - tol:
                 return False
@@ -2105,6 +2120,206 @@ class Structure(models.Model, object):
         self.atoms = init_atoms
         self.get_sites()
         return self
+
+    @property
+    def deviation_from_sc(self):
+        sc_uc = np.array([[1, 0, 0],
+                          [0, 1, 0],
+                          [0, 0, 1]])
+        return self.get_deviation_from_cell_shape(
+                lattice_vectors=self.cell,
+                target_cell_shape=sc_uc
+        )
+
+    @property
+    def deviation_from_simple_cubic(self):
+        return self.deviation_from_sc
+
+    @property
+    def deviation_from_fcc(self):
+        fcc_uc = np.array([[0, 0.5, 0.5],
+                           [0.5, 0, 0.5],
+                           [0, 0.5, 0.5]])
+        return self.get_deviation_from_cell_shape(
+                lattice_vectors=self.cell,
+                target_cell_shape=fcc_uc
+        )
+
+    @property
+    def deviation_from_face_centered_cubic(self):
+        return self.deviation_from_fcc
+
+    @property
+    def deviation_from_bcc(self):
+        bcc_uc = np.array([[-0.5, 0.5, 0.5],
+                           [0.5, -0.5, 0.5],
+                           [0.5, 0.5, -0.5]])
+        return self.get_deviation_from_cell_shape(
+                lattice_vectors=self.cell,
+                target_cell_shape=bcc_uc
+        )
+
+    @property
+    def deviation_from_body_centered_cubic(self):
+        return self.deviation_from_bcc
+
+    @staticmethod
+    def get_deviation_from_cell_shape(lattice_vectors=None,
+                                      target_cell_shape=None,
+                                      volume_factor=None):
+        """
+        Calculates deviation of the structure's lattice parameters from the
+        specified target shape, using the following:
+
+        \Delta = || volume_factor * self.cell - target_cell_shape ||_2
+
+        where ||x||_2 indicates the L2-norm. If `volume_factor` (VF) is not
+        specified, it is calculated using:
+
+        VF = [DET(self.cell)/DET(target_cell_shape)]^(-1/3)
+
+        where DET indicates determinant. VF, when calculated as above,
+        ensures volume-agnostic comparison of cell shapes (which may or may
+        not be what you intended).
+
+        Args:
+            lattice_vectors:
+                3x3 array of Float with the lattice vectors of interest.
+
+            target_cell_shape:
+                3x3 array of Integers or Float with the target cell shape.
+                E.g., [[1, 0, 1], [0, 1, 1], [1, 1, 1]]
+
+            volume_factor:
+                Float with the factor with which to scale the lattice
+                parameters in `self.cell`.
+
+        Returns:
+            Float quantifying the deviation of the structure from the target
+            cell shape.
+
+        """
+        if lattice_vectors is None:
+            raise StructureError('Cell lattice vectors not specified')
+        if target_cell_shape is None:
+            raise StructureError('Target cell shape not specified')
+        if not volume_factor:
+            volume_factor = abs(np.linalg.det(lattice_vectors)/np.linalg.det(
+                target_cell_shape))**(-1./3.)
+        return np.linalg.norm(volume_factor*lattice_vectors - target_cell_shape)
+
+    def get_matching_atom(self, atom, tol=0.01):
+        """
+        Get atom belonging to the :class:`qmpy.Structure` object in `self`
+        that is equivalent to `atom`.
+
+        Args:
+            atom:
+                :class:`qmpy.Atom` object with the atom.
+
+            tol:
+                Float with the distance tolerance (in Angstrom) used to
+                determine if two coordinates are equivalent.
+
+        Returns:
+            :class:`qmpy.Atom` object if matching atom found, `None` otherwise.
+
+        """
+        if atom in self.atoms:
+            return atom
+        atom.structure = self
+        for atom2 in self.atoms:
+            if not atom2.element_id == atom.element_id:
+                continue
+            if abs(atom2.dist - atom.dist) > tol:
+                continue
+            d = self.get_distance(atom, atom2, limit=1)
+            if d < tol and d is not None:
+                return atom2
+        return None
+
+    def get_radial_distances(self, atom=None):
+        """
+        Calculates the shortest distance between `atom` and every other atom in
+        the unit cell in `self`.
+
+        Args:
+            atom:
+                :class:`qmpy.Atom` object with the atom.
+
+                Alternatively, if it is an Integer, it is assumed to be the
+                atom index, i.e., the corresponding atom is chosen from the
+                `self.atoms` list.
+
+        Returns:
+            Dictionary (nested) with the atom indices and shortest radial
+            distances from the specified atom. Structure of the dictionary:
+            {
+                'origin_atom_index': n1,
+                'distances': {
+                    0: d1,
+                    1: d2,
+                    2: d3,
+                    ...
+                    n1: 0.0,
+                    ...
+                    ...
+                }
+            }
+
+        """
+        if atom is None:
+            satom = random.choice(self.atoms)
+        elif isinstance(atom, numbers.Integral):
+            satom = self.atoms[atom]
+        elif isinstance(atom, Atom):
+            satom = self.get_matching_atom(atom)
+        else:
+            err_msg = ('Failed to parse input'
+                       ' `atom`= {}').format(atom)
+            raise StructureError(err_msg)
+
+        sa_index = self.atoms.index(satom)
+        rd = {
+            'origin_atom_index': sa_index,
+            'distances': {}
+        }
+        for i, atom2 in enumerate(self.atoms):
+            rd['distances'][i] = self.get_distance(satom, atom2)
+        return rd
+
+    def perturb_all_atoms(self, in_place=True, displacement=0.01):
+        """
+        Displaces all atoms in the structure by the specified distance in a
+        random direction.
+
+        Args:
+            in_place:
+                Boolean specifying whether the input structure is perturbed
+                or a copy of it.
+
+                Defaults to True.
+
+            displacement:
+                Float with displacement in Angstrom each atom is to be
+                perturbed.
+
+                Defaults to 0.01 Angstrom.
+
+        Returns:
+            `qmpy.Structure` object with the perturbed crystal.
+
+        """
+        if not in_place:
+            s = self.copy()
+            s.perturb_all_atoms(displacement=displacement)
+            return s
+
+        for atom in self.atoms:
+            c_disp = [random.randint(-1, 1)*displacement for _ in range(3)]
+            f_disp = np.dot(np.linalg.inv(self.cell.T), c_disp)
+            atom.coord -= f_disp.tolist()
+
 
 class Prototype(models.Model):
     """
