@@ -18,7 +18,7 @@ setup(
     include_package_data=True,
     long_description=open("README.md").read(),
     install_requires=[
-        "Django < 2.3",
+        "Django < 3.3",
         "PuLP",
         "numpy",
         "scipy",
