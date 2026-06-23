@@ -19,6 +19,9 @@ class Point(Renderable):
             self.label = label
             self.options = kwargs
 
+    def __hash__(self):
+        return hash((tuple(self.coord), self.label))
+
     def __eq__(self, other):
         if not np.allclose(self.coord, other.coord):
             return False
