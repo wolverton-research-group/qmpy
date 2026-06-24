@@ -24,9 +24,9 @@ copyright = "2019, The OQMD development team"
 author = "The OQMD development team"
 
 # The short X.Y version
-version = "1.2.0"
+version = "1.6.0"
 # The full version, including alpha/beta/rc tags
-release = "v1.2.0"
+release = "v1.6.0"
 
 
 # -- General configuration ---------------------------------------------------

@@ -132,7 +132,7 @@ class Lark2Django(Transformer):
     """
 
     def __init__(self):
-        self.L2D_version = "1.0"
+        self.L2D_version = "1.2"
         self.opers = {
             "=": self.eq,
             ">": self.gt,
@@ -153,7 +153,8 @@ class Lark2Django(Transformer):
             "CONTAINS": self.contains,
         }
         self.fuzzy_functions_list = {self.starts, self.ends, self.contains}
-        self.parser = LarkParser(version=(1, 0, 0))
+        # OPTIMADE v1.3 uses the v1.2 filter grammar.
+        self.parser = LarkParser(version=(1, 2, 0))
         prop_data = json.load(
             open(
                 sorted(
@@ -164,6 +165,23 @@ class Lark2Django(Transformer):
         self.property_dict = {}
         for item in prop_data:
             self.property_dict[item] = RESTProperty(**prop_data[item])
+        standard_properties = {
+            "chemical_formula_reduced",
+            "chemical_formula_anonymous",
+            "elements",
+            "id",
+            "last_modified",
+            "nelements",
+            "nperiodic_dimensions",
+            "nsites",
+            "structure_features",
+            "type",
+        }
+        self.property_dict = {
+            name: prop
+            for name, prop in self.property_dict.items()
+            if name in standard_properties or name.startswith("_oqmd_")
+        }
 
         self.logic_functions = [self.gt, self.ge, self.lt, self.le]
         self.elements = qmpy.elements.keys()
@@ -268,7 +286,7 @@ class Lark2Django(Transformer):
     def eq(self, a, b):
         if isinstance(b, str):
             b = b.strip('"')
-            if a.db_value == self.property_dict["element"].db_value:
+            if a.db_value == "composition__element_list__contains":
                 if not b.endswith("_"):
                     if not b in self.elements:
                         self.handle_error(
@@ -495,17 +513,23 @@ class Lark2Django(Transformer):
         _property = children[0].children[0].value
         try:
             a = self.property_dict[_property]
-        except:
-            if _property.startswith("_") and not _property.startswith("_oqmd_"):
+        except KeyError:
+            foreign_property = re.match(r"^_([a-z][a-z0-9]*)_[a-z0-9_]+$", _property)
+            if foreign_property and foreign_property.group(1) != "oqmd":
                 error_message = "Cannot resolve the property name."
                 error_message += (
                     "This particular query field is considered as unknown and ignored."
                 )
                 error_message += "A dummy query (id=-1) to return None is executed"
                 self.handle_error("T4", error_message, _property, raise_error=False)
+                if children[1] is not None:
+                    operation_fn = children[1][0]
+                    if operation_fn == self.is_unknown:
+                        return Q()
+                    if operation_fn == self.is_known:
+                        return self.eq(self.property_dict["id"], -1)
                 return self.eq(self.property_dict["id"], -1)
-            self.handle_error("T1", "Cannot resolve the property name", _property)
-            return
+            raise LarkParserError("Unknown property: {}".format(_property))
 
         if children[1] is None:
             self.handle_error(
@@ -515,6 +539,31 @@ class Lark2Django(Transformer):
 
         operation_fn = children[1][0]
         b = children[1][1]
+
+        if operation_fn in (self.is_known, self.is_unknown):
+            if a.name == "last_modified":
+                is_unknown = True
+                matches = is_unknown if operation_fn == self.is_unknown else not is_unknown
+                return Q() if matches else self.eq(self.property_dict["id"], -1)
+            if a.name == "type":
+                matches = operation_fn == self.is_known
+                return Q() if matches else self.eq(self.property_dict["id"], -1)
+            if a.db_value:
+                return Q(
+                    **{a.db_value + "__isnull": operation_fn == self.is_unknown}
+                )
+
+        if a.name == "type":
+            value = str(b).strip('"')
+            if operation_fn == self.eq:
+                return Q() if value == "structures" else self.eq(
+                    self.property_dict["id"], -1
+                )
+            if operation_fn == self.ne:
+                return Q() if value != "structures" else self.eq(
+                    self.property_dict["id"], -1
+                )
+            raise LarkParserError("type only supports equality comparisons")
 
         if not (a.is_queryable and a.db_value):
             if a.name == "nperiodic_dimensions":
@@ -594,7 +643,14 @@ class Lark2Django(Transformer):
             )
 
     def known_op_rhs(self, children):
-        self.handle_error("T3", "Not supported yet", "KNOWN OPERATION")
+        operation = children[-1].value
+        return [self.is_known if operation == "KNOWN" else self.is_unknown, None]
+
+    def is_known(self, a, _):
+        return Q(**{a.db_value + "__isnull": False})
+
+    def is_unknown(self, a, _):
+        return Q(**{a.db_value + "__isnull": True})
 
     def fuzzy_string_op_rhs(self, children):
         if children[0] in self.opers:
@@ -664,7 +720,7 @@ class Lark2Django(Transformer):
             # VisitError is the default exception for Lark parsers.
             # The attributes err.rule and err.obj provide more info.
             # err.orig_exc attribute retreives the original exception
-            if isinstance(err.orig_exc, NotImplementedErr):
+            if isinstance(err.orig_exc, (NotImplementedErr, LarkParserError)):
                 raise err.orig_exc
             else:
                 raise APIException(error_message_500, code=500)

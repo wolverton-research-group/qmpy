@@ -1,107 +1,176 @@
-from rest_framework import generics
-import django_filters.rest_framework
+from rest_framework import generics, status
+from rest_framework.exceptions import APIException
 from qmpy.web.serializers.optimade import OptimadeStructureSerializer
 from qmpy.materials.formation_energy import FormationEnergy
-from qmpy.materials.entry import Composition
-from qmpy.models import Formation
-from qmpy.utils import query_to_Q, parse_formula_regex
+from qmpy.utils import query_to_Q
 
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
-from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer
-from rest_framework_xml.renderers import XMLRenderer
-from rest_framework_yaml.renderers import YAMLRenderer
-
-from qmpy.rester import qmpy_rester
-from django.http import HttpResponse, JsonResponse
+from rest_framework.renderers import JSONRenderer
+from rest_framework.decorators import api_view, renderer_classes
+from django.http import HttpResponse
 
 from collections import OrderedDict
 from qmpy.utils import oqmd_optimade as oqop
-import time
-import datetime
+from qmpy.utils.oqmd_optimade.config import (
+    error_document,
+    response_meta,
+)
 
-BASE_URL = qmpy_rester.REST_OPTIMADE
+
+class OptimadeAPIException(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+
+    def __init__(self, detail, status_code=None, code=None, source=None):
+        super().__init__(detail, code=code)
+        if status_code is not None:
+            self.status_code = status_code
+        self.optimade_code = code
+        self.optimade_source = source
 
 
-class OptimadeStructureDetail(generics.RetrieveAPIView):
+class OptimadeRequestMixin(object):
+    renderer_classes = [JSONRenderer]
+    allowed_query_parameters = {
+        "api_hint",
+        "dimension_slices",
+        "email_address",
+        "filter",
+        "page_limit",
+        "page_offset",
+        "response_fields",
+        "response_format",
+        "sort",
+    }
+
+    def initial(self, request, *args, **kwargs):
+        super().initial(request, *args, **kwargs)
+        for parameter in request.query_params:
+            if parameter in self.allowed_query_parameters or parameter.startswith(
+                "_oqmd_"
+            ):
+                continue
+            raise OptimadeAPIException(
+                "Unrecognized query parameter: {}".format(parameter),
+                source={"parameter": parameter},
+            )
+
+        response_format = request.query_params.get("response_format", "json")
+        if response_format != "json":
+            raise OptimadeAPIException(
+                "Unsupported response format: {}".format(response_format),
+                source={"parameter": "response_format"},
+            )
+
+        api_hint = request.query_params.get("api_hint")
+        is_versioned = "/optimade/v1" in request.path
+        if api_hint and not is_versioned and api_hint not in {"v1", "v1.3"}:
+            raise OptimadeAPIException(
+                "The requested API version is not supported: {}".format(api_hint),
+                status_code=553,
+                code="VersionNotSupported",
+                source={"parameter": "api_hint"},
+            )
+        if "dimension_slices" in request.query_params:
+            raise OptimadeAPIException(
+                "The dimension_slices query parameter is not implemented.",
+                status_code=status.HTTP_501_NOT_IMPLEMENTED,
+                source={"parameter": "dimension_slices"},
+            )
+
+    def handle_exception(self, exc):
+        if isinstance(exc, OptimadeAPIException):
+            return Response(
+                error_document(
+                    self.request,
+                    str(exc.detail),
+                    exc.status_code,
+                    code=exc.optimade_code,
+                    source=exc.optimade_source,
+                ),
+                status=exc.status_code,
+            )
+        response = super().handle_exception(exc)
+        if response is not None and response.status_code >= 400:
+            if isinstance(response.data, dict):
+                detail = response.data.get("detail", "Request failed")
+            else:
+                detail = str(response.data)
+            response.data = error_document(
+                self.request, str(detail), response.status_code
+            )
+        return response
+
+
+def _static_request_error(request):
+    """Validate query parameters for info and links endpoints."""
+    allowed = {"api_hint", "response_format"}
+    for parameter in request.query_params:
+        if parameter not in allowed and not parameter.startswith("_oqmd_"):
+            detail = "Unrecognized query parameter: {}".format(parameter)
+            return Response(
+                error_document(
+                    request,
+                    detail,
+                    400,
+                    source={"parameter": parameter},
+                ),
+                status=400,
+            )
+    response_format = request.query_params.get("response_format", "json")
+    if response_format != "json":
+        detail = "Unsupported response format: {}".format(response_format)
+        return Response(
+            error_document(
+                request,
+                detail,
+                400,
+                source={"parameter": "response_format"},
+            ),
+            status=400,
+        )
+    api_hint = request.query_params.get("api_hint")
+    if api_hint and "/optimade/v1" not in request.path and api_hint not in {
+        "v1",
+        "v1.3",
+    }:
+        detail = "The requested API version is not supported: {}".format(api_hint)
+        return Response(
+            error_document(request, detail, 553, code="VersionNotSupported"),
+            status=553,
+        )
+    return None
+
+
+class OptimadeStructureDetail(OptimadeRequestMixin, generics.RetrieveAPIView):
     queryset = FormationEnergy.objects.filter(fit="standard")
     serializer_class = OptimadeStructureSerializer
-    renderer_classes = [JSONRenderer, XMLRenderer, YAMLRenderer, BrowsableAPIRenderer]
 
     def retrieve(self, request, *args, **kwargs):
         structure_id = request.path.strip("/").split("/")[-1]
         self.queryset = self.queryset.filter(id=structure_id)
         instance = self.get_object()
         serializer = self.get_serializer(instance)
-        _data = [serializer.data]
-        data = []
-        for _item in _data:
-            item = OrderedDict([("id", _item["id"]), ("type", _item["type"])])
-            del _item["id"]
-            del _item["type"]
-            item["attributes"] = _item
-            data.append(item)
-        _data = serializer.data
+        _data = OrderedDict(serializer.data)
         data = OrderedDict([("id", _data["id"]), ("type", _data["type"])])
         del _data["id"]
         del _data["type"]
         data["attributes"] = _data
-
-        full_url = request.build_absolute_uri()
-        representation = full_url.replace(BASE_URL, "")
-
-        time_now = time.time()
-        time_stamp = datetime.datetime.fromtimestamp(time_now).strftime(
-            "%Y-%m-%d %H:%M:%S"
-        )
-        meta_list = [
-            (
-                "query",
-                {
-                    "representation": representation,
-                },
-            ),
-            ("api_version", "1.0.0"),
-            ("time_stamp", time_stamp),
-            ("data_returned", 1),
-            ("data_available", Formation.objects.filter(fit="standard").count()),
-            ("more_data_available", False),
-            (
-                "provider",
-                OrderedDict(
-                    [
-                        ("name", "OQMD"),
-                        ("description", "The Open Quantum Materials Database"),
-                        ("prefix", "oqmd"),
-                        ("homepage", "http://oqmd.org"),
-                    ]
-                ),
-            ),
-            ("warnings", []),
-            ("response_message", "OK"),
-        ]
         return Response(
             OrderedDict(
                 [
+                    ("links", {"self": request.build_absolute_uri()}),
+                    ("data", data),
                     (
-                        "links",
-                        OrderedDict(
-                            [
-                                ("next", None),
-                                ("previous", None),
-                                (
-                                    "base_url",
-                                    {
-                                        "href": BASE_URL,
-                                        "meta": {"_oqmd_version": "1.0"},
-                                    },
-                                ),
-                            ]
+                        "meta",
+                        response_meta(
+                            request,
+                            data_returned=1,
+                            data_available=FormationEnergy.objects.filter(
+                                fit="standard"
+                            ).count(),
                         ),
                     ),
-                    ("resource", {}),
-                    ("data", data),
-                    ("meta", OrderedDict(meta_list)),
                 ]
             )
         )
@@ -123,13 +192,6 @@ class OptimadePagination(LimitOffsetPagination):
             data.append(item)
         request = page_data["request"]
 
-        full_url = request.build_absolute_uri()
-        representation = full_url.replace(BASE_URL, "")
-
-        time_now = time.time()
-        time_stamp = datetime.datetime.fromtimestamp(time_now).strftime(
-            "%Y-%m-%d %H:%M:%S"
-        )
         _oqmd_final_query = (
             page_data["meta"]["django_query"]
             if "django_query" in page_data["meta"]
@@ -145,43 +207,15 @@ class OptimadePagination(LimitOffsetPagination):
                     "detail": "_oqmd_NoFilterWarning: No filters were provided in the query",
                 }
             ]
-        meta_list = [
-            (
-                "query",
-                {
-                    "representation": representation,
-                    "_oqmd_final_query": _oqmd_final_query,
-                },
-            ),
-            ("api_version", "1.0.0"),
-            ("time_stamp", time_stamp),
-            (
-                "_oqmd_data_in_response",
-                min(
-                    self.get_limit(request),
-                    self.count - self.get_offset(request),
-                ),
-            ),
-            ("data_returned", self.count),
-            ("data_available", Formation.objects.filter(fit="standard").count()),
-            (
-                "more_data_available",
-                (self.get_next_link() != None) or (self.get_previous_link() != None),
-            ),
-            (
-                "provider",
-                OrderedDict(
-                    [
-                        ("name", "OQMD"),
-                        ("description", "The Open Quantum Materials Database"),
-                        ("prefix", "oqmd"),
-                        ("homepage", "http://oqmd.org"),
-                    ]
-                ),
-            ),
-            ("warnings", _warnings),
-            ("response_message", "OK"),
-        ]
+        meta = response_meta(
+            request,
+            more_data_available=self.get_next_link() is not None,
+            data_returned=self.count,
+            data_available=FormationEnergy.objects.filter(fit="standard").count(),
+            warnings=_warnings,
+            _oqmd_data_in_response=len(data),
+            _oqmd_final_query=_oqmd_final_query,
+        )
 
         return Response(
             OrderedDict(
@@ -192,28 +226,20 @@ class OptimadePagination(LimitOffsetPagination):
                             [
                                 ("next", self.get_next_link()),
                                 ("previous", self.get_previous_link()),
-                                (
-                                    "base_url",
-                                    {
-                                        "href": BASE_URL,
-                                        "meta": {"_oqmd_version": "1.0"},
-                                    },
-                                ),
+                                ("self", request.build_absolute_uri()),
                             ]
                         ),
                     ),
-                    ("resource", {}),
                     ("data", data),
-                    ("meta", OrderedDict(meta_list)),
+                    ("meta", meta),
                 ]
             )
         )
 
 
-class OptimadeStructureList(generics.ListAPIView):
+class OptimadeStructureList(OptimadeRequestMixin, generics.ListAPIView):
     serializer_class = OptimadeStructureSerializer
     pagination_class = OptimadePagination
-    renderer_classes = [JSONRenderer, XMLRenderer, YAMLRenderer, BrowsableAPIRenderer]
 
     def get_queryset(self):
         fes = FormationEnergy.objects.filter(fit="standard")
@@ -221,7 +247,37 @@ class OptimadeStructureList(generics.ListAPIView):
         return (fes, meta_info)
 
     def list(self, request, *args, **kwargs):
+        requested_fields = request.query_params.get("response_fields")
+        if requested_fields:
+            available_fields = set(self.serializer_class.Meta.fields)
+            unknown_fields = set(requested_fields.split(",")) - available_fields
+            if unknown_fields:
+                field = sorted(unknown_fields)[0]
+                raise OptimadeAPIException(
+                    "Unknown response field: {}".format(field),
+                    source={"parameter": "response_fields"},
+                )
         query_set, meta_info = self.get_queryset()
+        sort = request.query_params.get("sort")
+        if sort:
+            sort_fields = {
+                "id": "id",
+                "_oqmd_delta_e": "delta_e",
+                "_oqmd_stability": "stability",
+            }
+            django_sort = []
+            for field in sort.split(","):
+                descending = field.startswith("-")
+                name = field[1:] if descending else field
+                if name not in sort_fields:
+                    raise OptimadeAPIException(
+                        "Property is not sortable: {}".format(name),
+                        source={"parameter": "sort"},
+                    )
+                django_sort.append(
+                    ("-" if descending else "") + sort_fields[name]
+                )
+            query_set = query_set.order_by(*django_sort)
         page = self.paginate_queryset(query_set)
         serializer = self.get_serializer(page, many=True)
         page_data = {
@@ -247,13 +303,6 @@ class OptimadeStructureList(generics.ListAPIView):
             }
             return fes, meta_data
 
-        # shortcut to get all stable phases
-        filters = filters.replace("stability=0", "stability<=0")
-
-        filters = filters.replace("&", " AND ")
-        filters = filters.replace("|", " OR ")
-        filters = filters.replace("~", " NOT ")
-
         q, meta_info = query_to_Q(filters)
         if not q:
             return ([], meta_info)
@@ -262,33 +311,46 @@ class OptimadeStructureList(generics.ListAPIView):
         return (fes, meta_info)
 
 
+@api_view(["GET"])
+@renderer_classes([JSONRenderer])
 def OptimadeInfoData(request):
-    data = oqop.get_optimade_data("info")
-    return HttpResponse(data, content_type="application/json")
+    error = _static_request_error(request)
+    if error is not None:
+        return error
+    return Response(oqop.get_optimade_data("info", request))
 
 
+@api_view(["GET"])
 def OptimadeVersionsData(request):
-    data = oqop.get_optimade_data("versions")
-    return HttpResponse(data, content_type="text/plain")
+    data = oqop.get_optimade_data("versions", request)
+    return HttpResponse(data, content_type="text/csv; header=present")
 
 
-def OptimadeVersionPage(request):
-    versions = oqop.get_optimade_data("versions").strip().split("\n")[1:]
-    versions = ["v{}".format(item) for item in versions]
-    request_version = request.path.strip("/").split("/")[-1]
-    data = {"query": request.path}
-    if request_version in versions:
-        return JsonResponse(data)
-    else:
-        data["error"] = "Version not supported"
-        return JsonResponse({"status": "false", "message": data}, status=553)
+@api_view(["GET"])
+@renderer_classes([JSONRenderer])
+def OptimadeVersionPage(request, version=None):
+    if version in {"1", "1.3", "1.3.0"}:
+        detail = "The requested OPTIMADE endpoint does not exist."
+        return Response(error_document(request, detail, 404), status=404)
+    detail = "OPTIMADE API version v{} is not supported; use v1.".format(version)
+    return Response(
+        error_document(request, detail, 553, code="VersionNotSupported"), status=553
+    )
 
 
+@api_view(["GET"])
+@renderer_classes([JSONRenderer])
 def OptimadeLinksData(request):
-    data = oqop.get_optimade_data("links")
-    return HttpResponse(data, content_type="application/json")
+    error = _static_request_error(request)
+    if error is not None:
+        return error
+    return Response(oqop.get_optimade_data("links", request))
 
 
+@api_view(["GET"])
+@renderer_classes([JSONRenderer])
 def OptimadeStructuresInfoData(request):
-    data = oqop.get_optimade_data("info.structures")
-    return HttpResponse(data, content_type="application/json")
+    error = _static_request_error(request)
+    if error is not None:
+        return error
+    return Response(oqop.get_optimade_data("info.structures", request))

@@ -105,7 +105,24 @@ urlpatterns += [
     ),
     url(r"^optimade/v1/info/structures$", views.OptimadeStructuresInfoData),
     url(r"^optimade/v1/links$", views.OptimadeLinksData),
-    url(r"^optimade/v\d+$", views.OptimadeVersionPage),
+    url(r"^optimade/v1\.3/info$", views.OptimadeInfoData),
+    url(r"^optimade/v1\.3/structures$", views.OptimadeStructureList.as_view()),
+    url(
+        r"^optimade/v1\.3/structures/(?P<pk>[0-9]+)/$",
+        views.OptimadeStructureDetail.as_view(),
+    ),
+    url(r"^optimade/v1\.3/info/structures$", views.OptimadeStructuresInfoData),
+    url(r"^optimade/v1\.3/links$", views.OptimadeLinksData),
+    url(r"^optimade/v1\.3\.0/info$", views.OptimadeInfoData),
+    url(r"^optimade/v1\.3\.0/structures$", views.OptimadeStructureList.as_view()),
+    url(
+        r"^optimade/v1\.3\.0/structures/(?P<pk>[0-9]+)/$",
+        views.OptimadeStructureDetail.as_view(),
+    ),
+    url(r"^optimade/v1\.3\.0/info/structures$", views.OptimadeStructuresInfoData),
+    url(r"^optimade/v1\.3\.0/links$", views.OptimadeLinksData),
+    url(r"^optimade/v(?P<version>[0-9][^/]*)/(?:.*)$", views.OptimadeVersionPage),
+    url(r"^optimade/v(?P<version>[0-9][^/]*)$", views.OptimadeVersionPage),
     ## download
     url(r"^download/", views.download_home),
     ## other

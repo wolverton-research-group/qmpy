@@ -5,6 +5,7 @@ from qmpy.utils import reverse_generic_order
 
 
 class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer):
+    id = serializers.SerializerMethodField()
     chemical_formula_reduced = serializers.SerializerMethodField()
     chemical_formula_anonymous = serializers.SerializerMethodField()
     type = serializers.SerializerMethodField()
@@ -20,12 +21,14 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
     structure_features = serializers.SerializerMethodField()
     chemical_formula_descriptive = serializers.SerializerMethodField()
     species = serializers.SerializerMethodField()
+    space_group_it_number = serializers.SerializerMethodField()
+    space_group_symbol_hall = serializers.SerializerMethodField()
+    space_group_symbol_hermann_mauguin = serializers.SerializerMethodField()
 
     _oqmd_icsd_id = serializers.SerializerMethodField()
     _oqmd_entry_id = serializers.SerializerMethodField()
     _oqmd_calculation_id = serializers.SerializerMethodField()
 
-    _oqmd_direct_site_positions = serializers.SerializerMethodField()
     nsites = serializers.SerializerMethodField()
     _oqmd_spacegroup = serializers.SerializerMethodField()
     _oqmd_prototype = serializers.SerializerMethodField()
@@ -45,18 +48,17 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
             _fields = _fields[0].split(",") + ["id", "type"]
             fields_to_drop = [item for item in self.fields if not item in _fields]
         else:
-            fields_to_drop = [
-                "elements_ratios",
-                "dimension_types",
-                "_oqmd_direct_site_positions",
-                "species",
-            ]
+            fields_to_drop = []
         for field in fields_to_drop:
             self.fields.pop(field)
 
     # Mandatory properties
     def get_type(self, _):
         return "structures"
+
+    def get_id(self, formationenergy):
+        # OPTIMADE IDs are strings, even when the backing database uses integers.
+        return str(formationenergy.id)
 
     def get_last_modified(self, _):
         return None
@@ -117,14 +119,6 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
         except:
             return None
 
-    def get__oqmd_direct_site_positions(self, formationenergy):
-        try:
-            strct = formationenergy.calculation.output
-            sites = [s.coord.round(6).tolist() for s in strct.sites]
-            return sites
-        except:
-            return []
-
     # Constant value or unsupported properties, but response required by optimade
     def get_dimension_types(self, _):
         return [1, 1, 1]
@@ -132,8 +126,9 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
     def get_nperiodic_dimensions(self, _):
         return 3
 
-    def get_elements_ratios(self, _):
-        return None
+    def get_elements_ratios(self, formationenergy):
+        composition = formationenergy.composition.unit_comp
+        return [float(composition[element]) for element in sorted(composition)]
 
     def get_structure_features(self, _):
         return []
@@ -142,11 +137,34 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
         return self.get_chemical_formula_reduced(formationenergy)
 
     def get_species(self, formationenergy):
-        species_set = set(s.label for s in formationenergy.calculation.output.sites)
-        return [
-            {"name": s, "chemical_symbols": [s], "concentration": [1]}
-            for s in species_set
-        ]
+        try:
+            species_set = sorted(
+                set(s.label for s in formationenergy.calculation.output.sites)
+            )
+            return [
+                {"name": s, "chemical_symbols": [s], "concentration": [1.0]}
+                for s in species_set
+            ]
+        except (AttributeError, TypeError):
+            return None
+
+    def get_space_group_it_number(self, formationenergy):
+        try:
+            return formationenergy.calculation.output.spacegroup.number
+        except AttributeError:
+            return None
+
+    def get_space_group_symbol_hall(self, formationenergy):
+        try:
+            return formationenergy.calculation.output.spacegroup.hall
+        except AttributeError:
+            return None
+
+    def get_space_group_symbol_hermann_mauguin(self, formationenergy):
+        try:
+            return formationenergy.calculation.output.spacegroup.hm
+        except AttributeError:
+            return None
 
     # OQMD specific data
     def get__oqmd_icsd_id(self, formationenergy):
@@ -203,7 +221,6 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
             "elements",
             "nsites",
             "lattice_vectors",
-            "_oqmd_direct_site_positions",
             "species_at_sites",
             "dimension_types",
             "nperiodic_dimensions",
@@ -212,6 +229,9 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
             "chemical_formula_descriptive",
             "species",
             "cartesian_site_positions",
+            "space_group_it_number",
+            "space_group_symbol_hall",
+            "space_group_symbol_hermann_mauguin",
             "_oqmd_entry_id",
             "_oqmd_calculation_id",
             "_oqmd_icsd_id",
