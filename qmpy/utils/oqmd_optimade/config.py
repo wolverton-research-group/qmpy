@@ -4,9 +4,9 @@ import datetime
 from collections import OrderedDict
 
 
-API_VERSION = "1.3.0"
+API_VERSION = "1.2.0"
 API_MAJOR_VERSION = "1"
-SCHEMA_URL = "https://schemas.optimade.org/json-schema/v1.3.0/optimade.json"
+SCHEMA_URL = "https://schemas.optimade.org/json-schema/v1.2.0/optimade.json"
 PROVIDER = OrderedDict(
     [
         ("name", "OQMD"),
@@ -32,10 +32,10 @@ def query_representation(request):
     path = request.get_full_path()
     marker = "/optimade"
     remainder = path.split(marker, 1)[1] if marker in path else path
-    if remainder.startswith("/v1.3.0"):
-        remainder = remainder[len("/v1.3.0") :]
-    elif remainder.startswith("/v1.3"):
-        remainder = remainder[len("/v1.3") :]
+    if remainder.startswith("/v1.2.0"):
+        remainder = remainder[len("/v1.2.0") :]
+    elif remainder.startswith("/v1.2"):
+        remainder = remainder[len("/v1.2") :]
     elif remainder.startswith("/v1"):
         remainder = remainder[len("/v1") :]
     return remainder or "/"
@@ -76,7 +76,9 @@ def response_meta(request, more_data_available=False, **extra):
 
 def error_document(request, detail, status, code=None, source=None):
     """Build a JSON:API-compatible OPTIMADE error response document."""
-    error = OrderedDict([("status", str(status)), ("title", detail), ("detail", detail)])
+    error = OrderedDict(
+        [("status", str(status)), ("title", detail), ("detail", detail)]
+    )
     if code is not None:
         error["code"] = code
     if source is not None:

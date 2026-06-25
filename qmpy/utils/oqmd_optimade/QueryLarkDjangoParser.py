@@ -153,19 +153,18 @@ class Lark2Django(Transformer):
             "CONTAINS": self.contains,
         }
         self.fuzzy_functions_list = {self.starts, self.ends, self.contains}
-        # OPTIMADE v1.3 uses the v1.2 filter grammar.
+        # The implementation targets the OPTIMADE v1.2 filter grammar.
         self.parser = LarkParser(version=(1, 2, 0))
-        prop_data = json.load(
-            open(
-                sorted(
-                    glob(os.path.join(os.path.dirname(__file__), "grammar", "*.oqmd"))
-                )[-1]
-            )
-        )
+        property_file = sorted(
+            glob(os.path.join(os.path.dirname(__file__), "grammar", "*.oqmd"))
+        )[-1]
+        with open(property_file) as handle:
+            prop_data = json.load(handle)
         self.property_dict = {}
         for item in prop_data:
             self.property_dict[item] = RESTProperty(**prop_data[item])
         standard_properties = {
+            "chemical_formula_descriptive",
             "chemical_formula_reduced",
             "chemical_formula_anonymous",
             "elements",
@@ -174,6 +173,10 @@ class Lark2Django(Transformer):
             "nelements",
             "nperiodic_dimensions",
             "nsites",
+            "space_group_it_number",
+            "space_group_symbol_hall",
+            "space_group_symbol_hermann_mauguin",
+            "species_at_sites",
             "structure_features",
             "type",
         }
@@ -182,6 +185,31 @@ class Lark2Django(Transformer):
             for name, prop in self.property_dict.items()
             if name in standard_properties or name.startswith("_oqmd_")
         }
+        self.property_dict.update(
+            {
+                "species_at_sites": RESTProperty(
+                    "species_at_sites",
+                    "composition__element_list__contains",
+                    length_prop="nsites",
+                    is_set_operable=True,
+                    is_logic_operable=False,
+                ),
+                "space_group_it_number": RESTProperty(
+                    "space_group_it_number",
+                    "calculation__output__spacegroup__number",
+                ),
+                "space_group_symbol_hall": RESTProperty(
+                    "space_group_symbol_hall",
+                    "calculation__output__spacegroup__hall",
+                    is_logic_operable=False,
+                ),
+                "space_group_symbol_hermann_mauguin": RESTProperty(
+                    "space_group_symbol_hermann_mauguin",
+                    "calculation__output__spacegroup__hm",
+                    is_logic_operable=False,
+                ),
+            }
+        )
 
         self.logic_functions = [self.gt, self.ge, self.lt, self.le]
         self.elements = qmpy.elements.keys()
@@ -296,18 +324,28 @@ class Lark2Django(Transformer):
         return Q(**{a.db_value: b})
 
     def gt(self, a, b):
+        if isinstance(b, str):
+            b = b.strip('"')
         return Q(**{a.db_value + "__gt": b})
 
     def ge(self, a, b):
+        if isinstance(b, str):
+            b = b.strip('"')
         return Q(**{a.db_value + "__gte": b})
 
     def lt(self, a, b):
+        if isinstance(b, str):
+            b = b.strip('"')
         return Q(**{a.db_value + "__lt": b})
 
     def le(self, a, b):
+        if isinstance(b, str):
+            b = b.strip('"')
         return Q(**{a.db_value + "__lte": b})
 
     def ne(self, a, b):
+        if isinstance(b, str):
+            b = b.strip('"')
         return ~Q(**{a.db_value: b})
 
     def not_(self, q):
@@ -406,6 +444,9 @@ class Lark2Django(Transformer):
             self.handle_error("T3", "Not supported for {}".format(a.name), "HAS ONLY")
 
     def starts(self, a, b):
+        if a.name == "id":
+            value = b[0] if isinstance(b, list) else b
+            return Q(**{a.db_value + "__startswith": str(value).strip('"')})
         if a.is_chem_form:
             if a.name == "chemical_formula_anonymous":
                 self.handle_error("T3", "Not supported for {}".format(a.name), "STARTS")
@@ -423,6 +464,9 @@ class Lark2Django(Transformer):
             self.handle_error("T3", "Not supported for {}".format(a.name), "STARTS")
 
     def ends(self, a, b):
+        if a.name == "id":
+            value = b[0] if isinstance(b, list) else b
+            return Q(**{a.db_value + "__endswith": str(value).strip('"')})
         if a.is_chem_form:
             if a.name == "chemical_formula_anonymous":
                 self.handle_error("T3", "Not supported for {}".format(a.name), "STARTS")
@@ -436,6 +480,9 @@ class Lark2Django(Transformer):
             self.handle_error("T3", "Not supported for {}".format(a.name), "ENDS")
 
     def contains(self, a, b):
+        if a.name == "id":
+            value = b[0] if isinstance(b, list) else b
+            return Q(**{a.db_value + "__contains": str(value).strip('"')})
         if a.is_chem_form:
             _db_value = a.db_value.strip("__in")
             _db_value = _db_value + "__contains"
@@ -475,7 +522,8 @@ class Lark2Django(Transformer):
             return a
 
     def expression_phrase(self, children):
-        if children is None:
+        children = [item for item in children if item is not None]
+        if not children:
             return
         elif len(children) == 1:
             return children[0]
@@ -543,25 +591,29 @@ class Lark2Django(Transformer):
         if operation_fn in (self.is_known, self.is_unknown):
             if a.name == "last_modified":
                 is_unknown = True
-                matches = is_unknown if operation_fn == self.is_unknown else not is_unknown
+                matches = (
+                    is_unknown if operation_fn == self.is_unknown else not is_unknown
+                )
                 return Q() if matches else self.eq(self.property_dict["id"], -1)
             if a.name == "type":
                 matches = operation_fn == self.is_known
                 return Q() if matches else self.eq(self.property_dict["id"], -1)
             if a.db_value:
-                return Q(
-                    **{a.db_value + "__isnull": operation_fn == self.is_unknown}
-                )
+                return Q(**{a.db_value + "__isnull": operation_fn == self.is_unknown})
 
         if a.name == "type":
             value = str(b).strip('"')
             if operation_fn == self.eq:
-                return Q() if value == "structures" else self.eq(
-                    self.property_dict["id"], -1
+                return (
+                    Q()
+                    if value == "structures"
+                    else self.eq(self.property_dict["id"], -1)
                 )
             if operation_fn == self.ne:
-                return Q() if value != "structures" else self.eq(
-                    self.property_dict["id"], -1
+                return (
+                    Q()
+                    if value != "structures"
+                    else self.eq(self.property_dict["id"], -1)
                 )
             raise LarkParserError("type only supports equality comparisons")
 
@@ -573,11 +625,11 @@ class Lark2Django(Transformer):
                     or (operation_fn == self.ge and int(b) <= 3)
                     or (operation_fn == self.le and int(b) >= 3)
                 ):
-                    return self.gt(self.property_dict["volume"], 0)
+                    return Q()
                 else:
                     error_message = "All structures in OQMD have nperiodic_dimensions=3"
                     self.handle_error("T4", error_message, a.name, raise_error=False)
-                    return self.eq(self.property_dict["volume"], 0)
+                    return self.eq(self.property_dict["id"], -1)
             elif a.name == "structure_features":
                 error_message = "No structure_features are included in OQMD. "
                 error_message += "A dummy query (id=-1) to return none is executed"
@@ -609,10 +661,23 @@ class Lark2Django(Transformer):
                         for cd in c_dict_lst
                     ]
             if operation_fn in self.logic_functions:
-                error_message = "It does not make sense to use logic operators in chemical formulae. "
-                error_message += "A dummy query (id=-1) to return none is executed"
-                self.handle_error("T4", error_message, a.name, raise_error=False)
-                return self.eq(self.property_dict["id"], -1)
+                if len(b) != 1:
+                    self.handle_error(
+                        "T3", "Ambiguous chemical formula comparison", a.name
+                    )
+                db_value = a.db_value
+                if db_value.endswith("__in"):
+                    db_value = db_value[: -len("__in")]
+                lookup = {
+                    self.gt: "gt",
+                    self.ge: "gte",
+                    self.lt: "lt",
+                    self.le: "lte",
+                }[operation_fn]
+                return Q(**{"{}__{}".format(db_value, lookup): b[0]})
+
+        if a.name == "space_group_symbol_hermann_mauguin" and isinstance(b, str):
+            b = b.strip('"').replace(" ", "")
 
         if (operation_fn in self.logic_functions) and (not a.is_logic_operable):
             self.handle_error(
@@ -664,6 +729,7 @@ class Lark2Django(Transformer):
             self.handle_error("T2", "Label not found", children[0])
 
     def set_op_rhs(self, children):
+        children = [item for item in children if item is not None]
         if len(children) == 2:
             set_operation_name = children[0].value
         else:
@@ -675,6 +741,7 @@ class Lark2Django(Transformer):
             self.handle_error("T2", "Label not found", set_operation_name)
 
     def length_op_rhs(self, children):
+        children = [item for item in children if item is not None]
         if len(children) > 2:
             self.handle_error(
                 "T3",
@@ -690,7 +757,7 @@ class Lark2Django(Transformer):
         """
         A list of values are provided for set operations
         """
-        return list(children)
+        return [item for item in children if item is not None]
 
     def value(self, val_tree):
         return val_tree[0].children[0].value

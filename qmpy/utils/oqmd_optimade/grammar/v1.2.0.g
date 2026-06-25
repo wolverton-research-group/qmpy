@@ -1,4 +1,4 @@
-// OPTIMADE v1.2.0 filter grammar (used by the v1.3 specification)
+// OPTIMADE v1.2.0 filter grammar
 // Adapted from https://github.com/Materials-Consortia/optimade-python-tools
 
 ?start: filter

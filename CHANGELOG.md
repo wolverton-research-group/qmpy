@@ -4,11 +4,13 @@ qmpy changelog
 1.6.0 - in development
 ----------------------
 
-- Begin migration of the OQMD API implementation from OPTIMADE 1.0.0 to 1.3.0.
-- Add v1.3 discovery metadata, version negotiation, schemas, and JSON:API errors.
-- Update to the OPTIMADE v1.2 filter grammar used by specification v1.3.
-- Add standard structure metadata, property definitions, and Python 3.9 tests.
+- Migrate the OQMD API implementation from OPTIMADE 1.0.0 to 1.2.0.
+- Add v1.2 discovery metadata, version negotiation, schemas, and JSON:API errors.
+- Update to the OPTIMADE v1.2 filter grammar.
+- Add standard structure property metadata and Python 3.9 tests.
 - Keep Python 3.9 and Django 2.2 as the supported runtime for this release.
+- Integrate yearly qmdb download changes.
+- Add rendering fixes to fix GCLP.
 
 1.4.0 - 09/29/2020
 ------------------

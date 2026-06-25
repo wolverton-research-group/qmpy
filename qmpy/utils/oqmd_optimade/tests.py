@@ -1,13 +1,15 @@
-from qmpy.utils import *
-from django.test import SimpleTestCase
-from django.db.models import Q
-from rest_framework.exceptions import ParseError
+from django.test import SimpleTestCase, override_settings
 from rest_framework.request import Request
 from rest_framework.test import APIRequestFactory
 from types import SimpleNamespace
 import numpy as np
 
-from qmpy.web.serializers.optimade import OptimadeStructureSerializer
+from qmpy.utils import Lark2Django
+from qmpy.web.serializers.optimade import (
+    OptimadeStructureSerializer,
+    _spaced_hm_symbol,
+)
+from qmpy.web.views.api.optimade_api import OptimadePagination, OptimadeRequestMixin
 from qmpy.utils.oqmd_optimade.QueryLarkDjangoParser import (
     NotImplementedErr,
     LarkParserError,
@@ -112,9 +114,7 @@ class RESTfulTestCase(SimpleTestCase):
         assert truth_value == self.transform_q('id="112/23344"')
 
     def test_errors(self):
-        self.assertRaises(
-            LarkParserError, self.transform_q, "abc_elements LENGTH 3", 3
-        )
+        self.assertRaises(LarkParserError, self.transform_q, "abc_elements LENGTH 3", 3)
         self.assertRaises(LarkParserError, self.transform_q, "xyz = 3", 3)
         self.assertRaises(
             LarkParserError,
@@ -154,7 +154,7 @@ class RESTfulTestCase(SimpleTestCase):
         self.assertRaises(LarkParserError, self.transform_q, "AND < 0", 3)
         self.assertRaises(LarkParserError, self.transform_q, " < 0", 3)
 
-    def test_v1_3_property_semantics(self):
+    def test_v1_2_property_semantics(self):
         self.assertEqual((1, 2, 0), self.transformer.parser.version)
         self.assertEqual("(AND: )", self.transform_q('type="structures"'))
         self.assertEqual("(AND: ('id', -1))", self.transform_q('type!="structures"'))
@@ -166,28 +166,42 @@ class RESTfulTestCase(SimpleTestCase):
         self.assertEqual("(AND: ('id', -1))", self.transform_q("_abc_flag=TRUE"))
         self.assertRaises(LarkParserError, self.transform_q, "_ < 0", 3)
 
+    def test_v1_2_required_and_space_group_filters(self):
+        self.assertEqual("(AND: )", self.transform_q("nperiodic_dimensions=3"))
+        self.assertEqual(
+            "(AND: ('composition__formula__in', ['Ru1']))",
+            self.transform_q('chemical_formula_descriptive="Ru"'),
+        )
+        self.assertEqual(
+            "(AND: ('calculation__output__spacegroup__number', '225'))",
+            self.transform_q("space_group_it_number=225"),
+        )
+        self.assertEqual(
+            "(AND: ('calculation__output__spacegroup__hm', 'Fm-3m'))",
+            self.transform_q('space_group_symbol_hermann_mauguin="F m -3 m"'),
+        )
+
     def test_warnings(self):
         assert self.transform_q("_abc_stability < 0", 1)[0]["detail"].startswith(
             "_oqmd_GeneralWarning"
         )
-        assert self.transform_q("nsites<8 AND _abc_missing<0", 1)[0]["detail"].startswith(
-            "_oqmd_GeneralWarning"
-        )
+        assert self.transform_q("nsites<8 AND _abc_missing<0", 1)[0][
+            "detail"
+        ].startswith("_oqmd_GeneralWarning")
         assert self.transform_q("nsites<8 AND nelements<4", 1) == []
 
 
+@override_settings(ALLOWED_HOSTS=["testserver"])
 class OptimadeEndpointTestCase(SimpleTestCase):
-    def test_info_advertises_v1_3(self):
+    def test_info_advertises_v1_2(self):
         response = self.client.get("/optimade/info")
         self.assertEqual(response.status_code, 200)
         document = response.json()
-        self.assertEqual(document["meta"]["api_version"], "1.3.0")
+        self.assertEqual(document["meta"]["api_version"], "1.2.0")
         self.assertEqual(document["data"]["attributes"]["formats"], ["json"])
         self.assertEqual(
-            document["data"]["attributes"]["available_api_versions"][0][
-                "version"
-            ],
-            "1.3.0",
+            document["data"]["attributes"]["available_api_versions"][0]["version"],
+            "1.2.0",
         )
 
     def test_versioned_info_uses_versioned_query_representation(self):
@@ -223,19 +237,37 @@ class OptimadeEndpointTestCase(SimpleTestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn("Unknown property", response.json()["errors"][0]["detail"])
 
-    def test_structures_info_has_v1_2_property_definitions(self):
+    def test_structures_info_uses_v1_2_property_metadata(self):
         response = self.client.get("/optimade/info/structures")
         self.assertEqual(response.status_code, 200)
         data = response.json()["data"]
         self.assertEqual(data["id"], "structures")
         self.assertIn("space_group_it_number", data["properties"])
-        self.assertEqual(
-            data["properties"]["elements"]["$ref"],
-            "https://schemas.optimade.org/defs/v1.2/properties/optimade/structures/elements",
-        )
+        self.assertEqual(data["properties"]["elements"]["type"], "list")
+        self.assertEqual(data["properties"]["_oqmd_delta_e"]["type"], "float")
+        self.assertIn("assemblies", data["properties"])
+
+    def test_v1_2_minor_routes(self):
+        for path in ("/optimade/v1.2/info", "/optimade/v1.2.0/info"):
+            response = self.client.get(path)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.json()["meta"]["api_version"], "1.2.0")
+
+    def test_pagination_accepts_zero_limit(self):
+        request = Request(APIRequestFactory().get("/optimade/structures?page_limit=0"))
+        self.assertEqual(OptimadePagination().get_limit(request), 0)
+
+    def test_include_is_a_recognized_parameter(self):
+        self.assertIn("include", OptimadeRequestMixin.allowed_query_parameters)
 
 
 class OptimadeSerializerTestCase(SimpleTestCase):
+    def test_compact_hermann_mauguin_symbols_are_spaced(self):
+        self.assertEqual(_spaced_hm_symbol("P212121"), "P 21 21 21")
+        self.assertEqual(_spaced_hm_symbol("R-3m"), "R -3 m")
+        self.assertEqual(_spaced_hm_symbol("Fm-3m"), "F m -3 m")
+        self.assertEqual(_spaced_hm_symbol("P4/mmm"), "P 4/m m m")
+
     def test_structure_values_follow_optimade_types(self):
         site_al = SimpleNamespace(
             label="Al", atoms=[SimpleNamespace(cart_coord=np.array([0.0, 0.0, 0.0]))]
@@ -279,16 +311,17 @@ class OptimadeSerializerTestCase(SimpleTestCase):
             stability=0.0,
         )
         request = Request(APIRequestFactory().get("/optimade/v1/structures"))
-        data = OptimadeStructureSerializer(
-            formation, context={"request": request}
-        ).data
+        data = OptimadeStructureSerializer(formation, context={"request": request}).data
 
         self.assertEqual(data["id"], "42")
         self.assertEqual(data["type"], "structures")
+        self.assertIsNone(data["immutable_id"])
+        self.assertIsNone(data["chemical_formula_hill"])
         self.assertEqual(data["elements"], ["Al", "O"])
         self.assertEqual(data["elements_ratios"], [0.4, 0.6])
         self.assertEqual(data["space_group_it_number"], 221)
         self.assertEqual(data["space_group_symbol_hall"], "-P 4 2 3")
-        self.assertEqual(
-            data["space_group_symbol_hermann_mauguin"], "Pm-3m"
-        )
+        self.assertEqual(data["space_group_symbol_hermann_mauguin"], "P m -3 m")
+        self.assertIsNone(data["space_group_symmetry_operations_xyz"])
+        self.assertIsNone(data["space_group_symbol_hermann_mauguin_extended"])
+        self.assertIsNone(data["assemblies"])

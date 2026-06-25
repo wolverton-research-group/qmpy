@@ -7,31 +7,6 @@ from collections import OrderedDict
 from .config import API_VERSION, base_url, response_meta
 
 
-PROPERTY_DEFINITION_SCHEMA = (
-    "https://schemas.optimade.org/meta/v1.2/optimade/property_definition.json"
-)
-STANDARD_STRUCTURE_PROPERTIES = {
-    "elements",
-    "nelements",
-    "elements_ratios",
-    "chemical_formula_descriptive",
-    "chemical_formula_reduced",
-    "chemical_formula_anonymous",
-    "dimension_types",
-    "nperiodic_dimensions",
-    "lattice_vectors",
-    "cartesian_site_positions",
-    "nsites",
-    "species_at_sites",
-    "species",
-    "structure_features",
-    "space_group_it_number",
-    "space_group_symbol_hall",
-    "space_group_symbol_hermann_mauguin",
-}
-CORE_PROPERTIES = {"id", "type", "last_modified"}
-
-
 def _legacy_properties():
     filename = os.path.join(
         os.path.dirname(__file__), "grammar", "optimade_info_structures.json"
@@ -40,81 +15,16 @@ def _legacy_properties():
         return json.load(handle)["data"]["properties"]
 
 
-def _property_reference(name, legacy):
-    """Reference the canonical definition and add OQMD support metadata."""
-    if name in CORE_PROPERTIES:
-        property_id = "https://schemas.optimade.org/defs/v1.2/properties/core/{}".format(
-            name
-        )
-    else:
-        property_id = (
-            "https://schemas.optimade.org/defs/v1.2/properties/optimade/structures/{}"
-        ).format(name)
+def _entry_info_property(legacy):
+    """Return the property metadata shape required by OPTIMADE 1.2."""
     return OrderedDict(
         [
-            ("$ref", property_id),
             ("description", legacy["description"]),
-            (
-                "x-optimade-implementation",
-                {
-                    "sortable": bool(legacy.get("sortable")),
-                    "query-support": (
-                        "all mandatory" if legacy.get("_oqmd_queryable") else "none"
-                    ),
-                },
-            ),
+            ("unit", legacy.get("unit")),
+            ("sortable", bool(legacy.get("sortable"))),
+            ("type", legacy["type"]),
         ]
     )
-
-
-def _custom_property_definition(name, legacy):
-    type_map = {
-        "float": "number",
-        "integer": "integer",
-        "list": "array",
-        "string": "string",
-        "timestamp": "string",
-    }
-    optimade_type = legacy["type"]
-    json_type = type_map[optimade_type]
-    definition = OrderedDict(
-        [
-            (
-                "$id",
-                "urn:oqmd:optimade:property:{}".format(name),
-            ),
-            ("$schema", PROPERTY_DEFINITION_SCHEMA),
-            ("title", name.replace("_", " ").strip()),
-            (
-                "x-optimade-definition",
-                {
-                    "label": "{}_oqmd".format(name.strip("_")),
-                    "kind": "property",
-                    "format": "1.2",
-                    "version": "1.0.0",
-                    "name": name,
-                },
-            ),
-            ("x-optimade-type", optimade_type),
-            ("type", [json_type, "null"]),
-            ("description", legacy["description"]),
-            ("x-optimade-unit", legacy.get("unit") or "inapplicable"),
-            (
-                "x-optimade-implementation",
-                {
-                    "sortable": bool(legacy.get("sortable")),
-                    "query-support": (
-                        "all mandatory" if legacy.get("_oqmd_queryable") else "none"
-                    ),
-                },
-            ),
-        ]
-    )
-    if json_type == "array":
-        definition["items"] = {}
-    if optimade_type == "timestamp":
-        definition["format"] = "date-time"
-    return definition
 
 
 def _structures_properties():
@@ -142,6 +52,21 @@ def _structures_properties():
     )
     properties = OrderedDict()
     serializer_additions = {
+        "immutable_id": {
+            "description": "Optional immutable identifier; unavailable in OQMD.",
+            "type": "string",
+            "sortable": False,
+        },
+        "chemical_formula_hill": {
+            "description": "Chemical formula in Hill notation; unavailable in OQMD.",
+            "type": "string",
+            "sortable": False,
+        },
+        "space_group_symmetry_operations_xyz": {
+            "description": "Crystallographic symmetry operations; unavailable in OQMD.",
+            "type": "list",
+            "sortable": False,
+        },
         "space_group_it_number": {
             "description": "International Tables for Crystallography space-group number.",
             "type": "integer",
@@ -160,13 +85,20 @@ def _structures_properties():
             "sortable": False,
             "_oqmd_queryable": False,
         },
+        "space_group_symbol_hermann_mauguin_extended": {
+            "description": "Extended Hermann-Mauguin space-group symbol; unavailable in OQMD.",
+            "type": "string",
+            "sortable": False,
+        },
+        "assemblies": {
+            "description": "Correlated site assemblies; unavailable in OQMD.",
+            "type": "list",
+            "sortable": False,
+        },
     }
     legacy_properties.update(serializer_additions)
     for name, legacy in legacy_properties.items():
-        if name in CORE_PROPERTIES or name in STANDARD_STRUCTURE_PROPERTIES:
-            properties[name] = _property_reference(name, legacy)
-        else:
-            properties[name] = _custom_property_definition(name, legacy)
+        properties[name] = _entry_info_property(legacy)
     return properties
 
 

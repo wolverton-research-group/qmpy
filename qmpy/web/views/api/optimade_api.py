@@ -36,6 +36,7 @@ class OptimadeRequestMixin(object):
         "dimension_slices",
         "email_address",
         "filter",
+        "include",
         "page_limit",
         "page_offset",
         "response_fields",
@@ -64,7 +65,7 @@ class OptimadeRequestMixin(object):
 
         api_hint = request.query_params.get("api_hint")
         is_versioned = "/optimade/v1" in request.path
-        if api_hint and not is_versioned and api_hint not in {"v1", "v1.3"}:
+        if api_hint and not is_versioned and api_hint not in {"v1", "v1.2"}:
             raise OptimadeAPIException(
                 "The requested API version is not supported: {}".format(api_hint),
                 status_code=553,
@@ -77,6 +78,23 @@ class OptimadeRequestMixin(object):
                 status_code=status.HTTP_501_NOT_IMPLEMENTED,
                 source={"parameter": "dimension_slices"},
             )
+
+        for parameter in ("page_limit", "page_offset"):
+            value = request.query_params.get(parameter)
+            if value is None:
+                continue
+            try:
+                value = int(value)
+            except (TypeError, ValueError):
+                raise OptimadeAPIException(
+                    "{} must be a non-negative integer.".format(parameter),
+                    source={"parameter": parameter},
+                )
+            if value < 0:
+                raise OptimadeAPIException(
+                    "{} must be a non-negative integer.".format(parameter),
+                    source={"parameter": parameter},
+                )
 
     def handle_exception(self, exc):
         if isinstance(exc, OptimadeAPIException):
@@ -130,10 +148,15 @@ def _static_request_error(request):
             status=400,
         )
     api_hint = request.query_params.get("api_hint")
-    if api_hint and "/optimade/v1" not in request.path and api_hint not in {
-        "v1",
-        "v1.3",
-    }:
+    if (
+        api_hint
+        and "/optimade/v1" not in request.path
+        and api_hint
+        not in {
+            "v1",
+            "v1.2",
+        }
+    ):
         detail = "The requested API version is not supported: {}".format(api_hint)
         return Response(
             error_document(request, detail, 553, code="VersionNotSupported"),
@@ -180,6 +203,17 @@ class OptimadePagination(LimitOffsetPagination):
     default_limit = 50
     offset_query_param = "page_offset"
     limit_query_param = "page_limit"
+
+    def get_limit(self, request):
+        value = request.query_params.get(self.limit_query_param)
+        if value is not None and int(value) == 0:
+            return 0
+        return super().get_limit(request)
+
+    def get_next_link(self):
+        if self.limit == 0:
+            return None
+        return super().get_next_link()
 
     def get_paginated_response(self, page_data):
         _data = page_data["data"]
@@ -274,9 +308,7 @@ class OptimadeStructureList(OptimadeRequestMixin, generics.ListAPIView):
                         "Property is not sortable: {}".format(name),
                         source={"parameter": "sort"},
                     )
-                django_sort.append(
-                    ("-" if descending else "") + sort_fields[name]
-                )
+                django_sort.append(("-" if descending else "") + sort_fields[name])
             query_set = query_set.order_by(*django_sort)
         page = self.paginate_queryset(query_set)
         serializer = self.get_serializer(page, many=True)
@@ -304,7 +336,7 @@ class OptimadeStructureList(OptimadeRequestMixin, generics.ListAPIView):
             return fes, meta_data
 
         q, meta_info = query_to_Q(filters)
-        if not q:
+        if q is None:
             return ([], meta_info)
         fes = fes.filter(q)
 
@@ -329,7 +361,7 @@ def OptimadeVersionsData(request):
 @api_view(["GET"])
 @renderer_classes([JSONRenderer])
 def OptimadeVersionPage(request, version=None):
-    if version in {"1", "1.3", "1.3.0"}:
+    if version in {"1", "1.2", "1.2.0"}:
         detail = "The requested OPTIMADE endpoint does not exist."
         return Response(error_document(request, detail, 404), status=404)
     detail = "OPTIMADE API version v{} is not supported; use v1.".format(version)

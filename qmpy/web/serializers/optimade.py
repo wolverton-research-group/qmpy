@@ -4,10 +4,43 @@ from drf_queryfields import QueryFieldsMixin
 from qmpy.utils import reverse_generic_order
 
 
+_SCREW_AXIS_TOKENS = ("65", "64", "63", "62", "61", "43", "42", "41", "32", "31", "21")
+
+
+def _spaced_hm_symbol(symbol):
+    """Convert qmpy's compact short H-M symbol to OPTIMADE spacing."""
+    if not symbol:
+        return None
+    tokens = [symbol[0]]
+    remainder = symbol[1:]
+    while remainder:
+        if remainder[0] in "mabcnd":
+            token = remainder[0]
+            remainder = remainder[1:]
+        elif remainder[0] == "-" and len(remainder) > 1:
+            token = remainder[:2]
+            remainder = remainder[2:]
+        elif remainder[0].isdigit():
+            token = next(
+                (item for item in _SCREW_AXIS_TOKENS if remainder.startswith(item)),
+                remainder[0],
+            )
+            remainder = remainder[len(token) :]
+        else:
+            return None
+        if remainder.startswith("/") and len(remainder) > 1:
+            token += remainder[:2]
+            remainder = remainder[2:]
+        tokens.append(token)
+    return " ".join(tokens)
+
+
 class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer):
     id = serializers.SerializerMethodField()
+    immutable_id = serializers.SerializerMethodField()
     chemical_formula_reduced = serializers.SerializerMethodField()
     chemical_formula_anonymous = serializers.SerializerMethodField()
+    chemical_formula_hill = serializers.SerializerMethodField()
     type = serializers.SerializerMethodField()
     last_modified = serializers.SerializerMethodField()
     nelements = serializers.SerializerMethodField()
@@ -22,8 +55,11 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
     chemical_formula_descriptive = serializers.SerializerMethodField()
     species = serializers.SerializerMethodField()
     space_group_it_number = serializers.SerializerMethodField()
+    space_group_symmetry_operations_xyz = serializers.SerializerMethodField()
     space_group_symbol_hall = serializers.SerializerMethodField()
     space_group_symbol_hermann_mauguin = serializers.SerializerMethodField()
+    space_group_symbol_hermann_mauguin_extended = serializers.SerializerMethodField()
+    assemblies = serializers.SerializerMethodField()
 
     _oqmd_icsd_id = serializers.SerializerMethodField()
     _oqmd_entry_id = serializers.SerializerMethodField()
@@ -60,6 +96,9 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
         # OPTIMADE IDs are strings, even when the backing database uses integers.
         return str(formationenergy.id)
 
+    def get_immutable_id(self, _):
+        return None
+
     def get_last_modified(self, _):
         return None
 
@@ -78,6 +117,9 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
         # e.g., ABCD4 vs A4BCD, so it needs to be reversed
         formula = formationenergy.composition.generic
         return reverse_generic_order(formula)
+
+    def get_chemical_formula_hill(self, _):
+        return None
 
     def get_nelements(self, formationenergy):
         return formationenergy.composition.ntypes
@@ -154,6 +196,9 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
         except AttributeError:
             return None
 
+    def get_space_group_symmetry_operations_xyz(self, _):
+        return None
+
     def get_space_group_symbol_hall(self, formationenergy):
         try:
             return formationenergy.calculation.output.spacegroup.hall
@@ -162,9 +207,15 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
 
     def get_space_group_symbol_hermann_mauguin(self, formationenergy):
         try:
-            return formationenergy.calculation.output.spacegroup.hm
+            return _spaced_hm_symbol(formationenergy.calculation.output.spacegroup.hm)
         except AttributeError:
             return None
+
+    def get_space_group_symbol_hermann_mauguin_extended(self, _):
+        return None
+
+    def get_assemblies(self, _):
+        return None
 
     # OQMD specific data
     def get__oqmd_icsd_id(self, formationenergy):
@@ -214,8 +265,10 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
         fields = (
             "id",
             "type",
+            "immutable_id",
             "last_modified",
             "chemical_formula_reduced",
+            "chemical_formula_hill",
             "chemical_formula_anonymous",
             "nelements",
             "elements",
@@ -230,8 +283,11 @@ class OptimadeStructureSerializer(QueryFieldsMixin, serializers.ModelSerializer)
             "species",
             "cartesian_site_positions",
             "space_group_it_number",
+            "space_group_symmetry_operations_xyz",
             "space_group_symbol_hall",
             "space_group_symbol_hermann_mauguin",
+            "space_group_symbol_hermann_mauguin_extended",
+            "assemblies",
             "_oqmd_entry_id",
             "_oqmd_calculation_id",
             "_oqmd_icsd_id",
