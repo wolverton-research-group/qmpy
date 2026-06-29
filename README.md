@@ -13,4 +13,4 @@ Install qmpy with pip:
 
     pip install qmpy
 
-For more complete documentation, see: http://oqmd.org/static/docs/index.html
+For more complete documentation, see: https://static.oqmd.org/static/docs/index.html

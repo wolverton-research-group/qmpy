@@ -67,7 +67,7 @@ class DictField(models.TextField):
 
     def __init__(self, *args, **kwargs):
         super(DictField, self).__init__(*args, **kwargs)
-
+        
     def from_db_value(self, value, expression, connection, context):
         if not value:
             value = {}
@@ -76,7 +76,7 @@ class DictField(models.TextField):
         try:
             return ast.literal_eval(value)
         except:
-            return(yaml.load(value))
+            return(yaml.safe_load(value))
 
     def to_python(self, value):
         if not value:
@@ -87,7 +87,7 @@ class DictField(models.TextField):
         try:
             return ast.literal_eval(value)
         except:
-            return(yaml.load(value))
+            return(yaml.safe_load(value))
 
     def get_prep_value(self, value):
         if value is None:
