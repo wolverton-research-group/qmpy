@@ -9,7 +9,7 @@ defusedxml==0.7.1
 Django==2.2.28
 django-crispy-forms==1.14.0
 django-extensions==3.1.5
-django-filter==21.1
+django-filter==2.4.0
 djangorestframework==3.13.1
 djangorestframework-queryfields==1.1.0
 djangorestframework-xml==2.0.0
@@ -26,7 +26,7 @@ lark-parser==0.12.0
 lxml==5.2.1
 MarkupSafe==2.1.5
 matplotlib==3.8.4
-mysqlclient==2.2.4
+mysqlclient==2.1.1
 networkx==3.2.1
 numpy==1.26.4
 packaging==24.0
@@ -38,7 +38,7 @@ ply==3.11
 ptyprocess==0.7.0
 PuLP==2.8.0
 PyCifRW==4.4.6
-pygraphviz==1.11
+pygraphviz==1.7
 pyparsing==3.1.2
 pytest==8.1.1
 python-dateutil==2.9.0.post0
